@@ -13,15 +13,15 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="##1.安装tftp服务和客户端 sudo apt-get install xinetd tftp tftpd  ##2.配置 vim &#x2F;etc&#x2F;xinetd.d&#x2F;tftp内容如下： service tftp &#123;         socket_type     		&#x3D; dgram         protocol                &#x3D; udp">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291614287.png">
-<meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291618535.png">
-<meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291634339.png">
-<meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291640687.png">
+<meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291614287.png">
+<meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291618535.png">
+<meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291634339.png">
+<meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291640687.png">
 <meta property="article:published_time" content="2024-03-24T14:24:38.000Z">
-<meta property="article:modified_time" content="2024-03-24T14:47:21.922Z">
+<meta property="article:modified_time" content="2024-03-24T14:51:59.535Z">
 <meta property="article:author" content="John Doe">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291614287.png">
+<meta name="twitter:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291614287.png">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -131,11 +131,11 @@ sudo /etc/init.d/xinetd restart（如果启动失败先关闭防火墙 service i
 输入get test,这样就可以获取到test文件,
 输入q退出tftp
 </code></pre>
-<p>如下图所示：<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291614287.png" alt="1711291614287"></p>
+<p>如下图所示：<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291614287.png"></p>
 <h3 id="2）开发板测试"><a href="#2）开发板测试" class="headerlink" title="2）开发板测试"></a>2）开发板测试</h3><p>2440开发板的uboot可以支持tftp下载功能，在uboot命令行输入：</p>
 <pre><code>tftp 0x30000000  uImage_4.3
 </code></pre>
-<p>如下图所示。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291618535.png" alt="1711291618535"></p>
+<p>如下图所示。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291618535.png"></p>
 <h1 id="2-ftp服务"><a href="#2-ftp服务" class="headerlink" title="2 ftp服务"></a>2 ftp服务</h1><pre><code>sudo apt install vsftpd
 vi /etc/vsftpd.conf
 
@@ -143,14 +143,14 @@ local_enable=YES
 write_enable=YES
 sudo /etc/init.d/vsftpd restart
 </code></pre>
-<p><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291634339.png" alt="1711291634339"></p>
+<p><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291634339.png"></p>
 <p>##2.1 windows客户端<br><a target="_blank" rel="noopener" href="https://filezilla-project.org/">https://filezilla-project.org/</a></p>
-<p>新建站点，配置ftp协议, 主机输入ubuntu IP地址，用户密码信息，即可连接成功。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291640687.png" alt="1711291640687"></p>
+<p>新建站点，配置ftp协议, 主机输入ubuntu IP地址，用户密码信息，即可连接成功。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1711291640687.png"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" data-id="clu5mxgcr0001nkuf8r061kj7" data-title="linux搭建tftp和ftp服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" data-id="clu5n6wx70001zoufe58z9h03" data-title="linux搭建tftp和ftp服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
