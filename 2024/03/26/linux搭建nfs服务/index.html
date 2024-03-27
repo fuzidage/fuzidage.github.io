@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>linux搭建nfs服务 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 下载安装NFS服务sudo apt-get install nfs-kernel-server nfs-common 2 关闭防火墙sudo ufw disable 3 创建NFS共享文件夹123mkdir &#x2F;home&#x2F;book&#x2F;nfs_sharesudo chown book:book &#x2F;home&#x2F;book&#x2F;nfs_sharesudo chmod 777 &#x2F;home&#x2F;book&#x2F;nfs_sha">
+<meta property="og:type" content="article">
+<meta property="og:title" content="linux搭建nfs服务">
+<meta property="og:url" content="http://example.com/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 下载安装NFS服务sudo apt-get install nfs-kernel-server nfs-common 2 关闭防火墙sudo ufw disable 3 创建NFS共享文件夹123mkdir &#x2F;home&#x2F;book&#x2F;nfs_sharesudo chown book:book &#x2F;home&#x2F;book&#x2F;nfs_sharesudo chmod 777 &#x2F;home&#x2F;book&#x2F;nfs_sha">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/1.png">
+<meta property="article:published_time" content="2024-03-26T15:32:15.000Z">
+<meta property="article:modified_time" content="2024-03-26T15:38:46.000Z">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-linux搭建nfs服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" class="article-date">
+  <time class="dt-published" datetime="2024-03-26T15:32:15.000Z" itemprop="datePublished">2024-03-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      linux搭建nfs服务
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="1-下载安装NFS服务"><a href="#1-下载安装NFS服务" class="headerlink" title="1 下载安装NFS服务"></a>1 下载安装NFS服务</h1><p><code>sudo apt-get install nfs-kernel-server nfs-common</code></p>
+<h1 id="2-关闭防火墙"><a href="#2-关闭防火墙" class="headerlink" title="2 关闭防火墙"></a>2 关闭防火墙</h1><p><code>sudo ufw disable</code></p>
+<h1 id="3-创建NFS共享文件夹"><a href="#3-创建NFS共享文件夹" class="headerlink" title="3 创建NFS共享文件夹"></a>3 创建NFS共享文件夹</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> /home/book/nfs_share</span><br><span class="line">sudo <span class="built_in">chown</span> book:book /home/book/nfs_share</span><br><span class="line">sudo <span class="built_in">chmod</span> 777 /home/book/nfs_share -R</span><br></pre></td></tr></table></figure>
+<h1 id="4-配置NFS"><a href="#4-配置NFS" class="headerlink" title="4 配置NFS"></a>4 配置NFS</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/exports</span><br><span class="line">/home/book/nfs_share *(rw,<span class="built_in">sync</span>,no_root_squash,no_subtree_check)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/1.png" alt="1"></p>
+<h1 id="5-启动NFS服务"><a href="#5-启动NFS服务" class="headerlink" title="5 启动NFS服务"></a>5 启动NFS服务</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart nfs-kernel-serve</span><br><span class="line">或者sudo service nfs-kernel-server restart</span><br><span class="line">或者sudo /etc/init.d/nfs-kernel-server restart</span><br></pre></td></tr></table></figure>
+
+<h1 id="6-客户端进行NFS挂载"><a href="#6-客户端进行NFS挂载" class="headerlink" title="6 客户端进行NFS挂载"></a>6 客户端进行NFS挂载</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">运行开发板</span><br><span class="line"><span class="meta prompt_">[root@book]~# </span><span class="language-bash">mount -t nfs -o nolock -o tcp 192.168.2.100:/home/book/nfs_share /mnt/nfs</span></span><br><span class="line">-t nfs                          #挂载类型</span><br><span class="line">-o nolock                       #读写的时候不锁定</span><br><span class="line">-o tcp                          #tcp模式</span><br><span class="line">客户端退出NFS挂载</span><br><span class="line">umount /mnt/nfs</span><br></pre></td></tr></table></figure>
+
+
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" data-id="clu9yvyyk0002noufhic9el06" data-title="linux搭建nfs服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          linux搭建samba服务
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2024/03/25/hello-world/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Hello World</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/">linux搭建samba服务</a>
+          </li>
+        
+          <li>
+            <a href="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/">linux搭建nfs服务</a>
+          </li>
+        
+          <li>
+            <a href="/2024/03/25/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/">linux搭建tftp和ftp服务</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

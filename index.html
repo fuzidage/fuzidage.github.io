@@ -69,6 +69,163 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-linux搭建samba服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/" class="article-date">
+  <time class="dt-published" datetime="2024-03-27T15:17:30.000Z" itemprop="datePublished">2024-03-27</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/">linux搭建samba服务</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="1-安装服务"><a href="#1-安装服务" class="headerlink" title="1 安装服务"></a>1 安装服务</h1><p><code>sudo apt-get install samba samba-common</code></p>
+<h1 id="2-关闭防火墙"><a href="#2-关闭防火墙" class="headerlink" title="2 关闭防火墙"></a>2 关闭防火墙</h1><p><code>sudo systemctl stop ufw</code></p>
+<h1 id="3-添加用户book"><a href="#3-添加用户book" class="headerlink" title="3 添加用户book"></a>3 添加用户book</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sudo smbpasswd -a book</span><br><span class="line">配置samba</span><br><span class="line">sudo vim /etc/samba/smb.conf</span><br><span class="line">[book_share_samba_dir]</span><br><span class="line">        comment = share samba <span class="built_in">dir</span></span><br><span class="line">        path = /home/book/ftp</span><br><span class="line">        valid <span class="built_in">users</span> = book</span><br><span class="line">        force user = book</span><br><span class="line">        force group = book</span><br><span class="line">        creat mask = 0644</span><br><span class="line">        directory mask = 0755</span><br><span class="line">        browseable= <span class="built_in">yes</span></span><br><span class="line">        available = <span class="built_in">yes</span></span><br><span class="line">        public = <span class="built_in">yes</span></span><br><span class="line">        <span class="built_in">read</span> only = no</span><br><span class="line">        writeable = <span class="built_in">yes</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="4-重启服务"><a href="#4-重启服务" class="headerlink" title="4 重启服务"></a>4 重启服务</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">~$ sudo service smbd restart</span><br><span class="line">~$ sudo /etc/init.d/smbd restart</span><br><span class="line">~$ /etc/init.d/smbd restart</span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="5-windows进行samba映射"><a href="#5-windows进行samba映射" class="headerlink" title="5 windows进行samba映射"></a>5 windows进行samba映射</h1><p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/1.png" alt="img"></p>
+<p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/2.png" alt="img"></p>
+<p>注意不能用NAT虚拟网络IP访问samba, 要用桥接网络ip，不过ssh可以两种方式访问，但是NAT虚拟网络是用来虚拟机上网的IP地址可能会发生变化，还是建议用桥接网络IP地址。</p>
+<p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/3.png" alt="img"></p>
+<h1 id="6-常见问题"><a href="#6-常见问题" class="headerlink" title="6 常见问题"></a>6 常见问题</h1><p>samba不允许一个用户使用一个以上用户名与一个服务器或共享资源的多重连接，因此需要windows进入cmd</p>
+<p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/4.png" alt="img"></p>
+<p>可以windows cmd下用 net use 命令查看下当前的共享访问到底有没有它。</p>
+<p>有的话，net use * &#x2F;del &#x2F;y</p>
+<p>重新映射网络驱动器即可</p>
+<p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/5.png" alt="img"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/" data-id="clu9yvyyk0003noufdrnh6c4v" data-title="linux搭建samba服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-linux搭建nfs服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" class="article-date">
+  <time class="dt-published" datetime="2024-03-26T15:32:15.000Z" itemprop="datePublished">2024-03-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/">linux搭建nfs服务</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="1-下载安装NFS服务"><a href="#1-下载安装NFS服务" class="headerlink" title="1 下载安装NFS服务"></a>1 下载安装NFS服务</h1><p><code>sudo apt-get install nfs-kernel-server nfs-common</code></p>
+<h1 id="2-关闭防火墙"><a href="#2-关闭防火墙" class="headerlink" title="2 关闭防火墙"></a>2 关闭防火墙</h1><p><code>sudo ufw disable</code></p>
+<h1 id="3-创建NFS共享文件夹"><a href="#3-创建NFS共享文件夹" class="headerlink" title="3 创建NFS共享文件夹"></a>3 创建NFS共享文件夹</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> /home/book/nfs_share</span><br><span class="line">sudo <span class="built_in">chown</span> book:book /home/book/nfs_share</span><br><span class="line">sudo <span class="built_in">chmod</span> 777 /home/book/nfs_share -R</span><br></pre></td></tr></table></figure>
+<h1 id="4-配置NFS"><a href="#4-配置NFS" class="headerlink" title="4 配置NFS"></a>4 配置NFS</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/exports</span><br><span class="line">/home/book/nfs_share *(rw,<span class="built_in">sync</span>,no_root_squash,no_subtree_check)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/1.png" alt="1"></p>
+<h1 id="5-启动NFS服务"><a href="#5-启动NFS服务" class="headerlink" title="5 启动NFS服务"></a>5 启动NFS服务</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart nfs-kernel-serve</span><br><span class="line">或者sudo service nfs-kernel-server restart</span><br><span class="line">或者sudo /etc/init.d/nfs-kernel-server restart</span><br></pre></td></tr></table></figure>
+
+<h1 id="6-客户端进行NFS挂载"><a href="#6-客户端进行NFS挂载" class="headerlink" title="6 客户端进行NFS挂载"></a>6 客户端进行NFS挂载</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">运行开发板</span><br><span class="line"><span class="meta prompt_">[root@book]~# </span><span class="language-bash">mount -t nfs -o nolock -o tcp 192.168.2.100:/home/book/nfs_share /mnt/nfs</span></span><br><span class="line">-t nfs                          #挂载类型</span><br><span class="line">-o nolock                       #读写的时候不锁定</span><br><span class="line">-o tcp                          #tcp模式</span><br><span class="line">客户端退出NFS挂载</span><br><span class="line">umount /mnt/nfs</span><br></pre></td></tr></table></figure>
+
+
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" data-id="clu9yvyyk0002noufhic9el06" data-title="linux搭建nfs服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/03/25/hello-world/" class="article-date">
+  <time class="dt-published" datetime="2024-03-25T07:16:51.270Z" itemprop="datePublished">2024-03-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/03/25/hello-world/">Hello World</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
+
+<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/25/hello-world/" data-id="clu9yvyyg0000nouf7w30es2n" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-linux搭建tftp和ftp服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" class="article-date">
@@ -143,58 +300,7 @@ sudo /etc/init.d/vsftpd restart
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" data-id="clu5olyii000168uf78oe09yq" data-title="linux搭建tftp和ftp服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/03/24/hello-world/" class="article-date">
-  <time class="dt-published" datetime="2024-03-24T13:33:43.035Z" itemprop="datePublished">2024-03-24</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/03/24/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/24/hello-world/" data-id="clu5olyid000068ufeza92ffb" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" data-id="clu9yvyyj0001nouf751k361b" data-title="linux搭建tftp和ftp服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -237,11 +343,19 @@ sudo /etc/init.d/vsftpd restart
       <ul>
         
           <li>
-            <a href="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/">linux搭建tftp和ftp服务</a>
+            <a href="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/">linux搭建samba服务</a>
           </li>
         
           <li>
-            <a href="/2024/03/24/hello-world/">Hello World</a>
+            <a href="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/">linux搭建nfs服务</a>
+          </li>
+        
+          <li>
+            <a href="/2024/03/25/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/">linux搭建tftp和ftp服务</a>
           </li>
         
       </ul>
