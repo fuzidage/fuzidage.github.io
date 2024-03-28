@@ -69,6 +69,62 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-gdb移植到arm开发板" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/" class="article-date">
+  <time class="dt-published" datetime="2024-03-28T13:59:59.000Z" itemprop="datePublished">2024-03-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/">gdb移植到arm开发板</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <h1 id="1-下载gdb"><a href="#1-下载gdb" class="headerlink" title="1.下载gdb"></a>1.下载gdb</h1><p><a target="_blank" rel="noopener" href="https://ftp.gnu.org/gnu/gdb/">https://ftp.gnu.org/gnu/gdb/</a></p>
+<p><a target="_blank" rel="noopener" href="http://ftp.gnu.org/gnu/ncurses/">http://ftp.gnu.org/gnu/ncurses/</a></p>
+<p>我这里选择的是gdb-7.12.tar.gz和ncurses-5.6.tar.gz</p>
+<h1 id="2-编译安装"><a href="#2-编译安装" class="headerlink" title="2.编译安装"></a>2.编译安装</h1><h2 id="2-1-设置工具链"><a href="#2-1-设置工具链" class="headerlink" title="2.1 设置工具链"></a>2.1 设置工具链</h2><p><code>export PATH=$PATH:/home/robin/share/cv183x/host-tools/gcc/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu/bin/</code><br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/1.png"><br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/2.png"></p>
+<h2 id="2-2-编译ncurses"><a href="#2-2-编译ncurses" class="headerlink" title="2.2 编译ncurses"></a>2.2 编译ncurses</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./configure --host=aarch64-linux-gnu-gcc --prefix=/home/robin/share/ncurses --without-ada --enable-termcap --with-shared CFLAGS=<span class="string">&quot;-O3 -fPIC&quot;</span></span><br><span class="line">    make</span><br><span class="line">	make install</span><br></pre></td></tr></table></figure>
+
+<p>执行.&#x2F;configure时可能会失败，报错如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/3.png"><br>这是由于64bit machine配置引起的，进行如下操作后继续尝试。</p>
+<pre><code>wget -O config.guess &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD&#39;
+wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD&#39;
+</code></pre>
+<p>编译出的ncurses库如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/4.png"></p>
+<h2 id="2-3-编译gdb"><a href="#2-3-编译gdb" class="headerlink" title="2.3 编译gdb"></a>2.3 编译gdb</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tar xvf gdb-7.12.tar.gz;</span><br><span class="line"><span class="built_in">cd</span> gdb-7.12</span><br><span class="line">./configure --host=aarch64-linux-gnu-gcc(--host=arm-linux-gnueabihf) --enable-shared --prefix=/home/robin/share/gdb --without-x --disable-gdbtk --disable-tui --without-included-regex --without-included-gettext  --disable-werror CFLAGS=<span class="string">&quot;-O0 -fPIC&quot;</span></span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>.&#x2F;configure后结果如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/5.png"></p>
+<p>make install后结果如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/6.png"></p>
+<h1 id="3-运行测试"><a href="#3-运行测试" class="headerlink" title="3.运行测试"></a>3.运行测试</h1><p>1.将gdb和ncureses库cp到板子运行，结果如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/7.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/" data-id="clubb8ihn000098uf1mux67pn" data-title="gdb移植到arm开发板" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-linux搭建samba服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/" class="article-date">
@@ -117,6 +173,8 @@
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
     </footer>
   </div>
   
@@ -167,6 +225,8 @@
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
     </footer>
   </div>
   
@@ -304,6 +364,8 @@ sudo /etc/init.d/vsftpd restart
       
       
       
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
     </footer>
   </div>
   
@@ -322,9 +384,23 @@ sudo /etc/init.d/vsftpd restart
 
   
     
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+    </div>
+  </div>
+
 
   
     
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 10px;">linux嵌入式环境搭建</a>
+    </div>
+  </div>
+
   
     
   <div class="widget-wrap">
@@ -341,6 +417,10 @@ sudo /etc/init.d/vsftpd restart
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/">gdb移植到arm开发板</a>
+          </li>
         
           <li>
             <a href="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/">linux搭建samba服务</a>
