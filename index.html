@@ -91,37 +91,36 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h1 id="1-配置虚拟机NET模式"><a href="#1-配置虚拟机NET模式" class="headerlink" title="1 配置虚拟机NET模式"></a>1 配置虚拟机NET模式</h1><p>vmware安装后默认就会用NAT方式和pc主机共享网络，虚拟机是通过pc主机的网卡数据转换进行上网的，只要windows主机有网，虚拟机就会对应有网络。<br>NAT模式在这里主要目的就是提供给虚拟机进行上网。<br>如果没有可以进行如下配置，打开虚拟机-&gt;编辑虚拟机设置-&gt;网络适配器,网络连接选择NAT模式如下图：</p>
+        <div class="tocStart"></div>
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-pei-zhi-xu-ni-ji-net-mo-shi">1 配置虚拟机NET模式</a></li>
+<li><a href="#2-pei-zhi-xu-ni-ji-qiao-jie-wang-luo">2 配置虚拟机桥接网络</a><ul>
+<li><a href="#2-1-fang-fa-1-shi-yong-usb-wang-qia">2.1 方法1：使用usb网卡</a></li>
+<li><a href="#2-1-fang-fa-2-shi-yong-lu-you-qi">2.1 方法2：使用路由器</a><ul>
+<li><a href="#2-1-1-tian-jia-qiao-jie-wang-qia">2.1.1 添加桥接网卡</a></li>
+<li><a href="#2-1-2-pei-zhi-qiao-jie-wang-qia">2.1.2 配置桥接网卡</a></li>
+<li><a href="#2-1-3-pei-zhi-xu-ni-ji-qiao-jie-wang-qia-jing-tai-ip">2.1.3 配置虚拟机桥接网卡静态ip</a></li>
+<li><a href="#2-1-4-pei-zhi-windows-zhu-ji-qiao-jie-wang-qia-ip">2.1.4 配置windows主机桥接网卡ip</a></li>
+<li><a href="#2-1-5-pei-zhi-kai-fa-ban-ip">2.1.5 配置开发板IP</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+<div class="tocEnd"></div>
+
+<h1 id="1-配置虚拟机NET模式"><a href="#1-配置虚拟机NET模式" class="headerlink" title="1 配置虚拟机NET模式"></a>1 配置虚拟机NET模式</h1><p>vmware安装后默认就会用NAT方式和pc主机共享网络，虚拟机是通过pc主机的网卡数据转换进行上网的，只要windows主机有网，虚拟机就会对应有网络。<br>NAT模式在这里主要目的就是提供给虚拟机进行上网。<br>如果没有可以进行如下配置，打开虚拟机-&gt;编辑虚拟机设置-&gt;网络适配器,网络连接选择NAT模式如下图：</p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/1.png" alt="img"></p>
-<p>启动进入虚拟机，console输入ifconfig</p>
-<p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/2.png" alt="img"></p>
-<p> windows进入cmd,输入ipconfig</p>
-<p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/3.png" alt="img"></p>
-<p> VMware Network Adapter VMnet8是虚拟机启用NAT模式后多出来的虚拟网卡，可以看到ip为192.168.70.1，和虚拟机的192.168.70.128同一网段。下图可以看到都可以ping通，且都能访问外网。</p>
-<p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/4.png" alt="img"></p>
-<p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/5.png" alt="img"></p>
-<p> windows搜索框输入vmnet,进入虚拟网络编辑器，可以看到虚拟网络信息，有这个VMnet8，模式为NAT</p>
-<p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/6.png" alt="img"></p>
-<h1 id="2-配置虚拟机桥接网络"><a href="#2-配置虚拟机桥接网络" class="headerlink" title="2 配置虚拟机桥接网络"></a>2 配置虚拟机桥接网络</h1><h2 id="2-1-方法1：使用usb网卡"><a href="#2-1-方法1：使用usb网卡" class="headerlink" title="2.1 方法1：使用usb网卡"></a>2.1 方法1：使用usb网卡</h2><p>需要买一个usb网卡，连接板子和windows主机。双网卡配置参考如下视频： <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1zV411U7H9?p=3">https://www.bilibili.com/video/BV1zV411U7H9?p=3</a></p>
-<h2 id="2-1-方法2：使用路由器"><a href="#2-1-方法2：使用路由器" class="headerlink" title="2.1 方法2：使用路由器"></a>2.1 方法2：使用路由器</h2><h3 id="2-1-1-添加桥接网卡"><a href="#2-1-1-添加桥接网卡" class="headerlink" title="2.1.1 添加桥接网卡"></a>2.1.1 添加桥接网卡</h3><p>桥接网络使用实际的物理网卡进行数据交换，因此需要借助实际的物理网卡，可以是有线网卡，也可以是无线网卡。桥接的目的是为了让虚拟机和主机以及板子能够互相进行收据收发传送。打开虚拟机，配置如下：</p>
-<p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/7.png" alt="img"></p>
-<h3 id="2-1-2-配置桥接网卡"><a href="#2-1-2-配置桥接网卡" class="headerlink" title="2.1.2 配置桥接网卡"></a>2.1.2 配置桥接网卡</h3><p>打开vmnet,进入虚拟网络编辑器,在这个里面要把桥接网卡选择成具体的网卡型号，不能设置为自动桥接。注意：这里根据你电脑主机接路由器的网卡，如果你用的无线网卡与路由器通信，那么就要桥接到无线网卡，如果是接网线到路由器，那就要用有线网卡。具体的网卡名字可以进入入网络共享中心-&gt;更改适配器选项或者进入设备管理器来确认清楚。</p>
-<p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/8.png" alt="img"></p>
-<p>配置完桥接网卡后，需要配置桥接网卡对应到window主机&#x2F;虚拟机&#x2F;板子的ip.</p>
-<h3 id="2-1-3-配置虚拟机桥接网卡静态ip"><a href="#2-1-3-配置虚拟机桥接网卡静态ip" class="headerlink" title="2.1.3 配置虚拟机桥接网卡静态ip"></a>2.1.3 配置虚拟机桥接网卡静态ip</h3><p>ifconfig查看，发现桥接的网卡在虚拟机中还没有分配ip.</p>
-<p> <img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/9.png" alt="img"></p>
-<p>进入ubuntu setting-&gt; network， 设置成和路由器同一网段即可。配置ens36 ip为192.168.2.100</p>
-<p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/10.png" alt="img"></p>
-<p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/11.png" alt="img"></p>
-<p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/12.png" alt="img"></p>
-<h3 id="2-1-4-配置windows主机桥接网卡ip"><a href="#2-1-4-配置windows主机桥接网卡ip" class="headerlink" title="2.1.4 配置windows主机桥接网卡ip"></a>2.1.4 配置windows主机桥接网卡ip</h3><p>桥接网卡为intel Ethernet Connection I219-V ,ip 192.168.2.6</p>
-<p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/13.png" alt="img"></p>
-<p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/14.png" alt="img"></p>
-<h3 id="2-1-5-配置开发板IP"><a href="#2-1-5-配置开发板IP" class="headerlink" title="2.1.5 配置开发板IP"></a>2.1.5 配置开发板IP</h3><p><strong>三者互 ping 验证:</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">windows ip: 192.168.2.6</span><br><span class="line">ubuntu ip:  192.168.2.100</span><br><span class="line">开发板 ip:   192.168.2.xxx</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/15.png" alt="img"></p>
-
+        
+          <p class="article-more-link">
+            <a href="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/#more">Read More</a>
+          </p>
+        
       
     </div>
     <footer class="article-footer">
@@ -161,22 +160,40 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h1 id="1-下载gdb"><a href="#1-下载gdb" class="headerlink" title="1.下载gdb"></a>1.下载gdb</h1><p><a target="_blank" rel="noopener" href="https://ftp.gnu.org/gnu/gdb/">https://ftp.gnu.org/gnu/gdb/</a></p>
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-xia-zai-gdb">1.下载gdb</a></li>
+<li><a href="#2-bian-yi-an-zhuang">2.编译安装</a><ul>
+<li><a href="#2-1-she-zhi-gong-ju-lian">2.1 设置工具链</a></li>
+<li><a href="#2-2-bian-yi-ncurses">2.2 编译ncurses</a></li>
+<li><a href="#2-3-bian-yi-gdb">2.3 编译gdb</a></li>
+</ul>
+</li>
+<li><a href="#3-yun-xing-ce-shi">3.运行测试</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-xia-zai-gdb">1.下载gdb</span><a href="#1-xia-zai-gdb" class="header-anchor">#</a></h1><p><a target="_blank" rel="noopener" href="https://ftp.gnu.org/gnu/gdb/">https://ftp.gnu.org/gnu/gdb/</a></p>
 <p><a target="_blank" rel="noopener" href="http://ftp.gnu.org/gnu/ncurses/">http://ftp.gnu.org/gnu/ncurses/</a></p>
 <p>我这里选择的是gdb-7.12.tar.gz和ncurses-5.6.tar.gz</p>
-<h1 id="2-编译安装"><a href="#2-编译安装" class="headerlink" title="2.编译安装"></a>2.编译安装</h1><h2 id="2-1-设置工具链"><a href="#2-1-设置工具链" class="headerlink" title="2.1 设置工具链"></a>2.1 设置工具链</h2><p><code>export PATH=$PATH:/home/robin/share/cv183x/host-tools/gcc/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu/bin/</code><br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/1.png"><br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/2.png"></p>
-<h2 id="2-2-编译ncurses"><a href="#2-2-编译ncurses" class="headerlink" title="2.2 编译ncurses"></a>2.2 编译ncurses</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./configure --host=aarch64-linux-gnu-gcc --prefix=/home/robin/share/ncurses --without-ada --enable-termcap --with-shared CFLAGS=<span class="string">&quot;-O3 -fPIC&quot;</span></span><br><span class="line">    make</span><br><span class="line">	make install</span><br></pre></td></tr></table></figure>
+<h1><span id="2-bian-yi-an-zhuang">2.编译安装</span><a href="#2-bian-yi-an-zhuang" class="header-anchor">#</a></h1><h2><span id="2-1-she-zhi-gong-ju-lian">2.1 设置工具链</span><a href="#2-1-she-zhi-gong-ju-lian" class="header-anchor">#</a></h2><p><code>export PATH=$PATH:/home/robin/share/cv183x/host-tools/gcc/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu/bin/</code><br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/1.png"><br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/2.png"></p>
+<h2><span id="2-2-bian-yi-ncurses">2.2 编译ncurses</span><a href="#2-2-bian-yi-ncurses" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./configure --host=aarch64-linux-gnu-gcc --prefix=/home/robin/share/ncurses --without-ada --enable-termcap --with-shared CFLAGS=<span class="string">&quot;-O3 -fPIC&quot;</span></span><br><span class="line">    make</span><br><span class="line">	make install</span><br></pre></td></tr></table></figure>
 
 <p>执行.&#x2F;configure时可能会失败，报错如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/3.png"><br>这是由于64bit machine配置引起的，进行如下操作后继续尝试。</p>
 <pre><code>wget -O config.guess &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD&#39;
 wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD&#39;
 </code></pre>
 <p>编译出的ncurses库如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/4.png"></p>
-<h2 id="2-3-编译gdb"><a href="#2-3-编译gdb" class="headerlink" title="2.3 编译gdb"></a>2.3 编译gdb</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tar xvf gdb-7.12.tar.gz;</span><br><span class="line"><span class="built_in">cd</span> gdb-7.12</span><br><span class="line">./configure --host=aarch64-linux-gnu-gcc(--host=arm-linux-gnueabihf) --enable-shared --prefix=/home/robin/share/gdb --without-x --disable-gdbtk --disable-tui --without-included-regex --without-included-gettext  --disable-werror CFLAGS=<span class="string">&quot;-O0 -fPIC&quot;</span></span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+<h2><span id="2-3-bian-yi-gdb">2.3 编译gdb</span><a href="#2-3-bian-yi-gdb" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tar xvf gdb-7.12.tar.gz;</span><br><span class="line"><span class="built_in">cd</span> gdb-7.12</span><br><span class="line">./configure --host=aarch64-linux-gnu-gcc(--host=arm-linux-gnueabihf) --enable-shared --prefix=/home/robin/share/gdb --without-x --disable-gdbtk --disable-tui --without-included-regex --without-included-gettext  --disable-werror CFLAGS=<span class="string">&quot;-O0 -fPIC&quot;</span></span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
 
 <p>.&#x2F;configure后结果如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/5.png"></p>
 <p>make install后结果如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/6.png"></p>
-<h1 id="3-运行测试"><a href="#3-运行测试" class="headerlink" title="3.运行测试"></a>3.运行测试</h1><p>1.将gdb和ncureses库cp到板子运行，结果如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/7.png"></p>
+<h1><span id="3-yun-xing-ce-shi">3.运行测试</span><a href="#3-yun-xing-ce-shi" class="header-anchor">#</a></h1><p>1.将gdb和ncureses库cp到板子运行，结果如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/7.png"></p>
 
       
     </div>
@@ -217,19 +234,35 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h1 id="1-安装服务"><a href="#1-安装服务" class="headerlink" title="1 安装服务"></a>1 安装服务</h1><p><code>sudo apt-get install samba samba-common</code></p>
-<h1 id="2-关闭防火墙"><a href="#2-关闭防火墙" class="headerlink" title="2 关闭防火墙"></a>2 关闭防火墙</h1><p><code>sudo systemctl stop ufw</code></p>
-<h1 id="3-添加用户book"><a href="#3-添加用户book" class="headerlink" title="3 添加用户book"></a>3 添加用户book</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sudo smbpasswd -a book</span><br><span class="line">配置samba</span><br><span class="line">sudo vim /etc/samba/smb.conf</span><br><span class="line">[book_share_samba_dir]</span><br><span class="line">        comment = share samba <span class="built_in">dir</span></span><br><span class="line">        path = /home/book/ftp</span><br><span class="line">        valid <span class="built_in">users</span> = book</span><br><span class="line">        force user = book</span><br><span class="line">        force group = book</span><br><span class="line">        creat mask = 0644</span><br><span class="line">        directory mask = 0755</span><br><span class="line">        browseable= <span class="built_in">yes</span></span><br><span class="line">        available = <span class="built_in">yes</span></span><br><span class="line">        public = <span class="built_in">yes</span></span><br><span class="line">        <span class="built_in">read</span> only = no</span><br><span class="line">        writeable = <span class="built_in">yes</span></span><br></pre></td></tr></table></figure>
+        <div class="toc">
 
-<h1 id="4-重启服务"><a href="#4-重启服务" class="headerlink" title="4 重启服务"></a>4 重启服务</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">~$ sudo service smbd restart</span><br><span class="line">~$ sudo /etc/init.d/smbd restart</span><br><span class="line">~$ /etc/init.d/smbd restart</span><br></pre></td></tr></table></figure>
+<!-- toc -->
+
+<ul>
+<li><a href="#1-an-zhuang-fu-wu">1 安装服务</a></li>
+<li><a href="#2-guan-bi-fang-huo-qiang">2 关闭防火墙</a></li>
+<li><a href="#3-tian-jia-yong-hu-book">3 添加用户book</a></li>
+<li><a href="#4-chong-qi-fu-wu">4 重启服务</a></li>
+<li><a href="#5-windows-jin-xing-samba-ying-she">5 windows进行samba映射</a></li>
+<li><a href="#6-chang-jian-wen-ti">6 常见问题</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-an-zhuang-fu-wu">1 安装服务</span><a href="#1-an-zhuang-fu-wu" class="header-anchor">#</a></h1><p><code>sudo apt-get install samba samba-common</code></p>
+<h1><span id="2-guan-bi-fang-huo-qiang">2 关闭防火墙</span><a href="#2-guan-bi-fang-huo-qiang" class="header-anchor">#</a></h1><p><code>sudo systemctl stop ufw</code></p>
+<h1><span id="3-tian-jia-yong-hu-book">3 添加用户book</span><a href="#3-tian-jia-yong-hu-book" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sudo smbpasswd -a book</span><br><span class="line">配置samba</span><br><span class="line">sudo vim /etc/samba/smb.conf</span><br><span class="line">[book_share_samba_dir]</span><br><span class="line">        comment = share samba <span class="built_in">dir</span></span><br><span class="line">        path = /home/book/ftp</span><br><span class="line">        valid <span class="built_in">users</span> = book</span><br><span class="line">        force user = book</span><br><span class="line">        force group = book</span><br><span class="line">        creat mask = 0644</span><br><span class="line">        directory mask = 0755</span><br><span class="line">        browseable= <span class="built_in">yes</span></span><br><span class="line">        available = <span class="built_in">yes</span></span><br><span class="line">        public = <span class="built_in">yes</span></span><br><span class="line">        <span class="built_in">read</span> only = no</span><br><span class="line">        writeable = <span class="built_in">yes</span></span><br></pre></td></tr></table></figure>
+
+<h1><span id="4-chong-qi-fu-wu">4 重启服务</span><a href="#4-chong-qi-fu-wu" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">~$ sudo service smbd restart</span><br><span class="line">~$ sudo /etc/init.d/smbd restart</span><br><span class="line">~$ /etc/init.d/smbd restart</span><br></pre></td></tr></table></figure>
 
 
 
-<h1 id="5-windows进行samba映射"><a href="#5-windows进行samba映射" class="headerlink" title="5 windows进行samba映射"></a>5 windows进行samba映射</h1><p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/1.png" alt="img"></p>
+<h1><span id="5-windows-jin-xing-samba-ying-she">5 windows进行samba映射</span><a href="#5-windows-jin-xing-samba-ying-she" class="header-anchor">#</a></h1><p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/1.png" alt="img"></p>
 <p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/2.png" alt="img"></p>
 <p>注意不能用NAT虚拟网络IP访问samba, 要用桥接网络ip，不过ssh可以两种方式访问，但是NAT虚拟网络是用来虚拟机上网的IP地址可能会发生变化，还是建议用桥接网络IP地址。</p>
 <p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/3.png" alt="img"></p>
-<h1 id="6-常见问题"><a href="#6-常见问题" class="headerlink" title="6 常见问题"></a>6 常见问题</h1><p>samba不允许一个用户使用一个以上用户名与一个服务器或共享资源的多重连接，因此需要windows进入cmd</p>
+<h1><span id="6-chang-jian-wen-ti">6 常见问题</span><a href="#6-chang-jian-wen-ti" class="header-anchor">#</a></h1><p>samba不允许一个用户使用一个以上用户名与一个服务器或共享资源的多重连接，因此需要windows进入cmd</p>
 <p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/4.png" alt="img"></p>
 <p>可以windows cmd下用 net use 命令查看下当前的共享访问到底有没有它。</p>
 <p>有的话，net use * &#x2F;del &#x2F;y</p>
@@ -275,15 +308,31 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h1 id="1-下载安装NFS服务"><a href="#1-下载安装NFS服务" class="headerlink" title="1 下载安装NFS服务"></a>1 下载安装NFS服务</h1><p><code>sudo apt-get install nfs-kernel-server nfs-common</code></p>
-<h1 id="2-关闭防火墙"><a href="#2-关闭防火墙" class="headerlink" title="2 关闭防火墙"></a>2 关闭防火墙</h1><p><code>sudo ufw disable</code></p>
-<h1 id="3-创建NFS共享文件夹"><a href="#3-创建NFS共享文件夹" class="headerlink" title="3 创建NFS共享文件夹"></a>3 创建NFS共享文件夹</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> /home/book/nfs_share</span><br><span class="line">sudo <span class="built_in">chown</span> book:book /home/book/nfs_share</span><br><span class="line">sudo <span class="built_in">chmod</span> 777 /home/book/nfs_share -R</span><br></pre></td></tr></table></figure>
-<h1 id="4-配置NFS"><a href="#4-配置NFS" class="headerlink" title="4 配置NFS"></a>4 配置NFS</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/exports</span><br><span class="line">/home/book/nfs_share *(rw,<span class="built_in">sync</span>,no_root_squash,no_subtree_check)</span><br></pre></td></tr></table></figure>
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-xia-zai-an-zhuang-nfs-fu-wu">1 下载安装NFS服务</a></li>
+<li><a href="#2-guan-bi-fang-huo-qiang">2 关闭防火墙</a></li>
+<li><a href="#3-chuang-jian-nfs-gong-xiang-wen-jian-jia">3 创建NFS共享文件夹</a></li>
+<li><a href="#4-pei-zhi-nfs">4 配置NFS</a></li>
+<li><a href="#5-qi-dong-nfs-fu-wu">5 启动NFS服务</a></li>
+<li><a href="#6-ke-hu-duan-jin-xing-nfs-gua-zai">6 客户端进行NFS挂载</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-xia-zai-an-zhuang-nfs-fu-wu">1 下载安装NFS服务</span><a href="#1-xia-zai-an-zhuang-nfs-fu-wu" class="header-anchor">#</a></h1><p><code>sudo apt-get install nfs-kernel-server nfs-common</code></p>
+<h1><span id="2-guan-bi-fang-huo-qiang">2 关闭防火墙</span><a href="#2-guan-bi-fang-huo-qiang" class="header-anchor">#</a></h1><p><code>sudo ufw disable</code></p>
+<h1><span id="3-chuang-jian-nfs-gong-xiang-wen-jian-jia">3 创建NFS共享文件夹</span><a href="#3-chuang-jian-nfs-gong-xiang-wen-jian-jia" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> /home/book/nfs_share</span><br><span class="line">sudo <span class="built_in">chown</span> book:book /home/book/nfs_share</span><br><span class="line">sudo <span class="built_in">chmod</span> 777 /home/book/nfs_share -R</span><br></pre></td></tr></table></figure>
+<h1><span id="4-pei-zhi-nfs">4 配置NFS</span><a href="#4-pei-zhi-nfs" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/exports</span><br><span class="line">/home/book/nfs_share *(rw,<span class="built_in">sync</span>,no_root_squash,no_subtree_check)</span><br></pre></td></tr></table></figure>
 
 <p><img src="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/1.png" alt="1"></p>
-<h1 id="5-启动NFS服务"><a href="#5-启动NFS服务" class="headerlink" title="5 启动NFS服务"></a>5 启动NFS服务</h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart nfs-kernel-serve</span><br><span class="line">或者sudo service nfs-kernel-server restart</span><br><span class="line">或者sudo /etc/init.d/nfs-kernel-server restart</span><br></pre></td></tr></table></figure>
+<h1><span id="5-qi-dong-nfs-fu-wu">5 启动NFS服务</span><a href="#5-qi-dong-nfs-fu-wu" class="header-anchor">#</a></h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart nfs-kernel-serve</span><br><span class="line">或者sudo service nfs-kernel-server restart</span><br><span class="line">或者sudo /etc/init.d/nfs-kernel-server restart</span><br></pre></td></tr></table></figure>
 
-<h1 id="6-客户端进行NFS挂载"><a href="#6-客户端进行NFS挂载" class="headerlink" title="6 客户端进行NFS挂载"></a>6 客户端进行NFS挂载</h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">运行开发板</span><br><span class="line"><span class="meta prompt_">[root@book]~# </span><span class="language-bash">mount -t nfs -o nolock -o tcp 192.168.2.100:/home/book/nfs_share /mnt/nfs</span></span><br><span class="line">-t nfs                          #挂载类型</span><br><span class="line">-o nolock                       #读写的时候不锁定</span><br><span class="line">-o tcp                          #tcp模式</span><br><span class="line">客户端退出NFS挂载</span><br><span class="line">umount /mnt/nfs</span><br></pre></td></tr></table></figure>
+<h1><span id="6-ke-hu-duan-jin-xing-nfs-gua-zai">6 客户端进行NFS挂载</span><a href="#6-ke-hu-duan-jin-xing-nfs-gua-zai" class="header-anchor">#</a></h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">运行开发板</span><br><span class="line"><span class="meta prompt_">[root@book]~# </span><span class="language-bash">mount -t nfs -o nolock -o tcp 192.168.2.100:/home/book/nfs_share /mnt/nfs</span></span><br><span class="line">-t nfs                          #挂载类型</span><br><span class="line">-o nolock                       #读写的时候不锁定</span><br><span class="line">-o tcp                          #tcp模式</span><br><span class="line">客户端退出NFS挂载</span><br><span class="line">umount /mnt/nfs</span><br></pre></td></tr></table></figure>
 
 
 
@@ -378,55 +427,28 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <p>##1.安装tftp服务和客户端</p>
+        <div class="tocStart"></div>
+
+<!-- toc -->
+
+<pre><code>+ [1)本机测试](#1-ben-ji-ce-shi)
++ [2）开发板测试](#2-kai-fa-ban-ce-shi)
+</code></pre>
+<ul>
+<li><a href="#2-ftp-fu-wu">2 ftp服务</a></li>
+</ul>
+<!-- tocstop -->
+
+<div class="tocEnd"></div>
+
+<p>##1.安装tftp服务和客户端</p>
 <pre><code>sudo apt-get install xinetd tftp tftpd
 </code></pre>
-<p>##2.配置</p>
-<p>vim &#x2F;etc&#x2F;xinetd.d&#x2F;tftp<br>内容如下：</p>
-<pre><code>service tftp
-&#123;
-        socket_type     		= dgram
-        protocol                = udp
-        wait                    = yes
-        user                    = root
-        server          		= /usr/sbin/in.tftpd
-        server_args     		= -s /home/lyb/tftpshare/
-        disable         		= no
-        per_source      		=11
-        cps                     = 100 2
-        flags                   = IPv4
-&#125;
-</code></pre>
-<p>##3.创建tftp共享目录</p>
-<pre><code>1.创建服务器目录
-mkdir /home/lyb/tftpshare/
-2.然后修改目录权限
-chmod 777 /home/lyb/tftpshare/
-3.重启xinetd服务
-sudo /etc/init.d/xinetd restart（如果启动失败先关闭防火墙 service iptables stop）
-</code></pre>
-<p>##4.测试验证功能</p>
-<h3 id="1-本机测试"><a href="#1-本机测试" class="headerlink" title="1)本机测试"></a>1)本机测试</h3><pre><code>重新启动一个终端，
-输入命令 tftp 192.168.1.11（我的虚拟机ip）进入tftp,
-输入get test,这样就可以获取到test文件,
-输入q退出tftp
-</code></pre>
-<p>如下图所示：<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1.png" alt="1"></p>
-<h3 id="2）开发板测试"><a href="#2）开发板测试" class="headerlink" title="2）开发板测试"></a>2）开发板测试</h3><p>2440开发板的uboot可以支持tftp下载功能，在uboot命令行输入：</p>
-<pre><code>tftp 0x30000000  uImage_4.3
-</code></pre>
-<p>如下图所示。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/2.png" alt="2"></p>
-<h1 id="2-ftp服务"><a href="#2-ftp服务" class="headerlink" title="2 ftp服务"></a>2 ftp服务</h1><pre><code>sudo apt install vsftpd
-vi /etc/vsftpd.conf
-
-local_enable=YES
-write_enable=YES
-sudo /etc/init.d/vsftpd restart
-</code></pre>
-<p><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/3.png" alt="3"></p>
-<p>##2.1 windows客户端<br><a target="_blank" rel="noopener" href="https://filezilla-project.org/">https://filezilla-project.org/</a></p>
-<p>新建站点，配置ftp协议, 主机输入ubuntu IP地址，用户密码信息，即可连接成功。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/4.png" alt="4"></p>
-
+        
+          <p class="article-more-link">
+            <a href="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/#more">Read More</a>
+          </p>
+        
       
     </div>
     <footer class="article-footer">

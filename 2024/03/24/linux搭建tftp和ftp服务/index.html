@@ -6,19 +6,19 @@
   
   <title>linux搭建tftp和ftp服务 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="##1.安装tftp服务和客户端 sudo apt-get install xinetd tftp tftpd  ##2.配置 vim &#x2F;etc&#x2F;xinetd.d&#x2F;tftp内容如下： service tftp &#123;         socket_type     		&#x3D; dgram         protocol                &#x3D; udp">
+  <meta name="description" content="+ [1)本机测试](#1-ben-ji-ce-shi) + [2）开发板测试](#2-kai-fa-ban-ce-shi)   2 ftp服务      ##1.安装tftp服务和客户端 sudo apt-get install xinetd tftp tftpd">
 <meta property="og:type" content="article">
 <meta property="og:title" content="linux搭建tftp和ftp服务">
 <meta property="og:url" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="##1.安装tftp服务和客户端 sudo apt-get install xinetd tftp tftpd  ##2.配置 vim &#x2F;etc&#x2F;xinetd.d&#x2F;tftp内容如下： service tftp &#123;         socket_type     		&#x3D; dgram         protocol                &#x3D; udp">
+<meta property="og:description" content="+ [1)本机测试](#1-ben-ji-ce-shi) + [2）开发板测试](#2-kai-fa-ban-ce-shi)   2 ftp服务      ##1.安装tftp服务和客户端 sudo apt-get install xinetd tftp tftpd">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1.png">
 <meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/2.png">
 <meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/3.png">
 <meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/4.png">
 <meta property="article:published_time" content="2024-03-24T14:24:38.000Z">
-<meta property="article:modified_time" content="2024-03-28T14:12:36.000Z">
+<meta property="article:modified_time" content="2024-03-29T15:26:18.000Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="linux嵌入式环境搭建">
 <meta name="twitter:card" content="summary">
@@ -99,9 +99,24 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <p>##1.安装tftp服务和客户端</p>
+        <div class="toc">
+
+<!-- toc -->
+
+<pre><code>+ [1)本机测试](#1-ben-ji-ce-shi)
++ [2）开发板测试](#2-kai-fa-ban-ce-shi)
+</code></pre>
+<ul>
+<li><a href="#2-ftp-fu-wu">2 ftp服务</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<p>##1.安装tftp服务和客户端</p>
 <pre><code>sudo apt-get install xinetd tftp tftpd
 </code></pre>
+<span id="more"></span>
 <p>##2.配置</p>
 <p>vim &#x2F;etc&#x2F;xinetd.d&#x2F;tftp<br>内容如下：</p>
 <pre><code>service tftp
@@ -127,17 +142,17 @@ chmod 777 /home/lyb/tftpshare/
 sudo /etc/init.d/xinetd restart（如果启动失败先关闭防火墙 service iptables stop）
 </code></pre>
 <p>##4.测试验证功能</p>
-<h3 id="1-本机测试"><a href="#1-本机测试" class="headerlink" title="1)本机测试"></a>1)本机测试</h3><pre><code>重新启动一个终端，
+<h3><span id="1-ben-ji-ce-shi">1)本机测试</span><a href="#1-ben-ji-ce-shi" class="header-anchor">#</a></h3><pre><code>重新启动一个终端，
 输入命令 tftp 192.168.1.11（我的虚拟机ip）进入tftp,
 输入get test,这样就可以获取到test文件,
 输入q退出tftp
 </code></pre>
 <p>如下图所示：<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1.png" alt="1"></p>
-<h3 id="2）开发板测试"><a href="#2）开发板测试" class="headerlink" title="2）开发板测试"></a>2）开发板测试</h3><p>2440开发板的uboot可以支持tftp下载功能，在uboot命令行输入：</p>
+<h3><span id="2-kai-fa-ban-ce-shi">2）开发板测试</span><a href="#2-kai-fa-ban-ce-shi" class="header-anchor">#</a></h3><p>2440开发板的uboot可以支持tftp下载功能，在uboot命令行输入：</p>
 <pre><code>tftp 0x30000000  uImage_4.3
 </code></pre>
 <p>如下图所示。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/2.png" alt="2"></p>
-<h1 id="2-ftp服务"><a href="#2-ftp服务" class="headerlink" title="2 ftp服务"></a>2 ftp服务</h1><pre><code>sudo apt install vsftpd
+<h1><span id="2-ftp-fu-wu">2 ftp服务</span><a href="#2-ftp-fu-wu" class="header-anchor">#</a></h1><pre><code>sudo apt install vsftpd
 vi /etc/vsftpd.conf
 
 local_enable=YES

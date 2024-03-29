@@ -6,12 +6,12 @@
   
   <title>linux搭建samba服务 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="1 安装服务sudo apt-get install samba samba-common 2 关闭防火墙sudo systemctl stop ufw 3 添加用户book12345678910111213141516sudo smbpasswd -a book配置sambasudo vim &#x2F;etc&#x2F;samba&#x2F;smb.conf[book_share_samba_dir]        com">
+  <meta name="description" content="1 安装服务 2 关闭防火墙 3 添加用户book 4 重启服务 5 windows进行samba映射 6 常见问题      1 安装服务#sudo apt-get install samba samba-common 2 关闭防火墙#sudo systemctl stop ufw 3 添加用户book#12345678910111213141516sudo smbpasswd -a">
 <meta property="og:type" content="article">
 <meta property="og:title" content="linux搭建samba服务">
 <meta property="og:url" content="http://example.com/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="1 安装服务sudo apt-get install samba samba-common 2 关闭防火墙sudo systemctl stop ufw 3 添加用户book12345678910111213141516sudo smbpasswd -a book配置sambasudo vim &#x2F;etc&#x2F;samba&#x2F;smb.conf[book_share_samba_dir]        com">
+<meta property="og:description" content="1 安装服务 2 关闭防火墙 3 添加用户book 4 重启服务 5 windows进行samba映射 6 常见问题      1 安装服务#sudo apt-get install samba samba-common 2 关闭防火墙#sudo systemctl stop ufw 3 添加用户book#12345678910111213141516sudo smbpasswd -a">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://example.com/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/1.png">
 <meta property="og:image" content="http://example.com/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/2.png">
@@ -19,7 +19,7 @@
 <meta property="og:image" content="http://example.com/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/4.png">
 <meta property="og:image" content="http://example.com/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/5.png">
 <meta property="article:published_time" content="2024-03-27T15:17:30.000Z">
-<meta property="article:modified_time" content="2024-03-28T14:12:30.000Z">
+<meta property="article:modified_time" content="2024-03-29T15:26:54.000Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="linux嵌入式环境搭建">
 <meta name="twitter:card" content="summary">
@@ -100,19 +100,35 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h1 id="1-安装服务"><a href="#1-安装服务" class="headerlink" title="1 安装服务"></a>1 安装服务</h1><p><code>sudo apt-get install samba samba-common</code></p>
-<h1 id="2-关闭防火墙"><a href="#2-关闭防火墙" class="headerlink" title="2 关闭防火墙"></a>2 关闭防火墙</h1><p><code>sudo systemctl stop ufw</code></p>
-<h1 id="3-添加用户book"><a href="#3-添加用户book" class="headerlink" title="3 添加用户book"></a>3 添加用户book</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sudo smbpasswd -a book</span><br><span class="line">配置samba</span><br><span class="line">sudo vim /etc/samba/smb.conf</span><br><span class="line">[book_share_samba_dir]</span><br><span class="line">        comment = share samba <span class="built_in">dir</span></span><br><span class="line">        path = /home/book/ftp</span><br><span class="line">        valid <span class="built_in">users</span> = book</span><br><span class="line">        force user = book</span><br><span class="line">        force group = book</span><br><span class="line">        creat mask = 0644</span><br><span class="line">        directory mask = 0755</span><br><span class="line">        browseable= <span class="built_in">yes</span></span><br><span class="line">        available = <span class="built_in">yes</span></span><br><span class="line">        public = <span class="built_in">yes</span></span><br><span class="line">        <span class="built_in">read</span> only = no</span><br><span class="line">        writeable = <span class="built_in">yes</span></span><br></pre></td></tr></table></figure>
+        <div class="toc">
 
-<h1 id="4-重启服务"><a href="#4-重启服务" class="headerlink" title="4 重启服务"></a>4 重启服务</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">~$ sudo service smbd restart</span><br><span class="line">~$ sudo /etc/init.d/smbd restart</span><br><span class="line">~$ /etc/init.d/smbd restart</span><br></pre></td></tr></table></figure>
+<!-- toc -->
+
+<ul>
+<li><a href="#1-an-zhuang-fu-wu">1 安装服务</a></li>
+<li><a href="#2-guan-bi-fang-huo-qiang">2 关闭防火墙</a></li>
+<li><a href="#3-tian-jia-yong-hu-book">3 添加用户book</a></li>
+<li><a href="#4-chong-qi-fu-wu">4 重启服务</a></li>
+<li><a href="#5-windows-jin-xing-samba-ying-she">5 windows进行samba映射</a></li>
+<li><a href="#6-chang-jian-wen-ti">6 常见问题</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-an-zhuang-fu-wu">1 安装服务</span><a href="#1-an-zhuang-fu-wu" class="header-anchor">#</a></h1><p><code>sudo apt-get install samba samba-common</code></p>
+<h1><span id="2-guan-bi-fang-huo-qiang">2 关闭防火墙</span><a href="#2-guan-bi-fang-huo-qiang" class="header-anchor">#</a></h1><p><code>sudo systemctl stop ufw</code></p>
+<h1><span id="3-tian-jia-yong-hu-book">3 添加用户book</span><a href="#3-tian-jia-yong-hu-book" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sudo smbpasswd -a book</span><br><span class="line">配置samba</span><br><span class="line">sudo vim /etc/samba/smb.conf</span><br><span class="line">[book_share_samba_dir]</span><br><span class="line">        comment = share samba <span class="built_in">dir</span></span><br><span class="line">        path = /home/book/ftp</span><br><span class="line">        valid <span class="built_in">users</span> = book</span><br><span class="line">        force user = book</span><br><span class="line">        force group = book</span><br><span class="line">        creat mask = 0644</span><br><span class="line">        directory mask = 0755</span><br><span class="line">        browseable= <span class="built_in">yes</span></span><br><span class="line">        available = <span class="built_in">yes</span></span><br><span class="line">        public = <span class="built_in">yes</span></span><br><span class="line">        <span class="built_in">read</span> only = no</span><br><span class="line">        writeable = <span class="built_in">yes</span></span><br></pre></td></tr></table></figure>
+
+<h1><span id="4-chong-qi-fu-wu">4 重启服务</span><a href="#4-chong-qi-fu-wu" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">~$ sudo service smbd restart</span><br><span class="line">~$ sudo /etc/init.d/smbd restart</span><br><span class="line">~$ /etc/init.d/smbd restart</span><br></pre></td></tr></table></figure>
 
 
 
-<h1 id="5-windows进行samba映射"><a href="#5-windows进行samba映射" class="headerlink" title="5 windows进行samba映射"></a>5 windows进行samba映射</h1><p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/1.png" alt="img"></p>
+<h1><span id="5-windows-jin-xing-samba-ying-she">5 windows进行samba映射</span><a href="#5-windows-jin-xing-samba-ying-she" class="header-anchor">#</a></h1><p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/1.png" alt="img"></p>
 <p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/2.png" alt="img"></p>
 <p>注意不能用NAT虚拟网络IP访问samba, 要用桥接网络ip，不过ssh可以两种方式访问，但是NAT虚拟网络是用来虚拟机上网的IP地址可能会发生变化，还是建议用桥接网络IP地址。</p>
 <p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/3.png" alt="img"></p>
-<h1 id="6-常见问题"><a href="#6-常见问题" class="headerlink" title="6 常见问题"></a>6 常见问题</h1><p>samba不允许一个用户使用一个以上用户名与一个服务器或共享资源的多重连接，因此需要windows进入cmd</p>
+<h1><span id="6-chang-jian-wen-ti">6 常见问题</span><a href="#6-chang-jian-wen-ti" class="header-anchor">#</a></h1><p>samba不允许一个用户使用一个以上用户名与一个服务器或共享资源的多重连接，因此需要windows进入cmd</p>
 <p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/4.png" alt="img"></p>
 <p>可以windows cmd下用 net use 命令查看下当前的共享访问到底有没有它。</p>
 <p>有的话，net use * &#x2F;del &#x2F;y</p>

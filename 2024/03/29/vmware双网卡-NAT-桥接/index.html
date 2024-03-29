@@ -6,12 +6,12 @@
   
   <title>vmware双网卡_NAT_桥接 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="1 配置虚拟机NET模式vmware安装后默认就会用NAT方式和pc主机共享网络，虚拟机是通过pc主机的网卡数据转换进行上网的，只要windows主机有网，虚拟机就会对应有网络。NAT模式在这里主要目的就是提供给虚拟机进行上网。如果没有可以进行如下配置，打开虚拟机-&gt;编辑虚拟机设置-&gt;网络适配器,网络连接选择NAT模式如下图：  启动进入虚拟机，console输入ifconfig">
+  <meta name="description" content="1 配置虚拟机NET模式 2 配置虚拟机桥接网络 2.1 方法1：使用usb网卡 2.1 方法2：使用路由器 2.1.1 添加桥接网卡 2.1.2 配置桥接网卡 2.1.3 配置虚拟机桥接网卡静态ip 2.1.4 配置windows主机桥接网卡ip 2.1.5 配置开发板IP          1 配置虚拟机NET模式vmware安装后默认就会用NAT方式和pc主机共享网络，虚拟机是通过">
 <meta property="og:type" content="article">
 <meta property="og:title" content="vmware双网卡_NAT_桥接">
 <meta property="og:url" content="http://example.com/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="1 配置虚拟机NET模式vmware安装后默认就会用NAT方式和pc主机共享网络，虚拟机是通过pc主机的网卡数据转换进行上网的，只要windows主机有网，虚拟机就会对应有网络。NAT模式在这里主要目的就是提供给虚拟机进行上网。如果没有可以进行如下配置，打开虚拟机-&gt;编辑虚拟机设置-&gt;网络适配器,网络连接选择NAT模式如下图：  启动进入虚拟机，console输入ifconfig">
+<meta property="og:description" content="1 配置虚拟机NET模式 2 配置虚拟机桥接网络 2.1 方法1：使用usb网卡 2.1 方法2：使用路由器 2.1.1 添加桥接网卡 2.1.2 配置桥接网卡 2.1.3 配置虚拟机桥接网卡静态ip 2.1.4 配置windows主机桥接网卡ip 2.1.5 配置开发板IP          1 配置虚拟机NET模式vmware安装后默认就会用NAT方式和pc主机共享网络，虚拟机是通过">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://example.com/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/1.png">
 <meta property="og:image" content="http://example.com/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/2.png">
@@ -29,7 +29,7 @@
 <meta property="og:image" content="http://example.com/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/14.png">
 <meta property="og:image" content="http://example.com/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/15.png">
 <meta property="article:published_time" content="2024-03-29T14:03:51.000Z">
-<meta property="article:modified_time" content="2024-03-29T14:20:28.000Z">
+<meta property="article:modified_time" content="2024-03-29T15:22:48.000Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="linux嵌入式环境搭建">
 <meta name="twitter:card" content="summary">
@@ -110,8 +110,33 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h1 id="1-配置虚拟机NET模式"><a href="#1-配置虚拟机NET模式" class="headerlink" title="1 配置虚拟机NET模式"></a>1 配置虚拟机NET模式</h1><p>vmware安装后默认就会用NAT方式和pc主机共享网络，虚拟机是通过pc主机的网卡数据转换进行上网的，只要windows主机有网，虚拟机就会对应有网络。<br>NAT模式在这里主要目的就是提供给虚拟机进行上网。<br>如果没有可以进行如下配置，打开虚拟机-&gt;编辑虚拟机设置-&gt;网络适配器,网络连接选择NAT模式如下图：</p>
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-pei-zhi-xu-ni-ji-net-mo-shi">1 配置虚拟机NET模式</a></li>
+<li><a href="#2-pei-zhi-xu-ni-ji-qiao-jie-wang-luo">2 配置虚拟机桥接网络</a><ul>
+<li><a href="#2-1-fang-fa-1-shi-yong-usb-wang-qia">2.1 方法1：使用usb网卡</a></li>
+<li><a href="#2-1-fang-fa-2-shi-yong-lu-you-qi">2.1 方法2：使用路由器</a><ul>
+<li><a href="#2-1-1-tian-jia-qiao-jie-wang-qia">2.1.1 添加桥接网卡</a></li>
+<li><a href="#2-1-2-pei-zhi-qiao-jie-wang-qia">2.1.2 配置桥接网卡</a></li>
+<li><a href="#2-1-3-pei-zhi-xu-ni-ji-qiao-jie-wang-qia-jing-tai-ip">2.1.3 配置虚拟机桥接网卡静态ip</a></li>
+<li><a href="#2-1-4-pei-zhi-windows-zhu-ji-qiao-jie-wang-qia-ip">2.1.4 配置windows主机桥接网卡ip</a></li>
+<li><a href="#2-1-5-pei-zhi-kai-fa-ban-ip">2.1.5 配置开发板IP</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-pei-zhi-xu-ni-ji-net-mo-shi">1 配置虚拟机NET模式</span><a href="#1-pei-zhi-xu-ni-ji-net-mo-shi" class="header-anchor"></a></h1><p>vmware安装后默认就会用NAT方式和pc主机共享网络，虚拟机是通过pc主机的网卡数据转换进行上网的，只要windows主机有网，虚拟机就会对应有网络。<br>NAT模式在这里主要目的就是提供给虚拟机进行上网。<br>如果没有可以进行如下配置，打开虚拟机-&gt;编辑虚拟机设置-&gt;网络适配器,网络连接选择NAT模式如下图：</p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/1.png" alt="img"></p>
+ <span id="more"></span>
+
 <p>启动进入虚拟机，console输入ifconfig</p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/2.png" alt="img"></p>
 <p> windows进入cmd,输入ipconfig</p>
@@ -121,22 +146,22 @@
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/5.png" alt="img"></p>
 <p> windows搜索框输入vmnet,进入虚拟网络编辑器，可以看到虚拟网络信息，有这个VMnet8，模式为NAT</p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/6.png" alt="img"></p>
-<h1 id="2-配置虚拟机桥接网络"><a href="#2-配置虚拟机桥接网络" class="headerlink" title="2 配置虚拟机桥接网络"></a>2 配置虚拟机桥接网络</h1><h2 id="2-1-方法1：使用usb网卡"><a href="#2-1-方法1：使用usb网卡" class="headerlink" title="2.1 方法1：使用usb网卡"></a>2.1 方法1：使用usb网卡</h2><p>需要买一个usb网卡，连接板子和windows主机。双网卡配置参考如下视频： <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1zV411U7H9?p=3">https://www.bilibili.com/video/BV1zV411U7H9?p=3</a></p>
-<h2 id="2-1-方法2：使用路由器"><a href="#2-1-方法2：使用路由器" class="headerlink" title="2.1 方法2：使用路由器"></a>2.1 方法2：使用路由器</h2><h3 id="2-1-1-添加桥接网卡"><a href="#2-1-1-添加桥接网卡" class="headerlink" title="2.1.1 添加桥接网卡"></a>2.1.1 添加桥接网卡</h3><p>桥接网络使用实际的物理网卡进行数据交换，因此需要借助实际的物理网卡，可以是有线网卡，也可以是无线网卡。桥接的目的是为了让虚拟机和主机以及板子能够互相进行收据收发传送。打开虚拟机，配置如下：</p>
+<h1><span id="2-pei-zhi-xu-ni-ji-qiao-jie-wang-luo">2 配置虚拟机桥接网络</span><a href="#2-pei-zhi-xu-ni-ji-qiao-jie-wang-luo" class="header-anchor"></a></h1><h2><span id="2-1-fang-fa-1-shi-yong-usb-wang-qia">2.1 方法1：使用usb网卡</span><a href="#2-1-fang-fa-1-shi-yong-usb-wang-qia" class="header-anchor"></a></h2><p>需要买一个usb网卡，连接板子和windows主机。双网卡配置参考如下视频： <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1zV411U7H9?p=3">https://www.bilibili.com/video/BV1zV411U7H9?p=3</a></p>
+<h2><span id="2-1-fang-fa-2-shi-yong-lu-you-qi">2.1 方法2：使用路由器</span><a href="#2-1-fang-fa-2-shi-yong-lu-you-qi" class="header-anchor"></a></h2><h3><span id="2-1-1-tian-jia-qiao-jie-wang-qia">2.1.1 添加桥接网卡</span><a href="#2-1-1-tian-jia-qiao-jie-wang-qia" class="header-anchor"></a></h3><p>桥接网络使用实际的物理网卡进行数据交换，因此需要借助实际的物理网卡，可以是有线网卡，也可以是无线网卡。桥接的目的是为了让虚拟机和主机以及板子能够互相进行收据收发传送。打开虚拟机，配置如下：</p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/7.png" alt="img"></p>
-<h3 id="2-1-2-配置桥接网卡"><a href="#2-1-2-配置桥接网卡" class="headerlink" title="2.1.2 配置桥接网卡"></a>2.1.2 配置桥接网卡</h3><p>打开vmnet,进入虚拟网络编辑器,在这个里面要把桥接网卡选择成具体的网卡型号，不能设置为自动桥接。注意：这里根据你电脑主机接路由器的网卡，如果你用的无线网卡与路由器通信，那么就要桥接到无线网卡，如果是接网线到路由器，那就要用有线网卡。具体的网卡名字可以进入入网络共享中心-&gt;更改适配器选项或者进入设备管理器来确认清楚。</p>
+<h3><span id="2-1-2-pei-zhi-qiao-jie-wang-qia">2.1.2 配置桥接网卡</span><a href="#2-1-2-pei-zhi-qiao-jie-wang-qia" class="header-anchor"></a></h3><p>打开vmnet,进入虚拟网络编辑器,在这个里面要把桥接网卡选择成具体的网卡型号，不能设置为自动桥接。注意：这里根据你电脑主机接路由器的网卡，如果你用的无线网卡与路由器通信，那么就要桥接到无线网卡，如果是接网线到路由器，那就要用有线网卡。具体的网卡名字可以进入入网络共享中心-&gt;更改适配器选项或者进入设备管理器来确认清楚。</p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/8.png" alt="img"></p>
 <p>配置完桥接网卡后，需要配置桥接网卡对应到window主机&#x2F;虚拟机&#x2F;板子的ip.</p>
-<h3 id="2-1-3-配置虚拟机桥接网卡静态ip"><a href="#2-1-3-配置虚拟机桥接网卡静态ip" class="headerlink" title="2.1.3 配置虚拟机桥接网卡静态ip"></a>2.1.3 配置虚拟机桥接网卡静态ip</h3><p>ifconfig查看，发现桥接的网卡在虚拟机中还没有分配ip.</p>
+<h3><span id="2-1-3-pei-zhi-xu-ni-ji-qiao-jie-wang-qia-jing-tai-ip">2.1.3 配置虚拟机桥接网卡静态ip</span><a href="#2-1-3-pei-zhi-xu-ni-ji-qiao-jie-wang-qia-jing-tai-ip" class="header-anchor"></a></h3><p>ifconfig查看，发现桥接的网卡在虚拟机中还没有分配ip.</p>
 <p> <img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/9.png" alt="img"></p>
 <p>进入ubuntu setting-&gt; network， 设置成和路由器同一网段即可。配置ens36 ip为192.168.2.100</p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/10.png" alt="img"></p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/11.png" alt="img"></p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/12.png" alt="img"></p>
-<h3 id="2-1-4-配置windows主机桥接网卡ip"><a href="#2-1-4-配置windows主机桥接网卡ip" class="headerlink" title="2.1.4 配置windows主机桥接网卡ip"></a>2.1.4 配置windows主机桥接网卡ip</h3><p>桥接网卡为intel Ethernet Connection I219-V ,ip 192.168.2.6</p>
+<h3><span id="2-1-4-pei-zhi-windows-zhu-ji-qiao-jie-wang-qia-ip">2.1.4 配置windows主机桥接网卡ip</span><a href="#2-1-4-pei-zhi-windows-zhu-ji-qiao-jie-wang-qia-ip" class="header-anchor"></a></h3><p>桥接网卡为intel Ethernet Connection I219-V ,ip 192.168.2.6</p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/13.png" alt="img"></p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/14.png" alt="img"></p>
-<h3 id="2-1-5-配置开发板IP"><a href="#2-1-5-配置开发板IP" class="headerlink" title="2.1.5 配置开发板IP"></a>2.1.5 配置开发板IP</h3><p><strong>三者互 ping 验证:</strong></p>
+<h3><span id="2-1-5-pei-zhi-kai-fa-ban-ip">2.1.5 配置开发板IP</span><a href="#2-1-5-pei-zhi-kai-fa-ban-ip" class="header-anchor"></a></h3><p><strong>三者互 ping 验证:</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">windows ip: 192.168.2.6</span><br><span class="line">ubuntu ip:  192.168.2.100</span><br><span class="line">开发板 ip:   192.168.2.xxx</span><br></pre></td></tr></table></figure>
 
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/15.png" alt="img"></p>

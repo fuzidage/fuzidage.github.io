@@ -6,12 +6,12 @@
   
   <title>gdb移植到arm开发板 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="1.下载gdbhttps:&#x2F;&#x2F;ftp.gnu.org&#x2F;gnu&#x2F;gdb&#x2F; http:&#x2F;&#x2F;ftp.gnu.org&#x2F;gnu&#x2F;ncurses&#x2F; 我这里选择的是gdb-7.12.tar.gz和ncurses-5.6.tar.gz 2.编译安装2.1 设置工具链export PATH&#x3D;$PATH:&#x2F;home&#x2F;robin&#x2F;share&#x2F;cv183x&#x2F;host-tools&#x2F;gcc&#x2F;gcc-linaro-6.3.1-">
+  <meta name="description" content="1.下载gdb 2.编译安装 2.1 设置工具链 2.2 编译ncurses 2.3 编译gdb   3.运行测试      1.下载gdb#https:&#x2F;&#x2F;ftp.gnu.org&#x2F;gnu&#x2F;gdb&#x2F; http:&#x2F;&#x2F;ftp.gnu.org&#x2F;gnu&#x2F;ncurses&#x2F; 我这里选择的是gdb-7.12.tar.gz和ncurses-5.6.tar.gz 2.编译安装#2.1 设置工具链#expo">
 <meta property="og:type" content="article">
 <meta property="og:title" content="gdb移植到arm开发板">
 <meta property="og:url" content="http://example.com/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="1.下载gdbhttps:&#x2F;&#x2F;ftp.gnu.org&#x2F;gnu&#x2F;gdb&#x2F; http:&#x2F;&#x2F;ftp.gnu.org&#x2F;gnu&#x2F;ncurses&#x2F; 我这里选择的是gdb-7.12.tar.gz和ncurses-5.6.tar.gz 2.编译安装2.1 设置工具链export PATH&#x3D;$PATH:&#x2F;home&#x2F;robin&#x2F;share&#x2F;cv183x&#x2F;host-tools&#x2F;gcc&#x2F;gcc-linaro-6.3.1-">
+<meta property="og:description" content="1.下载gdb 2.编译安装 2.1 设置工具链 2.2 编译ncurses 2.3 编译gdb   3.运行测试      1.下载gdb#https:&#x2F;&#x2F;ftp.gnu.org&#x2F;gnu&#x2F;gdb&#x2F; http:&#x2F;&#x2F;ftp.gnu.org&#x2F;gnu&#x2F;ncurses&#x2F; 我这里选择的是gdb-7.12.tar.gz和ncurses-5.6.tar.gz 2.编译安装#2.1 设置工具链#expo">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://example.com/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/1.png">
 <meta property="og:image" content="http://example.com/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/2.png">
@@ -21,7 +21,7 @@
 <meta property="og:image" content="http://example.com/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/6.png">
 <meta property="og:image" content="http://example.com/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/7.png">
 <meta property="article:published_time" content="2024-03-28T13:59:59.000Z">
-<meta property="article:modified_time" content="2024-03-28T14:08:26.000Z">
+<meta property="article:modified_time" content="2024-03-29T15:27:34.000Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="linux嵌入式环境搭建">
 <meta name="twitter:card" content="summary">
@@ -102,22 +102,40 @@
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <h1 id="1-下载gdb"><a href="#1-下载gdb" class="headerlink" title="1.下载gdb"></a>1.下载gdb</h1><p><a target="_blank" rel="noopener" href="https://ftp.gnu.org/gnu/gdb/">https://ftp.gnu.org/gnu/gdb/</a></p>
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-xia-zai-gdb">1.下载gdb</a></li>
+<li><a href="#2-bian-yi-an-zhuang">2.编译安装</a><ul>
+<li><a href="#2-1-she-zhi-gong-ju-lian">2.1 设置工具链</a></li>
+<li><a href="#2-2-bian-yi-ncurses">2.2 编译ncurses</a></li>
+<li><a href="#2-3-bian-yi-gdb">2.3 编译gdb</a></li>
+</ul>
+</li>
+<li><a href="#3-yun-xing-ce-shi">3.运行测试</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-xia-zai-gdb">1.下载gdb</span><a href="#1-xia-zai-gdb" class="header-anchor">#</a></h1><p><a target="_blank" rel="noopener" href="https://ftp.gnu.org/gnu/gdb/">https://ftp.gnu.org/gnu/gdb/</a></p>
 <p><a target="_blank" rel="noopener" href="http://ftp.gnu.org/gnu/ncurses/">http://ftp.gnu.org/gnu/ncurses/</a></p>
 <p>我这里选择的是gdb-7.12.tar.gz和ncurses-5.6.tar.gz</p>
-<h1 id="2-编译安装"><a href="#2-编译安装" class="headerlink" title="2.编译安装"></a>2.编译安装</h1><h2 id="2-1-设置工具链"><a href="#2-1-设置工具链" class="headerlink" title="2.1 设置工具链"></a>2.1 设置工具链</h2><p><code>export PATH=$PATH:/home/robin/share/cv183x/host-tools/gcc/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu/bin/</code><br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/1.png"><br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/2.png"></p>
-<h2 id="2-2-编译ncurses"><a href="#2-2-编译ncurses" class="headerlink" title="2.2 编译ncurses"></a>2.2 编译ncurses</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./configure --host=aarch64-linux-gnu-gcc --prefix=/home/robin/share/ncurses --without-ada --enable-termcap --with-shared CFLAGS=<span class="string">&quot;-O3 -fPIC&quot;</span></span><br><span class="line">    make</span><br><span class="line">	make install</span><br></pre></td></tr></table></figure>
+<h1><span id="2-bian-yi-an-zhuang">2.编译安装</span><a href="#2-bian-yi-an-zhuang" class="header-anchor">#</a></h1><h2><span id="2-1-she-zhi-gong-ju-lian">2.1 设置工具链</span><a href="#2-1-she-zhi-gong-ju-lian" class="header-anchor">#</a></h2><p><code>export PATH=$PATH:/home/robin/share/cv183x/host-tools/gcc/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu/bin/</code><br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/1.png"><br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/2.png"></p>
+<h2><span id="2-2-bian-yi-ncurses">2.2 编译ncurses</span><a href="#2-2-bian-yi-ncurses" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./configure --host=aarch64-linux-gnu-gcc --prefix=/home/robin/share/ncurses --without-ada --enable-termcap --with-shared CFLAGS=<span class="string">&quot;-O3 -fPIC&quot;</span></span><br><span class="line">    make</span><br><span class="line">	make install</span><br></pre></td></tr></table></figure>
 
 <p>执行.&#x2F;configure时可能会失败，报错如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/3.png"><br>这是由于64bit machine配置引起的，进行如下操作后继续尝试。</p>
 <pre><code>wget -O config.guess &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD&#39;
 wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD&#39;
 </code></pre>
 <p>编译出的ncurses库如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/4.png"></p>
-<h2 id="2-3-编译gdb"><a href="#2-3-编译gdb" class="headerlink" title="2.3 编译gdb"></a>2.3 编译gdb</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tar xvf gdb-7.12.tar.gz;</span><br><span class="line"><span class="built_in">cd</span> gdb-7.12</span><br><span class="line">./configure --host=aarch64-linux-gnu-gcc(--host=arm-linux-gnueabihf) --enable-shared --prefix=/home/robin/share/gdb --without-x --disable-gdbtk --disable-tui --without-included-regex --without-included-gettext  --disable-werror CFLAGS=<span class="string">&quot;-O0 -fPIC&quot;</span></span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+<h2><span id="2-3-bian-yi-gdb">2.3 编译gdb</span><a href="#2-3-bian-yi-gdb" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tar xvf gdb-7.12.tar.gz;</span><br><span class="line"><span class="built_in">cd</span> gdb-7.12</span><br><span class="line">./configure --host=aarch64-linux-gnu-gcc(--host=arm-linux-gnueabihf) --enable-shared --prefix=/home/robin/share/gdb --without-x --disable-gdbtk --disable-tui --without-included-regex --without-included-gettext  --disable-werror CFLAGS=<span class="string">&quot;-O0 -fPIC&quot;</span></span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
 
 <p>.&#x2F;configure后结果如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/5.png"></p>
 <p>make install后结果如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/6.png"></p>
-<h1 id="3-运行测试"><a href="#3-运行测试" class="headerlink" title="3.运行测试"></a>3.运行测试</h1><p>1.将gdb和ncureses库cp到板子运行，结果如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/7.png"></p>
+<h1><span id="3-yun-xing-ce-shi">3.运行测试</span><a href="#3-yun-xing-ce-shi" class="header-anchor">#</a></h1><p>1.将gdb和ncureses库cp到板子运行，结果如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/7.png"></p>
 
       
     </div>
