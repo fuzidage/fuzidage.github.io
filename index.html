@@ -69,6 +69,102 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-virtualbox配置实现PC-虚拟机-开发板互ping" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/" class="article-date">
+  <time class="dt-published" datetime="2024-03-30T06:13:08.000Z" itemprop="datePublished">2024-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/">virtualbox配置实现PC-虚拟机-开发板互ping</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-she-zhi-virtualbox-wang-qia">1 设置virtualbox网卡</a><ul>
+<li><a href="#1-1-guan-bi-xu-ni-ji">1.1 关闭虚拟机</a></li>
+<li><a href="#1-2-she-zhi-tian-jia-wang-qia">1.2 设置添加网卡</a><ul>
+<li><a href="#1-2-1-tian-jia-wang-qia-1-nat-wang-luo">1.2.1 添加网卡1(NAT网络)</a></li>
+<li><a href="#1-2-2-tian-jia-wang-qia-2-host-only-wang-luo">1.2.2 添加网卡2(host only网络)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-pei-zhi-windows-he-xu-ni-ji">2 配置windows和虚拟机</a><ul>
+<li><a href="#2-1-pei-zhi-window-yi-tai-wang-qia">2.1 配置window以太网卡</a></li>
+<li><a href="#2-2-pei-zhi-xu-ni-ji-wang-luo">2.2 配置虚拟机网络</a></li>
+</ul>
+</li>
+<li><a href="#3-ce-shi-shang-wang-zhuang-tai">3 测试上网状态</a></li>
+<li><a href="#4-gai-jin-he-you-hua">4 改进和优化</a><ul>
+<li><a href="#4-1-windows-ping-xu-ni-ji">4.1 windows ping 虚拟机</a></li>
+<li><a href="#4-2-xu-ni-ji-ping-windows">4.2 虚拟机 ping windows</a></li>
+<li><a href="#4-3-kai-fa-ban-ping-windows-he-xu-ni-ji">4.3 开发板 ping windows和虚拟机</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+
+<h1><span id="1-she-zhi-virtualbox-wang-qia">1 设置virtualbox网卡</span><a href="#1-she-zhi-virtualbox-wang-qia" class="header-anchor">#</a></h1><h2><span id="1-1-guan-bi-xu-ni-ji">1.1 关闭虚拟机</span><a href="#1-1-guan-bi-xu-ni-ji" class="header-anchor">#</a></h2><h2><span id="1-2-she-zhi-tian-jia-wang-qia">1.2 设置添加网卡</span><a href="#1-2-she-zhi-tian-jia-wang-qia" class="header-anchor">#</a></h2><p>进入设置-网络</p>
+<h3><span id="1-2-1-tian-jia-wang-qia-1-nat-wang-luo">1.2.1 添加网卡1(NAT网络)</span><a href="#1-2-1-tian-jia-wang-qia-1-nat-wang-luo" class="header-anchor">#</a></h3><p>这个网络是主机通过网络地址转换到虚拟机，比如主机用无线网卡WLAN上网，用NAT转换比较合适，这样虚拟机也可以访问外网。<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/1.png"></p>
+<h3><span id="1-2-2-tian-jia-wang-qia-2-host-only-wang-luo">1.2.2 添加网卡2(host only网络)</span><a href="#1-2-2-tian-jia-wang-qia-2-host-only-wang-luo" class="header-anchor">#</a></h3><p>这个网络是主机通过无线网卡WLAN上外网，但是虚拟机想通过有线网卡和主机、甚至与开发板互相ping通，传输文件。<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/2.png"></p>
+<p>当然开启host only模式前先确保windows下的virtual host only网卡有开启，如下图：<br><img src="https://img2020.cnblogs.com/blog/1876680/202009/1876680-20200923151634434-1218500133.png"></p>
+<p>如果没有请按照下图操作：（这里是添加host only网卡）<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/3.png"><br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/4.png"></p>
+<h1><span id="2-pei-zhi-windows-he-xu-ni-ji">2 配置windows和虚拟机</span><a href="#2-pei-zhi-windows-he-xu-ni-ji" class="header-anchor">#</a></h1><h2><span id="2-1-pei-zhi-window-yi-tai-wang-qia">2.1 配置window以太网卡</span><a href="#2-1-pei-zhi-window-yi-tai-wang-qia" class="header-anchor">#</a></h2><p>刚添加了虚拟机虚拟virtual host only网卡, 那么我们反正用的WLAN上的外网，为了方便，设置windows下的以太网卡网段和virtual host only网卡保持一致。<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/5.png"><br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/6.png"></p>
+<h2><span id="2-2-pei-zhi-xu-ni-ji-wang-luo">2.2 配置虚拟机网络</span><a href="#2-2-pei-zhi-xu-ni-ji-wang-luo" class="header-anchor">#</a></h2><p>一般默认情况下，虚拟机是通过NAT共享网络给虚拟机用的，那么此时虚拟机也是可以上网的，只是不能和外界开发板进行互相ping, 同时windows主机也不能ping虚拟机。 如下图：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/7.png"><br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/8.png"><br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/9.png"><br>图中可以看到两块网卡，enp0s3是Ubuntu默认的网卡（NAT），enp0s8是新增的网卡(host only)，可以看到enp0s8还没有分配IP地址，我们需要手工指定一下。sudo vim &#x2F;etc&#x2F;network&#x2F;interfaces将文件内容修改为如下所示：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">interfaces(5) file used by ifup(8) and ifdown(8)</span></span><br><span class="line">auto lo</span><br><span class="line">iface lo inet loopback</span><br><span class="line"></span><br><span class="line">auto enp0s8</span><br><span class="line">iface enp0s8 inet static</span><br><span class="line">address 192.168.56.101</span><br><span class="line">netmask 255.255.255.0</span><br></pre></td></tr></table></figure>
+<p>再来看下网卡ip信息：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/10.png"></p>
+<h1><span id="3-ce-shi-shang-wang-zhuang-tai">3 测试上网状态</span><a href="#3-ce-shi-shang-wang-zhuang-tai" class="header-anchor">#</a></h1><p><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/11.png"><br>从测试结果上可以看到虚拟机上外网和ping windows主机都是ok的。</p>
+<pre><code>  10.80.0.75时无线网卡的ip，
+  192.168.56.100是以太网卡的ip,
+  192.168.56.101是host only网卡的ip。 
+</code></pre>
+<p>同理用Windows ping虚拟机也是ok的。<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/12.png"></p>
+<p>用开发板ping主机和虚拟机发现，只能ping通windows主机，无法ping通虚拟机，如下图。这是为什么呢？<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/13.png"></p>
+<p>这是由于我们windows主机和开发板用的网线直连，两个以太网卡在同一网段下，当然能够ping通。但是虚拟机和windows主机用的确是host only网卡（NAT方式用来上外网），这样只能保证虚拟机和Windows主机是互通的，但是却无法被开发板访问，我们的开发板是没有无线网卡的，所以不能用WLAN，因此我们要想让开发板访问到虚拟机还得经过windows的以太网卡。</p>
+<p>那么我们虚拟机和windows主机是host only方式，所以我们无法用到以太网卡进行虚拟机和windows主机的交互。所以我们可以采取将host only网卡桥接到以太网卡，进入 网络-更改适配器-同时选中host only网卡和以太网卡，点击右键-选择桥接，如下图所示：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/14.png"></p>
+<p>这样我们的虚拟机的host only网卡就可以透过以太网卡和开发板交互了，效果如下：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/15.png"><br>开发板能够ping windows主机和虚拟机。</p>
+<h1><span id="4-gai-jin-he-you-hua">4 改进和优化</span><a href="#4-gai-jin-he-you-hua" class="header-anchor">#</a></h1><p>如果不想在windows下进行host only网卡和以太网卡桥接，也可直接把virtualbox的第2路网卡由原来的host only修改成以太网卡桥接模式，如下：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/16.png"></p>
+<p>这样需要配置虚拟机的enp0s8网卡和windows主机的以太网卡网段保持一致的。（和前面2.2操作一样）</p>
+<h2><span id="4-1-windows-ping-xu-ni-ji">4.1 windows ping 虚拟机</span><a href="#4-1-windows-ping-xu-ni-ji" class="header-anchor">#</a></h2><p><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/17.png"></p>
+<h2><span id="4-2-xu-ni-ji-ping-windows">4.2 虚拟机 ping windows</span><a href="#4-2-xu-ni-ji-ping-windows" class="header-anchor">#</a></h2><p><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/18.png"></p>
+<h2><span id="4-3-kai-fa-ban-ping-windows-he-xu-ni-ji">4.3 开发板 ping windows和虚拟机</span><a href="#4-3-kai-fa-ban-ping-windows-he-xu-ni-ji" class="header-anchor">#</a></h2><p><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/19.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/" data-id="cludpl6310000g8uf3y1sb5bj" data-title="virtualbox配置实现PC-虚拟机-开发板互ping" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-vmware双网卡-NAT-桥接" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/" class="article-date">
@@ -427,28 +523,75 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
     
     <div class="e-content article-entry" itemprop="articleBody">
       
-        <div class="tocStart"></div>
+        <div class="toc">
 
 <!-- toc -->
 
-<pre><code>+ [1)本机测试](#1-ben-ji-ce-shi)
-+ [2）开发板测试](#2-kai-fa-ban-ce-shi)
-</code></pre>
 <ul>
-<li><a href="#2-ftp-fu-wu">2 ftp服务</a></li>
+<li><a href="#1-an-zhuang-tftp-fu-wu-he-ke-hu-duan">1 安装tftp服务和客户端</a><ul>
+<li><a href="#1-1-pei-zhi">1.1 配置</a></li>
+<li><a href="#1-2-chuang-jian-tftp-gong-xiang-mu-lu">1.2 创建tftp共享目录</a></li>
+<li><a href="#1-3-ce-shi-yan-zheng-gong-neng">1.3 测试验证功能</a><ul>
+<li><a href="#1-3-1-ben-ji-ce-shi">1.3.1 本机测试</a></li>
+<li><a href="#1-3-2-kai-fa-ban-ce-shi">1.3.2 开发板测试</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-ftp-fu-wu">2 ftp服务</a><ul>
+<li><a href="#2-1-windows-ke-hu-duan">2.1 windows客户端</a></li>
+</ul>
+</li>
 </ul>
 <!-- tocstop -->
 
-<div class="tocEnd"></div>
+</div>
 
-<p>##1.安装tftp服务和客户端</p>
-<pre><code>sudo apt-get install xinetd tftp tftpd
+<h1><span id="1-an-zhuang-tftp-fu-wu-he-ke-hu-duan">1 安装tftp服务和客户端</span><a href="#1-an-zhuang-tftp-fu-wu-he-ke-hu-duan" class="header-anchor">#</a></h1><pre><code>sudo apt-get install xinetd tftp tftpd
 </code></pre>
-        
-          <p class="article-more-link">
-            <a href="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/#more">Read More</a>
-          </p>
-        
+<h2><span id="1-1-pei-zhi">1.1 配置</span><a href="#1-1-pei-zhi" class="header-anchor">#</a></h2><p>vim &#x2F;etc&#x2F;xinetd.d&#x2F;tftp<br>内容如下：</p>
+<pre><code>service tftp
+&#123;
+        socket_type     		= dgram
+        protocol                = udp
+        wait                    = yes
+        user                    = root
+        server          		= /usr/sbin/in.tftpd
+        server_args     		= -s /home/lyb/tftpshare/
+        disable         		= no
+        per_source      		=11
+        cps                     = 100 2
+        flags                   = IPv4
+&#125;
+</code></pre>
+<h2><span id="1-2-chuang-jian-tftp-gong-xiang-mu-lu">1.2 创建tftp共享目录</span><a href="#1-2-chuang-jian-tftp-gong-xiang-mu-lu" class="header-anchor">#</a></h2><pre><code>1.创建服务器目录
+mkdir /home/lyb/tftpshare/
+2.然后修改目录权限
+chmod 777 /home/lyb/tftpshare/
+3.重启xinetd服务
+sudo /etc/init.d/xinetd restart（如果启动失败先关闭防火墙 service iptables stop）
+</code></pre>
+<h2><span id="1-3-ce-shi-yan-zheng-gong-neng">1.3 测试验证功能</span><a href="#1-3-ce-shi-yan-zheng-gong-neng" class="header-anchor">#</a></h2><h3><span id="1-3-1-ben-ji-ce-shi">1.3.1 本机测试</span><a href="#1-3-1-ben-ji-ce-shi" class="header-anchor">#</a></h3><pre><code>重新启动一个终端，
+输入命令 tftp 192.168.1.11（我的虚拟机ip）进入tftp,
+输入get test,这样就可以获取到test文件,
+输入q退出tftp
+</code></pre>
+<p>如下图所示：<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1.png" alt="1"></p>
+<h3><span id="1-3-2-kai-fa-ban-ce-shi">1.3.2 开发板测试</span><a href="#1-3-2-kai-fa-ban-ce-shi" class="header-anchor">#</a></h3><p>2440开发板的uboot可以支持tftp下载功能，在uboot命令行输入：</p>
+<pre><code>tftp 0x30000000  uImage_4.3
+</code></pre>
+<p>如下图所示。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/2.png" alt="2"></p>
+<h1><span id="2-ftp-fu-wu">2 ftp服务</span><a href="#2-ftp-fu-wu" class="header-anchor">#</a></h1><pre><code>sudo apt install vsftpd
+vi /etc/vsftpd.conf
+
+local_enable=YES
+write_enable=YES
+sudo /etc/init.d/vsftpd restart
+</code></pre>
+<p><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/3.png" alt="3"></p>
+<h2><span id="2-1-windows-ke-hu-duan">2.1 windows客户端</span><a href="#2-1-windows-ke-hu-duan" class="header-anchor">#</a></h2><p><a target="_blank" rel="noopener" href="https://filezilla-project.org/">https://filezilla-project.org/</a></p>
+<p>新建站点，配置ftp协议, 主机输入ubuntu IP地址，用户密码信息，即可连接成功。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/4.png" alt="4"></p>
+
       
     </div>
     <footer class="article-footer">
@@ -511,6 +654,10 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
       <ul>
         
           <li>
+            <a href="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/">virtualbox配置实现PC-虚拟机-开发板互ping</a>
+          </li>
+        
+          <li>
             <a href="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/">vmware双网卡_NAT_桥接</a>
           </li>
         
@@ -524,10 +671,6 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
         
           <li>
             <a href="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/">linux搭建nfs服务</a>
-          </li>
-        
-          <li>
-            <a href="/2024/03/25/hello-world/">Hello World</a>
           </li>
         
       </ul>
