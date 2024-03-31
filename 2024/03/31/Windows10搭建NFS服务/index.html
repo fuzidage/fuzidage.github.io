@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Windows10搭建NFS服务 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 下载haneWIN NFS Server for Windows 2 安装并且执行 haneWIN NFS Server 2.1 修改配置文件 2.2 保存配置   3 让NFS服务通过防火墙 4 开发板客服端挂载测试 4.1 挂载共享目录到开发板 4.2 添加可写可执行权限 5 nfs配置文件      1 下载haneWIN NFS Server for Windows#链接如下">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Windows10搭建NFS服务">
+<meta property="og:url" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 下载haneWIN NFS Server for Windows 2 安装并且执行 haneWIN NFS Server 2.1 修改配置文件 2.2 保存配置   3 让NFS服务通过防火墙 4 开发板客服端挂载测试 4.1 挂载共享目录到开发板 4.2 添加可写可执行权限 5 nfs配置文件      1 下载haneWIN NFS Server for Windows#链接如下">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/1.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/2.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/3.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/4.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/5.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/6.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/7.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/8.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/9.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/10.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/11.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/12.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/13.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/14.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/15.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/16.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/17.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/18.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/19.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/20.png">
+<meta property="og:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/21.png">
+<meta property="article:published_time" content="2024-03-31T13:10:00.000Z">
+<meta property="article:modified_time" content="2024-03-31T13:23:28.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="linux嵌入式环境搭建">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-Windows10搭建NFS服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/" class="article-date">
+  <time class="dt-published" datetime="2024-03-31T13:10:00.000Z" itemprop="datePublished">2024-03-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      Windows10搭建NFS服务
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-xia-zai-hanewin-nfs-server-for-windows">1 下载haneWIN NFS Server for Windows</a></li>
+<li><a href="#2-an-zhuang-bing-qie-zhi-xing-hanewin-nfs-server">2 安装并且执行 haneWIN NFS Server</a><ul>
+<li><a href="#2-1-xiu-gai-pei-zhi-wen-jian">2.1 修改配置文件</a></li>
+<li><a href="#2-2-bao-cun-pei-zhi">2.2 保存配置</a></li>
+</ul>
+</li>
+<li><a href="#3-rang-nfs-fu-wu-tong-guo-fang-huo-qiang">3 让NFS服务通过防火墙</a></li>
+<li><a href="#4-kai-fa-ban-ke-fu-duan-gua-zai-ce-shi">4 开发板客服端挂载测试</a></li>
+<li><a href="#4-1-gua-zai-gong-xiang-mu-lu-dao-kai-fa-ban">4.1 挂载共享目录到开发板</a></li>
+<li><a href="#4-2-tian-jia-ke-xie-ke-zhi-xing-quan-xian">4.2 添加可写可执行权限</a></li>
+<li><a href="#5-nfs-pei-zhi-wen-jian">5 nfs配置文件</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-xia-zai-hanewin-nfs-server-for-windows">1 下载haneWIN NFS Server for Windows</span><a href="#1-xia-zai-hanewin-nfs-server-for-windows" class="header-anchor">#</a></h1><p>链接如下：<br><a target="_blank" rel="noopener" href="https://www.hanewin.net/nfs-e.htm">https://www.hanewin.net/nfs-e.htm</a><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/1.png" alt="image"></p>
+<h1><span id="2-an-zhuang-bing-qie-zhi-xing-hanewin-nfs-server">2 安装并且执行 haneWIN NFS Server</span><a href="#2-an-zhuang-bing-qie-zhi-xing-hanewin-nfs-server" class="header-anchor">#</a></h1><p>安装完后，打开hanWin如下：进入Edit-&gt;Preferences<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/2.png" alt="image"></p>
+<p>进入Exports-&gt;Edit exports file<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/3.png" alt="image"></p>
+<h2><span id="2-1-xiu-gai-pei-zhi-wen-jian">2.1 修改配置文件</span><a href="#2-1-xiu-gai-pei-zhi-wen-jian" class="header-anchor">#</a></h2><p><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/4.png" alt="image"><br>添加一行配置如下：<br><code>D:\ldc_res -name:nfs *(rw,sync,no_root_squash)</code><br>表示把D盘ldc_res目录当成nfs共享目录，-name:nfs表示客户端挂载时使用nfs表示D:\ldc_res路径<br><code>mount -t nfs -o nolock 192.168.0.100:/nfs /mnt/sd</code></p>
+<h2><span id="2-2-bao-cun-pei-zhi">2.2 保存配置</span><a href="#2-2-bao-cun-pei-zhi" class="header-anchor">#</a></h2><p>勾选如下2个选项：仅对授权用户可见，通过nfs将导出添加到文件夹的上下文菜单<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/5.png" alt="image"></p>
+<h1><span id="3-rang-nfs-fu-wu-tong-guo-fang-huo-qiang">3  让NFS服务通过防火墙</span><a href="#3-rang-nfs-fu-wu-tong-guo-fang-huo-qiang" class="header-anchor">#</a></h1><p>方法1：打开电脑防火墙设置，将专用网络和公用网络的防火墙禁用。<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/6.png" alt="image"><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/7.png" alt="image"></p>
+<p>方法2：设置防火墙入栈连接规则<br>查看haneWIN NFS server的端口映射：<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/8.png" alt="image"><br>可以看到haneWIN使用的端口如下：</p>
+<pre><code>TCP：111, 1058, 2049
+UDP：111, 1058, 2049
+</code></pre>
+<p>进入windows防火墙高级设置，设置入栈规则-&gt;新建规则：</p>
+<pre><code>规则类型选端口，
+协议选TCP, 规则应用于特定本地端口，输入刚才查看的映射端口号：111，1058， 2049
+操作选允许连接
+配置文件将域，专用，公用网络全部勾选
+最后设置好名称和描述
+</code></pre>
+<p><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/9.png" alt="image"><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/10.png" alt="image"><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/11.png" alt="image"><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/12.png" alt="image"><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/13.png" alt="image"><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/14.png" alt="image"></p>
+<h1><span id="4-kai-fa-ban-ke-fu-duan-gua-zai-ce-shi">4 开发板客服端挂载测试</span><a href="#4-kai-fa-ban-ke-fu-duan-gua-zai-ce-shi" class="header-anchor">#</a></h1><p><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/15.png" alt="image"></p>
+<p>设置板端IP地址：<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/16.png" alt="image"><br>先确保windows和板端能ping通<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/17.png" alt="image"></p>
+<h1><span id="4-1-gua-zai-gong-xiang-mu-lu-dao-kai-fa-ban">4.1 挂载共享目录到开发板</span><a href="#4-1-gua-zai-gong-xiang-mu-lu-dao-kai-fa-ban" class="header-anchor">#</a></h1><p><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/18.png" alt="image"></p>
+<p><code>mount -t nfs -o nolock 192.168.0.100:/nfs /mnt/sd</code><br>可以看到已经挂载上了，并且能访问挂载目录的文件</p>
+<h1><span id="4-2-tian-jia-ke-xie-ke-zhi-xing-quan-xian">4.2 添加可写可执行权限</span><a href="#4-2-tian-jia-ke-xie-ke-zhi-xing-quan-xian" class="header-anchor">#</a></h1><p>挂载上后发现没有可写权限，<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/19.png" alt="image"></p>
+<p>修改配置exports选项，添加-maproot:0 -public<br><code>D:\ldc_res -name:nfs -maproot:0 -public *(rw,sync,no_root_squash)</code><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/20.png" alt="image"></p>
+<p>可以可写可执行了：<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/21.png" alt="image"></p>
+<h1><span id="5-nfs-pei-zhi-wen-jian">5 nfs配置文件</span><a href="#5-nfs-pei-zhi-wen-jian" class="header-anchor">#</a></h1><pre><code>#
+# exports example
+#
+# please read doc for a list of all options
+# drive letters should be in upper case, because file-id returns upper case
+#   by default (option setting) they are mapped to lower case for clients
+# Option -range restricts access to specified address range
+#   a list of addresses restricts to these clients only
+# Option -readonly prohibits create/write/delete
+# Option -name:&lt;x&gt; makes folder for clients avalailable as /&lt;x&gt;
+# Option -maproot:&lt;uid&gt; maps unix root to specified &lt;uid&gt;
+#   without it uid root -&gt; uid NOBODY
+# Option -alldirs allows clients to mount folder or any subfolder
+# Use UNC path specification for access to remote drive
+# Hidden volumes without a drive letter can be mounted by volume GUID
+#
+C:\ftp -range 192.168.1.1 192.168.1.10
+C:\video -readonly 192.168.1.1 192.168.1.4 192.18.1.23
+C:\server -alldirs -name:server -maproot:0 -range 192.168.1.1 192.168.1.30
+\\router\FRITZ.NAS\SanDisk-U3CruzerMicro-00 -name:fritz
+\\?\Volume&#123;6afa3aa3-1b38-11e6-a140-0000fbaa0005&#125;\ -name:drive1
+D:\ldc_res -name:nfs -public -maproot:0 *(rw,sync,no_root_squash)
+E:\ -name:nfs_udisk -public -maproot:0 *(rw,sync,no_root_squash)
+</code></pre>
+<p>挂载：<br><code>mount -t nfs -o nolock 192.168.0.100:/nfs_udisk /mnt/</code></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/" data-id="clufjs1ik000034uf2cym86j5" data-title="Windows10搭建NFS服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">virtualbox配置实现PC-虚拟机-开发板互ping</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 10px;">linux嵌入式环境搭建</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/">Windows10搭建NFS服务</a>
+          </li>
+        
+          <li>
+            <a href="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/">virtualbox配置实现PC-虚拟机-开发板互ping</a>
+          </li>
+        
+          <li>
+            <a href="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/">vmware双网卡_NAT_桥接</a>
+          </li>
+        
+          <li>
+            <a href="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/">gdb移植到arm开发板</a>
+          </li>
+        
+          <li>
+            <a href="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/">linux搭建samba服务</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
