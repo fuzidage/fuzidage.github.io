@@ -69,6 +69,409 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-mipi-csi软件篇" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/" class="article-date">
+  <time class="dt-published" datetime="2024-04-02T09:20:23.000Z" itemprop="datePublished">2024-04-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/">mipi-csi软件篇</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-mipi-csi2-de-fa-song-he-jie-shou">1 MIPI CSI2的发送和接收</a></li>
+<li><a href="#2-d-phy-dsi-he-csi-de-wu-li-ceng-ding-yi">2 D-PHY(DSI和CSI的物理层定义)</a><ul>
+<li><a href="#2-1-chuan-shu-mo-shi">2.1 传输模式</a></li>
+<li><a href="#2-2-lane-states">2.2 lane states</a></li>
+<li><a href="#2-3-lane-levels">2.3 Lane Levels</a></li>
+<li><a href="#2-4-cao-zuo-mo-shi">2.4 操作模式</a></li>
+<li><a href="#2-5-shi-zhong-mo-shi">2.5 时钟模式</a></li>
+<li><a href="#2-6-shi-xu-yao-qiu">2.6 时序要求</a></li>
+<li><a href="#2-7-start-of-transmission-sot-guo-cheng">2.7 Start-of-Transmission ( SoT )过程</a></li>
+<li><a href="#2-8-end-of-transmission-eot-guo-cheng">2.8 End-of-Transmission ( EoT )过程</a></li>
+</ul>
+</li>
+<li><a href="#3-csi-2-shu-ju-bao-xie-yi">3 CSI-2数据包协议</a><ul>
+<li><a href="#3-1-yi-ge-shu-ju-bao-jie-gou">3.1 一个数据包结构</a></li>
+<li><a href="#3-2-bao-lei-xing">3.2 包类型</a><ul>
+<li><a href="#3-2-1-duan-bao-jie-gou">3.2.1 短包结构</a></li>
+<li><a href="#3-2-2-pack-footer-pf-de-jie-gou">3.2.2 pack footer(PF)的结构</a></li>
+<li><a href="#3-2-3-chang-bao-jie-gou">3.2.3 长包结构</a></li>
+<li><a href="#3-2-4-h-blanking-v-blanking">3.2.4 H-blanking &amp; V-blanking</a></li>
+<li><a href="#3-2-5-mipi-zheng-shu-ju-lei-xing-di">3.2.5 MIPI帧数据类型DI</a><ul>
+<li><a href="#3-2-5-1-vc-virtual-channel">3.2.5.1 VC(virtual channel)</a></li>
+<li><a href="#3-2-5-2-dt-data-type">3.2.5.2 DT(data type)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#4-mipi-zhi-chi-de-tu-xiang-ge-shi">4 mipi支持的图像格式</a><ul>
+<li><a href="#4-1-rgb-ge-shi">4.1 RGB格式</a></li>
+<li><a href="#4-2-yuv-ge-shi">4.2 YUV格式</a><ul>
+<li><a href="#4-2-1-yuv-cai-yang-mo-shi-subsamping">4.2.1 YUV采样模式(subsamping)</a><ul>
+<li><a href="#4-2-1-1-yuv444-cai-yang">4.2.1.1 YUV444采样</a></li>
+<li><a href="#4-2-1-2-yuv422-cai-yang">4.2.1.2 YUV422采样</a></li>
+<li><a href="#4-2-1-3-yuv420-cai-yang">4.2.1.3 YUV420采样</a></li>
+</ul>
+</li>
+<li><a href="#4-2-2-yuv-cun-chu-fang-shi">4.2.2 YUV存储方式</a><ul>
+<li><a href="#4-2-2-1-planner-cun-chu">4.2.2.1 planner存储</a><ul>
+<li><a href="#4-2-2-1-1-yuv420-planner">4.2.2.1.1 yuv420 planner</a></li>
+<li><a href="#4-2-2-1-2-yuv420sp">4.2.2.1.2 yuv420sp</a></li>
+<li><a href="#4-2-2-1-3-yuv422-planner">4.2.2.1.3 yuv422 planner</a></li>
+<li><a href="#4-2-2-1-4-yuv422sp">4.2.2.1.4 yuv422sp</a></li>
+</ul>
+</li>
+<li><a href="#4-2-2-2-packed-cun-chu">4.2.2.2 packed存储</a><ul>
+<li><a href="#4-2-2-2-1-yuyv">4.2.2.2.1 yuyv</a></li>
+<li><a href="#4-2-2-2-2-yvyu">4.2.2.2.2 yvyu</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#4-3-raw-ge-shi">4.3 RAW 格式</a><ul>
+<li><a href="#4-3-1-bayer-zhen-lie">4.3.1 bayer阵列</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#5-mipi-csi-shu-ju-bao-chuan-shu">5 mipi csi数据包传输</a></li>
+<li><a href="#6-se-cai-shen-du">6 色彩深度</a></li>
+<li><a href="#7-tu-xiang-jie-xi-du-fen-bian-lu">7 图像解析度&#x2F;分辨率</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-mipi-csi2-de-fa-song-he-jie-shou">1 MIPI CSI2的发送和接收</span><a href="#1-mipi-csi2-de-fa-song-he-jie-shou" class="header-anchor">#</a></h1><p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/1.png" alt="img"></p>
+<p>上图反映了sensor 和 soc 的数据关系，soc 通过 CCI (Camera Control Interface) 控制 sensor 寄存器，配置正确，sensor 将会通过 mipi 接口输出图像数据。</p>
+<p>控制信息是 soc 通过 CCI 发送到 sensor，CCI 接口一般的就是 I2C 接口,最大支持400KHz。</p>
+<p>data信息是CSI DPHY发送者发送到CSI DPHY接收者，由sensor端发送到soc的mipi-rx。</p>
+<h1><span id="2-d-phy-dsi-he-csi-de-wu-li-ceng-ding-yi">2 D-PHY(DSI和CSI的物理层定义)</span><a href="#2-d-phy-dsi-he-csi-de-wu-li-ceng-ding-yi" class="header-anchor">#</a></h1><p>D-PHY 是 MIPI 聯盟發布的高速物理層標準，規定了接口層的物理特性和傳輸協議。 DPHY 採用了 200mV 源同步的低压差分信號技術，每個 Lane 的數據綠率範圍支持到2500Mbps。 D-PHY 可以工作在低功耗 (Low Power, LP) 和高速 (High Speed, HS) 兩種模式下。</p>
+<h2><span id="2-1-chuan-shu-mo-shi">2.1 传输模式</span><a href="#2-1-chuan-shu-mo-shi" class="header-anchor">#</a></h2><p><strong>LP（Low-Power） 模式</strong>：用于传输控制信号，最高速率 10 MHz</p>
+<p><strong>HS（High-Speed）模</strong>式：用于高速传输数据，速率范围 [80 Mbps， 2.5Gbps] per Lane</p>
+<p>传输的最小单元为 1 个字节，采用小端的方式，也就是 LSB first，MSB last。</p>
+<p><strong>相关缩写名</strong>词：</p>
+<p>HS-RX：高速接收器<br>HS-TX：高速发送器<br>LP-RX：低功耗接收器<br>LP-TX：低功耗发送器<br>LPS:  Low Power State, 封包之間的spacing間距。<br>ST:    Start of Transmission (SoT), 封包的起始訊號, 一般為低速轉換為高速的暫態訊號。<br>ET:    End of Transmission (EoT), 封包的結束訊號, 一般為高速轉換為低速的暫態訊號。<br>PH:   Packet Header, 32 bit表示, 為封包的標頭。<br>PF:    Packet Footer, 16 bit表示, 為封包的結尾。</p>
+<h2><span id="2-2-lane-states">2.2 lane states</span><a href="#2-2-lane-states" class="header-anchor">#</a></h2><p>*  LP mode 有 4 种状态： LP00、LP01（<strong>0</strong>）、LP10（<strong>1</strong>）、LP11 （Dp、Dn）</p>
+<p>* HS mode 有 2 种状态： HS-0、HS-1</p>
+<p>HS 发送器发送的数据 LP 接收器看到的都是 LP00。</p>
+<h2><span id="2-3-lane-levels">2.3 Lane Levels</span><a href="#2-3-lane-levels" class="header-anchor">#</a></h2><p>* LP： 0 ~ 1.2V</p>
+<p>* HS： 100 ~ 300mV，HS common level &#x3D; 200mV，swing &#x3D; 200 mv</p>
+<h2><span id="2-4-cao-zuo-mo-shi">2.4 操作模式</span><a href="#2-4-cao-zuo-mo-shi" class="header-anchor">#</a></h2><p> • 数据Lane的3种操作模式 </p>
+<ul>
+<li><p>Escape mode,</p>
+</li>
+<li><p>High-Speed(Burst) mode</p>
+</li>
+<li><p>Control mode</p>
+<p><strong>①Escape mode request</strong><br> LP-11→LP-10→LP-00→LP-01→LP-00<br> exit:LP-10 -&gt; LP-11</p>
+</li>
+</ul>
+<p>当进入 Escape mode 需要发送 8-bit entry command 表明请求的动作，比如要进行低速数据传输则需要发送 cmd： 0x87，进入超低功耗模式则发送 cmd： 0x78。</p>
+<p>  <strong>②High-Speed mode request :</strong><br>    LP-11→LP-01→LP-00-&gt;SOT(0001_1101)<br>    exit: EOT -&gt; LP-11</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/2.png" alt="img"></p>
+<p><strong>③Turnaround request</strong><br>    LP-11→LP-10→LP-00→LP-10→LP-00</p>
+<p>这是开启 BTA 的时序，一般用于从 slave 返回数据如 ACK： 0x84.<br>    exit：LP00→LP10→LP11</p>
+<p> 最常用的就是“低功耗进入高速模式”如下图：</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/3.png" alt="img"></p>
+<p>我们的D0-D4都是一个差分信号，它从lowpower state进入到HS后，从hi speed mode 中sync出我们的data。</p>
+<p>sensor控制的信号由绿色框圈出来，主要是以下三个讯号：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">HS-Prepare：表示从low power mode进入到hi speed mode需要prepare一段时间</span><br><span class="line">Hs-zero: 表示从low power mode进入到hi speed mode需要keep LP-00状态一段时间</span><br><span class="line">Hs-trail:表示送完1 st data后需要keep一段时间后才允许进入low power mode，进行下一轮数据传输。</span><br></pre></td></tr></table></figure>
+
+<p>soc端的控制的信号由黄色框圈出来:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Hs-settle:表示soc要等一段时间才去开始去parse “sync code”, 当抓到sync code后表示sensor已经进入了hi speed mode， 这个时候就可以sync data了。</span><br></pre></td></tr></table></figure>
+
+<p>注意：</p>
+<p>1.每次EOT(end of trans)结束讯号后，都会进入low power mode，而不是sensor 工作后就一直处于hi speed mode。也就是每传一个package，都会走一遍上述的过程。</p>
+<p>2.hs-settle为mclk&#x2F;8 *n(这个n表示配置几个clk，对应code的话配置这个mipi_dev_attr_s-&gt;dphy)</p>
+<p>当hs-settle的时间太长会压到data中的“sync code”,那么就会出现sync code parse不到,出现ecc err. 又或者从data中parse到一个假的“sync code”，那么最后就会出现数据不太对，出现ecc err.</p>
+<p>Ecc还有一种出现可能就是lane mapping 出错，当我们传输数据出现ecc err, 有可能就是传输short pack时，4 byte的short pack拼接的不对（详见CSI的数据包结构），导致出现ecc error.</p>
+<p>3.如果hs-trail持续的太短（拉高的太快），有可能会压到最后面的data，所以会出现crc&#x2F;wc(word count ) err.另外，如果hs -settle太大，也有可能hs-trail也会是错误的数据，所以出现wc, crc err，因此不一定是hs-trail的问题，得先确保前面的ecc&#x2F;decode无误后再来调整hs-trail。</p>
+<p>一般排查流程如下：</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/4.png" alt="img"></p>
+<h2><span id="2-5-shi-zhong-mo-shi">2.5 时钟模式</span><a href="#2-5-shi-zhong-mo-shi" class="header-anchor">#</a></h2><ul>
+<li>连续时钟模式：数据包传输间隔，clk lane 保持在高速模式；</li>
+<li>非连续时钟模式：数据包传输间隔，clk lane 进入 LP-11 状态，退出hi speed mode；</li>
+</ul>
+<h2><span id="2-6-shi-xu-yao-qiu">2.6 时序要求</span><a href="#2-6-shi-xu-yao-qiu" class="header-anchor">#</a></h2><p>在调试 DSI 或者 CSI 的时候， HS mode 下的几个时序非常重要：T_LPX，T_HS-SETTLE ≈ T_HS-PREPARE + T_HS-ZERO，T_HS-TRAIL，一般遵循的原则为：Host 端的 T_HS-SETTLE &gt; Slave 端的 T_HS-SETTLE。</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/5.png" alt="img"></p>
+<h2><span id="2-7-start-of-transmission-sot-guo-cheng">2.7 Start-of-Transmission ( SoT )过程</span><a href="#2-7-start-of-transmission-sot-guo-cheng" class="header-anchor">#</a></h2><p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/6.png" alt="img"></p>
+<p>当要进行数据传输的时候，data lane 将会通过信号（SoT）退出停止状态，进入高速模式。过程如下：</p>
+<table>
+<thead>
+<tr>
+<th><strong>TX Side</strong></th>
+<th><strong>RX Side</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>退出停止状态 ( LP-11 )</td>
+<td>检测停止状态</td>
+</tr>
+<tr>
+<td>进入 HS-Rqst 状态 ( LP-01 )，并处于该状态的时间间隔为 TLPX</td>
+<td>检测到 lane 从 LP-11 转变为 LP-01</td>
+</tr>
+<tr>
+<td>进入 Bridge 状态 ( LP-00 )，并处于该状态的时间间隔为 THS-PREPARE</td>
+<td>检测到 lane 从 LP-01 转变为 LP-00，间隔 TD-TERM-EN 时间之后将使能传输</td>
+</tr>
+<tr>
+<td>同时退出低功耗模式，进入高速模式</td>
+<td></td>
+</tr>
+<tr>
+<td>处于 HS-0 状态，时长为 THS-ZERO</td>
+<td>使能 HS-RX 并等待 THS-SETTLE，以忽略转换状态</td>
+</tr>
+<tr>
+<td></td>
+<td>开始从数据流中等待同步序列</td>
+</tr>
+<tr>
+<td>时钟上升边缘插入 HS 同步序列 ‘00011101’</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>识别到同步序列 ‘00011101’</td>
+</tr>
+<tr>
+<td>高速模式开始传输有效数据</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td>接收到有效数据</td>
+</tr>
+</tbody></table>
+<h2><span id="2-8-end-of-transmission-eot-guo-cheng">2.8 End-of-Transmission ( EoT )过程</span><a href="#2-8-end-of-transmission-eot-guo-cheng" class="header-anchor">#</a></h2><p>在数据完成传输时，通过结束传输（EoT）过程，数据通道退出高速模式并进入停止状态，这个过程状态变化如下：</p>
+<table>
+<thead>
+<tr>
+<th><strong>TX Side</strong></th>
+<th><strong>RX Side</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>传输数据</td>
+<td>接收到数据</td>
+</tr>
+<tr>
+<td>在完成最后一个字节数据的传输之后，保持该状态的时间间隔为 THS-TRAIL</td>
+<td></td>
+</tr>
+<tr>
+<td>关闭 HS-TX，启用 LP-TX，并在 THS-EXIT一段时间内处于停止状态 ( LP-11 )</td>
+<td>检测到 lane 状态进入停止状态 ( LP-11 )，关闭传输功能</td>
+</tr>
+<tr>
+<td></td>
+<td>忽略 THS-SKIP一段时间内的 lane 变化，以忽略转换状态</td>
+</tr>
+<tr>
+<td></td>
+<td>检测有效数据的最后一次转换，确定最后一次有效数据并忽略包尾序列</td>
+</tr>
+</tbody></table>
+<p>接收器是如何判断数据将要开始传输了呢？</p>
+<p>当出现LP11→LP01→LP00时，接收器将会判断，将会有数据达到，同时，使用示波器查看mipi波形，将会发现在PL00（THS-PREPARE）时会有一个小脉冲（峰刺），一般的，在这个小脉冲之后，接收器将会打开比较器（由于在THS-PREPARE会有这个小脉冲的存在，所以在接收器中，会通过设置接收器的settle time，避开这个小脉冲，在这个脉冲之后再打开比较器），准备接收数据。而HS-00011101则表示有效数据开始，同时数据的开头，将会有数据表明将要数据的数据量，所以mipi接收器将会按其数据量接收，直到接收完成。<br>每根 lane（data lane&#x2F;clk lane）从 LP 模式切换到 HS 模式都会有 LP11→LP01→LP00 这样的一个时序，同时还要检查 HS-00011101 ，HS-00011101 主要是用于同步，只有前面正确采集到 00011101 ，才能保证 clk 和 data 相位一一对应。</p>
+<p><strong>mipi csi调试助手：</strong><br>测量 sensor 有相应的 mipi 信号输出，但是主控并没有接收到数据，通过查看主控的 mipi 寄存器发现，mipi接收器还处于 LP 模式，这种情况一般是mipi没有检测到sensor发送的从 LP 进入 HS 的时序。此时可测量sensor 开始输出图像数据时，clk lane 是否有 LP11→LP01→LP00 这样的一个时序。同时，应该先开 mipi，sensor 再开始 mipi 数据传输；<br>由于THS-PREPARE会有一个小脉冲的存在，所以，主控在接收mipi数据的时候，需要通过设置主控的settle time，这个时间需要在这个小脉冲之后，这样接收才不会有问题；<br>当出现 sensor 有数据输出，但是主控没有接收成功，这个情况一般是 mipi 的时序问题，sensor 端的时序没有和主控端的配合好，这个时候，可以尝试的减小sensor端的THS-PREPARE，增大THS-ZERO和THS-TRAIL；<br>由于一些主控的需求，在一帧数据完成之后，需要一定的时间才可以进行相应的ISP处理，当一帧传输完毕之后的LP11时间达不到主控ISP的时间要求导致ISP报错，可通过调节THS-TRAIL时间，以此得到ISP对帧间的时序长度要求 。</p>
+<h1><span id="3-csi-2-shu-ju-bao-xie-yi">3 CSI-2数据包协议</span><a href="#3-csi-2-shu-ju-bao-xie-yi" class="header-anchor">#</a></h1><p>CSI-2 是針對攝像頭的數據協議， 規定了主機與外設通信的數據包格式。CSI-2 可以支持不同像素格式的圖像應用， 數據傳輸的最小粒度是字節。 為增加 CSI-2 的性能，可以選擇數據 Lane 的數量， CSI-2 協議規訂了發送端將像素數據打包成字節的機制， 並指明多個數據 Lane 分配和管理的方式。字節數據以數據包的形式組織，數據包在SoT 與 EoT 之間傳輸。 接收端根據協議解析相應的數據包， 恢復出原始的像素數據。</p>
+<p>CSI-2 的數據包分為長包和短包兩種，包含有校驗碼，能進行誤碼糾正和錯誤檢測。長包和短包都是在 SoT 和 EoT 之間傳輸，在數據傳送的間隙， D-PHY 處於 LP 模式。 CSI-2數據包的傳輸機制如圖所示。 PH 和 PF 分別表示 Packet Header 和 Packet Footer。</p>
+<h2><span id="3-1-yi-ge-shu-ju-bao-jie-gou">3.1 一个数据包结构</span><a href="#3-1-yi-ge-shu-ju-bao-jie-gou" class="header-anchor">#</a></h2><p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/7.png" alt="img"></p>
+<h2><span id="3-2-bao-lei-xing">3.2 包类型</span><a href="#3-2-bao-lei-xing" class="header-anchor">#</a></h2><p>• 短包：4 bytes (固定)<br>• 长包：6~65541 bytes (可变) </p>
+<h3><span id="3-2-1-duan-bao-jie-gou">3.2.1 短包结构</span><a href="#3-2-1-duan-bao-jie-gou" class="header-anchor">#</a></h3><p><strong>一个short packet（也叫做pack head(PH)）</strong></p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/8.png" alt="img"></p>
+<p>包结构（4个字节）：<br>    • 数据标识(DI) 1个字节<br>    • WC （长度固定为2个字节）<br>    • 错误检测(ECC) 1个字节</p>
+<p>包大小：<br>    • 长度固定为4个字节</p>
+<h3><span id="3-2-2-pack-footer-pf-de-jie-gou">3.2.2 pack footer(PF)的结构</span><a href="#3-2-2-pack-footer-pf-de-jie-gou" class="header-anchor">#</a></h3><p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/9.png" alt="img"></p>
+<h3><span id="3-2-3-chang-bao-jie-gou">3.2.3 长包结构</span><a href="#3-2-3-chang-bao-jie-gou" class="header-anchor">#</a></h3><p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/10.png" alt="img"></p>
+<p>包头部（4个字节）（PH）：<br>• 　　数据标识(DI) 1个字节<br>• 　　数据计数WC (2个字节 )（PH和PF之間的資料個數）<br>• 　　错误检测(ECC) 1个字节<br>•　    数据填充(0~65535 字节)<br>•       长度&#x3D;WC*字节</p>
+<p>包尾：校验和（2个字节）(PF)</p>
+<p>长包 &#x3D; 短包（包头） + 数据 + 包尾 </p>
+<p>包大小：<br>    4 + (0~65535) + 2 &#x3D; 6 ~ 65541 字节</p>
+<h3><span id="3-2-4-h-blanking-amp-v-blanking">3.2.4 H-blanking &amp; V-blanking</span><a href="#3-2-4-h-blanking-amp-v-blanking" class="header-anchor">#</a></h3><p>传输多个pack和传输一个pack时对应的图像如下, VVALID&#x2F;HVALID&#x2F;DVALID可以先把它想成是影像的同步訊號VSync&#x2F;HSync&#x2F;DE，而Data就是影像資料，以方便理解。</p>
+<p>从图中可以看到，当水平同步讯号HVALID为Low的这段区间，剛好就是每行的Blanking间隔, 也就是H-blanking。</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/11.png" alt="img"></p>
+<p>从下图可以看到上一FE到下一FS之间的间隔为V-blanking.</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/12.png" alt="img"></p>
+<p>frame的封包示意图：</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/13.png" alt="img"></p>
+<h3><span id="3-2-5-mipi-zheng-shu-ju-lei-xing-di">3.2.5 MIPI帧数据类型DI</span><a href="#3-2-5-mipi-zheng-shu-ju-lei-xing-di" class="header-anchor">#</a></h3><p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/14.png" alt="img"></p>
+<p> Data Identifier (DI) 为虚拟通道(VC, 2 bit)和资料类型(DT, 6 bit)组成。</p>
+<h4><span id="3-2-5-1-vc-virtual-channel">3.2.5.1 VC(virtual channel)</span><a href="#3-2-5-1-vc-virtual-channel" class="header-anchor">#</a></h4><p>可以看出MIPI最多可以輸入4组影像来源，其ID为0~3，且內容可以是任意的內容，下图就表示用virtual chn来传输不同格式的数据。比如一般Sony, OV的HDR 模式基本都是VC mode，包括2帧HDR, 3帧HDR。</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/15.png" alt="img"></p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/16.png" alt="img"></p>
+<h4><span id="3-2-5-2-dt-data-type">3.2.5.2 DT(data type)</span><a href="#3-2-5-2-dt-data-type" class="header-anchor">#</a></h4><p>Data Type目前定义多种资料形态，范围从0x00<del>0x3F，其中0x00</del>0x0F为短封包类型，0x10~0x3F为長封包类型，如下表：</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/17.png" alt="img"></p>
+<p>用于同步的短包Data Type:</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/18.png" alt="img"></p>
+<p>从<strong>soc到外设</strong>发送的包类型:</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/19.png" alt="img"></p>
+<p>从<strong>外设到soc</strong>的数据包类型:</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/20.png" alt="img"></p>
+<h1><span id="4-mipi-zhi-chi-de-tu-xiang-ge-shi">4 mipi支持的图像格式</span><a href="#4-mipi-zhi-chi-de-tu-xiang-ge-shi" class="header-anchor">#</a></h1><p>MIPI CSI 共支持五種pixel資料格式的傳輸， 包含 YUV422-8bit、 YUV422-10bit、 RAW8、RAW10 和 RAW12。</p>
+<h2><span id="4-1-rgb-ge-shi">4.1 RGB格式</span><a href="#4-1-rgb-ge-shi" class="header-anchor">#</a></h2><p>传统的红绿蓝格式，比如RGB565，RGB888，其16-bit数据格式为5-bit R + 6-bit G + 5-bit B。G多一位，原因是人眼对绿色比较敏感。</p>
+<table>
+<thead>
+<tr>
+<th>格式</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RGB565</td>
+<td>1. 每个像素用16位表示，RGB分量分别使用5位、6位、5位。2. 内存中排列（高字节-&gt;低字节）：R R R R R G G G G G G B B B B B</td>
+</tr>
+<tr>
+<td>RGB555</td>
+<td>1. 每个像素用16位表示，RGB分量都使用5位（剩下1位不用）2. 内存中排列（高字节-&gt;低字节）：X R R R R G G G G G B B B B B（X表示不用，可以忽略）</td>
+</tr>
+<tr>
+<td>RGB24（RGB888）</td>
+<td>1. 每个像素用24位表示，RGB分量各使用8位。在内存中RGB各分量的排列顺序为：BGR BGR BGR ……2. 内存中排列（高字节-&gt;低字节）：B B B B B B B B G G G G G G G G R R R R R R R R</td>
+</tr>
+<tr>
+<td>ARGB32（ARGB8888）</td>
+<td>1. 每个像素用32位表示，RGB分量各使用8位（剩下的8位用于表示Alpha通道值）2. 内存中排列（高字节-&gt;低字节）：B B B B B B B B G G G G G G G G R R R R R R R R A A A A A A A A</td>
+</tr>
+</tbody></table>
+<h2><span id="4-2-yuv-ge-shi">4.2 YUV格式</span><a href="#4-2-yuv-ge-shi" class="header-anchor">#</a></h2><p>YUV是一种色彩编码方法，是一种彩色编码系统，相对于RGB色彩空间，YUV传输带宽占用更低，传输数据不易出错。</p>
+<p>Y’UV、YUV、YCbCr、YPbPr 几个概念其实是一回事儿。由于历史关系，Y’UV、YUV 主要是用在彩色电视中，用于模拟信号表示。YCbCr 是用在数字视频、图像的压缩和传输，如 MPEG、JPEG。今天大家所讲的 YUV 其实就是指 YCbCr。Y 表示亮度（luma），CbCr 表示色度（chroma）。</p>
+<p>人眼的视觉特点是对亮度更敏感，对位置、色彩相对来说不敏感。所以在视频编码系统中为了降低带宽，可以保存更多的亮度信息(luma)，保存较少的色差信息(chroma)。</p>
+<p>luminance 亮度，luma 是在视频编码系统中指亮度值；</p>
+<p>chrominance 色度，chroma 是在视频编码系统中指色度值。</p>
+<p>Y’UV 设计的初衷是为了使彩色电视能够兼容黑白电视。对于黑白电视信号，没有色度信息也就是(UV)，那么在彩色电视显示的时候只显示亮度信息。</p>
+<p>YUV是一个比较笼统地说法，针对它的具体排列方式，可以分为很多种具体的格式。色度(UV)定义了颜色的两个方面─色调与饱和度，分别用CB和CR表示。其中，Cr反映了RGB输入信号红色部分与RGB信号亮度值之间的差异。而Cb反映的是RGB输入信号蓝色部分与RGB信号亮度值之间的差异。</p>
+<h3><span id="4-2-1-yuv-cai-yang-mo-shi-subsamping">4.2.1 YUV采样模式(subsamping)</span><a href="#4-2-1-yuv-cai-yang-mo-shi-subsamping" class="header-anchor">#</a></h3><p>原则：在数字图像中<br>    1) 每一个图形像素都要包含 luma（亮度）值；<br>    2）几个图形像素共用一个 Cb + Cr 值，一般是 2、4、8 个像素。</p>
+<p>主要的采样格式有YCbCr 4:2:0、YCbCr 4:2:2、YCbCr 4:1:1和 YCbCr 4:4:4。</p>
+<h4><span id="4-2-1-1-yuv444-cai-yang">4.2.1.1 YUV444采样</span><a href="#4-2-1-1-yuv444-cai-yang" class="header-anchor">#</a></h4><p>全采样，对每个像素点的的YUV分量都进行采样，这样的三个分量信息量完整。<br>假设4*4像素，采样格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[y u v] [y u v] [y u v] [y u v]</span><br><span class="line">[y u v] [y u v] [y u v] [y u v]</span><br><span class="line">[y u v] [y u v] [y u v] [y u v]</span><br><span class="line">[y u v] [y u v] [y u v] [y u v]</span><br></pre></td></tr></table></figure>
+<p>那么1920<em>1080文件的大小：1920</em>1080*3（B），那么一个像素对应3个字节。</p>
+<h4><span id="4-2-1-2-yuv422-cai-yang">4.2.1.2 YUV422采样</span><a href="#4-2-1-2-yuv422-cai-yang" class="header-anchor">#</a></h4><p>部分采样，可节省1&#x2F;3存储空间和1&#x2F;3的数据传输量。UV分量是Y分量采样的一半，Y分量和UV 分量按照2 : 1的比例采样。如果水平方向有10个像素点，那么采样了10个Y分量，而只采样了5个UV分量。其中，每采样过一个像素点，都会采样其Y分量，而U、V分量就会间隔一个采集一个。<br>假设4*4像素，采样格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[y u] [y v] [y u] [y v]</span><br><span class="line">[y v] [y u] [y v] [y u]</span><br><span class="line">[y u] [y v] [y u] [y v]</span><br><span class="line">[y v] [y u] [y v] [y u]</span><br></pre></td></tr></table></figure>
+<p>1920<em>1080文件的大小：1920</em>1080+1920<em>1080</em>0.5+1920<em>1080</em>0.5（B），那么UV的数量减少了一半，相对于YUV444空间节省了1&#x2F;3。</p>
+<h4><span id="4-2-1-3-yuv420-cai-yang">4.2.1.3 YUV420采样</span><a href="#4-2-1-3-yuv420-cai-yang" class="header-anchor">#</a></h4><p>部分采样，可节省1&#x2F;2存储空间和1&#x2F;2的数据传输量。YUV 420采样，并不是指只采样U分量而不采样V分量。而是指，在每一行扫描时，只扫描一种色度分量（U或者V）和Y分量按照2 : 1的方式采样。比如，第一行扫描时，YU 按照 2 : 1的方式采样，那么第二行扫描时，YV分量按照 2:1的方式采样。对于每个色度分量来说，它的水平方向和竖直方向的采样和Y分量相比都是2:1 。其实yuv420的取名方式不是很高明，更确切的命名为yuv420yuv402，也就是第一行只有U，而第二行只有V。<br>假设4*4像素，采样格式如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[y u] [y] [y u] [y]</span><br><span class="line">[y v] [y] [y v] [y]</span><br><span class="line">[y u] [y] [y u] [y]</span><br><span class="line">[y v] [y] [y v] [y]</span><br></pre></td></tr></table></figure>
+
+<p>1920<em>1080文件的大小：1920</em>1080+1920<em>1080</em>0.25+1920<em>1080</em>0.25（B）相对于YUV444空间节省1&#x2F;2，因此也是比较主流的采样方式。</p>
+<h3><span id="4-2-2-yuv-cun-chu-fang-shi">4.2.2 YUV存储方式</span><a href="#4-2-2-yuv-cun-chu-fang-shi" class="header-anchor">#</a></h3><p>YUV的格式有两大类：<strong>planar（平面格式）和packed（打包格式）</strong>。</p>
+<h4><span id="4-2-2-1-planner-cun-chu">4.2.2.1 planner存储</span><a href="#4-2-2-1-planner-cun-chu" class="header-anchor">#</a></h4><p>对于planar的YUV格式，先连续存储所有像素点的Y，紧接着存储所有像素点的U，随后是所有像素点的V。</p>
+<p>一般默认是3个平面，即y平面，u平面，v平面。但还有一种semi-planar是两个平面。也就是说uv为同一个平面，即一个y平面，一个uv平面。</p>
+<h5><span id="4-2-2-1-1-yuv420-planner">4.2.2.1.1 yuv420 planner</span><a href="#4-2-2-1-1-yuv420-planner" class="header-anchor">#</a></h5><p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/21.png" alt="img"></p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/22.png" alt="img"></p>
+<p>例如：</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/23.png" alt="img"></p>
+<p>可以看到第一行的Y1Y2和第二行的Y7Y8共同使用一组U1V1。</p>
+<h5><span id="4-2-2-1-2-yuv420sp">4.2.2.1.2 yuv420sp</span><a href="#4-2-2-1-2-yuv420sp" class="header-anchor">#</a></h5><p> two-planer双平面，Y一个平面，UV在同一个平面交叉存储。也叫做semi-planar的YUV格式。</p>
+<ol>
+<li><p>nv12</p>
+<p>先存储全部的Y分量，然后UV分量交叉存储。</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/24.png" alt="img"></p>
+</li>
+<li><p>nv21</p>
+<p>先UV分量交叉存储, 然后存储全部的Y分量。</p>
+</li>
+</ol>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/25.png" alt="img"></p>
+<h5><span id="4-2-2-1-3-yuv422-planner">4.2.2.1.3 yuv422 planner</span><a href="#4-2-2-1-3-yuv422-planner" class="header-anchor">#</a></h5><p>3平面，数据量：u&#x3D;v&#x3D;y&#x2F;2，不画图展示</p>
+<h5><span id="4-2-2-1-4-yuv422sp">4.2.2.1.4 yuv422sp</span><a href="#4-2-2-1-4-yuv422sp" class="header-anchor">#</a></h5><p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/26.png" alt="img"></p>
+<p>可以看到y0y82个像素公用一组u0v0。</p>
+<h4><span id="4-2-2-2-packed-cun-chu">4.2.2.2 packed存储</span><a href="#4-2-2-2-packed-cun-chu" class="header-anchor">#</a></h4><p>packed的YUV格式，每个像素点的Y、U、V都是连续交叉存储的。</p>
+<h5><span id="4-2-2-2-1-yuyv">4.2.2.2.1 yuyv</span><a href="#4-2-2-2-1-yuyv" class="header-anchor">#</a></h5><p>该格式属于4：2：2类型，且是用packed形式存储的，相邻的2个像素共用一个Cb(U)和Cr(V)，以16个像素为例如下图：</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/27.png" alt="img"></p>
+<h5><span id="4-2-2-2-2-yvyu">4.2.2.2.2 yvyu</span><a href="#4-2-2-2-2-yvyu" class="header-anchor">#</a></h5><p>与YUYV相似，只是存储时UV分量顺序不同而已。</p>
+<p>4.2.2.2.2 uyvy</p>
+<p>与YUYV相似，只是存储时UV分量顺序不同而已。</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/28.png" alt="img"></p>
+<h2><span id="4-3-raw-ge-shi">4.3 RAW 格式</span><a href="#4-3-raw-ge-shi" class="header-anchor">#</a></h2><p>RAW图像就是CMOS或者CCD图像感应器将捕捉到的光源信号转化为数字信号的原始数据。RAW文件是一种记录了数码相机传感器的原始信息，同时记录了由相机拍摄所产生的一些元数据（Metadata，如ISO的设置、快门速度、光圈值、白平衡等）的文件。RAW是未经处理、也未经压缩的格式，可以把RAW概念化为“原始图像编码数据”或更形象的称为“数字底片”。Raw data（Raw RGB）经过彩色插值就变成RGB。</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/29.png" alt="img"></p>
+<p>sensor上每个像素只采集特定颜色的光的强度，因此sensor每个像素只能为R或G或B 。</p>
+<h3><span id="4-3-1-bayer-zhen-lie">4.3.1 bayer阵列</span><a href="#4-3-1-bayer-zhen-lie" class="header-anchor">#</a></h3><p>人眼对绿色比较敏感，所以一般bayer格式的图片绿色格式的像素是是r和g像素的和，那么bayer格式一般有下面4种：</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/30.png" alt="img"></p>
+<h1><span id="5-mipi-csi-shu-ju-bao-chuan-shu">5 mipi csi数据包传输</span><a href="#5-mipi-csi-shu-ju-bao-chuan-shu" class="header-anchor">#</a></h1><p>raw8格式传输：</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/31.png" alt="img"></p>
+<p>raw10格式传输：</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/32.png" alt="img"></p>
+<p>raw12格式传输：</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/33.png" alt="img"></p>
+<p> 从图像看，RAW8是一传输个字节对应一个pixel， 而raw10是5个byte去对应4个pixel，第5个byte用来存储pixel 0~3的bit[0:1]。同理raw12用3个byte存储2个pixel。</p>
+<p><img src="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/34.png" alt="img"></p>
+<h1><span id="6-se-cai-shen-du">6 色彩深度</span><a href="#6-se-cai-shen-du" class="header-anchor">#</a></h1><p>8位彩色，有256种深度。<br>16位彩色：65,536种颜色。<br>24位彩色：每种原色都有256个层次，它们的组合便有256<em>256</em>256种颜色。<br>32位彩色：除了24位彩色的颜色外，额外的8位是储存重叠图层的图形资料(alpha透明度)。</p>
+<h1><span id="7-tu-xiang-jie-xi-du-x2f-fen-bian-lu">7 图像解析度&#x2F;分辨率</span><a href="#7-tu-xiang-jie-xi-du-x2f-fen-bian-lu" class="header-anchor">#</a></h1><p>Resolution：</p>
+<table>
+<thead>
+<tr>
+<th>1280 * 720 &#x3D; 921600</th>
+<th>1M</th>
+<th>100万像素</th>
+<th>720P</th>
+<th>H65 sensor</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1920 * 1080 &#x3D; 2073600</td>
+<td>2M</td>
+<td>200万像素</td>
+<td>1080P</td>
+<td>Imx307&#x2F;imx327 sensor</td>
+</tr>
+<tr>
+<td>2560 * 1440 &#x3D; 36864002560 * 1600 &#x3D; 40960002592 * 1944 &#x3D; 5038848</td>
+<td>4M&#x2F;5M</td>
+<td>400万像素500万像素</td>
+<td>2K</td>
+<td>Imx335&#x2F;sc4210 sensor</td>
+</tr>
+<tr>
+<td>3840 * 2160 &#x3D; 8294400</td>
+<td>8M</td>
+<td>800万像素</td>
+<td>4K</td>
+<td>Imx334 sensor</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/" data-id="clujevinc0000w0lp7se6efhn" data-title="mipi-csi软件篇" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-mipi-csi硬件篇" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/" class="article-date">
@@ -1253,115 +1656,12 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
 
 
   
-    <article id="post-linux搭建tftp和ftp服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" class="article-date">
-  <time class="dt-published" datetime="2024-03-24T14:24:38.000Z" itemprop="datePublished">2024-03-24</time>
-</a>
+
+
+  <nav id="page-nav">
     
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/">linux搭建tftp和ftp服务</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-an-zhuang-tftp-fu-wu-he-ke-hu-duan">1 安装tftp服务和客户端</a><ul>
-<li><a href="#1-1-pei-zhi">1.1 配置</a></li>
-<li><a href="#1-2-chuang-jian-tftp-gong-xiang-mu-lu">1.2 创建tftp共享目录</a></li>
-<li><a href="#1-3-ce-shi-yan-zheng-gong-neng">1.3 测试验证功能</a><ul>
-<li><a href="#1-3-1-ben-ji-ce-shi">1.3.1 本机测试</a></li>
-<li><a href="#1-3-2-kai-fa-ban-ce-shi">1.3.2 开发板测试</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#2-ftp-fu-wu">2 ftp服务</a><ul>
-<li><a href="#2-1-windows-ke-hu-duan">2.1 windows客户端</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-an-zhuang-tftp-fu-wu-he-ke-hu-duan">1 安装tftp服务和客户端</span><a href="#1-an-zhuang-tftp-fu-wu-he-ke-hu-duan" class="header-anchor">#</a></h1><pre><code>sudo apt-get install xinetd tftp tftpd
-</code></pre>
-<h2><span id="1-1-pei-zhi">1.1 配置</span><a href="#1-1-pei-zhi" class="header-anchor">#</a></h2><p>vim &#x2F;etc&#x2F;xinetd.d&#x2F;tftp<br>内容如下：</p>
-<pre><code>service tftp
-&#123;
-        socket_type     		= dgram
-        protocol                = udp
-        wait                    = yes
-        user                    = root
-        server          		= /usr/sbin/in.tftpd
-        server_args     		= -s /home/lyb/tftpshare/
-        disable         		= no
-        per_source      		=11
-        cps                     = 100 2
-        flags                   = IPv4
-&#125;
-</code></pre>
-<h2><span id="1-2-chuang-jian-tftp-gong-xiang-mu-lu">1.2 创建tftp共享目录</span><a href="#1-2-chuang-jian-tftp-gong-xiang-mu-lu" class="header-anchor">#</a></h2><pre><code>1.创建服务器目录
-mkdir /home/lyb/tftpshare/
-2.然后修改目录权限
-chmod 777 /home/lyb/tftpshare/
-3.重启xinetd服务
-sudo /etc/init.d/xinetd restart（如果启动失败先关闭防火墙 service iptables stop）
-</code></pre>
-<h2><span id="1-3-ce-shi-yan-zheng-gong-neng">1.3 测试验证功能</span><a href="#1-3-ce-shi-yan-zheng-gong-neng" class="header-anchor">#</a></h2><h3><span id="1-3-1-ben-ji-ce-shi">1.3.1 本机测试</span><a href="#1-3-1-ben-ji-ce-shi" class="header-anchor">#</a></h3><pre><code>重新启动一个终端，
-输入命令 tftp 192.168.1.11（我的虚拟机ip）进入tftp,
-输入get test,这样就可以获取到test文件,
-输入q退出tftp
-</code></pre>
-<p>如下图所示：<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1.png" alt="1"></p>
-<h3><span id="1-3-2-kai-fa-ban-ce-shi">1.3.2 开发板测试</span><a href="#1-3-2-kai-fa-ban-ce-shi" class="header-anchor">#</a></h3><p>2440开发板的uboot可以支持tftp下载功能，在uboot命令行输入：</p>
-<pre><code>tftp 0x30000000  uImage_4.3
-</code></pre>
-<p>如下图所示。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/2.png" alt="2"></p>
-<h1><span id="2-ftp-fu-wu">2 ftp服务</span><a href="#2-ftp-fu-wu" class="header-anchor">#</a></h1><pre><code>sudo apt install vsftpd
-vi /etc/vsftpd.conf
-
-local_enable=YES
-write_enable=YES
-sudo /etc/init.d/vsftpd restart
-</code></pre>
-<p><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/3.png" alt="3"></p>
-<h2><span id="2-1-windows-ke-hu-duan">2.1 windows客户端</span><a href="#2-1-windows-ke-hu-duan" class="header-anchor">#</a></h2><p><a target="_blank" rel="noopener" href="https://filezilla-project.org/">https://filezilla-project.org/</a></p>
-<p>新建站点，配置ftp协议, 主机输入ubuntu IP地址，用户密码信息，即可连接成功。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/4.png" alt="4"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" data-id="clu9yvyyj0001nouf751k361b" data-title="linux搭建tftp和ftp服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+  </nav>
 
 </section>
         
@@ -1406,6 +1706,10 @@ sudo /etc/init.d/vsftpd restart
       <ul>
         
           <li>
+            <a href="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/">mipi-csi软件篇</a>
+          </li>
+        
+          <li>
             <a href="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/">mipi-csi硬件篇</a>
           </li>
         
@@ -1419,10 +1723,6 @@ sudo /etc/init.d/vsftpd restart
         
           <li>
             <a href="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/">virtualbox配置实现PC-虚拟机-开发板互ping</a>
-          </li>
-        
-          <li>
-            <a href="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/">vmware双网卡_NAT_桥接</a>
           </li>
         
       </ul>
