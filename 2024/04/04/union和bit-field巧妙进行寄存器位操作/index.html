@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>union和bit_field巧妙进行寄存器位操作 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 union结构区分大小端 2 寄存器的位操作 2.1 offsetof获取结构体成员的偏移量 2.2 container_of根据结构体成员找到该结构体 2.3 读取寄存器 2.4 写寄存器 2.5 位读取 2.6 位写入        1 union结构区分大小端#123456789101112131415161718192021#define read_bits(stc, fie">
+<meta property="og:type" content="article">
+<meta property="og:title" content="union和bit_field巧妙进行寄存器位操作">
+<meta property="og:url" content="http://example.com/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 union结构区分大小端 2 寄存器的位操作 2.1 offsetof获取结构体成员的偏移量 2.2 container_of根据结构体成员找到该结构体 2.3 读取寄存器 2.4 写寄存器 2.5 位读取 2.6 位写入        1 union结构区分大小端#123456789101112131415161718192021#define read_bits(stc, fie">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/1-1.png">
+<meta property="og:image" content="http://example.com/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/1.png">
+<meta property="og:image" content="http://example.com/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/2.png">
+<meta property="og:image" content="http://example.com/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/3.png">
+<meta property="og:image" content="http://example.com/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/4.png">
+<meta property="og:image" content="http://example.com/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/5.png">
+<meta property="og:image" content="http://example.com/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/6.png">
+<meta property="article:published_time" content="2024-04-04T10:15:23.000Z">
+<meta property="article:modified_time" content="2024-04-04T10:47:16.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="数据结构">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/1-1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-union和bit-field巧妙进行寄存器位操作" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/" class="article-date">
+  <time class="dt-published" datetime="2024-04-04T10:15:23.000Z" itemprop="datePublished">2024-04-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      union和bit_field巧妙进行寄存器位操作
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-union-jie-gou-qu-fen-da-xiao-duan">1 union结构区分大小端</a></li>
+<li><a href="#2-ji-cun-qi-de-wei-cao-zuo">2 寄存器的位操作</a><ul>
+<li><a href="#2-1-offsetof-huo-qu-jie-gou-ti-cheng-yuan-de-pian-yi-liang">2.1 offsetof获取结构体成员的偏移量</a></li>
+<li><a href="#2-2-container-of-gen-ju-jie-gou-ti-cheng-yuan-zhao-dao-gai-jie-gou-ti">2.2 container_of根据结构体成员找到该结构体</a></li>
+<li><a href="#2-3-du-qu-ji-cun-qi">2.3 读取寄存器</a></li>
+<li><a href="#2-4-xie-ji-cun-qi">2.4 写寄存器</a></li>
+<li><a href="#2-5-wei-du-qu">2.5 位读取</a></li>
+<li><a href="#2-6-wei-xie-ru">2.6 位写入</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-union-jie-gou-qu-fen-da-xiao-duan">1 union结构区分大小端</span><a href="#1-union-jie-gou-qu-fen-da-xiao-duan" class="header-anchor">#</a></h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> read_bits(stc, field)(&#123;stc.raw = 0x12345678; stc.bits.field;&#125;)</span></span><br><span class="line"><span class="class"><span class="keyword">union</span> <span class="title">a</span>&#123;</span></span><br><span class="line">        <span class="type">unsigned</span> <span class="type">int</span> raw;</span><br><span class="line">        <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">                <span class="type">unsigned</span> <span class="type">int</span> bit_a : <span class="number">8</span>;</span><br><span class="line">                <span class="type">unsigned</span> <span class="type">int</span> bit_b : <span class="number">8</span>;</span><br><span class="line">                <span class="type">unsigned</span> <span class="type">int</span> bit_c : <span class="number">5</span>;</span><br><span class="line">                <span class="type">unsigned</span> <span class="type">int</span> bit_d : <span class="number">3</span>;</span><br><span class="line">                <span class="type">unsigned</span> <span class="type">int</span> bit_e : <span class="number">1</span>;</span><br><span class="line">        &#125;bits;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">        <span class="class"><span class="keyword">union</span> <span class="title">a</span> <span class="title">num</span>;</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;%#x, %#x, %#x, %#x, %#x\n&quot;</span>,</span><br><span class="line">        read_bits(num, bit_a),</span><br><span class="line">        read_bits(num, bit_b),</span><br><span class="line">        read_bits(num, bit_c),</span><br><span class="line">        read_bits(num, bit_d),</span><br><span class="line">        read_bits(num, bit_e));</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/1-1.png" alt="img"></p>
+<p>这样的结果，原理如下图:</p>
+<p><img src="/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/1.png" alt="img"><br>那么从这里可以看出，低地址对应低字节， 因此我们的运行机器是Little Endian。</p>
+<p>那么bit_a&#x3D;0x78; bit_b&#x3D;0x56; bit_c等于0x34取低5位，也就是0x14; bit_d 等于0x34取高3位，也就是0x1； bit_e等于0x12取最低位，也就是0。</p>
+<p>由于这里的num是union结构，因此对.raw进行操作，那么也就等于对.bits也进行了操作，那么返回bit field是不是和寄存器的位操作很类似。下面详细介绍如何用union和bit field巧妙进行寄存器位操作。</p>
+<h1><span id="2-ji-cun-qi-de-wei-cao-zuo">2 寄存器的位操作</span><a href="#2-ji-cun-qi-de-wei-cao-zuo" class="header-anchor">#</a></h1><p>举个例子，这是mipi-rx DPHY的寄存器的部分截取：</p>
+<p><img src="/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/2.png" alt="img"></p>
+<p>那么我们可以对该module进行结构定义如下：(当然如果觉得手动去定义麻烦，网上有专门的python工具可以对excel到寄存器定义的转换)<br><img src="/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/3.png" alt="img"></p>
+<p><img src="/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/4.png" alt="img"></p>
+<p>这里对该module的每个寄存器都定义成union。</p>
+<h2><span id="2-1-offsetof-huo-qu-jie-gou-ti-cheng-yuan-de-pian-yi-liang">2.1 offsetof获取结构体成员的偏移量</span><a href="#2-1-offsetof-huo-qu-jie-gou-ti-cheng-yuan-de-pian-yi-liang" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">＃define <span class="title function_">offsetof</span><span class="params">(<span class="type">struct_t</span>,member)</span> <span class="params">( (<span class="type">int</span>)&amp;((<span class="type">struct_t</span> *)<span class="number">0</span>)-&gt;member )</span></span><br></pre></td></tr></table></figure>
+
+<p>(struct_t <em>)0)，可以看到这里*<em>把一个0地址转换成一个指针，它表示一个结构体指针变量，并且是值&#x3D;0的指针</em></em>, 那么访问它的成员，成员的地址自然就会往后递增，因此该成员的地址那么就等于该成员的偏移量。</p>
+<p>eg:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span>&#123;</span></span><br><span class="line">        <span class="type">unsigned</span> <span class="type">char</span> name[<span class="number">100</span>];</span><br><span class="line">        <span class="type">int</span> age;</span><br><span class="line">        <span class="type">int</span> id;</span><br><span class="line">        <span class="type">unsigned</span> <span class="type">char</span> sex;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>那么offsetof(struct student, id)就为100 + 4&#x3D;104，同理.name的offsetof为0，.age的offsetof为100，.sex的offsetof为108。</p>
+<h2><span id="2-2-container-of-gen-ju-jie-gou-ti-cheng-yuan-zhao-dao-gai-jie-gou-ti">2.2 container_of根据结构体成员找到该结构体</span><a href="#2-2-container-of-gen-ju-jie-gou-ti-cheng-yuan-zhao-dao-gai-jie-gou-ti" class="header-anchor">#</a></h2><p><img src="/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/5.png" alt="img"></p>
+<p>该函数实现位于include&#x2F;linux&#x2F;kernel.h， 源码如下：</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> container_of(ptr, type, member) (&#123;            \</span></span><br><span class="line">    <span class="function"><span class="keyword">const</span> <span class="title">typeof</span>(<span class="params"> ((type *</span>)0)-&gt;member ) *__mptr</span> = (ptr);    \</span><br><span class="line">    (type *)( (<span class="built_in">char</span> *)__mptr - offsetof(type,member) );&#125;)</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>定义一个结构体成员指针mptr指向该成员，</li>
+<li>用该成员指针减去该成员在结构体中的偏移量，不就是该结构体的起始地址</li>
+</ol>
+<p><img src="/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/6.png" alt="img"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">student</span> <span class="title">stu</span>=</span>&#123;.name=<span class="string">&quot;robin&quot;</span>, .age=<span class="number">18</span>, .id=<span class="number">123456</span>, .sex=<span class="string">&#x27;M&#x27;</span>&#125;, *pstu;</span><br><span class="line">pstu = container_of(&amp;stu.sex, <span class="keyword">struct</span> student, sex);</span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-3-du-qu-ji-cun-qi">2.3 读取寄存器</span><a href="#2-3-du-qu-ji-cun-qi" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> _reg_read(addr) readl((void __iomem *)addr)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DPHY_BA_ADDR (0x0300b000)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _OFST(_BLK_T, _REG)       ((uint64_t)&amp;(((struct _BLK_T *)0)-&gt;_REG))//this is same with offsetof</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> RD_REG(_BA, _BLK_T, _REG) \</span></span><br><span class="line">(_reg_read(_BA+_OFST(_BLK_T, _REG)))</span><br></pre></td></tr></table></figure>
+
+<p>用如下函数:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">RD_REG(DPHY_BA_ADDR, REG_CSI_DPHY_4LANE_WRAP_T, REG_08);</span><br></pre></td></tr></table></figure>
+
+<p>这样就表示对该module的REG_08的寄存器进行了read。</p>
+<h2><span id="2-4-xie-ji-cun-qi">2.4 写寄存器</span><a href="#2-4-xie-ji-cun-qi" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> _reg_write(addr, data) writel(data, (void __iomem *)addr)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> WR_REG(_BA, _BLK_T, _REG, _V) \</span></span><br><span class="line">                (_reg_write((_BA+_OFST(_BLK_T, _REG)), _V))</span><br></pre></td></tr></table></figure>
+
+<p>用如下函数:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">WR_REG(DPHY_BA_ADDR, REG_CSI_DPHY_4LANE_WRAP_T, REG_08, <span class="number">0x3333ffff</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这样就表示对该module的REG_08的寄存器进行了write, write的数据为0x3333ffff。</p>
+<h2><span id="2-5-wei-du-qu">2.5 位读取</span><a href="#2-5-wei-du-qu" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> RD_BITS(_BA, _BLK_T, _REG, _FLD) \</span></span><br><span class="line">        (&#123;\</span><br><span class="line">                <span class="keyword">typeof</span>(((<span class="keyword">struct</span> _BLK_T *)<span class="number">0</span>)-&gt;_REG) _r;\</span><br><span class="line">                _r.raw = RD_REG(_BA, _BLK_T, _REG);\</span><br><span class="line">                _r.bits._FLD;\</span><br><span class="line">        &#125;)</span><br></pre></td></tr></table></figure>
+
+<p>用如下函数:</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">RD_BITS</span>(DPHY_BA_ADDR, REG_CSI_DPHY_4LANE_WRAP_T, REG_08, MIPIRX_TEST_BIST1);</span><br></pre></td></tr></table></figure>
+
+<p>这里首先是定义了一个module的REG_08的寄存器结构，typeof表示对该成员取数据结构类型，然后把该寄存器里的值读出来，最后返回bit[31:16]。</p>
+<h2><span id="2-6-wei-xie-ru">2.6 位写入</span><a href="#2-6-wei-xie-ru" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> WR_BITS(_BA, _BLK_T, _REG, _FLD, _V) \</span></span><br><span class="line">        <span class="keyword">do</span> &#123;\</span><br><span class="line">                <span class="keyword">typeof</span>(((<span class="keyword">struct</span> _BLK_T *)<span class="number">0</span>)-&gt;_REG) _r;\</span><br><span class="line">                _r.raw = RD_REG(_BA, _BLK_T, _REG);\</span><br><span class="line">                _r.bits._FLD = _V;\</span><br><span class="line">                _reg_write((_BA+_OFST(_BLK_T, _REG)), _r.raw);\</span><br><span class="line">        &#125; <span class="keyword">while</span> (<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">WR_BITS(DPHY_BA_ADDR, REG_CSI_DPHY_4LANE_WRAP_T, REG_08, MIPIRX_TEST_BIST1, <span class="number">0x1111</span>);</span><br></pre></td></tr></table></figure>
+
+<p>这里首先是定义了一个module的REG_08的寄存器结构，然后把该寄存器里的值读出来, 再把该寄存器的bit[31:16]写入0x1111。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/" data-id="clul3rpio0000n4ufea6ge1mg" data-title="union和bit_field巧妙进行寄存器位操作" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2024/04/03/%E5%8D%B7%E5%B8%98%E5%BF%AB%E9%97%A8RollingShutter%E4%B8%8E%E5%85%A8%E5%B1%80%E5%BF%AB%E9%97%A8GlobalShutter/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">卷帘快门RollingShutter与全局快门GlobalShutter</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 20px;">linux嵌入式环境搭建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 15px;">mipi图像处理</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 10px;">数据结构</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/">union和bit_field巧妙进行寄存器位操作</a>
+          </li>
+        
+          <li>
+            <a href="/2024/04/03/%E5%8D%B7%E5%B8%98%E5%BF%AB%E9%97%A8RollingShutter%E4%B8%8E%E5%85%A8%E5%B1%80%E5%BF%AB%E9%97%A8GlobalShutter/">卷帘快门RollingShutter与全局快门GlobalShutter</a>
+          </li>
+        
+          <li>
+            <a href="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/">mipi-csi软件篇</a>
+          </li>
+        
+          <li>
+            <a href="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/">mipi-csi硬件篇</a>
+          </li>
+        
+          <li>
+            <a href="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/">Vim配置成类似source-insight的IDE</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

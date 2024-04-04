@@ -69,6 +69,74 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-linux搭建nfs服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" class="article-date">
+  <time class="dt-published" datetime="2024-03-26T15:32:15.000Z" itemprop="datePublished">2024-03-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/">linux搭建nfs服务</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-xia-zai-an-zhuang-nfs-fu-wu">1 下载安装NFS服务</a></li>
+<li><a href="#2-guan-bi-fang-huo-qiang">2 关闭防火墙</a></li>
+<li><a href="#3-chuang-jian-nfs-gong-xiang-wen-jian-jia">3 创建NFS共享文件夹</a></li>
+<li><a href="#4-pei-zhi-nfs">4 配置NFS</a></li>
+<li><a href="#5-qi-dong-nfs-fu-wu">5 启动NFS服务</a></li>
+<li><a href="#6-ke-hu-duan-jin-xing-nfs-gua-zai">6 客户端进行NFS挂载</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-xia-zai-an-zhuang-nfs-fu-wu">1 下载安装NFS服务</span><a href="#1-xia-zai-an-zhuang-nfs-fu-wu" class="header-anchor">#</a></h1><p><code>sudo apt-get install nfs-kernel-server nfs-common</code></p>
+<h1><span id="2-guan-bi-fang-huo-qiang">2 关闭防火墙</span><a href="#2-guan-bi-fang-huo-qiang" class="header-anchor">#</a></h1><p><code>sudo ufw disable</code></p>
+<h1><span id="3-chuang-jian-nfs-gong-xiang-wen-jian-jia">3 创建NFS共享文件夹</span><a href="#3-chuang-jian-nfs-gong-xiang-wen-jian-jia" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> /home/book/nfs_share</span><br><span class="line">sudo <span class="built_in">chown</span> book:book /home/book/nfs_share</span><br><span class="line">sudo <span class="built_in">chmod</span> 777 /home/book/nfs_share -R</span><br></pre></td></tr></table></figure>
+<h1><span id="4-pei-zhi-nfs">4 配置NFS</span><a href="#4-pei-zhi-nfs" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/exports</span><br><span class="line">/home/book/nfs_share *(rw,<span class="built_in">sync</span>,no_root_squash,no_subtree_check)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/1.png" alt="1"></p>
+<h1><span id="5-qi-dong-nfs-fu-wu">5 启动NFS服务</span><a href="#5-qi-dong-nfs-fu-wu" class="header-anchor">#</a></h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart nfs-kernel-serve</span><br><span class="line">或者sudo service nfs-kernel-server restart</span><br><span class="line">或者sudo /etc/init.d/nfs-kernel-server restart</span><br></pre></td></tr></table></figure>
+
+<h1><span id="6-ke-hu-duan-jin-xing-nfs-gua-zai">6 客户端进行NFS挂载</span><a href="#6-ke-hu-duan-jin-xing-nfs-gua-zai" class="header-anchor">#</a></h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">运行开发板</span><br><span class="line"><span class="meta prompt_">[root@book]~# </span><span class="language-bash">mount -t nfs -o nolock -o tcp 192.168.2.100:/home/book/nfs_share /mnt/nfs</span></span><br><span class="line">-t nfs                          #挂载类型</span><br><span class="line">-o nolock                       #读写的时候不锁定</span><br><span class="line">-o tcp                          #tcp模式</span><br><span class="line">客户端退出NFS挂载</span><br><span class="line">umount /mnt/nfs</span><br></pre></td></tr></table></figure>
+
+
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" data-id="clu9yvyyk0002noufhic9el06" data-title="linux搭建nfs服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/03/25/hello-world/" class="article-date">
@@ -246,7 +314,7 @@ sudo /etc/init.d/vsftpd restart
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li></ul>
     </div>
   </div>
 
@@ -256,7 +324,7 @@ sudo /etc/init.d/vsftpd restart
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 20px;">linux嵌入式环境搭建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 10px;">mipi图像处理</a>
+      <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 20px;">linux嵌入式环境搭建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 15px;">mipi图像处理</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 10px;">数据结构</a>
     </div>
   </div>
 
@@ -278,6 +346,10 @@ sudo /etc/init.d/vsftpd restart
       <ul>
         
           <li>
+            <a href="/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/">union和bit_field巧妙进行寄存器位操作</a>
+          </li>
+        
+          <li>
             <a href="/2024/04/03/%E5%8D%B7%E5%B8%98%E5%BF%AB%E9%97%A8RollingShutter%E4%B8%8E%E5%85%A8%E5%B1%80%E5%BF%AB%E9%97%A8GlobalShutter/">卷帘快门RollingShutter与全局快门GlobalShutter</a>
           </li>
         
@@ -291,10 +363,6 @@ sudo /etc/init.d/vsftpd restart
         
           <li>
             <a href="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/">Vim配置成类似source-insight的IDE</a>
-          </li>
-        
-          <li>
-            <a href="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/">Windows10搭建NFS服务</a>
           </li>
         
       </ul>
