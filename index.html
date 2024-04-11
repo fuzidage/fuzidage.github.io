@@ -69,6 +69,125 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-循环队列FIFO原理图解" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/" class="article-date">
+  <time class="dt-published" datetime="2024-04-11T07:18:51.000Z" itemprop="datePublished">2024-04-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/">循环队列FIFO原理图解</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-xun-huan-dui-lie-fifo-jie-shao">1 循环队列FIFO介绍</a><ul>
+<li><a href="#1-1-xun-huan-dui-lie-jie-gou">1.1 循环队列结构</a></li>
+<li><a href="#1-2-fifo-chu-shi-hua">1.2 FIFO初始化</a></li>
+<li><a href="#1-3-fifo-xiao-hui">1.3 FIFO销毁</a></li>
+<li><a href="#1-4-ru-dui-lie">1.4 入队列</a></li>
+<li><a href="#1-5-chu-dui-lie">1.5 出队列</a></li>
+<li><a href="#1-6-fifo-pan-kong">1.6 FIFO判空</a></li>
+<li><a href="#1-6-fifo-pan-man">1.6 FIFO判满</a></li>
+<li><a href="#1-7-fifo-rong-liang">1.7 FIFO容量</a></li>
+<li><a href="#1-8-fifo-zhong-you-xiao-yuan-su-ge-shu">1.8 FIFO中有效元素个数</a></li>
+<li><a href="#1-9-fifo-bian-li">1.9 FIFO遍历</a></li>
+<li><a href="#1-10-dui-lie-yuan-su-huo-qu">1.10 队列元素获取</a><ul>
+<li><a href="#1-10-1-di-yi-ge-yuan-su">1.10.1 第一个元素</a></li>
+<li><a href="#1-10-2-zui-hou-yi-ge-yuan-su">1.10.2 最后一个元素</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-ce-shi-yong-li">2 测试用例</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-xun-huan-dui-lie-fifo-jie-shao">1 循环队列FIFO介绍</span><a href="#1-xun-huan-dui-lie-fifo-jie-shao" class="header-anchor">#</a></h1><p>循环队列是把<a target="_blank" rel="noopener" href="https://baike.baidu.com/item/%E9%A1%BA%E5%BA%8F%E9%98%9F%E5%88%97/20832734">顺序队列</a>首尾相连，把存储队列元素的表从逻辑上看成一个环，成为循环队列。</p>
+<p><img src="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/1.png" alt="img"></p>
+<p>入队时尾指针向前追赶头指针；出队时头指针向前追赶尾指针。</p>
+<h2><span id="1-1-xun-huan-dui-lie-jie-gou">1.1 循环队列结构</span><a href="#1-1-xun-huan-dui-lie-jie-gou" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FIFO_HEAD(name, type)                                          \</span></span><br><span class="line">        <span class="keyword">struct</span> name &#123;                                                  \</span><br><span class="line">                <span class="keyword">struct</span> type *fifo;                                     \</span><br><span class="line">                <span class="built_in">int</span> front, tail, capacity;                             \</span><br><span class="line">        &#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">front表示首元素索引</span><br><span class="line">tail表示最后一个元素索引</span><br><span class="line">capacity表示队列的长度</span><br><span class="line">struct type fifo表示该队列中的元素指针，可以指向任意结构体指针</span><br></pre></td></tr></table></figure>
+
+<p>举个例子：</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> person&#123;</span><br><span class="line">        <span class="built_in">int</span> age;</span><br><span class="line">        <span class="built_in">int</span> id;</span><br><span class="line">        <span class="built_in">char</span> name[<span class="number">20</span>];</span><br><span class="line">&#125;;</span><br><span class="line">FIFO_HEAD(person_q, person*);</span><br><span class="line"><span class="comment">//等价于</span></span><br><span class="line"><span class="keyword">struct</span> person_q &#123;                                                        \</span><br><span class="line">    <span class="keyword">struct</span> person* *fifo;                                        \</span><br><span class="line">        <span class="built_in">int</span> front, tail, capacity;                                \</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="1-2-fifo-chu-shi-hua">1.2 FIFO初始化</span><a href="#1-2-fifo-chu-shi-hua" class="header-anchor">#</a></h2><p>分配一个连续的空间存储队列元素。用户自定义队列容量。</p>
+<p><img src="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/2.png" alt="img"></p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FIFO_INIT(head, _capacity) do &#123;                                  \</span></span><br><span class="line">        (head)-&gt;fifo = malloc(<span class="keyword">sizeof</span>(*(head)-&gt;fifo) * _capacity);        \</span><br><span class="line">        (head)-&gt;front = (head)-&gt;tail = <span class="number">-1</span>;                               \</span><br><span class="line">        (head)-&gt;capacity = _capacity;                                    \</span><br><span class="line">&#125; <span class="keyword">while</span> (<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<h2><span id="1-3-fifo-xiao-hui">1.3 FIFO销毁</span><a href="#1-3-fifo-xiao-hui" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FIFO_EXIT(head) do &#123;                                                \</span></span><br><span class="line">        (head)-&gt;front = (head)-&gt;tail = <span class="number">-1</span>;                                \</span><br><span class="line">        (head)-&gt;capacity = <span class="number">0</span>;                                                \</span><br><span class="line">        <span class="keyword">if</span> ((head)-&gt;fifo)                                                \</span><br><span class="line">                free((head)-&gt;fifo);                                        \</span><br><span class="line">&#125; <span class="keyword">while</span> (<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<h2><span id="1-4-ru-dui-lie">1.4 入队列</span><a href="#1-4-ru-dui-lie" class="header-anchor">#</a></h2><p>入队列就是尾元素的索引++，也就是tail++，让新元素放进队列的尾部。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FIFO_PUSH(head, elm) do &#123;                                      \</span></span><br><span class="line">        <span class="keyword">if</span> (FIFO_EMPTY(head))                                          \</span><br><span class="line">                (head)-&gt;front = (head)-&gt;tail = <span class="number">0</span>;                      \</span><br><span class="line">        <span class="keyword">else</span>                                                           \</span><br><span class="line">                (head)-&gt;tail = ((head)-&gt;tail == (head)-&gt;capacity - <span class="number">1</span>)  \</span><br><span class="line">                        ? <span class="number">0</span> : (head)-&gt;tail + <span class="number">1</span>;                        \</span><br><span class="line">        (head)-&gt;fifo[(head)-&gt;tail] = elm;                              \</span><br><span class="line">&#125; <span class="keyword">while</span> (<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<p>如果队列是空的，则第一个元素入队列，front和tail索引都指向第一个元素，front &#x3D; tail &#x3D; 0;<br><img src="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/3.png" alt="img"></p>
+<p>其他情况入队，让tail++<br><img src="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/4.png" alt="img"></p>
+<p><img src="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/5.png" alt="img"></p>
+<p><img src="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/6.png" alt="img"></p>
+<h2><span id="1-5-chu-dui-lie">1.5 出队列</span><a href="#1-5-chu-dui-lie" class="header-anchor">#</a></h2><p>出队列就是让font对应的元素丢出去，font++。</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FIFO_POP(head, pelm) do &#123;                                      \</span></span><br><span class="line">        *(pelm) = (head)-&gt;fifo[(head)-&gt;front];                         \</span><br><span class="line">        <span class="keyword">if</span> ((head)-&gt;front == (head)-&gt;tail)                             \</span><br><span class="line">                (head)-&gt;front = (head)-&gt;tail = <span class="number">-1</span>;                     \</span><br><span class="line">        <span class="keyword">else</span>                                                           \</span><br><span class="line">                (head)-&gt;front = ((head)-&gt;front == (head)-&gt;capacity - <span class="number">1</span>)\</span><br><span class="line">                        ? <span class="number">0</span> : (head)-&gt;front + <span class="number">1</span>;                \</span><br><span class="line">&#125; <span class="keyword">while</span> (<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+<p>当front追上tail后，表示队列空了，重新设置起始点，需要将front &#x3D; tail &#x3D; -1 。</p>
+<p><img src="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/7.png" alt="img"></p>
+<p>其他情况出队，丢出front元素，让front++</p>
+<p><img src="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/8.png" alt="img"></p>
+<h2><span id="1-6-fifo-pan-kong">1.6 FIFO判空</span><a href="#1-6-fifo-pan-kong" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FIFO_EMPTY(head)    ((head)-&gt;front == -1)</span></span><br></pre></td></tr></table></figure>
+
+<p>①队列初始化时，队列是空的，会让front为-1<br>②出队列时，font++, 当font追上tail表示空了，则可以重新设置起始点，令front &#x3D; tail &#x3D; -1<br>综合①②所以可以用-1判断</p>
+<h2><span id="1-6-fifo-pan-man">1.6 FIFO判满</span><a href="#1-6-fifo-pan-man" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FIFO_FULL(head)     (((head)-&gt;front == ((head)-&gt;tail + 1)%(head)-&gt;capacity))</span></span><br></pre></td></tr></table></figure>
+
+<p>①当front&#x3D;0时，那么tail到达capacity-1表示FIFO full。</p>
+<p><img src="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/9.png" alt="img"></p>
+<p>②否则，tail追上front后(front &#x3D; tail + 1)表示FIFO full。</p>
+<p><img src="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/10.png" alt="img"></p>
+<h2><span id="1-7-fifo-rong-liang">1.7 FIFO容量</span><a href="#1-7-fifo-rong-liang" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FIFO_CAPACITY(head) ((head)-&gt;capacity)</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="1-8-fifo-zhong-you-xiao-yuan-su-ge-shu">1.8 FIFO中有效元素个数</span><a href="#1-8-fifo-zhong-you-xiao-yuan-su-ge-shu" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FIFO_SIZE(head)     (FIFO_EMPTY(head) ? \</span></span><br><span class="line">        <span class="number">0</span> : ((((head)-&gt;tail + (head)-&gt;capacity - (head)-&gt;front) % (head)-&gt;capacity) + <span class="number">1</span>))</span><br></pre></td></tr></table></figure>
+
+<p>用tail - front就表示有效元素个数，不过由于循环FIFO,可能tail&lt;front,这个时候就需要取余运算，如下图:</p>
+<p><img src="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/11.png" alt="img"></p>
+<h2><span id="1-9-fifo-bian-li">1.9 FIFO遍历</span><a href="#1-9-fifo-bian-li" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FIFO_FOREACH(var, head, idx) \</span></span><br><span class="line">　　<span class="keyword">for</span> (idx = (head)-&gt;front, <span class="keyword">var</span> = (head)-&gt;fifo[idx]; \</span><br><span class="line">　　　　idx &lt; (head)-&gt;front + FIFO_SIZE(head); \</span><br><span class="line">　　　　<span class="keyword">var</span> = (head)-&gt;fifo[++idx % (head)-&gt;capacity])</span><br></pre></td></tr></table></figure>
+
+<h2><span id="1-10-dui-lie-yuan-su-huo-qu">1.10 队列元素获取</span><a href="#1-10-dui-lie-yuan-su-huo-qu" class="header-anchor">#</a></h2><h3><span id="1-10-1-di-yi-ge-yuan-su">1.10.1 第一个元素</span><a href="#1-10-1-di-yi-ge-yuan-su" class="header-anchor">#</a></h3><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FIFO_GET_FRONT(head, pelm) (*(pelm) = (head)-&gt;fifo[(head)-&gt;front])</span></span><br></pre></td></tr></table></figure>
+<h3><span id="1-10-2-zui-hou-yi-ge-yuan-su">1.10.2 最后一个元素</span><a href="#1-10-2-zui-hou-yi-ge-yuan-su" class="header-anchor">#</a></h3><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> FIFO_GET_TAIL(head, pelm) (*(pelm) = (head)-&gt;fifo[(head)-&gt;tail])</span></span><br></pre></td></tr></table></figure>
+<h1><span id="2-ce-shi-yong-li">2 测试用例</span><a href="#2-ce-shi-yong-li" class="header-anchor">#</a></h1><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#include &quot;fifo.h&quot;</span></span><br><span class="line"><span class="meta">#include &lt;stdio.h&gt;</span></span><br><span class="line"><span class="keyword">struct</span> person&#123;</span><br><span class="line">        <span class="built_in">int</span> age;</span><br><span class="line">        <span class="built_in">int</span> id;</span><br><span class="line">        <span class="built_in">char</span> name[<span class="number">20</span>];</span><br><span class="line">&#125;;</span><br><span class="line"> </span><br><span class="line">FIFO_HEAD(person_q, person*);</span><br><span class="line"><span class="keyword">struct</span> person_q person1_queue;</span><br><span class="line"><span class="keyword">struct</span> person_q person2_queue;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="built_in">int</span> <span class="title">main</span>(<span class="params"><span class="keyword">void</span></span>)</span>&#123;</span><br><span class="line">        FIFO_INIT(&amp;person1_queue, <span class="number">1</span>);</span><br><span class="line">        FIFO_INIT(&amp;person2_queue, <span class="number">5</span>);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (FIFO_CAPACITY(&amp;person1_queue) != <span class="number">1</span>) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_CAPACITY 1 NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (FIFO_CAPACITY(&amp;person2_queue) != <span class="number">5</span>) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_CAPACITY 2 NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">if</span> (FIFO_SIZE(&amp;person1_queue) != <span class="number">0</span>) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_SIZE 1 NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">if</span> (FIFO_SIZE(&amp;person2_queue) != <span class="number">0</span>) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_SIZE 2 NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (!FIFO_EMPTY(&amp;person1_queue)) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_EMPTY 1 NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">if</span> (!FIFO_EMPTY(&amp;person2_queue)) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_EMPTY 2 NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">struct</span> person *person_a = malloc(<span class="keyword">sizeof</span>(*person_a));</span><br><span class="line">        person_a-&gt;age = <span class="number">20</span>;</span><br><span class="line">        person_a-&gt;id = <span class="number">1001</span>;</span><br><span class="line">        FIFO_PUSH(&amp;person1_queue, person_a);<span class="comment">//把person_a这个结构体指针元素丢进FIFO,</span></span><br><span class="line">        <span class="comment">//后面对它pop出来又能拿到它，所以不用担心地址弄丢导致无法释放.</span></span><br><span class="line"> </span><br><span class="line">        <span class="keyword">if</span> (!FIFO_FULL(&amp;person1_queue)) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_FULL 1 NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        person_a = malloc(<span class="keyword">sizeof</span>(*person_a));</span><br><span class="line">        person_a-&gt;age = <span class="number">30</span>;</span><br><span class="line">        person_a-&gt;id = <span class="number">1002</span>;</span><br><span class="line">        FIFO_PUSH(&amp;person2_queue, person_a);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (FIFO_FULL(&amp;person2_queue)) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_FULL 2 NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (FIFO_SIZE(&amp;person1_queue) != <span class="number">1</span>) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_SIZE 3 NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (FIFO_SIZE(&amp;person2_queue) != <span class="number">1</span>) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_SIZE 4 NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        FIFO_POP(&amp;person1_queue, &amp;person_a);</span><br><span class="line">        <span class="keyword">if</span> (person_a-&gt;age != <span class="number">20</span>) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_POP content NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        free(person_a);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (FIFO_SIZE(&amp;person1_queue) != <span class="number">0</span>) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_SIZE 5 NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        person_a = malloc(<span class="keyword">sizeof</span>(*person_a));</span><br><span class="line">        person_a-&gt;age = <span class="number">40</span>;</span><br><span class="line">        person_a-&gt;id = <span class="number">1003</span>;</span><br><span class="line">        FIFO_PUSH(&amp;person2_queue, person_a);</span><br><span class="line"></span><br><span class="line">        FIFO_GET_FRONT(&amp;person2_queue, &amp;person_a);</span><br><span class="line">        <span class="keyword">if</span> (person_a-&gt;age != <span class="number">30</span>) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_GET_FRONT NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        FIFO_GET_TAIL(&amp;person2_queue, &amp;person_a);</span><br><span class="line">        <span class="keyword">if</span> (person_a-&gt;age != <span class="number">40</span>) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_GET_TAIL NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        FIFO_POP(&amp;person2_queue, &amp;person_a);</span><br><span class="line">        <span class="keyword">if</span> (person_a-&gt;age != <span class="number">30</span>) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_POP content NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        free(person_a);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (FIFO_SIZE(&amp;person2_queue) != <span class="number">1</span>) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_SIZE 6 NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        FIFO_POP(&amp;person2_queue, &amp;person_a);</span><br><span class="line">        <span class="keyword">if</span> (person_a-&gt;age != <span class="number">40</span>) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_POP content NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        free(person_a);</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">if</span> (FIFO_SIZE(&amp;person2_queue) != <span class="number">0</span>) &#123;</span><br><span class="line">                printf( <span class="string">&quot;FIFO_SIZE 7 NG.\n&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        <span class="keyword">struct</span> person *person_arr[<span class="number">5</span>];</span><br><span class="line">        <span class="built_in">int</span> i=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (!FIFO_FULL(&amp;person2_queue)) &#123;</span><br><span class="line">                person_arr[i] = malloc(<span class="keyword">sizeof</span>(*person_arr[<span class="number">0</span>]));</span><br><span class="line">                person_arr[i]-&gt;age = i;</span><br><span class="line">                person_arr[i]-&gt;id = <span class="number">1000</span> + i;</span><br><span class="line">                FIFO_PUSH(&amp;person2_queue, person_arr[i]);</span><br><span class="line">                i++;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (!FIFO_EMPTY(&amp;person2_queue) &#123;</span><br><span class="line">                FIFO_POP(&amp;person2_queue, &amp;person_a);</span><br><span class="line">                printf( <span class="string">&quot;age:%d, id:%d.\n&quot;</span>, person_a-&gt;age, person_a-&gt;id);</span><br><span class="line">                free(person_a);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        FIFO_EXIT(&amp;person1_queue);</span><br><span class="line">        FIFO_EXIT(&amp;person2_queue);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果如下：</p>
+<p><img src="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/12.png" alt="img"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/" data-id="cluuyksbq0000eklpchefgzwv" data-title="循环队列FIFO原理图解" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-tailq队列" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/04/11/tailq%E9%98%9F%E5%88%97/" class="article-date">
@@ -1767,80 +1886,6 @@ E:\ -name:nfs_udisk -public -maproot:0 *(rw,sync,no_root_squash)
 
 
   
-    <article id="post-gdb移植到arm开发板" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/" class="article-date">
-  <time class="dt-published" datetime="2024-03-28T13:59:59.000Z" itemprop="datePublished">2024-03-28</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/">gdb移植到arm开发板</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-xia-zai-gdb">1.下载gdb</a></li>
-<li><a href="#2-bian-yi-an-zhuang">2.编译安装</a><ul>
-<li><a href="#2-1-she-zhi-gong-ju-lian">2.1 设置工具链</a></li>
-<li><a href="#2-2-bian-yi-ncurses">2.2 编译ncurses</a></li>
-<li><a href="#2-3-bian-yi-gdb">2.3 编译gdb</a></li>
-</ul>
-</li>
-<li><a href="#3-yun-xing-ce-shi">3.运行测试</a></li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-xia-zai-gdb">1.下载gdb</span><a href="#1-xia-zai-gdb" class="header-anchor">#</a></h1><p><a target="_blank" rel="noopener" href="https://ftp.gnu.org/gnu/gdb/">https://ftp.gnu.org/gnu/gdb/</a></p>
-<p><a target="_blank" rel="noopener" href="http://ftp.gnu.org/gnu/ncurses/">http://ftp.gnu.org/gnu/ncurses/</a></p>
-<p>我这里选择的是gdb-7.12.tar.gz和ncurses-5.6.tar.gz</p>
-<h1><span id="2-bian-yi-an-zhuang">2.编译安装</span><a href="#2-bian-yi-an-zhuang" class="header-anchor">#</a></h1><h2><span id="2-1-she-zhi-gong-ju-lian">2.1 设置工具链</span><a href="#2-1-she-zhi-gong-ju-lian" class="header-anchor">#</a></h2><p><code>export PATH=$PATH:/home/robin/share/cv183x/host-tools/gcc/gcc-linaro-6.3.1-2017.05-x86_64_aarch64-linux-gnu/bin/</code><br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/1.png"><br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/2.png"></p>
-<h2><span id="2-2-bian-yi-ncurses">2.2 编译ncurses</span><a href="#2-2-bian-yi-ncurses" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./configure --host=aarch64-linux-gnu-gcc --prefix=/home/robin/share/ncurses --without-ada --enable-termcap --with-shared CFLAGS=<span class="string">&quot;-O3 -fPIC&quot;</span></span><br><span class="line">    make</span><br><span class="line">	make install</span><br></pre></td></tr></table></figure>
-
-<p>执行.&#x2F;configure时可能会失败，报错如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/3.png"><br>这是由于64bit machine配置引起的，进行如下操作后继续尝试。</p>
-<pre><code>wget -O config.guess &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD&#39;
-wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD&#39;
-</code></pre>
-<p>编译出的ncurses库如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/4.png"></p>
-<h2><span id="2-3-bian-yi-gdb">2.3 编译gdb</span><a href="#2-3-bian-yi-gdb" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">tar xvf gdb-7.12.tar.gz;</span><br><span class="line"><span class="built_in">cd</span> gdb-7.12</span><br><span class="line">./configure --host=aarch64-linux-gnu-gcc(--host=arm-linux-gnueabihf) --enable-shared --prefix=/home/robin/share/gdb --without-x --disable-gdbtk --disable-tui --without-included-regex --without-included-gettext  --disable-werror CFLAGS=<span class="string">&quot;-O0 -fPIC&quot;</span></span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
-
-<p>.&#x2F;configure后结果如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/5.png"></p>
-<p>make install后结果如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/6.png"></p>
-<h1><span id="3-yun-xing-ce-shi">3.运行测试</span><a href="#3-yun-xing-ce-shi" class="header-anchor">#</a></h1><p>1.将gdb和ncureses库cp到板子运行，结果如下：<br><img src="/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/7.png"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/" data-id="clubb8ihn000098uf1mux67pn" data-title="gdb移植到arm开发板" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -1869,7 +1914,7 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 20px;">linux嵌入式环境搭建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 15px;">mipi图像处理</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 10px;">数据结构</a>
+      <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 20px;">linux嵌入式环境搭建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 10px;">mipi图像处理</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 10px;">数据结构</a>
     </div>
   </div>
 
@@ -1891,6 +1936,10 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
       <ul>
         
           <li>
+            <a href="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/">循环队列FIFO原理图解</a>
+          </li>
+        
+          <li>
             <a href="/2024/04/11/tailq%E9%98%9F%E5%88%97/">tailq队列</a>
           </li>
         
@@ -1904,10 +1953,6 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
         
           <li>
             <a href="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/">mipi-csi软件篇</a>
-          </li>
-        
-          <li>
-            <a href="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/">mipi-csi硬件篇</a>
           </li>
         
       </ul>
