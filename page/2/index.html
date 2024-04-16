@@ -69,6 +69,250 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-mipi-csi硬件篇" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/" class="article-date">
+  <time class="dt-published" datetime="2024-04-02T06:28:07.000Z" itemprop="datePublished">2024-04-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/">mipi-csi硬件篇</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-mipi-csi-ying-jian">1 mipi-csi硬件</a><ul>
+<li><a href="#1-1-mipi-csi-gai-nian">1.1 mipi-csi概念</a></li>
+<li><a href="#1-2-mipi-vs-dvp">1.2 MIPI vs DVP</a></li>
+<li><a href="#1-3-csi-gui-ge">1.3 CSI规格</a></li>
+<li><a href="#1-4-csi-jie-kou-lei-xing">1.4 CSI接口類型</a></li>
+<li><a href="#1-5-csi-ying-jian-yin-jiao-ji-jie-xian">1.5 CSI 硬件引脚及接线</a><ul>
+<li><a href="#1-5-1-mipi-sensor-yin-jiao-miao-shu">1.5.1 mipi sensor引脚描述:</a></li>
+<li><a href="#1-5-2-dian-lu-tu-xian-lu-jie-gou">1.5.2 电路图线路结构</a></li>
+</ul>
+</li>
+<li><a href="#1-6-chai-fen-xin-hao-jie-shao">1.6 差分信号介绍</a></li>
+<li><a href="#1-7-mipi-sensor-de-power-on-shi-xu">1.7 MIPI sensor的 power on时序</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+# 1 mipi-csi硬件
+
+<h2><span id="1-1-mipi-csi-gai-nian">1.1 mipi-csi概念</span><a href="#1-1-mipi-csi-gai-nian" class="header-anchor">#</a></h2><p><strong>DSI （Display serial interface）</strong>定义了一个位于处理器和显示模组之间的高速串行接口,对应MIPI-TX.<br><strong>CSI(Camera Serial Interface）</strong>定义了一个位于处理器和摄像模组之间的高速串行接口,也就是接下来要讲的MIPI-RX。</p>
+<p>MIPI Rx (Mobile Industry Processor Interface Receiver) 模塊主要功能為接收由 CMOS sensor 所傳送的視頻數據， 支持 MIPI D-PHY、 sub-LVDS (Low-Voltage Differential Signal)、 HiSPi (High-Speed Serial Pixel Interface) 等不同的串行視頻信號輸入， 並將其處理轉化為內部視頻時序，傳遞給下一級的視頻處理模塊 (ISP)。MIPI Rx 模塊中可細分為 PHY 和 Controller 兩部分，其中 PHY 模塊集成了模擬和數字兩個部分，主要將串行信號轉換為並行信號，而 Controller 模塊則負責解碼不同的視頻數據格式，傳送給後端的視頻處理模塊 (ISP)。功能框圖及在系統中的位置如下图所示:</p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/1.png" alt="img"></p>
+<h2><span id="1-2-mipi-vs-dvp">1.2 MIPI vs DVP</span><a href="#1-2-mipi-vs-dvp" class="header-anchor">#</a></h2><p><strong>DVP:</strong></p>
+<p>并口传输数据需要帧同步信号（Vsync）、行同步信号（Hsync）和八条数据线，共十根数据线, DVP 接口在信号完整性方面受限制，速率也受限制。</p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/2.png" alt="img"></p>
+<p><strong>MIPI:</strong></p>
+<p>MIPI 传输只需要帧同步信号（Vsync）、行同步信号（Hsync）、mipi 时钟（mipi_clk）、mipi 数据（mipi_data）和像素时钟（PCLK）5 根数据线。对比MIPI 接口比 DVP 的接口信号线少，由于是低压差分信号，产生的干扰小，抗干扰能力也强。</p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/3.png" alt="img"></p>
+<h2><span id="1-3-csi-gui-ge">1.3 CSI规格</span><a href="#1-3-csi-gui-ge" class="header-anchor">#</a></h2><p>可同時支持 2 路 sensor 輸入（2组D-PHY， 每组5对差分线（1C4D））</p>
+<p>• sensor 0 最大支持 4K2K @60fps HDR or @30fps 線性輸入</p>
+<p>• sensor 1 最大支持 3M(2304x1296) @60fps HDR or linear 輸入</p>
+<p>• 單路最多支持 4-Lane MIPI D-PHY 接口，最大支持 2.5Gbps&#x2F;Lane</p>
+<p>• 單路最多支持 4-Lane sub-LVDS&#x2F; HiSPi 接口，最大支持 1.5Gbps&#x2F;Lane</p>
+<p>• 支持 RAW8&#x2F; RAW10&#x2F; RAW12 數據類型的解析</p>
+<p>• 支持 YUV422 8-bit&#x2F; YUV422 10-bit 數據類型的解析</p>
+<p>• 最多支持 2 幀 WDR，支持多種 WDR 時序</p>
+<p>• 支持 sub-LVDS&#x2F; HiSPi 模式像素&#x2F;同步碼大小端配置</p>
+<p>• 支持 Lane 數和 Lane 順序可配置</p>
+<p>MIPI Rx 的帶寬有兩部分限制： PHY 的接口數據率和內部處理速度。</p>
+<p>輸入接口最大支持 2.5Gbps&#x2F;Lane，內部處理速度最大為 600M*1pixels&#x2F;s（MAC clk）</p>
+<h2><span id="1-4-csi-jie-kou-lei-xing">1.4 CSI接口類型</span><a href="#1-4-csi-jie-kou-lei-xing" class="header-anchor">#</a></h2><table>
+<thead>
+<tr>
+<th>Common modevoltage</th>
+<th>Differential modevoltage</th>
+<th>Maximum clockfrequency</th>
+<th>Maximum datarate per lane</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>MIPI DPHY</strong> 200mV</td>
+<td>200mV</td>
+<td>1.25GHz</td>
+<td>2.5Gbps</td>
+</tr>
+<tr>
+<td>Sub-LVDS 900mV</td>
+<td>150mV</td>
+<td>750MHz</td>
+<td>1.5Gbps</td>
+</tr>
+<tr>
+<td>HiSPi(HiVCM) 900mV</td>
+<td>280mV</td>
+<td>750MHz</td>
+<td>1.5Gbps</td>
+</tr>
+<tr>
+<td>HiSPi(SLVDS) 200mV</td>
+<td>200mV</td>
+<td>750MHz</td>
+<td>1.5Gbps</td>
+</tr>
+</tbody></table>
+<h2><span id="1-5-csi-ying-jian-yin-jiao-ji-jie-xian">1.5 CSI 硬件引脚及接线</span><a href="#1-5-csi-ying-jian-yin-jiao-ji-jie-xian" class="header-anchor">#</a></h2><p>常用的电脑摄像头是USB接口, 主流的智能手机摄像头是MIPI接口, 下面讲解常用的智能手机 camera MIPI接口。</p>
+<p>MIPI CSI一般会有1对I2C通信引脚，1对MIPI差分时钟引脚和1~4对MIPI差分数据信号引脚, 也就是1CD4(1 clk lane &amp; 4 data lane)。</p>
+<h3><span id="1-5-1-mipi-sensor-yin-jiao-miao-shu">1.5.1 mipi sensor引脚描述:</span><a href="#1-5-1-mipi-sensor-yin-jiao-miao-shu" class="header-anchor">#</a></h3><table>
+<thead>
+<tr>
+<th>信号名</th>
+<th>引脚类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DOVDD</td>
+<td>电源</td>
+<td>1.8V IO 电源</td>
+</tr>
+<tr>
+<td>DVDD</td>
+<td>电源</td>
+<td>1.2V 数字电源</td>
+</tr>
+<tr>
+<td>AVDD</td>
+<td>电源</td>
+<td>2.8V 模拟电源</td>
+</tr>
+<tr>
+<td>SCL</td>
+<td>输入</td>
+<td>I2C 时钟线</td>
+</tr>
+<tr>
+<td>SDA</td>
+<td>输入&#x2F;输出</td>
+<td>I2C 数据线(open drain)</td>
+</tr>
+<tr>
+<td>SID0</td>
+<td>输入</td>
+<td>I2C Device ID 的选择 0 (内置下拉电阻，默认Device ID 是 7’h30)</td>
+</tr>
+<tr>
+<td>SID1</td>
+<td>输入</td>
+<td>I2C Device ID 的选择 1 (内置下拉电阻，默认Device ID 是 7’h30)</td>
+</tr>
+<tr>
+<td>XSHUTDN （RST）</td>
+<td>输入</td>
+<td>复位信号输入(内置上拉电阻，低电位有效)</td>
+</tr>
+<tr>
+<td>EXTCLK</td>
+<td>输入</td>
+<td>时钟输入</td>
+</tr>
+<tr>
+<td>PWDNB</td>
+<td>输入</td>
+<td>Power Down 信号输入(内置上拉电阻， 低电位有效)</td>
+</tr>
+<tr>
+<td>D&lt;3&gt;(MD3P)</td>
+<td>输出</td>
+<td>DVP 输出 bit[3]&#x2F;MIPI 数据 3 正极信号</td>
+</tr>
+<tr>
+<td>D&lt;5&gt;(MD1P)</td>
+<td>输出</td>
+<td>DVP 输出 bit[5]&#x2F;MIPI 数据 1 正极信号</td>
+</tr>
+<tr>
+<td>D&lt;7&gt;(MCP)</td>
+<td>输出</td>
+<td>DVP 输出 bit[7]&#x2F;MIPI 时钟正极信号</td>
+</tr>
+<tr>
+<td>D&lt;8&gt;(MD0P)</td>
+<td>输出</td>
+<td>DVP 输出 bit[8]&#x2F;MIPI 数据 0 正极信号</td>
+</tr>
+<tr>
+<td>D&lt;10&gt;(MD2P)</td>
+<td>输出</td>
+<td>DVP 输出 bit[10]&#x2F;MIPI 数据 2 正极信号</td>
+</tr>
+<tr>
+<td>D&lt;4&gt;(MD3N)</td>
+<td>输出</td>
+<td>DVP 输出 bit[4]&#x2F;MIPI 数据 3 负极信号</td>
+</tr>
+<tr>
+<td>D&lt;6&gt;(MD1N)</td>
+<td>输出</td>
+<td>DVP 输出 bit[6]&#x2F;MIPI 数据 1 负极信号</td>
+</tr>
+<tr>
+<td>PCLK(MCN)</td>
+<td>输出</td>
+<td>DVP 输出时钟&#x2F;MIPI 时钟负极信号</td>
+</tr>
+<tr>
+<td>D&lt;9&gt;(MD0N)</td>
+<td>输出</td>
+<td>DVP 输出 bit[9]&#x2F;MIPI 数据 0 负极信号</td>
+</tr>
+<tr>
+<td>D&lt;11&gt;(MD2N)</td>
+<td>输出</td>
+<td>DVP 输出 bit[11]&#x2F;MIPI 数据 2 负极信号</td>
+</tr>
+</tbody></table>
+<h3><span id="1-5-2-dian-lu-tu-xian-lu-jie-gou">1.5.2 电路图线路结构</span><a href="#1-5-2-dian-lu-tu-xian-lu-jie-gou" class="header-anchor">#</a></h3><p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/4.png" alt="img"></p>
+<p>一般mipi接口的sensor支持4 lane，2 lane，1 lane等数据传输方式。上图硬件上的连接了1组clk lane, 4组data lane。这幅图只连接了i2c和lane总线，还有EXTCLK ，PWDN, RST, VDD等引脚的连线需要外部soc去提供。这里就需要驱动人员会看原理图，知道lane id和pn swap的接线。clk lane, data lane等。</p>
+<h2><span id="1-6-chai-fen-xin-hao-jie-shao">1.6 差分信号介绍</span><a href="#1-6-chai-fen-xin-hao-jie-shao" class="header-anchor">#</a></h2><p>我们用一个方法对差分信号做一下比喻，差分信号就好比是跷跷板上的两个人，当一个人被跷上去的时候，另一个人被跷下来了 - 但是他们的平均位置是不变的。继续跷跷板的类推，正值可以表示左边的人比右边的人高，而负值表示右边的人比左边的人高。0 表示两个人都是同一水平。</p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/5.png" alt="img"></p>
+<p>下图，应用到电学上，这两个跷跷板用一对标识为V+和V-的导线来表示。当V+ &gt; V-时，信号定义成正极信号，V+ &lt; V-时，信号定义成负极信号。 差分对的平均电压设置成 2.5V。</p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/6.png" alt="img"></p>
+<h2><span id="1-7-mipi-sensor-de-power-on-shi-xu">1.7 MIPI sensor的 power on时序</span><a href="#1-7-mipi-sensor-de-power-on-shi-xu" class="header-anchor">#</a></h2><p><strong>Sony imx334：</strong></p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/7.png" alt="img"></p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/8.png" alt="img"></p>
+<p><strong>SC4210：</strong></p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/9.png" alt="img"></p>
+<p>这里列举了sony imx334和格科微gc2093, sc4210的上电时序，现在市面上大部分的mipi接口sensor都可以让VDD，PWDN, RST，EXTCLK讯号同时发出，然后过一段时间后就可以进行I2c通信了。</p>
+<p>在HW交接到SW后，要确保最基本的power on时序是ok的，最好是用示波器对VDD，PWDN, RST，EXTCLK，I2c等波形进行测量无误后再porting到SW手上。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/" data-id="clui0imhd0000uklp1w4ofz5c" data-title="mipi-csi硬件篇" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Vim配置成类似source-insight的IDE" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/" class="article-date">
@@ -1167,6 +1411,10 @@ sudo /etc/init.d/vsftpd restart
       <ul>
         
           <li>
+            <a href="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/">s3c2440裸机-异常中断</a>
+          </li>
+        
+          <li>
             <a href="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/">s3c2440裸机编程-代码重定位和清bss</a>
           </li>
         
@@ -1180,10 +1428,6 @@ sudo /etc/init.d/vsftpd restart
         
           <li>
             <a href="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/">s3c2440裸机编程-时钟体系</a>
-          </li>
-        
-          <li>
-            <a href="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/">循环队列FIFO原理图解</a>
           </li>
         
       </ul>
