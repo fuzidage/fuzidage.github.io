@@ -133,7 +133,7 @@
 
 </div>
 
-<h1><span id="1-pei-zhi-xu-ni-ji-net-mo-shi">1 配置虚拟机NET模式</span><a href="#1-pei-zhi-xu-ni-ji-net-mo-shi" class="header-anchor"></a></h1><p>vmware安装后默认就会用NAT方式和pc主机共享网络，虚拟机是通过pc主机的网卡数据转换进行上网的，只要windows主机有网，虚拟机就会对应有网络。<br>NAT模式在这里主要目的就是提供给虚拟机进行上网。<br>如果没有可以进行如下配置，打开虚拟机-&gt;编辑虚拟机设置-&gt;网络适配器,网络连接选择NAT模式如下图：</p>
+<h1><span id="1-pei-zhi-xu-ni-ji-net-mo-shi">1 配置虚拟机NET模式</span><a href="#1-pei-zhi-xu-ni-ji-net-mo-shi" class="header-anchor">#</a></h1><p>vmware安装后默认就会用NAT方式和pc主机共享网络，虚拟机是通过pc主机的网卡数据转换进行上网的，只要windows主机有网，虚拟机就会对应有网络。<br>NAT模式在这里主要目的就是提供给虚拟机进行上网。<br>如果没有可以进行如下配置，打开虚拟机-&gt;编辑虚拟机设置-&gt;网络适配器,网络连接选择NAT模式如下图：</p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/1.png" alt="img"></p>
  <span id="more"></span>
 
@@ -146,22 +146,22 @@
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/5.png" alt="img"></p>
 <p> windows搜索框输入vmnet,进入虚拟网络编辑器，可以看到虚拟网络信息，有这个VMnet8，模式为NAT</p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/6.png" alt="img"></p>
-<h1><span id="2-pei-zhi-xu-ni-ji-qiao-jie-wang-luo">2 配置虚拟机桥接网络</span><a href="#2-pei-zhi-xu-ni-ji-qiao-jie-wang-luo" class="header-anchor"></a></h1><h2><span id="2-1-fang-fa-1-shi-yong-usb-wang-qia">2.1 方法1：使用usb网卡</span><a href="#2-1-fang-fa-1-shi-yong-usb-wang-qia" class="header-anchor"></a></h2><p>需要买一个usb网卡，连接板子和windows主机。双网卡配置参考如下视频： <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1zV411U7H9?p=3">https://www.bilibili.com/video/BV1zV411U7H9?p=3</a></p>
-<h2><span id="2-1-fang-fa-2-shi-yong-lu-you-qi">2.1 方法2：使用路由器</span><a href="#2-1-fang-fa-2-shi-yong-lu-you-qi" class="header-anchor"></a></h2><h3><span id="2-1-1-tian-jia-qiao-jie-wang-qia">2.1.1 添加桥接网卡</span><a href="#2-1-1-tian-jia-qiao-jie-wang-qia" class="header-anchor"></a></h3><p>桥接网络使用实际的物理网卡进行数据交换，因此需要借助实际的物理网卡，可以是有线网卡，也可以是无线网卡。桥接的目的是为了让虚拟机和主机以及板子能够互相进行收据收发传送。打开虚拟机，配置如下：</p>
+<h1><span id="2-pei-zhi-xu-ni-ji-qiao-jie-wang-luo">2 配置虚拟机桥接网络</span><a href="#2-pei-zhi-xu-ni-ji-qiao-jie-wang-luo" class="header-anchor">#</a></h1><h2><span id="2-1-fang-fa-1-shi-yong-usb-wang-qia">2.1 方法1：使用usb网卡</span><a href="#2-1-fang-fa-1-shi-yong-usb-wang-qia" class="header-anchor">#</a></h2><p>需要买一个usb网卡，连接板子和windows主机。双网卡配置参考如下视频： <a target="_blank" rel="noopener" href="https://www.bilibili.com/video/BV1zV411U7H9?p=3">https://www.bilibili.com/video/BV1zV411U7H9?p=3</a></p>
+<h2><span id="2-1-fang-fa-2-shi-yong-lu-you-qi">2.1 方法2：使用路由器</span><a href="#2-1-fang-fa-2-shi-yong-lu-you-qi" class="header-anchor">#</a></h2><h3><span id="2-1-1-tian-jia-qiao-jie-wang-qia">2.1.1 添加桥接网卡</span><a href="#2-1-1-tian-jia-qiao-jie-wang-qia" class="header-anchor">#</a></h3><p>桥接网络使用实际的物理网卡进行数据交换，因此需要借助实际的物理网卡，可以是有线网卡，也可以是无线网卡。桥接的目的是为了让虚拟机和主机以及板子能够互相进行收据收发传送。打开虚拟机，配置如下：</p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/7.png" alt="img"></p>
-<h3><span id="2-1-2-pei-zhi-qiao-jie-wang-qia">2.1.2 配置桥接网卡</span><a href="#2-1-2-pei-zhi-qiao-jie-wang-qia" class="header-anchor"></a></h3><p>打开vmnet,进入虚拟网络编辑器,在这个里面要把桥接网卡选择成具体的网卡型号，不能设置为自动桥接。注意：这里根据你电脑主机接路由器的网卡，如果你用的无线网卡与路由器通信，那么就要桥接到无线网卡，如果是接网线到路由器，那就要用有线网卡。具体的网卡名字可以进入入网络共享中心-&gt;更改适配器选项或者进入设备管理器来确认清楚。</p>
+<h3><span id="2-1-2-pei-zhi-qiao-jie-wang-qia">2.1.2 配置桥接网卡</span><a href="#2-1-2-pei-zhi-qiao-jie-wang-qia" class="header-anchor">#</a></h3><p>打开vmnet,进入虚拟网络编辑器,在这个里面要把桥接网卡选择成具体的网卡型号，不能设置为自动桥接。注意：这里根据你电脑主机接路由器的网卡，如果你用的无线网卡与路由器通信，那么就要桥接到无线网卡，如果是接网线到路由器，那就要用有线网卡。具体的网卡名字可以进入入网络共享中心-&gt;更改适配器选项或者进入设备管理器来确认清楚。</p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/8.png" alt="img"></p>
 <p>配置完桥接网卡后，需要配置桥接网卡对应到window主机&#x2F;虚拟机&#x2F;板子的ip.</p>
-<h3><span id="2-1-3-pei-zhi-xu-ni-ji-qiao-jie-wang-qia-jing-tai-ip">2.1.3 配置虚拟机桥接网卡静态ip</span><a href="#2-1-3-pei-zhi-xu-ni-ji-qiao-jie-wang-qia-jing-tai-ip" class="header-anchor"></a></h3><p>ifconfig查看，发现桥接的网卡在虚拟机中还没有分配ip.</p>
+<h3><span id="2-1-3-pei-zhi-xu-ni-ji-qiao-jie-wang-qia-jing-tai-ip">2.1.3 配置虚拟机桥接网卡静态ip</span><a href="#2-1-3-pei-zhi-xu-ni-ji-qiao-jie-wang-qia-jing-tai-ip" class="header-anchor">#</a></h3><p>ifconfig查看，发现桥接的网卡在虚拟机中还没有分配ip.</p>
 <p> <img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/9.png" alt="img"></p>
 <p>进入ubuntu setting-&gt; network， 设置成和路由器同一网段即可。配置ens36 ip为192.168.2.100</p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/10.png" alt="img"></p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/11.png" alt="img"></p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/12.png" alt="img"></p>
-<h3><span id="2-1-4-pei-zhi-windows-zhu-ji-qiao-jie-wang-qia-ip">2.1.4 配置windows主机桥接网卡ip</span><a href="#2-1-4-pei-zhi-windows-zhu-ji-qiao-jie-wang-qia-ip" class="header-anchor"></a></h3><p>桥接网卡为intel Ethernet Connection I219-V ,ip 192.168.2.6</p>
+<h3><span id="2-1-4-pei-zhi-windows-zhu-ji-qiao-jie-wang-qia-ip">2.1.4 配置windows主机桥接网卡ip</span><a href="#2-1-4-pei-zhi-windows-zhu-ji-qiao-jie-wang-qia-ip" class="header-anchor">#</a></h3><p>桥接网卡为intel Ethernet Connection I219-V ,ip 192.168.2.6</p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/13.png" alt="img"></p>
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/14.png" alt="img"></p>
-<h3><span id="2-1-5-pei-zhi-kai-fa-ban-ip">2.1.5 配置开发板IP</span><a href="#2-1-5-pei-zhi-kai-fa-ban-ip" class="header-anchor"></a></h3><p><strong>三者互 ping 验证:</strong></p>
+<h3><span id="2-1-5-pei-zhi-kai-fa-ban-ip">2.1.5 配置开发板IP</span><a href="#2-1-5-pei-zhi-kai-fa-ban-ip" class="header-anchor">#</a></h3><p><strong>三者互 ping 验证:</strong></p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">windows ip: 192.168.2.6</span><br><span class="line">ubuntu ip:  192.168.2.100</span><br><span class="line">开发板 ip:   192.168.2.xxx</span><br></pre></td></tr></table></figure>
 
 <p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/15.png" alt="img"></p>
@@ -169,7 +169,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/" data-id="clucr3vp00000h0uf6nuuc37b" data-title="vmware双网卡_NAT_桥接" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/" data-id="clv4vlbri001qyklp51eo0v0o" data-title="vmware双网卡_NAT_桥接" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -213,7 +213,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li></ul>
     </div>
   </div>
 
@@ -223,7 +223,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 15px;">arm裸机</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 20px;">linux嵌入式环境搭建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 10px;">mipi图像处理</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 10px;">数据结构</a>
+      <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 17.5px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 10px;">boot启动</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 20px;">linux嵌入式环境搭建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 15px;">mipi图像处理</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 15px;">外设驱动</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 12.5px;">存储驱动</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 15px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a>
     </div>
   </div>
 
