@@ -69,6 +69,80 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-linux搭建samba服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/" class="article-date">
+  <time class="dt-published" datetime="2024-03-27T15:17:30.000Z" itemprop="datePublished">2024-03-27</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/">linux搭建samba服务</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-an-zhuang-fu-wu">1 安装服务</a></li>
+<li><a href="#2-guan-bi-fang-huo-qiang">2 关闭防火墙</a></li>
+<li><a href="#3-tian-jia-yong-hu-book">3 添加用户book</a></li>
+<li><a href="#4-chong-qi-fu-wu">4 重启服务</a></li>
+<li><a href="#5-windows-jin-xing-samba-ying-she">5 windows进行samba映射</a></li>
+<li><a href="#6-chang-jian-wen-ti">6 常见问题</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-an-zhuang-fu-wu">1 安装服务</span><a href="#1-an-zhuang-fu-wu" class="header-anchor">#</a></h1><p><code>sudo apt-get install samba samba-common</code></p>
+<h1><span id="2-guan-bi-fang-huo-qiang">2 关闭防火墙</span><a href="#2-guan-bi-fang-huo-qiang" class="header-anchor">#</a></h1><p><code>sudo systemctl stop ufw</code></p>
+<h1><span id="3-tian-jia-yong-hu-book">3 添加用户book</span><a href="#3-tian-jia-yong-hu-book" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sudo smbpasswd -a book</span><br><span class="line">配置samba</span><br><span class="line">sudo vim /etc/samba/smb.conf</span><br><span class="line">[book_share_samba_dir]</span><br><span class="line">        comment = share samba <span class="built_in">dir</span></span><br><span class="line">        path = /home/book/ftp</span><br><span class="line">        valid <span class="built_in">users</span> = book</span><br><span class="line">        force user = book</span><br><span class="line">        force group = book</span><br><span class="line">        creat mask = 0644</span><br><span class="line">        directory mask = 0755</span><br><span class="line">        browseable= <span class="built_in">yes</span></span><br><span class="line">        available = <span class="built_in">yes</span></span><br><span class="line">        public = <span class="built_in">yes</span></span><br><span class="line">        <span class="built_in">read</span> only = no</span><br><span class="line">        writeable = <span class="built_in">yes</span></span><br></pre></td></tr></table></figure>
+
+<h1><span id="4-chong-qi-fu-wu">4 重启服务</span><a href="#4-chong-qi-fu-wu" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">~$ sudo service smbd restart</span><br><span class="line">~$ sudo /etc/init.d/smbd restart</span><br><span class="line">~$ /etc/init.d/smbd restart</span><br></pre></td></tr></table></figure>
+
+
+
+<h1><span id="5-windows-jin-xing-samba-ying-she">5 windows进行samba映射</span><a href="#5-windows-jin-xing-samba-ying-she" class="header-anchor">#</a></h1><p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/1.png" alt="img"></p>
+<p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/2.png" alt="img"></p>
+<p>注意不能用NAT虚拟网络IP访问samba, 要用桥接网络ip，不过ssh可以两种方式访问，但是NAT虚拟网络是用来虚拟机上网的IP地址可能会发生变化，还是建议用桥接网络IP地址。</p>
+<p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/3.png" alt="img"></p>
+<h1><span id="6-chang-jian-wen-ti">6 常见问题</span><a href="#6-chang-jian-wen-ti" class="header-anchor">#</a></h1><p>samba不允许一个用户使用一个以上用户名与一个服务器或共享资源的多重连接，因此需要windows进入cmd</p>
+<p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/4.png" alt="img"></p>
+<p>可以windows cmd下用 net use 命令查看下当前的共享访问到底有没有它。</p>
+<p>有的话，net use * &#x2F;del &#x2F;y</p>
+<p>重新映射网络驱动器即可</p>
+<p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/5.png" alt="img"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/" data-id="clv4vlbqv0008yklp6oul6kuj" data-title="linux搭建samba服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-linux搭建nfs服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" class="article-date">
@@ -324,7 +398,7 @@ sudo /etc/init.d/vsftpd restart
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 20px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17.5px;">boot启动</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 20px;">linux嵌入式环境搭建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 15px;">mipi图像处理</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17.5px;">外设驱动</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 12.5px;">存储驱动</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 15px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 12.5px;">通信协议</a>
+      <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 20px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 15px;">boot启动</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.33px;">linux嵌入式环境搭建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 13.33px;">mipi图像处理</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.67px;">外设驱动</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.67px;">存储驱动</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.33px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.33px;">通信协议</a>
     </div>
   </div>
 
@@ -346,6 +420,10 @@ sudo /etc/init.d/vsftpd restart
       <ul>
         
           <li>
+            <a href="/2024/04/18/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-SPI/">s3c2440裸机编程-SPI</a>
+          </li>
+        
+          <li>
             <a href="/2024/04/18/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-I2C/">s3c2440裸机编程-I2C</a>
           </li>
         
@@ -359,10 +437,6 @@ sudo /etc/init.d/vsftpd restart
         
           <li>
             <a href="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/">s3c2440裸机-异常中断</a>
-          </li>
-        
-          <li>
-            <a href="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/">s3c2440裸机编程-代码重定位和清bss</a>
           </li>
         
       </ul>
