@@ -69,6 +69,113 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-s3c2440裸机编程-时钟体系" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" class="article-date">
+  <time class="dt-published" datetime="2024-04-11T08:49:52.000Z" itemprop="datePublished">2024-04-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/">s3c2440裸机编程-时钟体系</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-zong-xian-kuang-jia">1 总线框架</a></li>
+<li><a href="#2-shi-zhong-kuang-jia">2 时钟框架</a><ul>
+<li><a href="#2-1-ru-he-xuan-ze-shi-zhong-yuan">2.1 如何选择时钟源</a></li>
+<li><a href="#2-2-ru-he-de-dao-hclk-pclk-uclk">2.2 如何得到HCLK,PCLK，UCLK</a></li>
+</ul>
+</li>
+<li><a href="#3-pei-zhi-shi-zhong-kong-zhi-qi">3 配置时钟控制器</a><ul>
+<li><a href="#3-1-s3c2440-shi-zhong-shi-xu">3.1 s3c2440时钟时序</a></li>
+<li><a href="#3-2-ru-he-pei-zhi-shi-zhong">3.2 如何配置时钟</a><ul>
+<li><a href="#3-2-1-pei-zhi-lock-time">3.2.1 配置lock time</a></li>
+<li><a href="#3-2-2-pei-zhi-mpll-de-dao-fclk">3.2.2 配置MPLL得到FCLK</a></li>
+<li><a href="#3-2-2-wan-zheng-hui-bian-dai-ma">3.2.2 完整汇编代码</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+
+<h1><span id="1-zong-xian-kuang-jia">1 总线框架</span><a href="#1-zong-xian-kuang-jia" class="header-anchor">#</a></h1><p>下图是s3c2440的总线框架，其中有AHB(Advanced High performance Bus)高速总线,APB(Advanced Peripheral Bus)外围总线。</p>
+<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/1.jpg"></p>
+<p>不同总线对应不同的时钟。</p>
+<pre><code>SOC &lt;-&gt; FCLK
+AHB &lt;-&gt; HCLK	
+APB &lt;-&gt; PCLK 
+</code></pre>
+<p>其中：</p>
+<p>1.使用AHB总线的有：LCD控制器、usb控制器、中断控制器、内存控制器等…<br>2.使用APB总线的有：i2c、spi、timer、gpio、adc等…具体上图。</p>
+<h1><span id="2-shi-zhong-kuang-jia">2 时钟框架</span><a href="#2-shi-zhong-kuang-jia" class="header-anchor">#</a></h1><p>下图表示s3c2440 Soc的时钟框图：<br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/2.png"></p>
+<p>下面从细节上讲解时钟体系：</p>
+<h2><span id="2-1-ru-he-xuan-ze-shi-zhong-yuan">2.1 如何选择时钟源</span><a href="#2-1-ru-he-xuan-ze-shi-zhong-yuan" class="header-anchor">#</a></h2><p>s3c2440时钟源有2个，一个是OSC，一个是外部时钟EXTCLK,上面的时钟框图有标记，当然大家也可以查看手册“Figure 7-1. Clock Generator Block Diagram”。</p>
+<p>那么如何选择是OSC还是EXTCLK呢？</p>
+<p>打开原理图，OM3,OM2的引脚接地，那么OM[3,2]&#x3D;00.所以根据手册“Table 7-1. Clock Source Selection at Boot-Up”可知时钟源为OSC晶振。<br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/3.png"><br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/4.png"></p>
+<h2><span id="2-2-ru-he-de-dao-hclk-pclk-uclk">2.2 如何得到HCLK,PCLK，UCLK</span><a href="#2-2-ru-he-de-dao-hclk-pclk-uclk" class="header-anchor">#</a></h2><p>先了解下PLL, DIV</p>
+<pre><code>PLL:用锁相环进行倍频
+DIV:用分频器进行分频
+</code></pre>
+<p>如下图：<br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/5.png"></p>
+<p>生成的MPLL(Main PLL)和UPLL(USB PLL)，MPLL直接提供给FCLK，通过HDIVN分频给HCLK，通过PDIVN分频给PCLK，再传给下面的各个设备。<br>osc经过UPLL(USB PLL)得到UCLK。</p>
+<h1><span id="3-pei-zhi-shi-zhong-kong-zhi-qi">3 配置时钟控制器</span><a href="#3-pei-zhi-shi-zhong-kong-zhi-qi" class="header-anchor">#</a></h1><h2><span id="3-1-s3c2440-shi-zhong-shi-xu">3.1 s3c2440时钟时序</span><a href="#3-1-s3c2440-shi-zhong-shi-xu" class="header-anchor">#</a></h2><p>下图是2440时钟配置时序：</p>
+<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/6.jpg"></p>
+<p>1.上电后，nRESET复位信号拉低，此时cpu还无法取指令工作。<br>2.nRESET复位信号结束后变为高电平，此时cpu开始工作。此时cpu主频FCLK&#x3D;osc。<br>3.此时可以配置PLL，经过lock time后，FCLK倍频成新的时钟。</p>
+<h2><span id="3-2-ru-he-pei-zhi-shi-zhong">3.2 如何配置时钟</span><a href="#3-2-ru-he-pei-zhi-shi-zhong" class="header-anchor">#</a></h2><p>在参考手册的特性里介绍了S3C2440的工作频率，Fclk最高400MHz，Hclk最高136MHz，Pclk最高68MHz。那么 我们干脆配置FCLK：HCLK:PCLK&#x3D; 400：100：50 (MHz).</p>
+<h3><span id="3-2-1-pei-zhi-lock-time">3.2.1 配置lock time</span><a href="#3-2-1-pei-zhi-lock-time" class="header-anchor">#</a></h3><p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/7.png"></p>
+<pre><code>我们取芯片手册上的推荐值。
+</code></pre>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/* LOCKTIME(0x4C000000) = 0xFFFFFFFF */</span><br><span class="line">ldr r0, =0x4C000000</span><br><span class="line">ldr r1, =0xFFFFFFFF</span><br><span class="line">str r1, [r0]</span><br></pre></td></tr></table></figure>
+<h3><span id="3-2-2-pei-zhi-mpll-de-dao-fclk">3.2.2 配置MPLL得到FCLK</span><a href="#3-2-2-pei-zhi-mpll-de-dao-fclk" class="header-anchor">#</a></h3><p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/8.png"></p>
+<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/9.png"></p>
+<p>也可参考配置表取值<br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/10.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">/*</span><br><span class="line">** MPLL(FCLK) = 2*m*Fin/(p*2^s)</span><br><span class="line">** 不妨取：</span><br><span class="line">** m = MDIV+8 = 92+8=100</span><br><span class="line">** p = PDIV+2 = 1+2 = 3</span><br><span class="line">** s = SDIV = 1</span><br><span class="line">** 则：</span><br><span class="line">** FCLK= 2*100*12/(3*2^1)=400M</span><br><span class="line">*/</span><br><span class="line">ldr r0, =0x4C000004</span><br><span class="line">ldr r1, =(92&lt;&lt;12)|(1&lt;&lt;4)|(1&lt;&lt;0)</span><br><span class="line">str r1, [r0]</span><br></pre></td></tr></table></figure>
+
+<p>注意：如果也要配置了UPLL,那么先配置UPLL,要个7个NOP后才能再配置MPLL.</p>
+<p>###3,配置CLKDIVN得到HCLK,PCLK<br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/11.png"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/* CLKDIVN(0x4C000014) = 0X5, tFCLK:tHCLK:tPCLK = 1:4:8  */</span><br><span class="line">ldr r0, =0x4C000014</span><br><span class="line">ldr r1, =0x5</span><br><span class="line">str r1, [r0]</span><br></pre></td></tr></table></figure>
+
+<p>注意：如果HDIV设置为非0，CPU的总线模式要进行改变，默认情况下FCLK &#x3D; HCLK，CPU工作在fast bus mode快速总线模式下，HDIV设置为非0后， FCLK与HCLK不再相等，要将CPU改为asynchronous bus mod异步总线模式.</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/* 设置CPU工作于异步模式 */</span><br><span class="line">mrc p15, 0, r1, c1, c0, 0         /* 读取CP15 C1寄存器 */ </span><br><span class="line">orr r1, r1, #0xc0000000           /* 设置CPU总线模式 */ </span><br><span class="line">mcr p15, 0, r1, c1, c0, 0         /* 写回CP15 C1寄存器 */</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-2-2-wan-zheng-hui-bian-dai-ma">3.2.2 完整汇编代码</span><a href="#3-2-2-wan-zheng-hui-bian-dai-ma" class="header-anchor">#</a></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">.text</span><br><span class="line">.global _start</span><br><span class="line"></span><br><span class="line">_start:</span><br><span class="line">/* 关闭看门狗 */</span><br><span class="line">ldr r0, =0x53000000</span><br><span class="line">ldr r1, =0</span><br><span class="line">str r1, [r0]</span><br><span class="line"></span><br><span class="line">/* 设置MPLL, FCLK : HCLK : PCLK = 400m : 100m : 50m */</span><br><span class="line">/* LOCKTIME(0x4C000000) = 0xFFFFFFFF */</span><br><span class="line">ldr r0, =0x4C000000</span><br><span class="line">ldr r1, =0xFFFFFFFF</span><br><span class="line">str r1, [r0]</span><br><span class="line"></span><br><span class="line">/* CLKDIVN(0x4C000014) = 0X5, tFCLK:tHCLK:tPCLK = 1:4:8  */</span><br><span class="line">ldr r0, =0x4C000014</span><br><span class="line">ldr r1, =0x5</span><br><span class="line">str r1, [r0]</span><br><span class="line"></span><br><span class="line">/* 设置CPU工作于异步模式 */</span><br><span class="line">mrc p15,0,r0,c1,c0,0</span><br><span class="line">orr r0,r0,#0xc0000000   //R1_nF:OR:R1_iA</span><br><span class="line">mcr p15,0,r0,c1,c0,0</span><br><span class="line"></span><br><span class="line">/* 设置MPLLCON(0x4C000004) = (92&lt;&lt;12)|(1&lt;&lt;4)|(1&lt;&lt;0) </span><br><span class="line"> *  m = MDIV+8 = 92+8=100</span><br><span class="line"> *  p = PDIV+2 = 1+2 = 3</span><br><span class="line"> *  s = SDIV = 1</span><br><span class="line"> *  FCLK = 2*m*Fin/(p*2^s) = 2*100*12/(3*2^1)=400M</span><br><span class="line"> */</span><br><span class="line">ldr r0, =0x4C000004</span><br><span class="line">ldr r1, =(92&lt;&lt;12)|(1&lt;&lt;4)|(1&lt;&lt;0)</span><br><span class="line">str r1, [r0]</span><br><span class="line"></span><br><span class="line">/* 一旦设置PLL, 就会锁定lock time直到PLL输出稳定</span><br><span class="line"> * 然后CPU工作于新的频率FCLK</span><br><span class="line"> */</span><br><span class="line"></span><br><span class="line">/* 设置内存: sp 栈 */</span><br><span class="line">/* 分辨是nor/nand启动</span><br><span class="line"> * 写0到0地址, 再读出来</span><br><span class="line"> * 如果得到0, 表示0地址上的内容被修改了, 它对应ram, 这就是nand启动</span><br><span class="line"> * 否则就是nor启动</span><br><span class="line"> */</span><br><span class="line">mov r1, #0</span><br><span class="line">ldr r0, [r1] /* 读出原来的值备份 */</span><br><span class="line">str r1, [r1] /* 0-&gt;[0] */ </span><br><span class="line">ldr r2, [r1] /* r2=[0] */</span><br><span class="line">cmp r1, r2</span><br><span class="line">ldr sp, =0x40000000+4096</span><br><span class="line">moveq sp, #4096  /* r1=r2， nand启动，修改栈指针=4096（此时sram对应0地址） */</span><br><span class="line">streq r0, [r1]   /* 恢复原来的值 */</span><br><span class="line"></span><br><span class="line">bl main</span><br><span class="line"></span><br><span class="line">halt:</span><br><span class="line">b halt</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" data-id="clv6fu5ya000vn8lpg24c3mwv" data-title="s3c2440裸机编程-时钟体系" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-循环队列FIFO原理图解" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/" class="article-date">
@@ -1817,75 +1924,6 @@ E:\ -name:nfs_udisk -public -maproot:0 *(rw,sync,no_root_squash)
 
 
   
-    <article id="post-vmware双网卡-NAT-桥接" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/" class="article-date">
-  <time class="dt-published" datetime="2024-03-29T14:03:51.000Z" itemprop="datePublished">2024-03-29</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/">vmware双网卡_NAT_桥接</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="tocStart"></div>
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-pei-zhi-xu-ni-ji-net-mo-shi">1 配置虚拟机NET模式</a></li>
-<li><a href="#2-pei-zhi-xu-ni-ji-qiao-jie-wang-luo">2 配置虚拟机桥接网络</a><ul>
-<li><a href="#2-1-fang-fa-1-shi-yong-usb-wang-qia">2.1 方法1：使用usb网卡</a></li>
-<li><a href="#2-1-fang-fa-2-shi-yong-lu-you-qi">2.1 方法2：使用路由器</a><ul>
-<li><a href="#2-1-1-tian-jia-qiao-jie-wang-qia">2.1.1 添加桥接网卡</a></li>
-<li><a href="#2-1-2-pei-zhi-qiao-jie-wang-qia">2.1.2 配置桥接网卡</a></li>
-<li><a href="#2-1-3-pei-zhi-xu-ni-ji-qiao-jie-wang-qia-jing-tai-ip">2.1.3 配置虚拟机桥接网卡静态ip</a></li>
-<li><a href="#2-1-4-pei-zhi-windows-zhu-ji-qiao-jie-wang-qia-ip">2.1.4 配置windows主机桥接网卡ip</a></li>
-<li><a href="#2-1-5-pei-zhi-kai-fa-ban-ip">2.1.5 配置开发板IP</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-<div class="tocEnd"></div>
-
-<h1 id="1-配置虚拟机NET模式"><a href="#1-配置虚拟机NET模式" class="headerlink" title="1 配置虚拟机NET模式"></a>1 配置虚拟机NET模式</h1><p>vmware安装后默认就会用NAT方式和pc主机共享网络，虚拟机是通过pc主机的网卡数据转换进行上网的，只要windows主机有网，虚拟机就会对应有网络。<br>NAT模式在这里主要目的就是提供给虚拟机进行上网。<br>如果没有可以进行如下配置，打开虚拟机-&gt;编辑虚拟机设置-&gt;网络适配器,网络连接选择NAT模式如下图：</p>
-<p><img src="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/1.png" alt="img"></p>
-        
-          <p class="article-more-link">
-            <a href="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/#more">Read More</a>
-          </p>
-        
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/" data-id="clv6fu5yr002en8lp8fl59bv3" data-title="vmware双网卡_NAT_桥接" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -1923,7 +1961,7 @@ E:\ -name:nfs_udisk -public -maproot:0 *(rw,sync,no_root_squash)
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
     </div>
   </div>
 
@@ -1934,6 +1972,10 @@ E:\ -name:nfs_udisk -public -maproot:0 *(rw,sync,no_root_squash)
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2024/05/01/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E7%94%B5%E9%98%BB%E8%A7%A6%E6%91%B8%E5%B1%8F/">s3c2440裸机编程-电阻触摸屏</a>
+          </li>
         
           <li>
             <a href="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/">s3c2440裸机编程-LDC</a>
@@ -1949,10 +1991,6 @@ E:\ -name:nfs_udisk -public -maproot:0 *(rw,sync,no_root_squash)
         
           <li>
             <a href="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/">s3c2440裸机编程-nandflash</a>
-          </li>
-        
-          <li>
-            <a href="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-ADC/">s3c2440裸机编程-ADC</a>
           </li>
         
       </ul>
