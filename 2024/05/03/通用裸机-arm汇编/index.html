@@ -33,7 +33,7 @@
 <meta property="og:image" content="http://example.com/2024/05/03/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-arm%E6%B1%87%E7%BC%96/18.png">
 <meta property="og:image" content="http://example.com/2024/05/03/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-arm%E6%B1%87%E7%BC%96/19.png">
 <meta property="article:published_time" content="2024-05-03T07:51:11.000Z">
-<meta property="article:modified_time" content="2024-05-03T08:43:20.000Z">
+<meta property="article:modified_time" content="2024-05-03T09:25:12.000Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="arm裸机">
 <meta property="article:tag" content="arm汇编">
@@ -254,7 +254,7 @@
 
 <p><strong>2.STMIA指令、STMIB指令、STMDB指令、STMDA指令</strong><br>同理，STM是STR指令的增强型 ， 将多组寄存器数据保存进连续地址空间。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">STMIA R13！，&#123;R0-R1&#125; /*将R0，R1寄存器中的数据存入R13指向的栈空间, r13指向的地址存入R0数据，再地址+4后存入R1的数据*/</span><br></pre></td></tr></table></figure>
-<h2><span id="2-3-ru-zhan-chu-zhan-zhi-ling">2.3 入栈出栈指令</span><a href="#2-3-ru-zhan-chu-zhan-zhi-ling" class="header-anchor">#</a></h2><p>函调调用过程中离不开现场的保护和恢复。保存 R0<del>R15 寄存器的操作就叫做现场保护，恢复 R0</del>R15 寄存器的操作就叫做恢复现场。</p>
+<h2><span id="2-3-ru-zhan-chu-zhan-zhi-ling">2.3 入栈出栈指令</span><a href="#2-3-ru-zhan-chu-zhan-zhi-ling" class="header-anchor">#</a></h2><p>函调调用过程中离不开现场的保护和恢复。保存 <code>R0~R15</code> 寄存器的操作就叫做现场保护，恢复 R0~R15 寄存器的操作就叫做恢复现场。</p>
 <h4><span id="2-3-1-push">2.3.1 PUSH</span><a href="#2-3-1-push" class="header-anchor">#</a></h4><p>比如要将 R0~R3 和 R12 这 5 个寄存器压栈，当前的 <code>SP （stack pointer）</code>指针指向 <code>0X80000000</code>，我们知道栈空间的地址是向下增长的，堆空间地址向上增长。</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">PUSH &#123;R0~R3, R12&#125; @将 R0~R3 和 R12 压栈</span><br></pre></td></tr></table></figure>
 
@@ -331,10 +331,10 @@
 </tr>
 </tbody></table>
 <p>九种模式所对应的寄存器：<br><img src="/2024/05/03/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-arm%E6%B1%87%E7%BC%96/7.png" alt="image"><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/12066599.html" title="arm920t cpu模式">arm920t cpu模式</a>或者查看<a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/">s3c2440裸机-异常中断 | Hexo (fuzidage.github.io)</a>的CPU模式。</p>
-<h1><span id="4-arm-v7-cpu-tong-yong-he-te-shu-ji-cun-qi">4 arm-v7 cpu通用和特殊寄存器</span><a href="#4-arm-v7-cpu-tong-yong-he-te-shu-ji-cun-qi" class="header-anchor">#</a></h1><p>ARM 架构提供了 16 个 32 位的通用寄存器(R0<del>R15)供软件使用，前 15 个(R0</del>R14)可以用作通用的数据存储，R15 是程序计数器 PC，用来保存将要执行的指令。ARM 还提供了一个当前程序状态寄存器 CPSR 和一个备份程序状态寄存器 SPSR，SPSR 寄存器就是 CPSR 寄存器的备份。<br><img src="/2024/05/03/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-arm%E6%B1%87%E7%BC%96/8.png" alt="image"></p>
-<h2><span id="4-1-tong-yong-ji-cun-qi">4.1 通用寄存器</span><a href="#4-1-tong-yong-ji-cun-qi" class="header-anchor">#</a></h2><h3><span id="4-1-1-tong-yong-ji-cun-qi-fen-lei">4.1.1 通用寄存器分类</span><a href="#4-1-1-tong-yong-ji-cun-qi-fen-lei" class="header-anchor">#</a></h3><p>R0<del>R15 就是通用寄存器，通用寄存器可以分为以下三类：<br>①、未备份寄存器，即 R0</del>R7。<br>②、备份寄存器，即 R8~R14。<br>③、程序计数器 PC，即 R15。</p>
-<h3><span id="4-1-2-wei-bei-fen-ji-cun-qi-r0-r7">4.1.2 未备份寄存器R0-R7</span><a href="#4-1-2-wei-bei-fen-ji-cun-qi-r0-r7" class="header-anchor">#</a></h3><p>未备份寄存器指的是 R0~R7 这 8 个寄存器，因为在所有的处理器模式下这 8 个寄存器都是同一个物理寄存器，在不同的模式下，这 8 个寄存器中的数据就会被破坏.</p>
-<h3><span id="4-1-3-bei-fen-ji-cun-qi">4.1.3 备份寄存器</span><a href="#4-1-3-bei-fen-ji-cun-qi" class="header-anchor">#</a></h3><h4><span id="4-1-3-1-r8-r12">4.1.3.1 R8~R12</span><a href="#4-1-3-1-r8-r12" class="header-anchor">#</a></h4><p>R8<del>R12 这 5 个寄存器有2种物理寄存器.在快速中断模式下<code>(FIQ)</code>它们对应着 &#96;Rx_irq(x&#x3D;8</del>12)<code>物理寄存器，其他模式下对应着 </code>Rx(8<del>12)<code>物理寄存器. </code>FIQ &#96;模式下的 R8</del>R12 是独立的，因此中断处理程序可以不用执行保存和恢复中断现场的指令，从而加速中断的执行过程。</p>
+<h1><span id="4-arm-v7-cpu-tong-yong-he-te-shu-ji-cun-qi">4 arm-v7 cpu通用和特殊寄存器</span><a href="#4-arm-v7-cpu-tong-yong-he-te-shu-ji-cun-qi" class="header-anchor">#</a></h1><p>ARM 架构提供了 16 个 32 位的通用寄存器<code>(R0~R15)</code>供软件使用，前 15 个(<code>R0~R14</code>)可以用作通用的数据存储，R15 是程序计数器 PC，用来保存将要执行的指令。ARM 还提供了一个当前程序状态寄存器 CPSR 和一个备份程序状态寄存器 SPSR，SPSR 寄存器就是 CPSR 寄存器的备份。<br><img src="/2024/05/03/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-arm%E6%B1%87%E7%BC%96/8.png" alt="image"></p>
+<h2><span id="4-1-tong-yong-ji-cun-qi">4.1 通用寄存器</span><a href="#4-1-tong-yong-ji-cun-qi" class="header-anchor">#</a></h2><h3><span id="4-1-1-tong-yong-ji-cun-qi-fen-lei">4.1.1 通用寄存器分类</span><a href="#4-1-1-tong-yong-ji-cun-qi-fen-lei" class="header-anchor">#</a></h3><p><code>R0~R15</code> 就是通用寄存器，通用寄存器可以分为以下三类：<br>①、未备份寄存器，即 <code>R0~R7</code>。<br>②、备份寄存器，即 <code>R8~R14</code>。<br>③、程序计数器 PC，即 R15。</p>
+<h3><span id="4-1-2-wei-bei-fen-ji-cun-qi-r0-r7">4.1.2 未备份寄存器R0-R7</span><a href="#4-1-2-wei-bei-fen-ji-cun-qi-r0-r7" class="header-anchor">#</a></h3><p>未备份寄存器指的是 <code>R0~R7</code> 这 8 个寄存器，因为在所有的处理器模式下这 8 个寄存器都是同一个物理寄存器，在不同的模式下，这 8 个寄存器中的数据就会被破坏.</p>
+<h3><span id="4-1-3-bei-fen-ji-cun-qi">4.1.3 备份寄存器</span><a href="#4-1-3-bei-fen-ji-cun-qi" class="header-anchor">#</a></h3><h4><span id="4-1-3-1-r8-r12">4.1.3.1 R8~R12</span><a href="#4-1-3-1-r8-r12" class="header-anchor">#</a></h4><p><code>R8~R12</code> 这 5 个寄存器有2种物理寄存器.在快速中断模式下<code>(FIQ)</code>它们对应着 <code>Rx_irq(x=8~12)</code>物理寄存器，其他模式下对应着 <code>Rx(8~12)</code>物理寄存器. <code>FIQ </code>模式下的 <code>R8~R12</code> 是独立的，因此中断处理程序可以不用执行保存和恢复中断现场的指令，从而加速中断的执行过程。</p>
 <h4><span id="4-1-3-2-r13-sp">4.1.3.2 R13 (SP)</span><a href="#4-1-3-2-r13-sp" class="header-anchor">#</a></h4><p>R13 一共有 8 个物理寄存器，其中一个是用户模式<code>(User)</code>和系统模式<code>(Sys)</code>共用的，剩下的 7 个分别对应 7 种不同的模式。R13 也叫做 SP，用来做为栈指针。基本上每种模式<br>都有一个自己的 R13 物理寄存器，应用程序会初始化 R13，使其指向该模式专用的栈地址，这就是常说的初始化 SP 指针.</p>
 <h4><span id="4-1-3-2-r14-lr">4.1.3.2 R14 (LR)</span><a href="#4-1-3-2-r14-lr" class="header-anchor">#</a></h4><p> R14 一共有 7 个物理寄存器，其中一个是用户模式(User)、系统模式(Sys)和超级监视模式<code>(Hyp)</code>所共有的，剩下的 6 个分别对应 6 种不同的模式.<br> LR被叫做链接寄存器:<br>①用来存放子函数的返回地址。<br> 在子函数中，将 R14(LR)中的值赋给 R15(PC)即可完成子函数返回，比如在子程序中可以使用如下代码：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">MOV PC, LR</span><br></pre></td></tr></table></figure>
