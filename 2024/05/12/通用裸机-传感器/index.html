@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>通用裸机-传感器 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 DHT11温湿度传感器 1.1 时序解析 1.1.1 数据格式 1.1.2 时序参数 1.1.3 数据传输   1.1.4 代码实现        1 DHT11温湿度传感器# MCU通过一条数据线与DH11连接，MCU通过这条线发命令给DH11，DH11再通过这条线把数据发送给MCU。只需要一根GPIO就OK了。 核心就是MCU发给DH11的命令格式和DH11返回的数据格式。 1.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="通用裸机-传感器">
+<meta property="og:url" content="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 DHT11温湿度传感器 1.1 时序解析 1.1.1 数据格式 1.1.2 时序参数 1.1.3 数据传输   1.1.4 代码实现        1 DHT11温湿度传感器# MCU通过一条数据线与DH11连接，MCU通过这条线发命令给DH11，DH11再通过这条线把数据发送给MCU。只需要一根GPIO就OK了。 核心就是MCU发给DH11的命令格式和DH11返回的数据格式。 1.">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/1.png">
+<meta property="og:image" content="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/2.png">
+<meta property="og:image" content="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/3.png">
+<meta property="og:image" content="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/4.png">
+<meta property="og:image" content="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/5.png">
+<meta property="og:image" content="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/6.png">
+<meta property="og:image" content="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/7.png">
+<meta property="article:published_time" content="2024-05-12T06:59:31.000Z">
+<meta property="article:modified_time" content="2024-05-18T08:43:48.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="arm裸机">
+<meta property="article:tag" content="外设驱动">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-通用裸机-传感器" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/" class="article-date">
+  <time class="dt-published" datetime="2024-05-12T06:59:31.000Z" itemprop="datePublished">2024-05-12</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      通用裸机-传感器
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-dht11-wen-shi-du-chuan-gan-qi">1 DHT11温湿度传感器</a><ul>
+<li><a href="#1-1-shi-xu-jie-xi">1.1 时序解析</a><ul>
+<li><a href="#1-1-1-shu-ju-ge-shi">1.1.1 数据格式</a></li>
+<li><a href="#1-1-2-shi-xu-can-shu">1.1.2 时序参数</a></li>
+<li><a href="#1-1-3-shu-ju-chuan-shu">1.1.3 数据传输</a></li>
+</ul>
+</li>
+<li><a href="#1-1-4-dai-ma-shi-xian">1.1.4 代码实现</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-dht11-wen-shi-du-chuan-gan-qi">1 DHT11温湿度传感器</span><a href="#1-dht11-wen-shi-du-chuan-gan-qi" class="header-anchor">#</a></h1><p><img src="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/1.png" alt="img"></p>
+<p>MCU通过一条数据线与DH11连接，MCU通过这条线发命令给DH11，DH11再通过这条线把数据发送给MCU。只需要一根GPIO就OK了。</p>
+<p>核心就是MCU发给DH11的命令格式和DH11返回的数据格式。</p>
+<h2><span id="1-1-shi-xu-jie-xi">1.1 时序解析</span><a href="#1-1-shi-xu-jie-xi" class="header-anchor">#</a></h2><p><img src="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/2.png" alt="img"></p>
+<ol>
+<li><p>MCU发送一个开始信号S，这个开始信号是一个低脉冲，然后再拉高。等待DHT11应答。</p>
+</li>
+<li><p>DH11拉低，做出一个响应信号，再拉高，准备发送数据。</p>
+</li>
+<li><p>接着就是DH11返回的数据。</p>
+</li>
+</ol>
+<h3><span id="1-1-1-shu-ju-ge-shi">1.1.1 数据格式</span><a href="#1-1-1-shu-ju-ge-shi" class="header-anchor">#</a></h3><p>这些数据一共有40bit,高位先出。（8bit湿度整数数据+8bit湿度小数数据+8bi温度整数数据+8bit温度小数数据+8bit校验和）</p>
+<p>数据有40bit: 8bit湿度整数数据+8bit湿度小数数据+8bit温度整数数据+8bit温度小数数据+8bit校验和</p>
+<h3><span id="1-1-2-shi-xu-can-shu">1.1.2 时序参数</span><a href="#1-1-2-shi-xu-can-shu" class="header-anchor">#</a></h3><p><img src="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/3.png" alt="img"></p>
+<p>MCU必须先拉低至少18ms, 然后再拉高20-40us, DH11再拉低80us以响应,最后再拉高80us。</p>
+<h3><span id="1-1-3-shu-ju-chuan-shu">1.1.3 数据传输</span><a href="#1-1-3-shu-ju-chuan-shu" class="header-anchor">#</a></h3><p><img src="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/4.png" alt="img"></p>
+<p><strong>Bit0</strong>：1bit 50us开始后，DHT11拉低数据时间为30us以内。</p>
+<p><img src="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/5.png" alt="img"></p>
+<p><strong>Bit1</strong>: 1bit 50us开始后，DHT11拉低数据时间为超过70us。</p>
+<h2><span id="1-1-4-dai-ma-shi-xian">1.1.4 代码实现</span><a href="#1-1-4-dai-ma-shi-xian" class="header-anchor">#</a></h2><p><img src="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/6.png" alt="img"></p>
+<p><img src="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/7.png" alt="img"></p>
+<p>使用GPG5引脚:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">dht11_data_cfg_as_output</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">        GPGCON &amp;= ~(<span class="number">3</span>&lt;&lt;<span class="number">10</span>);</span><br><span class="line">        GPGCON |= (<span class="number">1</span>&lt;&lt;<span class="number">10</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">dht11_data_cfg_as_input</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">        GPGCON &amp;= ~(<span class="number">3</span>&lt;&lt;<span class="number">10</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">dht11_data_set</span><span class="params">(<span class="type">int</span> val)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (val)</span><br><span class="line">                GPGDAT |= (<span class="number">1</span>&lt;&lt;<span class="number">5</span>);</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">                GPGDAT &amp;= ~(<span class="number">1</span>&lt;&lt;<span class="number">5</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">dht11_data_get</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (GPGDAT &amp; (<span class="number">1</span>&lt;&lt;<span class="number">5</span>))</span><br><span class="line">                <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//DHT11操作：</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">dht11_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    dht11_data_cfg_as_output();</span><br><span class="line">    dht11_data_set(<span class="number">1</span>);</span><br><span class="line">    mdelay(<span class="number">2000</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">dht11_start</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    dht11_data_set(<span class="number">0</span>);</span><br><span class="line">    mdelay(<span class="number">20</span>);</span><br><span class="line">    dht11_data_cfg_as_input();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">dht11_wait_ack</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    udelay(<span class="number">60</span>);</span><br><span class="line">    <span class="keyword">return</span> dht11_data_get();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">dht11_recv_byte</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    <span class="type">int</span> data = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">8</span>; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (dht11_wait_for_val(<span class="number">1</span>, <span class="number">1000</span>)) &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;dht11 wait for high data err!\n\r&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        udelay(<span class="number">40</span>);</span><br><span class="line">        data &lt;&lt;= <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (dht11_data_get() == <span class="number">1</span>)</span><br><span class="line">            data |= <span class="number">1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (dht11_wait_for_val(<span class="number">0</span>, <span class="number">1000</span>)) &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;dht11 wait for low data err!\n\r&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> data;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">dht11_wait_for_val</span><span class="params">(<span class="type">int</span> val, <span class="type">int</span> timeout_us)</span> &#123;</span><br><span class="line">    <span class="keyword">while</span> (timeout_us--) &#123;</span><br><span class="line">        <span class="keyword">if</span> (dht11_data_get() == val)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>; <span class="comment">/* ok */</span></span><br><span class="line">        udelay(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>; <span class="comment">/* err */</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">dht11_read</span><span class="params">(<span class="type">int</span> *hum, <span class="type">int</span> *temp)</span> &#123;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> hum_m, hum_n;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> temp_m, temp_n;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> check;        </span><br><span class="line">    </span><br><span class="line">    dht11_start();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (<span class="number">0</span> != dht11_wait_ack()) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;dht11 not ack, err!\n\r&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="number">0</span> != dht11_wait_for_val(<span class="number">1</span>, <span class="number">1000</span>)) &#123; <span class="comment">/* 等待ACK变为高电平, 超时时间是1000us */</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;dht11 wait for ack high err!\n\r&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="number">0</span> != dht11_wait_for_val(<span class="number">0</span>, <span class="number">1000</span>)) &#123; <span class="comment">/* 数据阶段: 等待低电平, 超时时间是1000us */</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;dht11 wait for data low err!\n\r&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    hum_m  = dht11_recv_byte();</span><br><span class="line">    hum_n  = dht11_recv_byte();</span><br><span class="line">    temp_m = dht11_recv_byte();</span><br><span class="line">    temp_n = dht11_recv_byte();</span><br><span class="line">    check  = dht11_recv_byte();</span><br><span class="line"></span><br><span class="line">    dht11_data_cfg_as_output();</span><br><span class="line">    dht11_data_set(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (hum_m + hum_n + temp_m + temp_n == check) &#123;</span><br><span class="line">        *hum  = hum_m;</span><br><span class="line">        *temp = temp_m;</span><br><span class="line">        mdelay(<span class="number">2000</span>);  <span class="comment">/* 读取周期是2S, 不能读太频繁 */</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;dht11 checksum err!\n\r&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">dht11_test</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="type">int</span> hum, temp;</span><br><span class="line">    dht11_init();</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (dht11_read(&amp;hum, &amp;temp) != <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;\n\rdht11 read err!\n\r&quot;</span>);</span><br><span class="line">            dht11_init();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;\n\rDHT11 : %d humidity, %d temperature\n\r&quot;</span>, hum, temp);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/" data-id="clwbub2bd0000jcuf2dgihe1c" data-title="通用裸机-传感器" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2024/05/03/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-arm%E6%B1%87%E7%BC%96/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">通用裸机-arm汇编</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 20px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 15px;">boot启动</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 16.67px;">linux嵌入式环境搭建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 13.33px;">mipi图像处理</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 18.33px;">外设驱动</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.67px;">存储驱动</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.33px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 15px;">通信协议</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/">通用裸机-传感器</a>
+          </li>
+        
+          <li>
+            <a href="/2024/05/03/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-arm%E6%B1%87%E7%BC%96/">通用裸机-arm汇编</a>
+          </li>
+        
+          <li>
+            <a href="/2024/05/02/imx6ull%E8%A3%B8%E6%9C%BA-SPI/">imx6ull裸机-SPI</a>
+          </li>
+        
+          <li>
+            <a href="/2024/05/02/imx6ull%E8%A3%B8%E6%9C%BA-%E5%AE%9A%E6%97%B6%E5%99%A8/">imx6ull裸机-定时器</a>
+          </li>
+        
+          <li>
+            <a href="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/">imx6ull裸机-ADC</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
