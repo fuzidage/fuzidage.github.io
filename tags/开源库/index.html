@@ -4,25 +4,15 @@
   <meta charset="utf-8">
   
   
-  <title>linux搭建tftp和ftp服务 | Hexo</title>
+  <title>Tag: 开源库 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="1 安装tftp服务和客户端 1.1 配置 1.2 创建tftp共享目录 1.3 测试验证功能 1.3.1 本机测试 1.3.2 开发板测试     2 ftp服务 2.1 windows客户端        1 安装tftp服务和客户端#sudo apt-get install xinetd tftp tftpd  1.1 配置#vim &#x2F;etc&#x2F;xinetd.d&amp;">
-<meta property="og:type" content="article">
-<meta property="og:title" content="linux搭建tftp和ftp服务">
-<meta property="og:url" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/index.html">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://example.com/tags/%E5%BC%80%E6%BA%90%E5%BA%93/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="1 安装tftp服务和客户端 1.1 配置 1.2 创建tftp共享目录 1.3 测试验证功能 1.3.1 本机测试 1.3.2 开发板测试     2 ftp服务 2.1 windows客户端        1 安装tftp服务和客户端#sudo apt-get install xinetd tftp tftpd  1.1 配置#vim &#x2F;etc&#x2F;xinetd.d&amp;">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1.png">
-<meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/2.png">
-<meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/3.png">
-<meta property="og:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/4.png">
-<meta property="article:published_time" content="2024-03-24T14:24:38.000Z">
-<meta property="article:modified_time" content="2024-03-30T06:06:58.000Z">
 <meta property="article:author" content="John Doe">
-<meta property="article:tag" content="linux嵌入式环境搭建">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1.png">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -77,126 +67,39 @@
 </header>
 
       <div class="outer">
-        <section id="main"><article id="post-linux搭建tftp和ftp服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" class="article-date">
-  <time class="dt-published" datetime="2024-03-24T14:24:38.000Z" itemprop="datePublished">2024-03-24</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
+        <section id="main">
   
-    <h1 class="p-name article-title" itemprop="headline name">
-      linux搭建tftp和ftp服务
+  
+    
+    
+      
+      
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2024" class="archive-year">2024</a>
+        </div>
+        <div class="archives">
+    
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      <a href="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/" class="archive-article-date">
+  <time class="dt-published" datetime="2024-05-25T08:08:09.000Z" itemprop="datePublished">May 25</time>
+</a>
+      
+  
+    <h1 itemprop="name">
+      <a class="archive-article-title" href="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/">ini_parse配置解析功能移植</a>
     </h1>
   
 
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-an-zhuang-tftp-fu-wu-he-ke-hu-duan">1 安装tftp服务和客户端</a><ul>
-<li><a href="#1-1-pei-zhi">1.1 配置</a></li>
-<li><a href="#1-2-chuang-jian-tftp-gong-xiang-mu-lu">1.2 创建tftp共享目录</a></li>
-<li><a href="#1-3-ce-shi-yan-zheng-gong-neng">1.3 测试验证功能</a><ul>
-<li><a href="#1-3-1-ben-ji-ce-shi">1.3.1 本机测试</a></li>
-<li><a href="#1-3-2-kai-fa-ban-ce-shi">1.3.2 开发板测试</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#2-ftp-fu-wu">2 ftp服务</a><ul>
-<li><a href="#2-1-windows-ke-hu-duan">2.1 windows客户端</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-an-zhuang-tftp-fu-wu-he-ke-hu-duan">1 安装tftp服务和客户端</span><a href="#1-an-zhuang-tftp-fu-wu-he-ke-hu-duan" class="header-anchor">#</a></h1><pre><code>sudo apt-get install xinetd tftp tftpd
-</code></pre>
-<h2><span id="1-1-pei-zhi">1.1 配置</span><a href="#1-1-pei-zhi" class="header-anchor">#</a></h2><p>vim &#x2F;etc&#x2F;xinetd.d&#x2F;tftp<br>内容如下：</p>
-<pre><code>service tftp
-&#123;
-        socket_type     		= dgram
-        protocol                = udp
-        wait                    = yes
-        user                    = root
-        server          		= /usr/sbin/in.tftpd
-        server_args     		= -s /home/lyb/tftpshare/
-        disable         		= no
-        per_source      		=11
-        cps                     = 100 2
-        flags                   = IPv4
-&#125;
-</code></pre>
-<h2><span id="1-2-chuang-jian-tftp-gong-xiang-mu-lu">1.2 创建tftp共享目录</span><a href="#1-2-chuang-jian-tftp-gong-xiang-mu-lu" class="header-anchor">#</a></h2><pre><code>1.创建服务器目录
-mkdir /home/lyb/tftpshare/
-2.然后修改目录权限
-chmod 777 /home/lyb/tftpshare/
-3.重启xinetd服务
-sudo /etc/init.d/xinetd restart（如果启动失败先关闭防火墙 service iptables stop）
-</code></pre>
-<h2><span id="1-3-ce-shi-yan-zheng-gong-neng">1.3 测试验证功能</span><a href="#1-3-ce-shi-yan-zheng-gong-neng" class="header-anchor">#</a></h2><h3><span id="1-3-1-ben-ji-ce-shi">1.3.1 本机测试</span><a href="#1-3-1-ben-ji-ce-shi" class="header-anchor">#</a></h3><pre><code>重新启动一个终端，
-输入命令 tftp 192.168.1.11（我的虚拟机ip）进入tftp,
-输入get test,这样就可以获取到test文件,
-输入q退出tftp
-</code></pre>
-<p>如下图所示：<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1.png" alt="1"></p>
-<h3><span id="1-3-2-kai-fa-ban-ce-shi">1.3.2 开发板测试</span><a href="#1-3-2-kai-fa-ban-ce-shi" class="header-anchor">#</a></h3><p>2440开发板的uboot可以支持tftp下载功能，在uboot命令行输入：</p>
-<pre><code>tftp 0x30000000  uImage_4.3
-</code></pre>
-<p>如下图所示。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/2.png" alt="2"></p>
-<h1><span id="2-ftp-fu-wu">2 ftp服务</span><a href="#2-ftp-fu-wu" class="header-anchor">#</a></h1><pre><code>sudo apt install vsftpd
-vi /etc/vsftpd.conf
-
-local_enable=YES
-write_enable=YES
-sudo /etc/init.d/vsftpd restart
-</code></pre>
-<p><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/3.png" alt="3"></p>
-<h2><span id="2-1-windows-ke-hu-duan">2.1 windows客户端</span><a href="#2-1-windows-ke-hu-duan" class="header-anchor">#</a></h2><p><a target="_blank" rel="noopener" href="https://filezilla-project.org/">https://filezilla-project.org/</a></p>
-<p>新建站点，配置ftp协议, 主机输入ubuntu IP地址，用户密码信息，即可连接成功。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/4.png" alt="4"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" data-id="clv6fu5xz000bn8lp5v9r2j3k" data-title="linux搭建tftp和ftp服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
-
-    </footer>
+    </header>
   </div>
-  
-    
-<nav id="article-nav">
-  
-    <a href="/2024/03/25/hello-world/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          Hello World
-        
-      </div>
-    </a>
-  
-  
-</nav>
-
-  
 </article>
+  
+  
+    </div></section>
+  
 
 
 </section>
