@@ -6096,4 +6096,132 @@ BurlyWood </td></table>
         <tag>linux嵌入式环境搭建</tag>
       </tags>
   </entry>
+  <entry>
+    <title>linux基本命令集合</title>
+    <url>/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/</url>
+    <content><![CDATA[<div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-qian-yan-can-kao-zi-liao">1 前言-参考资料</a></li>
+<li><a href="#2-linux-ming-ling">2 linux 命令</a><ul>
+<li><a href="#1-1-ci-pan-xiang-guan">1.1 磁盘相关</a><ul>
+<li><a href="#1-1-1-fdisk">1.1.1 fdisk</a><ul>
+<li><a href="#1-1-1-1-cha-kan-fen-qu">1.1.1.1 查看分区</a></li>
+<li><a href="#1-1-1-2-shan-chu-fen-qu">1.1.1.2 删除分区</a></li>
+<li><a href="#1-1-1-3-chuang-jian-fen-qu">1.1.1.3 创建分区</a></li>
+</ul>
+</li>
+<li><a href="#1-1-2-ci-pan-ge-shi-hua-ming-ling-mkfs">1.1.2 磁盘格式化命令-mkfs</a></li>
+<li><a href="#1-1-3-du">1.1.3 du</a></li>
+<li><a href="#1-1-4-df">1.1.4 df</a></li>
+</ul>
+</li>
+<li><a href="#1-2-wen-jian-zi-fu-cao-zuo-ming-ling">1.2 文件字符操作命令</a><ul>
+<li><a href="#1-2-1-xargs">1.2.1 xargs</a></li>
+<li><a href="#1-2-2-grep">1.2.2 grep</a></li>
+</ul>
+</li>
+<li><a href="#1-3-wang-luo-ming-ling">1.3 网络命令</a></li>
+</ul>
+</li>
+<li><a href="#3-shell-jiao-ben-ming-ling">3 shell脚本命令</a><ul>
+<li><a href="#3-1-jie-shi-qi">3.1 解释器</a></li>
+<li><a href="#3-2-duan-dai-ma-zhu-shi">3.2 段代码注释</a></li>
+<li><a href="#3-3-read-ming-ling">3.3 read命令</a></li>
+<li><a href="#3-4-test-ming-ling">3.4 test命令</a></li>
+<li><a href="#3-5-ming-ling-xing-can-shu">3.5 命令行参数</a></li>
+<li><a href="#3-6-tiao-jian-yu-ju">3.6 条件语句</a></li>
+<li><a href="#3-7-case-yu-ju">3.7 case语句</a></li>
+<li><a href="#3-8-han-shu">3.8 函数</a></li>
+<li><a href="#3-9-xun-huan-yu-ju">3.9 循环语句</a></li>
+<li><a href="#3-10-typeset-huo-zhe-declare">3.10 typeset或者declare</a></li>
+<li><a href="#3-11-unset">3.11 unset</a></li>
+<li><a href="#3-12-readonly">3.12 readonly</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-qian-yan-can-kao-zi-liao">1 前言-参考资料</span><a href="#1-qian-yan-can-kao-zi-liao" class="header-anchor">#</a></h1><p>正点原子：<a href="http://www.openedv.com/docs/boards/arm-linux/zdyz-i.mx6ull.html">http://www.openedv.com/docs/boards/arm-linux/zdyz-i.mx6ull.html</a></p>
+<h1><span id="2-linux-ming-ling">2 linux 命令</span><a href="#2-linux-ming-ling" class="header-anchor">#</a></h1><h2><span id="1-1-ci-pan-xiang-guan">1.1 磁盘相关</span><a href="#1-1-ci-pan-xiang-guan" class="header-anchor">#</a></h2><h3><span id="1-1-1-fdisk">1.1.1 fdisk</span><a href="#1-1-1-fdisk" class="header-anchor">#</a></h3><h4><span id="1-1-1-1-cha-kan-fen-qu">1.1.1.1 查看分区</span><a href="#1-1-1-1-cha-kan-fen-qu" class="header-anchor">#</a></h4><p><code>fdisk -l</code>显示磁盘分区使用情况</p>
+<p><img src="https://img2023.cnblogs.com/blog/1876680/202309/1876680-20230904215110138-1243210250.png" alt="image"></p>
+<h4><span id="1-1-1-2-shan-chu-fen-qu">1.1.1.2 删除分区</span><a href="#1-1-1-2-shan-chu-fen-qu" class="header-anchor">#</a></h4><p><code>fdisk /dev/sdb1 </code>用来对sdb1进行分区.</p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/1.png" alt="image"></p>
+<p>输入m表示获取帮助，默认有分区sdb1, 然后输入d删除分区1，p打印出分区表，i表示打印出详细分区信息，n表示新增分区信息，w表示保存，q表示退出。</p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/2.png" alt="image"></p>
+<p>来看dev&#x2F;sd*信息，发现已经没有了sdb1.</p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/3.png" alt="image"></p>
+<h4><span id="1-1-1-3-chuang-jian-fen-qu">1.1.1.3 创建分区</span><a href="#1-1-1-3-chuang-jian-fen-qu" class="header-anchor">#</a></h4><p>再来看如何建立分区1：<br>先建立一个1GB的分区，<code>1GB= 1024 * 1024 * 1024=1073741824 B = 2097152</code>个sector，一个sector有512 byte,再加上2048 个sector，那么等于2099200个sector。</p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/4.png" alt="image"></p>
+<p>再来何建立分区2：</p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/5.png" alt="image"></p>
+<p>这里First sector使用默认值2101248，Last sector使用4198400（1G是2097152， 2101248 + 2097152 &#x3D; 4198400），分区2也是1GB<br>再来何建立分区3：</p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/6.png" alt="image"></p>
+<p>First sector和Last sector使用默认，那么最终分区3有26.8GiB。</p>
+<p>最后输入w保存退出，来看下分区:</p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/7.png" alt="image"></p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/8.png" alt="image"></p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/9.png" alt="image"></p>
+<h3><span id="1-1-2-ci-pan-ge-shi-hua-ming-ling-mkfs">1.1.2 磁盘格式化命令-mkfs</span><a href="#1-1-2-ci-pan-ge-shi-hua-ming-ling-mkfs" class="header-anchor">#</a></h3><p>mkfs命令用来对磁盘分区格式化，将格式化好的sd卡放入windows系统查看，可以看到3个盘:</p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/10.png" alt="image"></p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/11.png" alt="image"></p>
+<h3><span id="1-1-3-du">1.1.3 du</span><a href="#1-1-3-du" class="header-anchor">#</a></h3><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/12.png" alt="image"></p>
+<h3><span id="1-1-4-df">1.1.4 df</span><a href="#1-1-4-df" class="header-anchor">#</a></h3><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/13.png" alt="image"></p>
+<h2><span id="1-2-wen-jian-zi-fu-cao-zuo-ming-ling">1.2 文件字符操作命令</span><a href="#1-2-wen-jian-zi-fu-cao-zuo-ming-ling" class="header-anchor">#</a></h2><h3><span id="1-2-1-xargs">1.2.1 xargs</span><a href="#1-2-1-xargs" class="header-anchor">#</a></h3><p><code>find -name *.sh |xargs grep -rn &quot;build_all&quot;</code></p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/14.png" alt="image"></p>
+<h3><span id="1-2-2-grep">1.2.2 grep</span><a href="#1-2-2-grep" class="header-anchor">#</a></h3><p><code>find /path/to/directory -type f -name &quot;*.txt&quot; | grep &quot;keyword&quot;</code></p>
+<p>-w 全词匹配。<br>-v 反向搜索<br>-i 不区分大小写</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$匹配以字符串结尾的行</span><br><span class="line">^ 匹配以字符串开头的行</span><br><span class="line"></span><br><span class="line">找出空行 grep <span class="string">&quot;^$&quot;</span> test.txt -n</span><br><span class="line">找出unix开头的行grep <span class="string">&quot;^unix&quot;</span> geekfile.txt</span><br><span class="line">找出.结尾的行 grep <span class="string">&quot;\.$&quot;</span> test.txt -n -o</span><br><span class="line">找出os.结尾的行，grep <span class="string">&quot;os.$&quot;</span> geekfile.txt</span><br></pre></td></tr></table></figure>
+
+<p><strong>[abc]中括号</strong></p>
+<p>匹配abc字符中的任意一个:</p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/15.png" alt="image"></p>
+<p>匹配a-z:</p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/16.png" alt="image"></p>
+<p>下面一个脚本用grep -v排除掉不需要的行，也就是删除包含指定字符的行从一个文件。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 定义要删除的特定字符</span></span><br><span class="line">pattern=<span class="string">&quot;特定字符&quot;</span></span><br><span class="line"><span class="comment"># 定义要处理的文件名</span></span><br><span class="line">filename=<span class="string">&quot;文件名&quot;</span></span><br><span class="line"><span class="comment"># 使用grep命令找到含有特定字符的行，并将结果输出到一个临时文件中</span></span><br><span class="line">grep -v <span class="string">&quot;<span class="variable">$pattern</span>&quot;</span> <span class="string">&quot;<span class="variable">$filename</span>&quot;</span> &gt; temp.txt</span><br><span class="line"><span class="comment"># 将临时文件的内容复制回原始文件</span></span><br><span class="line"><span class="built_in">cat</span> temp.txt &gt; <span class="string">&quot;<span class="variable">$filename</span>&quot;</span></span><br><span class="line"><span class="comment"># 删除临时文件</span></span><br><span class="line"><span class="built_in">rm</span> temp.txt</span><br></pre></td></tr></table></figure>
+
+<h2><span id="1-3-wang-luo-ming-ling">1.3 网络命令</span><a href="#1-3-wang-luo-ming-ling" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ifconfig eth0 up/down</span><br><span class="line">udhcpc -i eth0 //通过路由器分配 IP 地址</span><br><span class="line">ifconfig eth0 192.168.1.251 netmask 255.255.255.0 //设置 IP 地址和子网掩码</span><br><span class="line">route add default gw 192.168.1.1 //添加默认网关</span><br></pre></td></tr></table></figure>
+
+<h1><span id="3-shell-jiao-ben-ming-ling">3 shell脚本命令</span><a href="#3-shell-jiao-ben-ming-ling" class="header-anchor">#</a></h1><h2><span id="3-1-jie-shi-qi">3.1 解释器</span><a href="#3-1-jie-shi-qi" class="header-anchor">#</a></h2><ol>
+<li><p>sh解释器</p>
+</li>
+<li><p>bash解释器<br>脚本开头用<code>#！</code>用来申明用什么解释器，如：</p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/17.png" alt="image"></p>
+</li>
+</ol>
+<h2><span id="3-2-duan-dai-ma-zhu-shi">3.2 段代码注释</span><a href="#3-2-duan-dai-ma-zhu-shi" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;&lt;EOF</span><br><span class="line">...</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/18.png" alt="image"></p>
+<h2><span id="3-3-read-ming-ling">3.3 read命令</span><a href="#3-3-read-ming-ling" class="header-anchor">#</a></h2><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/19.png" alt="image"></p>
+<h2><span id="3-4-test-ming-ling">3.4 test命令</span><a href="#3-4-test-ming-ling" class="header-anchor">#</a></h2><p>测试文件，数值，权限，字符串等参数。</p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/20.png" alt="image"></p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/21.png" alt="image"></p>
+<p>中括号也能表示测试，里面只能用&#x3D;&#x3D;或!&#x3D;。</p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/22.png" alt="image"></p>
+<h2><span id="3-5-ming-ling-xing-can-shu">3.5 命令行参数</span><a href="#3-5-ming-ling-xing-can-shu" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="variable">$0</span>, <span class="variable">$1</span>, <span class="variable">$2</span>, <span class="variable">$3</span>...</span><br><span class="line"><span class="variable">$0</span>表示脚本文件名</span><br><span class="line"><span class="variable">$1</span>表示第一个参数</span><br><span class="line"><span class="variable">$n</span>表示第n个参数</span><br><span class="line"><span class="variable">$#</span>表示一共有多少个命令行参数</span><br><span class="line"><span class="variable">$@</span>表示所有的命令行参数集合，<span class="variable">$0</span> <span class="variable">$1</span> <span class="variable">$2</span> ... <span class="variable">$n</span></span><br><span class="line">$*表示等价<span class="variable">$@</span></span><br><span class="line">$?表示上一条命令是否返回成功，成功为0,错误非0</span><br><span class="line">$$表示当前脚本的进程号</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/23.png" alt="image"></p>
+<h2><span id="3-6-tiao-jian-yu-ju">3.6 条件语句</span><a href="#3-6-tiao-jian-yu-ju" class="header-anchor">#</a></h2><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/24.png" alt="image"></p>
+<h2><span id="3-7-case-yu-ju">3.7 case语句</span><a href="#3-7-case-yu-ju" class="header-anchor">#</a></h2><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/25.png" alt="image"></p>
+<h2><span id="3-8-han-shu">3.8 函数</span><a href="#3-8-han-shu" class="header-anchor">#</a></h2><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/26.png" alt="image"></p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/27.png" alt="image"></p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/28.png" alt="image"></p>
+<h2><span id="3-9-xun-huan-yu-ju">3.9 循环语句</span><a href="#3-9-xun-huan-yu-ju" class="header-anchor">#</a></h2><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/29.png" alt="image"></p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/30.png" alt="image"></p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/31.png" alt="image"></p>
+<h2><span id="3-10-typeset-huo-zhe-declare">3.10 typeset或者declare</span><a href="#3-10-typeset-huo-zhe-declare" class="header-anchor">#</a></h2><p>sh脚本默认所有变量都是字符串，比如val&#x3D;1，也表示val是一个字符串“1”。那么需要如何声明一个变量类型，用typeset或者declare。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">typeset</span> -i data=1</span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-11-unset">3.11 unset</span><a href="#3-11-unset" class="header-anchor">#</a></h2><p>清除变量值.</p>
+<h2><span id="3-12-readonly">3.12 readonly</span><a href="#3-12-readonly" class="header-anchor">#</a></h2><p>只读变量.</p>
+]]></content>
+      <tags>
+        <tag>linux嵌入式环境搭建</tag>
+      </tags>
+  </entry>
 </search>
