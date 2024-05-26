@@ -5777,4 +5777,323 @@ DIV:用分频器进行分频
         <tag>字符编码</tag>
       </tags>
   </entry>
+  <entry>
+    <title>markdown语法教程</title>
+    <url>/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/</url>
+    <content><![CDATA[<div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-duo-ji-biao-ti-mu-lu-jie-gou">1 多级标题目录结构</a></li>
+<li><a href="#yi-ji-biao-ti">一级标题</a><ul>
+<li><a href="#er-ji-biao-ti">二级标题</a><ul>
+<li><a href="#san-ji-biao-ti">三级标题</a><ul>
+<li><a href="#si-ji-biao-ti">四级标题</a><ul>
+<li><a href="#wu-ji-biao-ti">五级标题</a><ul>
+<li><a href="#liu-ji-biao-ti">六级标题</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-duan-luo">2 段落</a><ul>
+<li><a href="#2-1-huan-xing">2.1 换行</a></li>
+</ul>
+</li>
+<li><a href="#3-zi-ti">3 字体</a></li>
+<li><a href="#4-zi-ti-yan-se-da-xiao">4 字体颜色,大小</a></li>
+<li><a href="#5-zi-ti-bei-jing-yan-se">5 字体背景颜色</a></li>
+<li><a href="#5-xia-hua-xian">5 下划线</a></li>
+<li><a href="#6-lie-biao-xiang">6 列表项</a></li>
+<li><a href="#7-dai-ma-kuai-yu-yu-fa-gao-liang">7 代码块与语法高亮</a><ul>
+<li><a href="#7-1-xing-nei-dai-ma">7.1 行内代码</a></li>
+<li><a href="#7-2-kuai-dai-ma">7.2 块代码</a></li>
+</ul>
+</li>
+<li><a href="#8-dai-ma-zhe-die">8 代码折叠</a></li>
+<li><a href="#9-cha-ru-lian-jie">9 插入链接</a><ul>
+<li><a href="#9-1-zi-dong-lian-jie">9.1 自动链接</a></li>
+</ul>
+</li>
+<li><a href="#10-tian-jia-tu-pian">10 添加图片</a></li>
+<li><a href="#11-biao-ge">11 表格</a></li>
+<li><a href="#12-zhuan-yi-zi-fu">12 转义字符</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-duo-ji-biao-ti-mu-lu-jie-gou">1 多级标题目录结构</span><a href="#1-duo-ji-biao-ti-mu-lu-jie-gou" class="header-anchor">#</a></h1><pre><code># 一级标题
+## 二级标题
+### 三级标题
+#### 四级标题
+##### 五级标题
+###### 六级标题
+</code></pre>
+<p>效果如下：</p>
+<h1><span id="yi-ji-biao-ti">一级标题</span><a href="#yi-ji-biao-ti" class="header-anchor">#</a></h1><h2><span id="er-ji-biao-ti">二级标题</span><a href="#er-ji-biao-ti" class="header-anchor">#</a></h2><h3><span id="san-ji-biao-ti">三级标题</span><a href="#san-ji-biao-ti" class="header-anchor">#</a></h3><h4><span id="si-ji-biao-ti">四级标题</span><a href="#si-ji-biao-ti" class="header-anchor">#</a></h4><h5><span id="wu-ji-biao-ti">五级标题</span><a href="#wu-ji-biao-ti" class="header-anchor">#</a></h5><h6><span id="liu-ji-biao-ti">六级标题</span><a href="#liu-ji-biao-ti" class="header-anchor">#</a></h6><h1><span id="2-duan-luo">2 段落</span><a href="#2-duan-luo" class="header-anchor">#</a></h1><h2><span id="2-1-huan-xing">2.1 换行</span><a href="#2-1-huan-xing" class="header-anchor">#</a></h2><p>Markdown段落的换行是使用两个以上空格加上回车，当然也可以在段落后面使用一个空行来表示重新开始一个段落。</p>
+<h1><span id="3-zi-ti">3 字体</span><a href="#3-zi-ti" class="header-anchor">#</a></h1><pre><code>*斜体*
+**粗体**
+***加粗斜体***
+
+&lt;font face=&quot;黑体&quot;&gt;我是黑体字&lt;/font&gt;
+&lt;font face=&quot;微软雅黑&quot;&gt;我是微软雅黑&lt;/font&gt;
+&lt;font face=&quot;STCAIYUN&quot;&gt;我是华文彩云&lt;/font&gt;
+</code></pre>
+<p>效果：</p>
+<p><em>斜体</em><br><strong>粗体</strong><br><em><strong>加粗斜体</strong></em></p>
+<p><font face="黑体">我是黑体字</font><br><font face="微软雅黑">我是微软雅黑</font><br><font face="STCAIYUN">我是华文彩云</font></p>
+<h1><span id="4-zi-ti-yan-se-da-xiao">4 字体颜色,大小</span><a href="#4-zi-ti-yan-se-da-xiao" class="header-anchor">#</a></h1><pre><code>&lt;font color=#0099ff size=12 face=&quot;黑体&quot;&gt;黑体&lt;/font&gt;
+&lt;font color=gray size=5&gt;gray&lt;/font&gt;
+&lt;font color=#00ffff size=3&gt;null&lt;/font&gt;
+</code></pre>
+<p>效果：</p>
+<p><font color="#0099ff" size="12" face="黑体">黑体</font><br><font color="gray" size="5">gray</font><br><font color="#00ffff" size="3">null</font></p>
+<h1><span id="5-zi-ti-bei-jing-yan-se">5 字体背景颜色</span><a href="#5-zi-ti-bei-jing-yan-se" class="header-anchor">#</a></h1><pre><code>&lt;table&gt;&lt;td bgcolor=pink&gt; 
+背景色是pink &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=LightGoldenRodYellow&gt; 
+LightGoldenRodYellow &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=PeachPuff&gt; 
+PeachPuff &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=PapayaWhip&gt; 
+PapayaWhip &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=PaleGreen&gt; 
+PaleGreen &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=PaleGoldenRod&gt; 
+PaleGoldenRod &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=MistyRose&gt; 
+MistyRose &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=Linen&gt; 
+Linen &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=LightPink&gt; 
+LightPink &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=BurlyWood&gt; 
+BurlyWood &lt;/table&gt;
+</code></pre>
+<p>效果：</p>
+<table><td bgcolor="pink"> 
+背景色是pink </td></table>
+
+<table><td bgcolor="LightGoldenRodYellow"> 
+LightGoldenRodYellow </td></table>
+
+<table><td bgcolor="PeachPuff"> 
+PeachPuff </td></table>
+
+<table><td bgcolor="PapayaWhip"> 
+PapayaWhip </td></table>
+
+<table><td bgcolor="PaleGreen"> 
+PaleGreen </td></table>
+
+<table><td bgcolor="PaleGoldenRod"> 
+PaleGoldenRod </td></table>
+
+<table><td bgcolor="MistyRose"> 
+MistyRose </td></table>
+
+<table><td bgcolor="Linen"> 
+Linen </td></table>
+
+<table><td bgcolor="LightPink"> 
+LightPink </td></table>
+
+<table><td bgcolor="BurlyWood"> 
+BurlyWood </td></table>
+
+
+<h1><span id="5-xia-hua-xian">5 下划线</span><a href="#5-xia-hua-xian" class="header-anchor">#</a></h1><p>写法：<br>    <code>&lt;u&gt;下划线&lt;/u&gt;</code></p>
+<p>效果如下：<br><u>下划线</u></p>
+<h1><span id="6-lie-biao-xiang">6 列表项</span><a href="#6-lie-biao-xiang" class="header-anchor">#</a></h1><p>无序列表使用星号(*)、加号(+)或是减号(-)作为列表标记：</p>
+<pre><code>* 第一项
+* 第二项
+* 第三项
+</code></pre>
+<p>显示效果：  </p>
+<ul>
+<li>第一项</li>
+<li>第二项</li>
+<li>第三项</li>
+</ul>
+<p>有序列表使用数字并加上 <code>.</code> 号来表示： 	<br>    1. 第一项<br>        1. 小一项<br>        2. 小二项<br>    2. 第二项<br>    3. 第三项<br>显示效果： </p>
+<ol>
+<li>第一项<ol>
+<li>小一项</li>
+<li>小二项</li>
+</ol>
+</li>
+<li>第二项</li>
+<li>第三项</li>
+</ol>
+<h1><span id="7-dai-ma-kuai-yu-yu-fa-gao-liang">7 代码块与语法高亮</span><a href="#7-dai-ma-kuai-yu-yu-fa-gao-liang" class="header-anchor">#</a></h1><h2><span id="7-1-xing-nei-dai-ma">7.1 行内代码</span><a href="#7-1-xing-nei-dai-ma" class="header-anchor">#</a></h2><p>用反引号 &#96;&#96; 来标记或插入代码区段</p>
+<p>效果：<br><code>int main(void)</code></p>
+<h2><span id="7-2-kuai-dai-ma">7.2 块代码</span><a href="#7-2-kuai-dai-ma" class="header-anchor">#</a></h2><p>用tab键或者用&#96;&#96;&#96;</p>
+<p>效果：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(vpod)</span> &#123;</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;hello world\n&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="8-dai-ma-zhe-die">8 代码折叠</span><a href="#8-dai-ma-zhe-die" class="header-anchor">#</a></h1><p>写法：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">&lt;details&gt;</span><br><span class="line">&lt;summary&gt;点击展开代码&lt;/summary&gt;</span><br><span class="line">&lt;pre&gt;&lt;code&gt;</span><br><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">int main(int argc, char **argv)</span><br><span class="line">&#123;</span><br><span class="line">    printf(&quot;hello world\n&quot;);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/code&gt;&lt;/pre&gt;</span><br><span class="line">&lt;/details&gt;</span><br></pre></td></tr></table></figure>
+
+<p>效果如下：</p>
+<details>
+<summary>点击展开代码</summary>
+<pre><code>
+    #include &lt;stdio.h&gt;
+    int main(int argc, char **argv)
+    &#123;
+        printf("hello world\n");
+        return 0;
+    &#125;
+
+<p></p></code></pre><p></p>
+</details>
+
+<h1><span id="9-cha-ru-lian-jie">9 插入链接</span><a href="#9-cha-ru-lian-jie" class="header-anchor">#</a></h1><figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">用:</span><br><span class="line">[fuzidage的博客](https://www.cnblogs.com/fuzidage/)</span><br></pre></td></tr></table></figure>
+<p>效果：</p>
+<p><a href="https://www.cnblogs.com/fuzidage/">fuzidage的博客</a></p>
+<h2><span id="9-1-zi-dong-lian-jie">9.1 自动链接</span><a href="#9-1-zi-dong-lian-jie" class="header-anchor">#</a></h2><p>只要是用&lt;&gt;包起来， Markdown 就会自动把它转成链接：</p>
+<p>效果：<br><a href="https://github.com/fuzidage">https://github.com/fuzidage</a></p>
+<h1><span id="10-tian-jia-tu-pian">10 添加图片</span><a href="#10-tian-jia-tu-pian" class="header-anchor">#</a></h1><pre><code>写法：![](https://img2018.cnblogs.com/blog/1876680/201912/1876680-20191214155002138-1798053565.png)
+当然如果是本地图片写法：
+![](./markdown语法教程/1.png)
+</code></pre>
+<p>引用网络效果：</p>
+<p><img src="https://img2018.cnblogs.com/blog/1876680/201912/1876680-20191214155002138-1798053565.png"></p>
+<p>引用本地图片效果：<br><img src="/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/1.png" alt="image-20240526174126727"></p>
+<h1><span id="11-biao-ge">11 表格</span><a href="#11-biao-ge" class="header-anchor">#</a></h1><p>写法：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">| 左对齐 | 右对齐 | 居中对齐 |</span><br><span class="line">| :-----| ----: | :----:|</span><br><span class="line">| 单元格 | 单元格 | 单元格 |</span><br><span class="line">| 单元格 | 单元格 | 单元格 |</span><br></pre></td></tr></table></figure>
+<p>效果：</p>
+<table>
+<thead>
+<tr>
+<th align="left">左对齐</th>
+<th align="right">右对齐</th>
+<th align="center">居中对齐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">单元格</td>
+<td align="right">单元格</td>
+<td align="center">单元格</td>
+</tr>
+<tr>
+<td align="left">单元格</td>
+<td align="right">单元格</td>
+<td align="center">单元格</td>
+</tr>
+</tbody></table>
+<h1><span id="12-zhuan-yi-zi-fu">12 转义字符</span><a href="#12-zhuan-yi-zi-fu" class="header-anchor">#</a></h1><table>
+<thead>
+<tr>
+<th>显示结果</th>
+<th>描述</th>
+<th>输入</th>
+<th>实体编号</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td>空格</td>
+<td>&amp;nbsp；</td>
+<td>&amp;#160；</td>
+</tr>
+<tr>
+<td>&lt;</td>
+<td>小于号</td>
+<td>&amp;lt；</td>
+<td>&amp;#60；</td>
+</tr>
+<tr>
+<td>&gt;</td>
+<td>大于号</td>
+<td>&amp;gt；</td>
+<td>&amp;#62；</td>
+</tr>
+<tr>
+<td>&amp;</td>
+<td>和号</td>
+<td>&amp;amp；</td>
+<td>&amp;#38；</td>
+</tr>
+<tr>
+<td>“</td>
+<td>引号</td>
+<td>&amp;quot；</td>
+<td>&amp;#34；</td>
+</tr>
+<tr>
+<td>‘</td>
+<td>撇号</td>
+<td>&amp;apos；</td>
+<td>(IE不支持)	&amp;#39；</td>
+</tr>
+<tr>
+<td>￠</td>
+<td>分</td>
+<td>&amp;cent；</td>
+<td>&amp;#162；</td>
+</tr>
+<tr>
+<td>£</td>
+<td>镑</td>
+<td>&amp;pound；</td>
+<td>&amp;#163；</td>
+</tr>
+<tr>
+<td>¥</td>
+<td>日圆</td>
+<td>&amp;yen；</td>
+<td>&amp;#165；</td>
+</tr>
+<tr>
+<td>§</td>
+<td>节</td>
+<td>&amp;sect；</td>
+<td>&amp;#167；</td>
+</tr>
+<tr>
+<td>©</td>
+<td>版权</td>
+<td>&amp;copy；</td>
+<td>&amp;#169；</td>
+</tr>
+<tr>
+<td>®</td>
+<td>注册商标</td>
+<td>&amp;reg；</td>
+<td>&amp;#174；</td>
+</tr>
+<tr>
+<td>×</td>
+<td>乘号</td>
+<td>&amp;times；</td>
+<td>&amp;#215；</td>
+</tr>
+<tr>
+<td>÷</td>
+<td>除号</td>
+<td>&amp;divide；</td>
+<td>&amp;#247；</td>
+</tr>
+</tbody></table>
+]]></content>
+      <tags>
+        <tag>linux嵌入式环境搭建</tag>
+      </tags>
+  </entry>
 </search>
