@@ -13,7 +13,7 @@
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="1 前言-参考资料 2 linux 命令 1.1 磁盘相关 1.1.1 fdisk 1.1.1.1 查看分区 1.1.1.2 删除分区 1.1.1.3 创建分区   1.1.2 磁盘格式化命令-mkfs 1.1.3 du 1.1.4 df   1.2 文件字符操作命令 1.2.1 xargs 1.2.2 grep   1.3 网络命令   3 shell脚本命令 3.1 解释器 3.2">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="https://img2023.cnblogs.com/blog/1876680/202309/1876680-20230904215110138-1243210250.png">
+<meta property="og:image" content="http://example.com/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/0.png">
 <meta property="og:image" content="http://example.com/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/1.png">
 <meta property="og:image" content="http://example.com/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/2.png">
 <meta property="og:image" content="http://example.com/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/3.png">
@@ -46,11 +46,11 @@
 <meta property="og:image" content="http://example.com/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/30.png">
 <meta property="og:image" content="http://example.com/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/31.png">
 <meta property="article:published_time" content="2024-05-26T11:03:01.000Z">
-<meta property="article:modified_time" content="2024-05-26T11:39:12.000Z">
+<meta property="article:modified_time" content="2024-05-26T12:13:20.000Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="linux嵌入式环境搭建">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://img2023.cnblogs.com/blog/1876680/202309/1876680-20230904215110138-1243210250.png">
+<meta name="twitter:image" content="http://example.com/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/0.png">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -176,7 +176,7 @@
 
 <h1><span id="1-qian-yan-can-kao-zi-liao">1 前言-参考资料</span><a href="#1-qian-yan-can-kao-zi-liao" class="header-anchor">#</a></h1><p>正点原子：<a target="_blank" rel="noopener" href="http://www.openedv.com/docs/boards/arm-linux/zdyz-i.mx6ull.html">http://www.openedv.com/docs/boards/arm-linux/zdyz-i.mx6ull.html</a></p>
 <h1><span id="2-linux-ming-ling">2 linux 命令</span><a href="#2-linux-ming-ling" class="header-anchor">#</a></h1><h2><span id="1-1-ci-pan-xiang-guan">1.1 磁盘相关</span><a href="#1-1-ci-pan-xiang-guan" class="header-anchor">#</a></h2><h3><span id="1-1-1-fdisk">1.1.1 fdisk</span><a href="#1-1-1-fdisk" class="header-anchor">#</a></h3><h4><span id="1-1-1-1-cha-kan-fen-qu">1.1.1.1 查看分区</span><a href="#1-1-1-1-cha-kan-fen-qu" class="header-anchor">#</a></h4><p><code>fdisk -l</code>显示磁盘分区使用情况</p>
-<p><img src="https://img2023.cnblogs.com/blog/1876680/202309/1876680-20230904215110138-1243210250.png" alt="image"></p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/0.png" alt="image"></p>
 <h4><span id="1-1-1-2-shan-chu-fen-qu">1.1.1.2 删除分区</span><a href="#1-1-1-2-shan-chu-fen-qu" class="header-anchor">#</a></h4><p><code>fdisk /dev/sdb1 </code>用来对sdb1进行分区.</p>
 <p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/1.png" alt="image"></p>
 <p>输入m表示获取帮助，默认有分区sdb1, 然后输入d删除分区1，p打印出分区表，i表示打印出详细分区信息，n表示新增分区信息，w表示保存，q表示退出。</p>
