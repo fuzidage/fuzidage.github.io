@@ -69,6 +69,102 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-virtualbox配置实现PC-虚拟机-开发板互ping" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/" class="article-date">
+  <time class="dt-published" datetime="2024-03-30T06:13:08.000Z" itemprop="datePublished">2024-03-30</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/">virtualbox配置实现PC-虚拟机-开发板互ping</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-she-zhi-virtualbox-wang-qia">1 设置virtualbox网卡</a><ul>
+<li><a href="#1-1-guan-bi-xu-ni-ji">1.1 关闭虚拟机</a></li>
+<li><a href="#1-2-she-zhi-tian-jia-wang-qia">1.2 设置添加网卡</a><ul>
+<li><a href="#1-2-1-tian-jia-wang-qia-1-nat-wang-luo">1.2.1 添加网卡1(NAT网络)</a></li>
+<li><a href="#1-2-2-tian-jia-wang-qia-2-host-only-wang-luo">1.2.2 添加网卡2(host only网络)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-pei-zhi-windows-he-xu-ni-ji">2 配置windows和虚拟机</a><ul>
+<li><a href="#2-1-pei-zhi-window-yi-tai-wang-qia">2.1 配置window以太网卡</a></li>
+<li><a href="#2-2-pei-zhi-xu-ni-ji-wang-luo">2.2 配置虚拟机网络</a></li>
+</ul>
+</li>
+<li><a href="#3-ce-shi-shang-wang-zhuang-tai">3 测试上网状态</a></li>
+<li><a href="#4-gai-jin-he-you-hua">4 改进和优化</a><ul>
+<li><a href="#4-1-windows-ping-xu-ni-ji">4.1 windows ping 虚拟机</a></li>
+<li><a href="#4-2-xu-ni-ji-ping-windows">4.2 虚拟机 ping windows</a></li>
+<li><a href="#4-3-kai-fa-ban-ping-windows-he-xu-ni-ji">4.3 开发板 ping windows和虚拟机</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+
+<h1><span id="1-she-zhi-virtualbox-wang-qia">1 设置virtualbox网卡</span><a href="#1-she-zhi-virtualbox-wang-qia" class="header-anchor">#</a></h1><h2><span id="1-1-guan-bi-xu-ni-ji">1.1 关闭虚拟机</span><a href="#1-1-guan-bi-xu-ni-ji" class="header-anchor">#</a></h2><h2><span id="1-2-she-zhi-tian-jia-wang-qia">1.2 设置添加网卡</span><a href="#1-2-she-zhi-tian-jia-wang-qia" class="header-anchor">#</a></h2><p>进入设置-网络</p>
+<h3><span id="1-2-1-tian-jia-wang-qia-1-nat-wang-luo">1.2.1 添加网卡1(NAT网络)</span><a href="#1-2-1-tian-jia-wang-qia-1-nat-wang-luo" class="header-anchor">#</a></h3><p>这个网络是主机通过网络地址转换到虚拟机，比如主机用无线网卡WLAN上网，用NAT转换比较合适，这样虚拟机也可以访问外网。<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/1.png"></p>
+<h3><span id="1-2-2-tian-jia-wang-qia-2-host-only-wang-luo">1.2.2 添加网卡2(host only网络)</span><a href="#1-2-2-tian-jia-wang-qia-2-host-only-wang-luo" class="header-anchor">#</a></h3><p>这个网络是主机通过无线网卡WLAN上外网，但是虚拟机想通过有线网卡和主机、甚至与开发板互相ping通，传输文件。<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/2.png"></p>
+<p>当然开启host only模式前先确保windows下的virtual host only网卡有开启，如下图：<br><img src="https://img2020.cnblogs.com/blog/1876680/202009/1876680-20200923151634434-1218500133.png"></p>
+<p>如果没有请按照下图操作：（这里是添加host only网卡）<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/3.png"><br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/4.png"></p>
+<h1><span id="2-pei-zhi-windows-he-xu-ni-ji">2 配置windows和虚拟机</span><a href="#2-pei-zhi-windows-he-xu-ni-ji" class="header-anchor">#</a></h1><h2><span id="2-1-pei-zhi-window-yi-tai-wang-qia">2.1 配置window以太网卡</span><a href="#2-1-pei-zhi-window-yi-tai-wang-qia" class="header-anchor">#</a></h2><p>刚添加了虚拟机虚拟virtual host only网卡, 那么我们反正用的WLAN上的外网，为了方便，设置windows下的以太网卡网段和virtual host only网卡保持一致。<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/5.png"><br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/6.png"></p>
+<h2><span id="2-2-pei-zhi-xu-ni-ji-wang-luo">2.2 配置虚拟机网络</span><a href="#2-2-pei-zhi-xu-ni-ji-wang-luo" class="header-anchor">#</a></h2><p>一般默认情况下，虚拟机是通过NAT共享网络给虚拟机用的，那么此时虚拟机也是可以上网的，只是不能和外界开发板进行互相ping, 同时windows主机也不能ping虚拟机。 如下图：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/7.png"><br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/8.png"><br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/9.png"><br>图中可以看到两块网卡，enp0s3是Ubuntu默认的网卡（NAT），enp0s8是新增的网卡(host only)，可以看到enp0s8还没有分配IP地址，我们需要手工指定一下。sudo vim &#x2F;etc&#x2F;network&#x2F;interfaces将文件内容修改为如下所示：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">interfaces(5) file used by ifup(8) and ifdown(8)</span></span><br><span class="line">auto lo</span><br><span class="line">iface lo inet loopback</span><br><span class="line"></span><br><span class="line">auto enp0s8</span><br><span class="line">iface enp0s8 inet static</span><br><span class="line">address 192.168.56.101</span><br><span class="line">netmask 255.255.255.0</span><br></pre></td></tr></table></figure>
+<p>再来看下网卡ip信息：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/10.png"></p>
+<h1><span id="3-ce-shi-shang-wang-zhuang-tai">3 测试上网状态</span><a href="#3-ce-shi-shang-wang-zhuang-tai" class="header-anchor">#</a></h1><p><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/11.png"><br>从测试结果上可以看到虚拟机上外网和ping windows主机都是ok的。</p>
+<pre><code>  10.80.0.75时无线网卡的ip，
+  192.168.56.100是以太网卡的ip,
+  192.168.56.101是host only网卡的ip。 
+</code></pre>
+<p>同理用Windows ping虚拟机也是ok的。<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/12.png"></p>
+<p>用开发板ping主机和虚拟机发现，只能ping通windows主机，无法ping通虚拟机，如下图。这是为什么呢？<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/13.png"></p>
+<p>这是由于我们windows主机和开发板用的网线直连，两个以太网卡在同一网段下，当然能够ping通。但是虚拟机和windows主机用的确是host only网卡（NAT方式用来上外网），这样只能保证虚拟机和Windows主机是互通的，但是却无法被开发板访问，我们的开发板是没有无线网卡的，所以不能用WLAN，因此我们要想让开发板访问到虚拟机还得经过windows的以太网卡。</p>
+<p>那么我们虚拟机和windows主机是host only方式，所以我们无法用到以太网卡进行虚拟机和windows主机的交互。所以我们可以采取将host only网卡桥接到以太网卡，进入 网络-更改适配器-同时选中host only网卡和以太网卡，点击右键-选择桥接，如下图所示：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/14.png"></p>
+<p>这样我们的虚拟机的host only网卡就可以透过以太网卡和开发板交互了，效果如下：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/15.png"><br>开发板能够ping windows主机和虚拟机。</p>
+<h1><span id="4-gai-jin-he-you-hua">4 改进和优化</span><a href="#4-gai-jin-he-you-hua" class="header-anchor">#</a></h1><p>如果不想在windows下进行host only网卡和以太网卡桥接，也可直接把virtualbox的第2路网卡由原来的host only修改成以太网卡桥接模式，如下：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/16.png"></p>
+<p>这样需要配置虚拟机的enp0s8网卡和windows主机的以太网卡网段保持一致的。（和前面2.2操作一样）</p>
+<h2><span id="4-1-windows-ping-xu-ni-ji">4.1 windows ping 虚拟机</span><a href="#4-1-windows-ping-xu-ni-ji" class="header-anchor">#</a></h2><p><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/17.png"></p>
+<h2><span id="4-2-xu-ni-ji-ping-windows">4.2 虚拟机 ping windows</span><a href="#4-2-xu-ni-ji-ping-windows" class="header-anchor">#</a></h2><p><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/18.png"></p>
+<h2><span id="4-3-kai-fa-ban-ping-windows-he-xu-ni-ji">4.3 开发板 ping windows和虚拟机</span><a href="#4-3-kai-fa-ban-ping-windows-he-xu-ni-ji" class="header-anchor">#</a></h2><p><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/19.png"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/" data-id="clwni9kya001rewuf1guj08bs" data-title="virtualbox配置实现PC-虚拟机-开发板互ping" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-vmware双网卡-NAT-桥接" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/" class="article-date">
@@ -124,7 +220,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/" data-id="clwnad6oc001rikuf55hh4oqy" data-title="vmware双网卡_NAT_桥接" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/03/29/vmware%E5%8F%8C%E7%BD%91%E5%8D%A1-NAT-%E6%A1%A5%E6%8E%A5/" data-id="clwni9kya001tewuf026xc5qm" data-title="vmware双网卡_NAT_桥接" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -198,7 +294,7 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/" data-id="clwnad6o40006ikufhj5s063u" data-title="gdb移植到arm开发板" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/03/28/gdb%E7%A7%BB%E6%A4%8D%E5%88%B0arm%E5%BC%80%E5%8F%91%E6%9D%BF/" data-id="clwni9ky10006ewufbr6w8ddi" data-title="gdb移植到arm开发板" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -272,7 +368,7 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/" data-id="clwnad6o7000kikufdcyk3wvh" data-title="linux搭建samba服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/" data-id="clwni9ky5000kewuf9x8kh5fv" data-title="linux搭建samba服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -340,7 +436,7 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" data-id="clwnad6o7000iikuff8iy67fa" data-title="linux搭建nfs服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" data-id="clwni9ky4000iewuf21oqgfmr" data-title="linux搭建nfs服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -393,7 +489,7 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/25/hello-world/" data-id="clwnad6o50008ikufhmkw33of" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/03/25/hello-world/" data-id="clwni9ky20008ewuf15acgl09" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -499,7 +595,7 @@ sudo /etc/init.d/vsftpd restart
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" data-id="clwnad6o8000nikuf0apa8x2w" data-title="linux搭建tftp和ftp服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" data-id="clwni9ky5000newuf2kjib6o5" data-title="linux搭建tftp和ftp服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -531,7 +627,7 @@ sudo /etc/init.d/vsftpd restart
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
     </div>
   </div>
 
@@ -541,7 +637,7 @@ sudo /etc/init.d/vsftpd restart
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 20px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 14.29px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.14px;">linux嵌入式环境搭建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.86px;">mipi图像处理</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 18.57px;">外设驱动</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.43px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.86px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.86px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 15.71px;">通信协议</a>
+      <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 20px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 15px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.33px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 10px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 13.33px;">mipi图像处理</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 18.33px;">外设驱动</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.67px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 13.33px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.33px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 16.67px;">通信协议</a>
     </div>
   </div>
 
@@ -550,7 +646,7 @@ sudo /etc/init.d/vsftpd restart
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
     </div>
   </div>
 
@@ -561,6 +657,10 @@ sudo /etc/init.d/vsftpd restart
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/">Linux日志管理-syslog和rsyslog</a>
+          </li>
         
           <li>
             <a href="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/">linux基本命令集合</a>
@@ -576,10 +676,6 @@ sudo /etc/init.d/vsftpd restart
         
           <li>
             <a href="/2024/05/25/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E4%B8%8Efreetype%E7%A7%BB%E6%A4%8D/">字符编码与freetype移植</a>
-          </li>
-        
-          <li>
-            <a href="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/">ini_parse配置解析功能移植</a>
           </li>
         
       </ul>

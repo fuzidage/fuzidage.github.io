@@ -6,12 +6,12 @@
   
   <title>ini_parse配置解析功能移植 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="1 ini_parse移植 1.1 下载ini解析源码 1.2 使用ini_parse功能 1.2.1 自定义ini文件 1.2.2 支持语法检测          1 ini_parse移植#1.1 下载ini解析源码#源码的github地址https:&#x2F;&#x2F;github.com&#x2F;benhoyt&#x2F;ini。 1git clone https:&#x2F;&#x2F;github.com&#x2F;benhoyt&#x2F;ini">
+  <meta name="description" content="1 ini_parse移植 1.1 下载ini解析源码 1.2 使用ini_parse功能 1.2.1 自定义ini文件 1.2.2 支持语法检测     2 minIni移植使用 2.1 下载minIni 2.2 特征 2.3 INI 文件语法 2.4 minIni支持文件系统 2.5 minIni的API介绍 2.5.1 ini_gets() 2.5.1.1 getkeystring">
 <meta property="og:type" content="article">
 <meta property="og:title" content="ini_parse配置解析功能移植">
 <meta property="og:url" content="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="1 ini_parse移植 1.1 下载ini解析源码 1.2 使用ini_parse功能 1.2.1 自定义ini文件 1.2.2 支持语法检测          1 ini_parse移植#1.1 下载ini解析源码#源码的github地址https:&#x2F;&#x2F;github.com&#x2F;benhoyt&#x2F;ini。 1git clone https:&#x2F;&#x2F;github.com&#x2F;benhoyt&#x2F;ini">
+<meta property="og:description" content="1 ini_parse移植 1.1 下载ini解析源码 1.2 使用ini_parse功能 1.2.1 自定义ini文件 1.2.2 支持语法检测     2 minIni移植使用 2.1 下载minIni 2.2 特征 2.3 INI 文件语法 2.4 minIni支持文件系统 2.5 minIni的API介绍 2.5.1 ini_gets() 2.5.1.1 getkeystring">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/1.png">
 <meta property="og:image" content="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/2.png">
@@ -21,8 +21,14 @@
 <meta property="og:image" content="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/6.png">
 <meta property="og:image" content="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/7.png">
 <meta property="og:image" content="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/8.png">
+<meta property="og:image" content="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/9.png">
+<meta property="og:image" content="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/10.png">
+<meta property="og:image" content="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/11.png">
+<meta property="og:image" content="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/12.png">
+<meta property="og:image" content="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/13.png">
+<meta property="og:image" content="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/14.png">
 <meta property="article:published_time" content="2024-05-25T08:08:09.000Z">
-<meta property="article:modified_time" content="2024-05-26T05:22:56.000Z">
+<meta property="article:modified_time" content="2024-06-02T09:42:38.000Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="开源插件">
 <meta property="article:tag" content="ini解析">
@@ -118,6 +124,26 @@
 </li>
 </ul>
 </li>
+<li><a href="#2-minini-yi-zhi-shi-yong">2 minIni移植使用</a><ul>
+<li><a href="#2-1-xia-zai-minini">2.1 下载minIni</a></li>
+<li><a href="#2-2-te-zheng">2.2 特征</a></li>
+<li><a href="#2-3-ini-wen-jian-yu-fa">2.3 INI 文件语法</a></li>
+<li><a href="#2-4-minini-zhi-chi-wen-jian-xi-tong">2.4 minIni支持文件系统</a></li>
+<li><a href="#2-5-minini-de-api-jie-shao">2.5 minIni的API介绍</a><ul>
+<li><a href="#2-5-1-ini-gets">2.5.1 ini_gets()</a><ul>
+<li><a href="#2-5-1-1-getkeystring">2.5.1.1 getkeystring</a></li>
+</ul>
+</li>
+<li><a href="#2-5-2-ini-getl">2.5.2 ini_getl()</a></li>
+<li><a href="#2-5-3-ini-puts">2.5.3 ini_puts()</a></li>
+<li><a href="#2-5-4-ini-putl">2.5.4 ini_putl()</a></li>
+<li><a href="#2-5-5-section-key-enumeration">2.5.5 section&#x2F;key enumeration</a></li>
+<li><a href="#2-5-6-section-key-cun-zai-xing-jian-cha">2.5.6 section&#x2F;key存在性检查</a></li>
+<li><a href="#2-5-7-pei-zhi-wen-jian-yue-du-da-yin">2.5.7 配置文件阅读打印</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <!-- tocstop -->
 
@@ -141,11 +167,65 @@
 <h3><span id="1-2-2-zhi-chi-yu-fa-jian-ce">1.2.2 支持语法检测</span><a href="#1-2-2-zhi-chi-yu-fa-jian-ce" class="header-anchor">#</a></h3><p>ini_parse还支持语法检测。但ini写的不和语法规范会报错。手工制造ini语法错误，测试结果如下：</p>
 <p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/7.png" alt="img"></p>
 <p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/8.png" alt="img"></p>
+<h1><span id="2-minini-yi-zhi-shi-yong">2 minIni移植使用</span><a href="#2-minini-yi-zhi-shi-yong" class="header-anchor">#</a></h1><p>MiniINI 是一个用来解析 INI&#x2F;CFG 配置文件的 C++ 库，主要特点是可移植性、性能和小体积。支持上千种 INI 格式配置，易用简单。</p>
+<h2><span id="2-1-xia-zai-minini">2.1 下载minIni</span><a href="#2-1-xia-zai-minini" class="header-anchor">#</a></h2><p><a target="_blank" rel="noopener" href="https://github.com/compuphase/minIni">GitHub - compuphase&#x2F;minIni: A small and portable INI file library with read&#x2F;write support</a></p>
+<h2><span id="2-2-te-zheng">2.2 特征</span><a href="#2-2-te-zheng" class="header-anchor">#</a></h2><ul>
+<li>minIni 支持读取senction外部的key，因此它支持不使用section的配置文件（但在其他方面与 INI 文件兼容）。</li>
+<li>可以使用冒号分隔键和值;冒号等价于等号。也就是说，字符串“Name： Value”和“Name&#x3D;Value”具有相同的含义。</li>
+<li>minIni 不需要标准 C&#x2F;C++ 库中的 文件 I&#x2F;O 函数，且允许通过宏配置要选择文件 I&#x2F;O 接口。</li>
+<li>哈希字符 （“#”） 是分号开始注释的替代方法。允许尾随注释（即在一行上的键&#x2F;值对后面）。</li>
+<li>key名称和val周围的前导和尾随空格将被忽略。</li>
+<li>当写入包含注释字符（“;”或“#”）的值时，该值将自动放在双引号之间;读取值时，将删除这些引号。当设置中出现双引号本身时，这些字符将被转义。</li>
+<li>支持section和key枚举。</li>
+<li>您可以选择设置 minIni 将使用的行终止符（对于文本文件）。（这是编译时设置，而不是运行时设置)。</li>
+<li>由于写入速度远低于闪存（SD&#x2F;MMC 卡、U 盘）中的读取速度，因此 minIni 以双倍“文件读取”为代价将“文件写入”降至最低。</li>
+<li>内存占用是确定性的。没有动态内存分配。</li>
+</ul>
+<h2><span id="2-3-ini-wen-jian-yu-fa">2.3 INI 文件语法</span><a href="#2-3-ini-wen-jian-yu-fa" class="header-anchor">#</a></h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[Network]  <span class="comment">#section</span></span><br><span class="line">hostname=My Computer  <span class="comment">#key = val</span></span><br><span class="line">address=dhcp</span><br><span class="line">dns = <span class="number">192.168</span><span class="number">.1</span><span class="number">.1</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-4-minini-zhi-chi-wen-jian-xi-tong">2.4 minIni支持文件系统</span><a href="#2-4-minini-zhi-chi-wen-jian-xi-tong" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INI_FILETYPE                  FILE*</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_openread(filename,file)   ((*(file) = fopen((filename),<span class="string">&quot;r&quot;</span>)) != NULL)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_openwrite(filename,file)  ((*(file) = fopen((filename),<span class="string">&quot;w&quot;</span>)) != NULL)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_close(file)               (fclose(*(file)) == 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_read(buffer,size,file)    (fgets((buffer),(size),*(file)) != NULL)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_write(buffer,file)        (fputs((buffer),*(file)) &gt;= 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_rename(source,dest)       (rename((source), (dest)) == 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_remove(filename)          (remove(filename) == 0)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INI_FILEPOS                   fpos_t</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_tell(file,pos)            (fgetpos(*(file), (pos)) == 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_seek(file,pos)            (fsetpos(*(file), (pos)) == 0)</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-5-minini-de-api-jie-shao">2.5 minIni的API介绍</span><a href="#2-5-minini-de-api-jie-shao" class="header-anchor">#</a></h2><p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/9.png" alt="image-20240602144015881"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;minIni.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> sizearray(a)  (sizeof(a) / sizeof((a)[0]))</span></span><br><span class="line"><span class="type">const</span> <span class="type">char</span> inifile[] = <span class="string">&quot;example.ini&quot;</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">    <span class="type">char</span> str[<span class="number">100</span>];</span><br><span class="line">    <span class="type">char</span> section[<span class="number">50</span>];</span><br><span class="line">    <span class="type">long</span> n;</span><br><span class="line"></span><br><span class="line">    n = ini_gets(<span class="string">&quot;Network&quot;</span>, <span class="string">&quot;address&quot;</span>, <span class="string">&quot;dummy&quot;</span>, str, sizearray(str), inifile);</span><br><span class="line">    <span class="keyword">if</span> (n &gt;= <span class="number">0</span>) <span class="built_in">printf</span>(<span class="string">&quot;Network/address=%s&quot;</span>, str);</span><br><span class="line"></span><br><span class="line">    n = ini_getl(<span class="string">&quot;Network&quot;</span>, <span class="string">&quot;timeout&quot;</span>, <span class="number">-1</span>, inifile);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Network/timeout=%ld\n&quot;</span>, n);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>example.ini如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[Network]</span><br><span class="line">hostname=My Computer</span><br><span class="line">address=dhcp</span><br><span class="line">dns=<span class="number">192.168</span><span class="number">.1</span><span class="number">.1</span></span><br><span class="line">timeout=<span class="number">10</span></span><br></pre></td></tr></table></figure>
+
+<p>运行结果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Network/address=dhcp</span><br><span class="line">Network/timeout=10</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-5-1-ini-gets">2.5.1 ini_gets()</span><a href="#2-5-1-ini-gets" class="header-anchor">#</a></h3><p>获取字符串类型的值.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>   <span class="title function_">ini_gets</span><span class="params">(<span class="type">const</span> mTCHAR *Section, <span class="type">const</span> mTCHAR *Key, <span class="type">const</span> mTCHAR *DefValue, mTCHAR *Buffer, <span class="type">int</span> BufferSize, <span class="type">const</span> mTCHAR *Filename)</span>;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">参数 1 是 Section;</span></span><br><span class="line"><span class="comment">参数 2 是 Key;</span></span><br><span class="line"><span class="comment">参数 3 是获取不到值时的默认值;</span></span><br><span class="line"><span class="comment">参数 4 是用于保存目标键值的 Buffer;</span></span><br><span class="line"><span class="comment">参数 5 是 Buffer 的长度;</span></span><br><span class="line"><span class="comment">参数 6 是 INI 文件的路径;</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/10.png" alt="image-20240602144722018"></p>
+<p>先打开文件，然后用 <code>getkeystring() </code>找到目标键值，最后拷贝给调用者。</p>
+<h4><span id="2-5-1-1-getkeystring">2.5.1.1 getkeystring</span><a href="#2-5-1-1-getkeystring" class="header-anchor">#</a></h4><p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/11.png" alt="image-20240602150058567"></p>
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/12.png" alt="image-20240602145619533"></p>
+<ol>
+<li>用 fgets 进行逐行读取，用 strrchr 找到包含 ‘[‘ 和 ‘]’ 的行，然后再用 strncasecmp 找到目标 Section 所在的行。</li>
+<li>继续用 fgets 进行逐行读取，用 strrchr 找到包含 ‘&#x3D;’ 的行，然后再用 strncasecmp 找到目标 Key 所在的行。</li>
+<li>用 strncpy 将目标 Key 的值拷贝给调用者。</li>
+</ol>
+<p>大致就是这3个关键步骤，当然还有很多其他异常处理，语法检测和边界判断的逻辑，这里不做展示。</p>
+<h3><span id="2-5-2-ini-getl">2.5.2 ini_getl()</span><a href="#2-5-2-ini-getl" class="header-anchor">#</a></h3><p><code>ini_getl() </code>用于获取整型类型的值，也是间接调用<code>int_gets</code>， 最后将字符串转换成数字。</p>
+<h3><span id="2-5-3-ini-puts">2.5.3 ini_puts()</span><a href="#2-5-3-ini-puts" class="header-anchor">#</a></h3><p>写出参数到ini,保存到ini。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** ini_puts()</span></span><br><span class="line"><span class="comment"> * \param Section     the name of the section to write the string in</span></span><br><span class="line"><span class="comment"> * \param Key         the name of the entry to write, or NULL to erase all keys in the section</span></span><br><span class="line"><span class="comment"> * \param Value       a pointer to the buffer the string, or NULL to erase the key</span></span><br><span class="line"><span class="comment"> * \param Filename    the name and full path of the .ini file to write to</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * \return            1 if successful, otherwise 0</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">ini_puts</span><span class="params">(<span class="type">const</span> TCHAR *Section, <span class="type">const</span> TCHAR *Key, <span class="type">const</span> TCHAR *Value, <span class="type">const</span> TCHAR *Filename)</span></span><br><span class="line"><span class="comment">//eg:</span></span><br><span class="line"><span class="title function_">ini_putl</span><span class="params">(<span class="string">&quot;second&quot;</span>, <span class="string">&quot;age&quot;</span>, <span class="number">20</span>, inifile)</span>;</span><br><span class="line">n = ini_puts(<span class="string">&quot;first&quot;</span>, <span class="string">&quot;alt&quot;</span>, <span class="literal">NULL</span>, inifile);<span class="comment">//当val等于NULL表示删除该key</span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-5-4-ini-putl">2.5.4 ini_putl()</span><a href="#2-5-4-ini-putl" class="header-anchor">#</a></h3><p><code>ini_putl() </code>用于写出整型类型的值，也是间接调用<code>int_puts</code>， 将数字转换成字符串,然后保存字符串到ini。</p>
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/13.png" alt="image-20240602171648913"></p>
+<h3><span id="2-5-5-section-x2f-key-enumeration">2.5.5 section&#x2F;key enumeration</span><a href="#2-5-5-section-x2f-key-enumeration" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;4. Section/key enumeration, file structure follows\n&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (s = <span class="number">0</span>; ini_getsection(s, section, sizearray(section), inifile) &gt; <span class="number">0</span>; s++) &#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;    [%s]\n&quot;</span>, section);</span><br><span class="line">    <span class="keyword">for</span> (k = <span class="number">0</span>; ini_getkey(section, k, str, sizearray(str), inifile) &gt; <span class="number">0</span>; k++) &#123;</span><br><span class="line">    	<span class="built_in">printf</span>(<span class="string">&quot;\t%s\n&quot;</span>, str);</span><br><span class="line">    &#125; </span><br><span class="line">&#125;<span class="comment">//对section和key进行枚举</span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-5-6-section-x2f-key-cun-zai-xing-jian-cha">2.5.6 section&#x2F;key存在性检查</span><a href="#2-5-6-section-x2f-key-cun-zai-xing-jian-cha" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* section/key presence check */</span></span><br><span class="line">assert(ini_hassection(<span class="string">&quot;first&quot;</span>, inifile));<span class="comment">//检查是否有first 段</span></span><br><span class="line">assert(!ini_hassection(<span class="string">&quot;fourth&quot;</span>, inifile));</span><br><span class="line">assert(ini_haskey(<span class="string">&quot;first&quot;</span>, <span class="string">&quot;val&quot;</span>, inifile));<span class="comment">//检查first段是否有val这个key</span></span><br><span class="line">assert(!ini_haskey(<span class="string">&quot;first&quot;</span>, <span class="string">&quot;test&quot;</span>, inifile));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;5. checking presence of sections and keys passed\n&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-5-7-pei-zhi-wen-jian-yue-du-da-yin">2.5.7 配置文件阅读打印</span><a href="#2-5-7-pei-zhi-wen-jian-yue-du-da-yin" class="header-anchor">#</a></h3><p><code>ini_browse</code>用来打印出每个段的每个key的内容。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">Callback</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *section, <span class="type">const</span> <span class="type">char</span> *key, <span class="type">const</span> <span class="type">char</span> *value, <span class="type">void</span> *userdata)</span> &#123;</span><br><span class="line">	(<span class="type">void</span>)userdata; <span class="comment">/* this parameter is not used in this example */</span></span><br><span class="line">  	<span class="built_in">printf</span>(<span class="string">&quot;    [%s]\t%s=%s\n&quot;</span>, section, key, value);</span><br><span class="line">  	<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* browsing through the file */</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;6. browse through all settings, file field list follows\n&quot;</span>);</span><br><span class="line">ini_browse(Callback, <span class="literal">NULL</span>, inifile);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (access(filename, F_OK) != <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">&quot;open %s fail&quot;</span>, filename);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/14.png" alt="image-20240602173647362"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/" data-id="clwnad6o6000fikuf3pzvczra" data-title="ini_parse配置解析功能移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/" data-id="clwni9ky3000fewuf56gq22fs" data-title="ini_parse配置解析功能移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -189,7 +269,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
     </div>
   </div>
 
@@ -199,7 +279,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 20px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 14.29px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.14px;">linux嵌入式环境搭建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.86px;">mipi图像处理</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 18.57px;">外设驱动</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.43px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.86px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.86px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 15.71px;">通信协议</a>
+      <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 20px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 15px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.33px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 10px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 13.33px;">mipi图像处理</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 18.33px;">外设驱动</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.67px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 13.33px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.33px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 16.67px;">通信协议</a>
     </div>
   </div>
 
@@ -208,7 +288,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
     </div>
   </div>
 
@@ -219,6 +299,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/">Linux日志管理-syslog和rsyslog</a>
+          </li>
         
           <li>
             <a href="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/">linux基本命令集合</a>
@@ -234,10 +318,6 @@
         
           <li>
             <a href="/2024/05/25/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E4%B8%8Efreetype%E7%A7%BB%E6%A4%8D/">字符编码与freetype移植</a>
-          </li>
-        
-          <li>
-            <a href="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/">ini_parse配置解析功能移植</a>
           </li>
         
       </ul>
