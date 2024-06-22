@@ -7313,6 +7313,110 @@ saveenv
 <p>start 是要测试的 DRAM 开始地址，end 是结束地址，比如我们测试<code> 0X80000000~0X80001000</code>这段内存，输入<code>mtest 80000000 80001000</code><br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/59.png" alt="image"><br> 可以看出，测试范围为<code> 0X80000000~0X80001000</code>，已经测试了 486 次，如果要结束测试就按下键盘上的“Ctrl+C”键。</p>
 ]]></content>
       <tags>
+        <tag>boot启动</tag>
+        <tag>linux系统构建</tag>
+        <tag>uboot</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>uboot-编译defconfig分析</title>
+    <url>/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-ban-ben-hao">1 版本号</a></li>
+<li><a href="#2-makeflags">2 <code>MAKEFLAGS</code></a></li>
+<li><a href="#3-she-zhi-ming-ling-shu-chu-xiang-xi-cheng-du">3 设置命令输出详细程度</a></li>
+<li><a href="#4-she-zhi-bian-yi-jie-guo-shu-chu-wei-zhi">4 设置编译结果输出位置</a></li>
+<li><a href="#5-dai-ma-jian-cha">5 代码检查</a></li>
+<li><a href="#6-zi-mo-kuai-bian-yi">6 子模块编译</a></li>
+<li><a href="#7-huo-qu-zhu-ji-jia-gou-xi-tong-xin-xi">7 获取主机架构系统信息</a></li>
+<li><a href="#8-she-zhi-mu-biao-jia-gou-gong-ju-lian-he-pei-zhi-wen-jian">8 设置目标架构、工具链和配置文件</a></li>
+<li><a href="#9-diao-yong-scripts-kbuild-include">9 调用 <code>scripts/Kbuild.include</code></a></li>
+<li><a href="#10-she-zhi-jiao-cha-bian-yi-qi">10 设置交叉编译器</a></li>
+<li><a href="#11-he-xin-bian-liang-dao-chu">11 核心变量导出</a></li>
+<li><a href="#12-make-xxx-defconfig-pei-zhi-guo-cheng">12 <code>make xxx_defconfig</code> 配置过程</a><ul>
+<li><a href="#12-1-chan-sheng-ban-ben-ri-qi-xin-xi">12.1 产生版本日期信息</a></li>
+<li><a href="#12-2-pei-zhi-bian-liang">12.2 配置变量</a></li>
+<li><a href="#12-3-zhi-xing-3-ge-yi-lai">12.3 执行3个依赖</a><ul>
+<li><a href="#12-3-1-scripts-basic">12.3.1 <code>scripts_basic</code></a><ul>
+<li><a href="#12-3-1-1-scripts-makefile-build">12.3.1.1 <code>scripts/Makefile.build</code></a><ul>
+<li><a href="#12-3-1-1-1-zhao-dao-mo-ren-mu-biao-build">12.3.1.1.1 找到默认目标<code>_build</code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#12-3-2-outputmakefile">12.3.2 <code>outputmakefile</code></a></li>
+<li><a href="#12-3-3-force">12.3.3 <code>FORCE</code></a></li>
+</ul>
+</li>
+<li><a href="#12-4-chan-sheng-config">12.4 产生<code>.config</code></a></li>
+<li><a href="#12-5-zhi-zuo-defconfig">12.5 制作<code>defconfig</code></a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+
+<h2><span id="1-ban-ben-hao">1 版本号</span><a href="#1-ban-ben-hao" class="header-anchor">#</a></h2><p><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/1.png" alt="image"><br>Top Makefile的开头会有版本描述，<code>VERSION </code>是主版本号，<code>PATCHLEVEL </code>是补丁版本号，<code>SUBLEVEL </code>是次版本号，这三个一 起构成了 uboot 的版本号，比如当前的 uboot 版本号就是<code>2016.03</code>。<code>EXTRAVERSION </code>是附加 版本信息，NAME 是和名字有关的，一般不使用这两个。</p>
+<h2><span id="2-makeflags">2 <code>MAKEFLAGS</code></span><a href="#2-makeflags" class="header-anchor">#</a></h2><p><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/2.png" alt="image"><br>有两个特殊的变量：<code>SHELL</code>和<code>MAKEFLAGS</code>，这两个变量除非使用<code>unexport</code>声明， 否则的话在整个make的执行过程中，它们的值始终自动的传递给子make。<br><code>MAKEFLAGS</code> 追加了一些值，<code>-rR</code>表示禁止使用内置的隐 含规则和变量定义，<code>--include-dir</code>指明搜索路径，<code>$(CURDIR)</code>表示当前目录。<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/3.png" alt="image"></p>
+<h2><span id="3-she-zhi-ming-ling-shu-chu-xiang-xi-cheng-du">3 设置命令输出详细程度</span><a href="#3-she-zhi-ming-ling-shu-chu-xiang-xi-cheng-du" class="header-anchor">#</a></h2><p>①uboot 默认编译使用短命令。<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/4.png" alt="image"><br>②设置变量<code>V=1</code>来实现完整的命令输出。<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/5.png" alt="image"><br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/6.png" alt="image"><br>③<code>make -s</code>设置成静默输出，将会<code>silent_输出</code>,不打印任何提示信息。如下：<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/7.png" alt="image"><br><code>MAKE_VERSION</code>就是make版本号，我这里是<code>4.2.1</code>。因此<code>filter 4.%,$(MAKE_VERSION)</code>得到的过滤结果不为空。<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/8.png" alt="image"></p>
+<p>当使用<code>make -s</code>编译的时候，<code>-s</code>会作为 <code>MAKEFLAGS </code>变量的一部分传递给 Makefile。因此<code>$(firstword x$(MAKEFLAGS))得到xrRs</code>，最后<code>quiet=silent</code>_,否则不使用<code>silent_</code>输出。最后使用 <code>export 导出变量 quiet、Q 和 KBUILD_VERBOSE</code>。<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/9.png" alt="image"><br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/10.png" alt="image"></p>
+<h2><span id="4-she-zhi-bian-yi-jie-guo-shu-chu-wei-zhi">4 设置编译结果输出位置</span><a href="#4-she-zhi-bian-yi-jie-guo-shu-chu-wei-zhi" class="header-anchor">#</a></h2><p>在 make 的时候使用<code>O</code>来指定 输出目录，这么做是为了将源文件 和编译产生的文件分开，当然也可以不指定 O 参数，不指定的话源文件和编译产生的文件都在 同一个目录内。<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/11.png" alt="image"><br>判断<code>O</code>是否来自于命令行，如果来自命令行的话，<code>KBUILD_OUTPUT 就为$(O)</code>，也就是输出目录。<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/12.png" alt="image"><br>一开始判断<code>KBUILD_OUTPUT </code>是否为空。 如果指定了输出目录就调用 <code>mkdir </code>命令创建目录。</p>
+<h2><span id="5-dai-ma-jian-cha">5 代码检查</span><a href="#5-dai-ma-jian-cha" class="header-anchor">#</a></h2><p>命令<code>make C=1</code>使能代码检查，检查那些需要重新编译的文 件。<code>make C=2</code>用于检查所有的源码文件。<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/13.png" alt="image"></p>
+<h2><span id="6-zi-mo-kuai-bian-yi">6 子模块编译</span><a href="#6-zi-mo-kuai-bian-yi" class="header-anchor">#</a></h2><p>使用命令<code>make M=dir</code>即可，旧语法<code>make SUBDIRS=dir</code>也是支持的。<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/14.png" alt="image"><br>如果定 义 了 SUBDIRS或者M,那么<code>KBUILD_EXTMOD</code>就会被赋值。然后进入目标<code>_all 依赖 modules</code>，要先编译出<code> modules</code>，也就是编译模块。<br>否则<code>KBUILD_EXTMOD</code>为空，进入<code>all</code>编译。<br>判断<code>KBUILD_SRC</code>是否为空，如果为空的话就设置变量<code>srctree</code>为当前目录，否则<code>srctree</code>就是<code>KBUILD_SRC</code>。一般不设置 <code>KBUILD_SRC</code>。<br>设置变量<code>src</code>和<code> obj</code>，都为当前目录，设置<code>VPATH</code>，导出量<code> scrtree、objtree 和 VPATH</code>。</p>
+<h2><span id="7-huo-qu-zhu-ji-jia-gou-xi-tong-xin-xi">7 获取主机架构系统信息</span><a href="#7-huo-qu-zhu-ji-jia-gou-xi-tong-xin-xi" class="header-anchor">#</a></h2><p><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/15.png" alt="image"><br>最终开发服务器主机架构和操作系统信息如下:<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/16.png" alt="image"></p>
+<h2><span id="8-she-zhi-mu-biao-jia-gou-gong-ju-lian-he-pei-zhi-wen-jian">8 设置目标架构、工具链和配置文件</span><a href="#8-she-zhi-mu-biao-jia-gou-gong-ju-lian-he-pei-zhi-wen-jian" class="header-anchor">#</a></h2><p><code>HOSTARCH是x86_64</code>,我们编译<code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-</code>就是用于设置目标<code> ARCH 和 CROSS_COMPILE</code>。<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/17.png" alt="image"><br><code>KCONFIG_CONFIG</code>，这里设置配置文件为<code>.config，.config </code>默认是没有的，需要使用命令<code>make xxx_defconfig</code> 对 uboot 进行配置，配置完成以后就会在 uboot 根目录下生成<code>.config</code>。<br>设置主机编译器<code>HOSTCC，HOSTCXX</code>等。</p>
+<h2><span id="9-diao-yong-scripts-kbuild-include">9 调用 <code>scripts/Kbuild.include</code></span><a href="#9-diao-yong-scripts-kbuild-include" class="header-anchor">#</a></h2><p><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/18.png" alt="image"><br><code>Kbuild.include</code>定义了很多变量:<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/19.png" alt="image"><br>里面定了build变量，后面产生配置文件时会用到：<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/20.png" alt="image"></p>
+<h2><span id="10-she-zhi-jiao-cha-bian-yi-qi">10 设置交叉编译器</span><a href="#10-she-zhi-jiao-cha-bian-yi-qi" class="header-anchor">#</a></h2><p><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/21.png" alt="image"></p>
+<h2><span id="11-he-xin-bian-liang-dao-chu">11 核心变量导出</span><a href="#11-he-xin-bian-liang-dao-chu" class="header-anchor">#</a></h2><p>在顶层 Makefile 会导出很多变量：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">export</span> VERSION PATCHLEVEL SUBLEVEL UBOOTRELEASE UBOOTVERSION</span><br><span class="line"><span class="built_in">export</span> ARCH CPU BOARD VENDOR SOC CPUDIR BOARDDIR</span><br><span class="line"><span class="built_in">export</span> CONFIG_SHELL HOSTCC HOSTCFLAGS HOSTLDFLAGS CROSS_COMPILE AS LD CC</span><br><span class="line"><span class="built_in">export</span> CPP AR NM LDR STRIP OBJCOPY OBJDUMP</span><br><span class="line"><span class="built_in">export</span> MAKE AWK PERL PYTHON</span><br><span class="line"><span class="built_in">export</span> HOSTCXX HOSTCXXFLAGS DTC CHECK CHECKFLAGS</span><br><span class="line"></span><br><span class="line"><span class="built_in">export</span> KBUILD_CPPFLAGS NOSTDINC_FLAGS UBOOTINCLUDE OBJCOPYFLAGS LDFLAGS</span><br><span class="line"><span class="built_in">export</span> KBUILD_CFLAGS KBUILD_AFLAGS</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/22.png" alt="image"><br>打印出export的这些变量：<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/23.png" alt="image"><br>①这些变量来自<code>config.mk</code>，里面定义了<code>ARCH,CPU,BOARD,VENDOR,SOC，BOARDDIR</code>等变量。变 量 <code>ARCH </code>， 值 为 <code>$(CONFIG_SYS_ARCH:&quot;%&quot;=%)</code> ， 也 就 是 提 取<code> CONFIG_SYS_ARCH</code> 里面双引号“”之间的内容。比如 <code>CONFIG_SYS_ARCH=“arm”</code>的话， <code>ARCH=arm</code>。经过展开确定了<code>CPUDIR=arch/arm/cpu/armv7</code>。<br>②这里有一个<code>sinclude</code>指令，<code>sinclude 和 include </code>的功能类似，在 Makefile 中都是读取指定文件内容，这里读取 文件<code>$(srctree)/arch/$(ARCH)/config.mk </code>的内容。<code>sinclude </code>读取的文件如果不存在的话不会报错。<br>③依次包含<code>arch,cpu,soc，vendor,board</code>相关的<code>config.mk</code><br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/24.png" alt="image"><br><code>.config</code>如下：<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/25.png" alt="image"></p>
+<h2><span id="12-make-xxx-defconfig-pei-zhi-guo-cheng">12 <code>make xxx_defconfig</code> 配置过程</span><a href="#12-make-xxx-defconfig-pei-zhi-guo-cheng" class="header-anchor">#</a></h2><p>输入命令进行配置：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- mx6ull_14x14_ddr512_emmc_defconfig</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/26.png" alt="image"></p>
+<h3><span id="12-1-chan-sheng-ban-ben-ri-qi-xin-xi">12.1 产生版本日期信息</span><a href="#12-1-chan-sheng-ban-ben-ri-qi-xin-xi" class="header-anchor">#</a></h3><p>先产生<code>version_h和timestamp_h</code>。<code>version_h</code>记录uboot版本和编译器版本。<code>timestamp_h</code>记录uboot的日期时间戳信息。打开这两个头文件：<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/27.png" alt="image"><br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/28.png" alt="image"></p>
+<h3><span id="12-2-pei-zhi-bian-liang">12.2 配置变量</span><a href="#12-2-pei-zhi-bian-liang" class="header-anchor">#</a></h3><p><code>MAKECMDGOALS </code>是 make 的一个环境变量，这个变量会保存你所指 定的终极目标列表，比如执行<code>make mx6ull_alientek_emmc_defconfig</code>，那么 <code>MAKECMDGOALS </code>就为 <code>mx6ull_alientek_emmc_defconfig</code>。<code>filter</code>函数将 <code>MAKECMDGOALS</code> 中符合<code>no-dot-config-targets</code>的部分过滤出来，可以看到为空，所以<code>dot-config</code>还是等于1.</p>
+<p><code>KBUILD_EXTMOD</code>前面提到没有编译子模块，<code>KBUILD_EXTMOD</code>为空，进入，在判断</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">ifneq ($(filter config %config,$(MAKECMDGOALS),)</span><br></pre></td></tr></table></figure>
+<p>当<code>make mx6ull_alientek_emmc_defconfig</code>, 明显过滤出来不为空，因此<code>config-targets=1</code>.</p>
+<p><code>words $(MAKECMDGOALS)</code>等于1，最后得到：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">config-targets = 1</span><br><span class="line">mixed-targets = 0</span><br><span class="line">dot-config = 1</span><br></pre></td></tr></table></figure>
+
+<h3><span id="12-3-zhi-xing-3-ge-yi-lai">12.3 执行3个依赖</span><a href="#12-3-zhi-xing-3-ge-yi-lai" class="header-anchor">#</a></h3><p><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/29.png" alt="image"><br><code>KBUILD_DEFCONFIG</code>等于<code>mx6ull_14x14_ddr512_emmc_defconfig</code>，<code> KBUILD_KCONFIG</code>等于空，导出。<br>匹配到<code>%config</code>， 执行<code>scripts_basic、outputmakefile 和 FORCE </code>3个依赖.<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/30.png" alt="image"></p>
+<h4><span id="12-3-1-scripts-basic">12.3.1 <code>scripts_basic</code></span><a href="#12-3-1-scripts-basic" class="header-anchor">#</a></h4><p><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/31.png" alt="image"></p>
+<p><code>scripts/Kbuild.include</code>定义了<code>build</code>变量。<code>$Q$(MAKE) $(build)=scripts/basic</code>展开<code>build</code>变量后得：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">make -f ./scripts/Makefile.build obj=scripts/basic</span><br></pre></td></tr></table></figure>
+
+<h5><span id="12-3-1-1-scripts-makefile-build">12.3.1.1 <code>scripts/Makefile.build</code></span><a href="#12-3-1-1-scripts-makefile-build" class="header-anchor">#</a></h5><p><code>scripts_basic </code>会调用文件<code>./scripts/Makefile.build</code>,打开这个文件：<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/32.png" alt="image"></p>
+<p>这里<code>$(obj)=scripts/basic, patsubst </code>是替换函数在<code>scripts/basic</code>中查找符合<code>tpl/%</code>的部分，然后将<code>tpl/</code>取消掉，但是 <code>scripts/basic</code>没有<code>tpl/</code>，所以<code> src= scripts/basic</code>。两个<code>ifeq ($(obj),$(src))</code>都满足条件，最终<code>prefix等于.</code>。<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/33.png" alt="image"><br><code>kbuild-dir </code>展开后为：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$(<span class="keyword">if</span> $(filter /%, scripts/basic), scripts/basic, ./scripts/basic)</span><br></pre></td></tr></table></figure>
+<p>因为没有以<code>/</code>为开头的单词，所以<code>$(filter /%, scripts/basic)</code>的结果为空，<code>kbuilddir=./scripts/basic</code>。<br><code>kbuild-file </code>展开后为：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">$(<span class="keyword">if</span> $(wildcard ./scripts/basic/Kbuild), ./scripts/basic/Kbuild, ./scripts/basic/Makefile)</span><br></pre></td></tr></table></figure>
+<p><code>scrpts/basic </code>目录中没有<code>Kbuild</code>这个文件，所以<code> kbuild-file= ./scripts/basic/Makefile</code>.<br><code>scripts/Makefile.build</code>文件包含<code>/scripts/basic/Makefile</code></p>
+<h6><span id="12-3-1-1-1-zhao-dao-mo-ren-mu-biao-build">12.3.1.1.1 找到默认目标<code>_build</code></span><a href="#12-3-1-1-1-zhao-dao-mo-ren-mu-biao-build" class="header-anchor">#</a></h6><p>再继续分析<code>scripts/Makefile.build</code>：<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/34.png" alt="image"></p>
+<p><code>__build </code>是默认目标，因为命令<code>@make -f ./scripts/Makefile.build obj=scripts/basic</code>没有指定目标，所以会使用到默认目标：<code>__build</code>。<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/35.png" alt="image"></p>
+<p>顶层 Makefile 中，<code>KBUILD_BUILTIN 为 1</code>， <code>KBUILD_MODULES 为 0</code>，因此展开后目标<code>__build </code>为：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">__build:$(builtin-target) $(lib-target) $(extra-y)) $(subdir-ym) $(always)</span><br><span class="line">@:</span><br></pre></td></tr></table></figure>
+<p>直接打印出这5个目标：所以最终只有一个依赖<code>scripts/basic/fixdep</code>要执行，产生<code>fixdep</code>.<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/36.png" alt="image"></p>
+<p>执行打印如下：<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/37.png" alt="image"><br>至此第一个依赖<code>scripts_basic</code>就结束了。<br>总结：<code>scripts_basic</code>就是利用<code>scripts/Makefile.build</code>去找到<code>_build</code>目标，然后去<code>scripts/basic</code>目录编译出<code>fixdep</code>.</p>
+<h4><span id="12-3-2-outputmakefile">12.3.2 <code>outputmakefile</code></span><a href="#12-3-2-outputmakefile" class="header-anchor">#</a></h4><p>由于<code>KBUILD_SRC</code>为空，不执行。否则会为源码路径创建<code>source</code>这个符号链接，执行<code>mkmakefile</code>。</p>
+<h4><span id="12-3-3-force">12.3.3 <code>FORCE</code></span><a href="#12-3-3-force" class="header-anchor">#</a></h4><p>Makefile最底下定了<code>FORCE</code>目标，可以看到什么都不执行。<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/38.png" alt="image"></p>
+<h3><span id="12-4-chan-sheng-config">12.4 产生<code>.config</code></span><a href="#12-4-chan-sheng-config" class="header-anchor">#</a></h3><p>回到<code>%config </code>处：<br><code>$(Q)$(MAKE) $(build)=scripts/kconfig $@</code>展开后</p>
+<figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line">make -f ./scripts/Makefile.build obj=scripts/kconfig mx6ull_14x14_ddr512_emmc_defconfig</span><br></pre></td></tr></table></figure>
+
+<p>再次进入<code>scripts/Makefile.build， 用echo</code>得到一些变量值:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">kbuild-dir = ./scripts/kconfig</span><br><span class="line">kbuild-file = ./scripts/kconfig/Makefile</span><br><span class="line">include ./scripts/kconfig/Makefile</span><br></pre></td></tr></table></figure>
+<p>打开<code>./scripts/kconfig/Makefile</code>：<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/39.png" alt="image"><br><code>%_defconfig: $(obj)/conf</code>匹配到我们的<code>mx6ull_14x14_ddr512_emmc_defconfig</code>，先编译依赖<code>scripts/kconfig/conf</code>,编译生成<code>scripts/kconfig/conf</code>如下：<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/40.png" alt="image"><br>最终利用<code>conf</code>工具从<code>configs</code>目录找到<code>mx6ull_14x14_ddr512_emmc_defconfig</code>，将配置写成<code>.config</code>文件。<br>总结<code>defconfig</code>配置过程：<br><img src="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/41.png" alt="image"></p>
+<h3><span id="12-5-zhi-zuo-defconfig">12.5 制作<code>defconfig</code></span><a href="#12-5-zhi-zuo-defconfig" class="header-anchor">#</a></h3><p>如果没有对应的<code>defconfig</code>可以找一个与自己板级信息类似的defconfig生成一个<code>.config</code>，再通过<code>menuconfig</code>来完成自己board的配置，并最后通过<code>savedefconfig</code>保存为自己<code>board的defconfig</code>：</p>
+<figure class="highlight makefile"><table><tr><td class="code"><pre><span class="line">make CROSS_COMPILE=aarch64-linux-gnu- evb-rk3399_defconfig</span><br><span class="line">make menuconfig</span><br><span class="line">make savedefconfig</span><br><span class="line">cp defconfig configs/my_defconfig</span><br></pre></td></tr></table></figure>
+]]></content>
+      <tags>
+        <tag>boot启动</tag>
         <tag>linux系统构建</tag>
         <tag>uboot</tag>
       </tags>
