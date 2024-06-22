@@ -69,6 +69,86 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-卷帘快门RollingShutter与全局快门GlobalShutter" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/04/03/%E5%8D%B7%E5%B8%98%E5%BF%AB%E9%97%A8RollingShutter%E4%B8%8E%E5%85%A8%E5%B1%80%E5%BF%AB%E9%97%A8GlobalShutter/" class="article-date">
+  <time class="dt-published" datetime="2024-04-03T07:56:37.000Z" itemprop="datePublished">2024-04-03</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/04/03/%E5%8D%B7%E5%B8%98%E5%BF%AB%E9%97%A8RollingShutter%E4%B8%8E%E5%85%A8%E5%B1%80%E5%BF%AB%E9%97%A8GlobalShutter/">卷帘快门RollingShutter与全局快门GlobalShutter</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-global-shutter">1 Global Shutter</a></li>
+<li><a href="#2-rolling-shutter">2 Rolling Shutter</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-global-shutter">1 Global Shutter</span><a href="#1-global-shutter" class="header-anchor">#</a></h1><p>通过整幅场景在同一时间曝光实现的。Sensor所有像素点同时收集光线，同时曝光。即在曝光开始的时候，Sensor开始收集光线；在曝光结束的时候，光线收集电路被切断。CCD就是Global shutter工作方式。所有像元同时曝光</p>
+<h1><span id="2-rolling-shutter">2 Rolling Shutter</span><a href="#2-rolling-shutter" class="header-anchor">#</a></h1><p>与Global shutter不同，它是通过Sensor逐行曝光的方式实现的。在曝光开始的时候，Sensor逐行扫描逐行进行曝光，直至所有像素点都被曝光。</p>
+<p>对比优缺点:</p>
+<p>Global shutter： 曝光时间更短，但会增加读出噪声；</p>
+<p>Rolling shutter：可以达到更高的帧速，噪声小，但是运动场景会产生果冻效应。</p>
+<p>卷帘快门与全局快门大致原理如下图：</p>
+<p align="left">&nbsp;<img src="/2024/04/03/%E5%8D%B7%E5%B8%98%E5%BF%AB%E9%97%A8RollingShutter%E4%B8%8E%E5%85%A8%E5%B1%80%E5%BF%AB%E9%97%A8GlobalShutter/1.gif" alt width="292" height="165" loading="lazy"></p>
+
+<p>卷帘快门：</p>
+<p><img src="/2024/04/03/%E5%8D%B7%E5%B8%98%E5%BF%AB%E9%97%A8RollingShutter%E4%B8%8E%E5%85%A8%E5%B1%80%E5%BF%AB%E9%97%A8GlobalShutter/2.gif" alt width="409" height="187" loading="lazy"></p>
+
+<p><strong>适用性：</strong></p>
+<table>
+<thead>
+<tr>
+<th><strong>Global shutter</strong></th>
+<th><strong>rolling shutter</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>曝光时间短的应用（如</strong><strong>&lt;500μs****）</strong></td>
+<td><strong>曝光时间长（如大于<strong><strong>500μs</strong></strong>）的应用可以有更低的噪声和帧速</strong></td>
+</tr>
+<tr>
+<td><strong>快速移动物体拍适合</strong></td>
+<td><strong>静止的物体适合</strong></td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/04/03/%E5%8D%B7%E5%B8%98%E5%BF%AB%E9%97%A8RollingShutter%E4%B8%8E%E5%85%A8%E5%B1%80%E5%BF%AB%E9%97%A8GlobalShutter/" data-id="clwni9kya001wewuf5vhdekj4" data-title="卷帘快门RollingShutter与全局快门GlobalShutter" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-mipi-csi软件篇" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/" class="article-date">
@@ -1605,57 +1685,6 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
 
 
   
-    <article id="post-hello-world" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/03/25/hello-world/" class="article-date">
-  <time class="dt-published" datetime="2024-03-25T07:16:51.270Z" itemprop="datePublished">2024-03-25</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/03/25/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2><span id="quick-start">Quick Start</span><a href="#quick-start" class="header-anchor">#</a></h2><h3><span id="create-a-new-post">Create a new post</span><a href="#create-a-new-post" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-<h3><span id="run-server">Run server</span><a href="#run-server" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/server.html">Server</a></p>
-<h3><span id="generate-static-files">Generate static files</span><a href="#generate-static-files" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/generating.html">Generating</a></p>
-<h3><span id="deploy-to-remote-sites">Deploy to remote sites</span><a href="#deploy-to-remote-sites" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/one-command-deployment.html">Deployment</a></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/25/hello-world/" data-id="clwni9ky20008ewuf15acgl09" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -1684,7 +1713,7 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 20px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 15.71px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.57px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 14.29px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.86px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 11.43px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17.14px;">外设驱动</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.43px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.86px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.86px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 14.29px;">通信协议</a>
+      <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 20px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.25px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.75px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 15px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.5px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 12.5px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17.5px;">外设驱动</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.25px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.5px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.5px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.75px;">通信协议</a>
     </div>
   </div>
 
@@ -1706,6 +1735,10 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
       <ul>
         
           <li>
+            <a href="/2024/06/22/uboot-%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8BMake%E5%88%86%E6%9E%90/">uboot-编译过程Make分析</a>
+          </li>
+        
+          <li>
             <a href="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/">uboot-编译defconfig分析</a>
           </li>
         
@@ -1719,10 +1752,6 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
         
           <li>
             <a href="/2024/06/07/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-printk%E5%92%8Cdemsg/">Linux日志管理-printk和demsg</a>
-          </li>
-        
-          <li>
-            <a href="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/">Linux日志管理-syslog和rsyslog</a>
           </li>
         
       </ul>
