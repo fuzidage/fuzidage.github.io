@@ -69,6 +69,529 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-s3c2440裸机-异常中断" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/" class="article-date">
+  <time class="dt-published" datetime="2024-04-16T06:55:01.000Z" itemprop="datePublished">2024-04-16</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/">s3c2440裸机-异常中断</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-yi-chang-zhong-duan-yin-ru">1 异常中断引入</a><ul>
+<li><a href="#1-1-cpu-mo-shi">1.1 CPU模式</a></li>
+<li><a href="#1-2-gong-zuo-state">1.2 工作State</a></li>
+<li><a href="#1-3-arm-ji-cun-qi">1.3 ARM寄存器</a><ul>
+<li><a href="#1-3-1-cpsr-cheng-xu-zhuang-tai-ji-cun-qi">1.3.1 CPSR程序状态寄存器</a></li>
+<li><a href="#1-3-2-spsr-cheng-xu-zhuang-tai-bei-fen-ji-cun-qi">1.3.2 SPSR程序状态备份寄存器</a></li>
+</ul>
+</li>
+<li><a href="#1-4-yi-chang-xiang-liang-biao">1.4 异常向量表</a></li>
+</ul>
+</li>
+<li><a href="#2-yi-chang-chu-li-liu-cheng">2 异常处理流程</a><ul>
+<li><a href="#2-1-zhong-duan-qian">2.1 中断前</a><ul>
+<li><a href="#2-1-1-chu-shi-hua-zhong-duan">2.1.1 初始化中断</a></li>
+</ul>
+</li>
+<li><a href="#2-2-zhong-duan-chan-sheng-hou">2.2 中断产生后</a><ul>
+<li><a href="#2-2-1-ying-jian-shang-de-chu-li-liu-cheng">2.2.1 硬件上的处理流程</a></li>
+</ul>
+</li>
+<li><a href="#2-2-2-ruan-jian-shang-de-chu-li-liu-cheng">2.2.2 软件上的处理流程</a></li>
+</ul>
+</li>
+<li><a href="#3-zhong-duan-shi-li">3 中断实例</a><ul>
+<li><a href="#3-1-und-wei-ding-yi-zhi-ling-yi-chang">3.1 und-未定义指令异常</a><ul>
+<li><a href="#3-1-1-hui-bian-xiang-c-han-shu-chuan-can">3.1.1 汇编向c函数传参</a></li>
+<li><a href="#3-1-2-und-yi-chang-cheng-xu-shi-li">3.1.2 und异常程序示例</a></li>
+<li><a href="#3-1-3-shi-li-gai-jin">3.1.3 示例改进</a><ul>
+<li><a href="#3-1-3-1-zhi-ling-4-zi-jie-dui-qi">3.1.3.1 指令4字节对齐</a></li>
+<li><a href="#3-1-3-2-jue-dui-tiao-zhuan-jin-ru-yi-chang-xiang-liang">3.1.3.2 绝对跳转进入异常向量</a></li>
+<li><a href="#3-1-3-3-chong-ding-wei-hou-tiao-zhuan-sdram-shang-zhi-xing">3.1.3.3 重定位后跳转sdram上执行</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-2-swi-ruan-zhong-duan">3.2 swi-软中断</a><ul>
+<li><a href="#3-2-1-jin-ru-ruan-zhong-duan-swi">3.2.1 进入软中断swi</a><ul>
+<li><a href="#3-2-1-1-da-yin-chu-swi-ruan-zhong-duan-hao">3.2.1.1 打印出swi软中断号</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-3-irq-wai-bu-zhong-duan">3.3 irq-外部中断</a><ul>
+<li><a href="#3-3-1-yin-ru-wai-bu-zhong-duan">3.3.1 引入外部中断</a></li>
+<li><a href="#3-3-2-wai-bu-zhong-duan-shi-li">3.3.2 外部中断示例</a><ul>
+<li><a href="#3-3-1-1-pei-zhi-gpio-he-zhong-duan-yuan">3.3.1.1 配置GPIO和中断源</a></li>
+<li><a href="#3-3-3-2-zhong-duan-kong-zhi-qi-she-zhi">3.3.3.2 中断控制器设置</a></li>
+<li><a href="#3-3-3-3-zhong-duan-zong-kai-guan">3.3.3.3 中断总开关</a></li>
+<li><a href="#3-3-3-4-zhong-duan-fu-wu-cheng-xu">3.3.3.4 中断服务程序</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-4-irq-ding-shi-qi-zhong-duan">3.4 irq-定时器中断</a><ul>
+<li><a href="#3-4-1-yin-ru-kan-men-gou-ding-shi-qi">3.4.1 引入看门狗定时器</a><ul>
+<li><a href="#3-4-1-1-watchdog-ding-shi-qi-yuan-li">3.4.1.1 WatchDog定时器原理</a><ul>
+<li><a href="#3-4-1-1-1-wtcon-ji-cun-qi">3.4.1.1.1 WTCON寄存器</a></li>
+<li><a href="#3-4-1-1-2-wtcnt-wtdat-ji-cun-qi">3.4.1.1.2 WTCNT、WTDAT寄存器</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-4-2-watchdog-ding-shi-qi-zhong-duan-shi-li">3.4.2 WatchDog定时器中断示例</a><ul>
+<li><a href="#3-4-2-1-ding-shi-qi-chu-shi-hua">3.4.2.1 定时器初始化</a></li>
+<li><a href="#3-4-2-2-ding-shi-qi-zhong-duan-fu-wu-cheng-xu">3.4.2.2 定时器中断服务程序</a></li>
+</ul>
+</li>
+<li><a href="#3-4-3-pwm-mai-chong-kuan-du-diao-zhi-ding-shi-qi">3.4.3 PWM脉冲宽度调制定时器</a><ul>
+<li><a href="#3-4-1-1-pwm-ding-shi-qi-yuan-li">3.4.1.1 pwm定时器原理</a></li>
+<li><a href="#3-4-3-2-pwm-ding-shi-qi-bian-cheng-shi-xian">3.4.3.2 pwm定时器编程实现</a><ul>
+<li><a href="#3-4-3-2-1-chu-shi-hua-pwm-ding-shi-qi">3.4.3.2.1 初始化pwm定时器</a></li>
+<li><a href="#3-4-3-2-2-pwm-ding-shi-qi-zhong-duan-fu-wu-cheng-xu">3.4.3.2.2 pwm定时器中断服务程序</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-5-irq-de-you-hua-gai-jin">3.5 irq的优化改进</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+
+<h1><span id="1-yi-chang-zhong-duan-yin-ru">1 异常中断引入</span><a href="#1-yi-chang-zhong-duan-yin-ru" class="header-anchor">#</a></h1><p>在arm架构的处理器中，cpu有7中工作模式，2中工作状态。</p>
+<h2><span id="1-1-cpu-mo-shi">1.1 CPU模式</span><a href="#1-1-cpu-mo-shi" class="header-anchor">#</a></h2><pre><code>7种Mode: 除了usr/sys，其他5种都是异常模式。我们知道中断属于异常的2中，中断有irq,fiq。
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>usr</th>
+<th>sys</th>
+<th>undefined(und)</th>
+<th>Supervisor(svc)</th>
+<th>Abort(abt)</th>
+<th>irq</th>
+<th>fiq</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>用户模式</td>
+<td>系统模式</td>
+<td>未定义指令异常模</td>
+<td>svc管理模式</td>
+<td>终止模式（1.指令预取终止(读写某条错误的指令导致终止运行)；2.数据访问终止(读写某个非法地址程序终止)）</td>
+<td>irq中断</td>
+<td>快中断</td>
+</tr>
+</tbody></table>
+<p>除了usr模式，其他6中为特权模式。 CPU无法从usr模式直接进入特权模式。不能直接进入特权模式，那么<strong>怎么进入特权模式</strong>呢？</p>
+<p>可以通过<strong>设置CPSR</strong>进入其他模式。</p>
+<h2><span id="1-2-gong-zuo-state">1.2 工作State</span><a href="#1-2-gong-zuo-state" class="header-anchor">#</a></h2><pre><code>ARM state
+Thumb state(几乎用不上)
+</code></pre>
+<h2><span id="1-3-arm-ji-cun-qi">1.3 ARM寄存器</span><a href="#1-3-arm-ji-cun-qi" class="header-anchor">#</a></h2><pre><code>(1)通用寄存器:
+(2)备份寄存器(banked register):
+    CPSR:当前程序状态寄存器(Current Program Status Register) 反映程序处在那种状态
+    SPSR:CPSR的备份寄存器 (Saved Program Status Register)  用来保存&quot;被中断前的CPSR&quot;
+</code></pre>
+<p>下图是我们arm状态下的通用寄存器和程序状态寄存器<br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/1.png"></p>
+<p><strong>R13是SP（栈指针）</strong><br><strong>R14是LR</strong>（link register），程序跳转或者发成异常时的返回地址<br><strong>R15是PC</strong>（程序计数器）</p>
+<p>假设cpu执行：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mov R0, R8</span><br><span class="line">mov R0,R8_fiq</span><br></pre></td></tr></table></figure>
+
+<p>在usr&#x2F;System 模式下访问的R8, 但是在FIQ模式下，访问R8是访问FIQ模式专属的R8寄存器，不是同一个物理上的寄存器。<br>在5种异常模式中每个模式都有自己专属的R13 R14寄存器，R13用作SP(栈)， R14(LR)是用来保存发生异常时的指令地址。</p>
+<p>为什么快中断(FIQ)有那么多专属寄存器?<br>这些寄存器称为备份寄存器，我们先看下<strong>中断处理流程</strong>：</p>
+<pre><code>1 保存现场(保存被中断模式的寄存器)---(比如程序正在sys/usr模式下运行，当发生中断时，需要把R0-R14这些寄存器全部保存下来)
+2 异常处理（去分辨是哪一个中断源产生了中断，去执行对应的中断服务程序）
+3 恢复现场(恢复被中断时保存下来的寄存器R0-R14)
+</code></pre>
+<p>但如果是快中断，那么我就不需要保存系统&#x2F;用户模式下的R8 ~ R12这几个寄存器，因为在FIQ模式下有自己专属的R8 ~ R12寄存器，省略保存寄存器的时间，加快处理速度，所以它才称得上快中断。</p>
+<h3><span id="1-3-1-cpsr-cheng-xu-zhuang-tai-ji-cun-qi">1.3.1 CPSR程序状态寄存器</span><a href="#1-3-1-cpsr-cheng-xu-zhuang-tai-ji-cun-qi" class="header-anchor">#</a></h3><p>在异常中断中PSR寄存器会使用的很频繁，PSR寄存器的格式如下图：<br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/2.png"></p>
+<p>我们再来看看下表，反映的是PSR的 M[4:0]与arm工作模式的关系：<br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/3.png"></p>
+<p>我们可以按照上图的对应关系设置CPSR，让其进入与之对应的模式。</p>
+<h3><span id="1-3-2-spsr-cheng-xu-zhuang-tai-bei-fen-ji-cun-qi">1.3.2 SPSR程序状态备份寄存器</span><a href="#1-3-2-spsr-cheng-xu-zhuang-tai-bei-fen-ji-cun-qi" class="header-anchor">#</a></h3><h2><span id="1-4-yi-chang-xiang-liang-biao">1.4 异常向量表</span><a href="#1-4-yi-chang-xiang-liang-biao" class="header-anchor">#</a></h2><p><strong>异常向量</strong>：不同的异常有不同的入口函数，那么这个异常入口函数的地址就是存放在该异常向量的位置。从该异常向量读取到的数据就是异常入口函数的地址。<br><strong>异常向量表</strong>：就是由异常向量组成的集合。</p>
+<p>下图是从uboot源代码中截取的smdk2410 的异常向量表：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">.globl _start</span><br><span class="line">_start:	b       reset</span><br><span class="line">	ldr	pc, _undefined_instruction</span><br><span class="line">	ldr	pc, _software_interrupt</span><br><span class="line">	ldr	pc, _prefetch_abort</span><br><span class="line">	ldr	pc, _data_abort</span><br><span class="line">	ldr	pc, _not_used</span><br><span class="line">	ldr	pc, _irq</span><br><span class="line">	ldr	pc, _fiq</span><br></pre></td></tr></table></figure>
+
+<p>异常向量表对应的地址如下图：<br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/4.png"></p>
+<h1><span id="2-yi-chang-chu-li-liu-cheng">2 异常处理流程</span><a href="#2-yi-chang-chu-li-liu-cheng" class="header-anchor">#</a></h1><p>CPU是如何进入到中断模式，执行中断服务程序的？</p>
+<h2><span id="2-1-zhong-duan-qian">2.1 中断前</span><a href="#2-1-zhong-duan-qian" class="header-anchor">#</a></h2><p>下图是中断未触发前的程序执行过程：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/5.png"></p>
+<h3><span id="2-1-1-chu-shi-hua-zhong-duan">2.1.1 初始化中断</span><a href="#2-1-1-chu-shi-hua-zhong-duan" class="header-anchor">#</a></h3><pre><code>1，设置中断源（使中断能够产生，让CPU知道是哪个中断）
+2，设置中断控制器（设置中断屏蔽，中断优先级）
+3，设置中断总开关CPSR (使能中断)
+</code></pre>
+<h2><span id="2-2-zhong-duan-chan-sheng-hou">2.2 中断产生后</span><a href="#2-2-zhong-duan-chan-sheng-hou" class="header-anchor">#</a></h2><p>举个栗子：按键按下，产生按键irq。</p>
+<h3><span id="2-2-1-ying-jian-shang-de-chu-li-liu-cheng">2.2.1 硬件上的处理流程</span><a href="#2-2-1-ying-jian-shang-de-chu-li-liu-cheng" class="header-anchor">#</a></h3><p>cpu强制跳转到异常向量表上对应的_irq异常向量（0x18）去读取指令（这个是CPU强制执行的，不需要我们去控制）。</p>
+<p>具体的进入中断向量和中断返回流程见下图：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/6.png"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">进入：</span><br><span class="line">	 (<span class="number">1</span>) LR_异常=PC + offset（具体多少看下图）</span><br><span class="line">	（<span class="number">2</span>）SPSR_异常=被中断前的程序模式CPSR</span><br><span class="line">	 (<span class="number">3</span>) CPSR被设置成对应的异常模式</span><br><span class="line">	（<span class="number">4</span>）跳转到对应的异常向量去执行</span><br><span class="line">退出（返回）：进入和退出就是一个逆过程</span><br><span class="line">	（<span class="number">1</span>）PC= LR_异常 -offset</span><br><span class="line">	（<span class="number">2</span>）被中断前的程序模式CPSR = SPSR_异常</span><br><span class="line">	（<span class="number">3</span>）中断结束，清中断</span><br></pre></td></tr></table></figure>
+
+<p>进入异常和返回异常时pc和lr的关系如下图：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/7.png"></p>
+<p>从图中我们发现进入不同异常，offset的值也是有差异的。</p>
+<h2><span id="2-2-2-ruan-jian-shang-de-chu-li-liu-cheng">2.2.2 软件上的处理流程</span><a href="#2-2-2-ruan-jian-shang-de-chu-li-liu-cheng" class="header-anchor">#</a></h2><pre><code>1.当跳转到irq异常向量(0x18)后，发现该处是一条跳转指令“ldr pc, _irq”,
+那么会通过ldr绝对跳转指令跳到到真正的中断处理函数_irq去执行。
+2.那么在_irq的函数中我们需要按照之前说的**中断处理流程**去执行：
+    （1）保存现场
+    （2）异常处理（去分辨是哪一个中断源产生了中断，去执行对应的中断服务程序）
+    （3）恢复现场
+</code></pre>
+<p>流程图总结下中断产生后的详细处理过程：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/8.png"></p>
+<h1><span id="3-zhong-duan-shi-li">3 中断实例</span><a href="#3-zhong-duan-shi-li" class="header-anchor">#</a></h1><h2><span id="3-1-und-wei-ding-yi-zhi-ling-yi-chang">3.1 und-未定义指令异常</span><a href="#3-1-und-wei-ding-yi-zhi-ling-yi-chang" class="header-anchor">#</a></h2><p>先来看下当cpu解析到什么样的指令才会触发未定义指令异常呢？</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/9.png"></p>
+<p>从上面的arm指令格式中可知，只要指令码属于划线的格式，就属于未定义指令异常。</p>
+<h3><span id="3-1-1-hui-bian-xiang-c-han-shu-chuan-can">3.1.1 汇编向c函数传参</span><a href="#3-1-1-hui-bian-xiang-c-han-shu-chuan-can" class="header-anchor">#</a></h3><p>我们知道汇编给C语言函数传参是通过r0，r1，…通过堆栈的方式去传递的参数，比如r0&#x3D;1, r1&#x3D;2;那么在被调用的c函数中argv0就是r0, argv1就是r1…,那么我们如果通过汇编给C函数传递字符串呢？</p>
+<p>声明und_string为一个字符串:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">und_string:</span><br><span class="line">	.<span class="built_in">string</span> <span class="string">&quot;undefined instruction exception&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>然后用<code>ldr r1, =und_string</code>，这样r1中就保存了und_string的地址。<br>这样调用我们的c函数就可以把und_string传入进去。</p>
+<h3><span id="3-1-2-und-yi-chang-cheng-xu-shi-li">3.1.2 und异常程序示例</span><a href="#3-1-2-und-yi-chang-cheng-xu-shi-li" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">.text</span><br><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">	b reset  <span class="comment">/* vector 0 : reset */</span> </span><br><span class="line">	b do_und <span class="comment">/* vector 4 : und （看中断向量表）*/</span></span><br><span class="line">reset:</span><br><span class="line">	<span class="comment">/*看门狗</span></span><br><span class="line"><span class="comment">	时钟</span></span><br><span class="line"><span class="comment">	sdram</span></span><br><span class="line"><span class="comment">	设置SP</span></span><br><span class="line"><span class="comment">	重定位*/</span></span><br><span class="line">	...</span><br><span class="line">	bl print1</span><br><span class="line">und_code:</span><br><span class="line">	.word <span class="number">0xdeadc0de</span>; <span class="comment">/*定义一条未定义指令*/</span></span><br><span class="line">	<span class="comment">/*故意以一个数据的方式引入一条未定义指令，当cpu执行到这里，读取0xdeadc0de指令码的时候，</span></span><br><span class="line"><span class="comment">	发现无法识别这条指令，就发生未定义指令异常，就跳转到0x4的中断向量去执行*/</span></span><br><span class="line">	</span><br><span class="line">	bl print2</span><br><span class="line">	...</span><br></pre></td></tr></table></figure>
+
+
+<p>在未定义指令异常前后加上打印print1, print2，<strong>如果出现未定义指令异常后，就会跳到0x4的地方去读取指令，print2也就没法执行</strong>。</p>
+<p>当跳转到0x4的中断向量后，发现此处是一条跳转指令<code>bl do_und</code>, 我们再到未定义指令异常的服务程序do_und中打印出und_string这个字符串的内容。<br>现在开始写指令异常的服务程序do_und，实现如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">do_und:</span><br><span class="line">	<span class="comment">/* sp_und未设置, 先设置它 （由于之前一直处于管理模式，现在处在und状态）*/</span></span><br><span class="line">	ldr sp, =<span class="number">0x34000000</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 保存现场 */</span></span><br><span class="line">	<span class="comment">/* 在und异常处理函数中有可能会修改r0-r12, 所以先保存 */</span></span><br><span class="line">	<span class="comment">/* lr是异常处理完后的返回地址, 也要保存 */</span></span><br><span class="line">	stmdb sp!, &#123;r0-r12, lr&#125;  <span class="comment">/*先减后存*/</span> <span class="comment">/* 把栈中的值备份到r0-r12*/</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 处理und异常 */</span></span><br><span class="line">	mrs r0, cpsr</span><br><span class="line">	ldr r1, =und_string <span class="comment">/*保存und_string地址*/</span></span><br><span class="line">	bl printException</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 恢复现场 */</span></span><br><span class="line">	ldmia sp!, &#123;r0-r12, pc&#125;^  <span class="comment">/*（ldmia先读后加）,把备份的值恢复到栈中，让pc=lr就可以恢复到异常前的指令地址。^会把spsr的值恢复到cpsr里 */</span></span><br></pre></td></tr></table></figure>
+
+<p>下面来分析一下这个未定义指令异常服务程序:</p>
+<ol>
+<li><p>进入未定义指令异常服务do_und之前硬件自动完成的事情如下：</p>
+<ol>
+<li>lr_und保存有被中断模式中的下一条即将执行的指令的地址</li>
+<li>SPSR_und保存有被中断模式的CPSR</li>
+<li>CPSR中的M4-M0被设置为11011, 进入到und模式</li>
+<li>跳到0x4的地方执行程序 （bl do_und）</li>
+</ol>
+</li>
+<li><p>进入指令异常服务程序do_und后，我们需要保存现场，处理und异常,恢复现场，<strong>注意：由于发生了cpu模式切换，如果要用到栈，那么先要设置对应模式的栈。</strong>由于栈的地址是向下生长的，这里我就用sdram的末位地址作为栈指针，把sp_und&#x3D;0x34000000。</p>
+</li>
+<li><p>在und异常服务程序中有可能会用到栈, 所以先保存现场，通过<code>stmdb sp!, &#123;r0-r12, lr&#125;</code>语句把栈中的值备份到r0-r12和lr，然后恢复现场的时候通过<code>ldmia sp!, &#123;r0-r12, pc&#125;^</code>，详见上面的注释。</p>
+</li>
+<li><p>我们看到保存现场后，我们把cpsr的值放到r0, 把und_string放到r1, 然后用bl printException调用c函数，这样我们的c函数printException就能收到汇编传过来的参数，一个是cpsr模式（r0），一个是und_string汇编传过来的字符串(r1)。我们用C函数实现printException：</p>
+</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">printException</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> cpsr, <span class="type">char</span> *str)</span> &#123;</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;Exception! cpsr = &quot;</span>);</span><br><span class="line">	printHex(cpsr);</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot; &quot;</span>);</span><br><span class="line">	<span class="built_in">puts</span>(str);</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;\n\r&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>完整的代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line">.text</span><br><span class="line">.global _start</span><br><span class="line"></span><br><span class="line">_start:</span><br><span class="line">	b reset  <span class="comment">/* vector 0 : reset */</span> </span><br><span class="line">	</span><br><span class="line">	b do_und <span class="comment">/* vector 4 : und （看中断向量表）*/</span></span><br><span class="line"></span><br><span class="line">do_und:</span><br><span class="line">	<span class="comment">/* 执行到这里之前:</span></span><br><span class="line"><span class="comment">	 * 1. lr_und保存有被中断模式中的下一条即将执行的指令的地址</span></span><br><span class="line"><span class="comment">	 * 2. SPSR_und保存有被中断模式的CPSR</span></span><br><span class="line"><span class="comment">	 * 3. CPSR中的M4-M0被设置为11011, 进入到und模式</span></span><br><span class="line"><span class="comment">	 * 4. 跳到0x4的地方执行程序 （bl do_und）</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* sp_und未设置, 先设置它 （由于之前一直处于管理模式，现在处在und状态）*/</span></span><br><span class="line">	ldr sp, =<span class="number">0x34000000</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 保存现场 */</span></span><br><span class="line">	<span class="comment">/* 在und异常处理函数中有可能会修改r0-r12, 所以先保存 */</span></span><br><span class="line">	<span class="comment">/* lr是异常处理完后的返回地址, 也要保存 */</span></span><br><span class="line">	stmdb sp!, &#123;r0-r12, lr&#125;  <span class="comment">/*先减后存*/</span> <span class="comment">/* 把栈中的值备份到r0-r12*/</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 处理und异常 */</span></span><br><span class="line">	mrs r0, cpsr</span><br><span class="line">	ldr r1, =und_string <span class="comment">/*保存und_string地址*/</span></span><br><span class="line">	bl printException</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 恢复现场 */</span></span><br><span class="line">	ldmia sp!, &#123;r0-r12, pc&#125;^  <span class="comment">/*（ldmia先读后加）,把备份的值恢复到栈中，让pc=lr就可以恢复到异常前的指令地址。^会把spsr的值恢复到cpsr里 */</span></span><br><span class="line">	</span><br><span class="line">und_string:</span><br><span class="line">	.<span class="built_in">string</span> <span class="string">&quot;undefined instruction exception&quot;</span></span><br><span class="line"></span><br><span class="line">reset:</span><br><span class="line">	<span class="comment">/* 关闭看门狗 */</span></span><br><span class="line">	<span class="comment">/* 时钟 */</span></span><br><span class="line">	<span class="comment">/* sdram */</span>	</span><br><span class="line">	bl copy2sdram</span><br><span class="line">	bl clean_bss</span><br><span class="line"></span><br><span class="line">	bl uart0_init</span><br><span class="line"></span><br><span class="line">	bl print1</span><br><span class="line">	<span class="comment">/* 故意加入一条未定义指令 */</span></span><br><span class="line">und_code:</span><br><span class="line">	.word <span class="number">0xdeadc0de</span>  <span class="comment">/* 未定义指令 */</span></span><br><span class="line">	bl print2</span><br><span class="line"></span><br><span class="line">	<span class="comment">//bl main  /* 使用BL命令相对跳转, 程序仍然在NOR/sram执行 */</span></span><br><span class="line">	ldr pc, =main  <span class="comment">/* 绝对跳转, 跳到SDRAM */</span></span><br><span class="line"></span><br><span class="line">halt:</span><br><span class="line">	b halt</span><br></pre></td></tr></table></figure>
+
+<p><strong>测试结果</strong>如下：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/10.png"></p>
+<p>打印出print1中的字符串‘abc’后，紧接着打印printException函数中的结果，cpsr&#x3D;0x600000db,那么对应的M[4:0]&#x3D;11011， 对应下图为und模式。然后从und异常返回，恢复原来的模式继续执行。</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/11.png"></p>
+<h3><span id="3-1-3-shi-li-gai-jin">3.1.3 示例改进</span><a href="#3-1-3-shi-li-gai-jin" class="header-anchor">#</a></h3><h4><span id="3-1-3-1-zhi-ling-4-zi-jie-dui-qi">3.1.3.1 指令4字节对齐</span><a href="#3-1-3-1-zhi-ling-4-zi-jie-dui-qi" class="header-anchor">#</a></h4><p>我们将上面的代码的und_string字符串修改一下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">und_string:</span><br><span class="line">	.<span class="built_in">string</span> <span class="string">&quot;undef instruction&quot;</span></span><br><span class="line"></span><br><span class="line">reset:</span><br><span class="line">	<span class="comment">/* 关闭看门狗 */</span></span><br><span class="line">	<span class="comment">/* 时钟 */</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>编译烧录再次运行，发现没有任何打印输出，这是为什么呢？我明明只是把und_string字符串改了一下呀。</p>
+<p>查看反汇编：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/12.png"></p>
+<p>我们发现reset的地址是0x30000032，竟然不是4字节对齐的，我们知道arm指令集是以4字节为基本单位的，那么这里没有对齐，肯定无法解析指令。那么我们手工改进代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">und_string:</span><br><span class="line">	.<span class="built_in">string</span> <span class="string">&quot;undef instruction&quot;</span></span><br></pre></td></tr></table></figure>
+
+<font color="red" size="2.5">
+.align 4
+</font>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">reset:</span><br><span class="line">	<span class="comment">/* 关闭看门狗 */</span></span><br><span class="line">	<span class="comment">/* 时钟 */</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/13.png"></p>
+<p>我们再来看看反汇编，发现reset的地址是30000040，是以4字节对齐的，再次烧录运行，发现能够正常输出print1, 能够进入未定义指令异常。</p>
+<h4><span id="3-1-3-2-jue-dui-tiao-zhuan-jin-ru-yi-chang-xiang-liang">3.1.3.2 绝对跳转进入异常向量</span><a href="#3-1-3-2-jue-dui-tiao-zhuan-jin-ru-yi-chang-xiang-liang" class="header-anchor">#</a></h4><p>如果我们程序非常大，中断向量入口代码的地址可能会大于sram的容量4k，比如do_und和do_swi，那么这个时候就需要用绝对跳转。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">.text</span><br><span class="line">.global _start</span><br><span class="line">_start:</span><br><span class="line">    b reset  <span class="comment">/* vector 0 : reset */</span> </span><br><span class="line">    b do_und <span class="comment">/* vector 4 : und （看中断向量表）*/</span></span><br></pre></td></tr></table></figure>
+
+<p>将上面的相对跳转换成如下代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"> .text</span><br><span class="line">.global _start</span><br><span class="line"></span><br><span class="line">_start:</span><br><span class="line">	b reset  </span><br><span class="line">	ldr pc, und_addr </span><br><span class="line">    ldr pc, swi_addr</span><br><span class="line">    ...</span><br><span class="line">    ... </span><br><span class="line">und_addr:</span><br><span class="line">	.word do_und</span><br><span class="line">swi_addr:</span><br><span class="line">    .word do_swi</span><br></pre></td></tr></table></figure>
+
+<p>这样我们的do_und， do_swi就可放在4k之外的地方, 放到sdram。</p>
+<h4><span id="3-1-3-3-chong-ding-wei-hou-tiao-zhuan-sdram-shang-zhi-xing">3.1.3.3 重定位后跳转sdram上执行</span><a href="#3-1-3-3-chong-ding-wei-hou-tiao-zhuan-sdram-shang-zhi-xing" class="header-anchor">#</a></h4><p>我们现在不断增加的程序代码量，那么有可能在 <code>ldr pc, =main</code> 这条指令执行之前程序就已经超过4k。那么我们当从nand启动的时候，还没执行到ldr pc, &#x3D;main这句来，就无法取指令执行了。nor同理超过2M也就无法取指令执行了。 所以我们干脆重定位完代码后就直接跳转到sdram上去执行,代码简要概述如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">reset：</span><br><span class="line">	<span class="comment">/*看门狗</span></span><br><span class="line"><span class="comment">	时钟</span></span><br><span class="line"><span class="comment">	set SP</span></span><br><span class="line"><span class="comment">	sdram_init</span></span><br><span class="line"><span class="comment">	重定位*/</span></span><br><span class="line">ldr pc, =sdram</span><br><span class="line">sdram：</span><br><span class="line">   ...</span><br><span class="line">ldr pc, =main  <span class="comment">/* 绝对跳转, 跳到SDRAM */</span></span><br><span class="line">halt:</span><br><span class="line">	b halt</span><br></pre></td></tr></table></figure>
+<p>我们再来分析下整个程序执行过程：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/14.jpg"></p>
+<pre><code>1.一上电，cpu从0地址执行，执行b reset（进行初始化硬件）
+2.重定位程序
+3.跳转到sdram去继续执行
+4.执行到 deadc0de,发生未定义指令异常
+5.跳转到异常向量表的0x4地址去执行
+6.跳转到sdram上执行异常处理函数（do_und）
+7.异常返回，继续执行
+</code></pre>
+<h2><span id="3-2-swi-ruan-zhong-duan">3.2 swi-软中断</span><a href="#3-2-swi-ruan-zhong-duan" class="header-anchor">#</a></h2><p>arm有7中工作模式，除了usr模式，其他6种都是特权模式。</p>
+<p>我们知道usr模式无法修改CPSR直接进入其他特权模式，但linux应用程序一般运行在usr模式，既然usr模式权限非常低，是无法直接访问硬件寄存器的，那么它是如何访问硬件的呢？</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">linux应用程序是通过系统调用，从而进入内核态，运行驱动程序来访问的硬件，那么系统调用又是如何实现的呢，就是通过软中断swi指令来进入svc模式，进入到svc模式后当然就能访问硬件啦。</span><br></pre></td></tr></table></figure>
+
+<p>所以我们的应用程序在usr模式想访问硬件，必须切换模式:</p>
+<p>有以下两种方式：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> 发生异常或中断(被动的)</span><br><span class="line"><span class="number">2.</span> swi + 某个值(主动的)</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-2-1-jin-ru-ruan-zhong-duan-swi">3.2.1 进入软中断swi</span><a href="#3-2-1-jin-ru-ruan-zhong-duan-swi" class="header-anchor">#</a></h3><p>s3c2440 一上电会跳到0地址（reset复位）执行代码，此时CPU处于svc模式，2440异常向量表如下图所示:<br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/15.png"></p>
+<p>为了验证usr模式能够主动的通过swi软中断指令来进入svc模式, 我们先将模式切换到usr模式，那么这个时候就不能访问硬件了，也不能直接修改cpsr直接进入其他模式。</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/16.png"></p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/17.png"></p>
+<p>从上图我们设置CPSR让M4-M0处在10000，这样就进入了usr模式。修改start.s如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">.global _start</span><br><span class="line"></span><br><span class="line">_start:</span><br><span class="line">	b reset  </span><br><span class="line">		ldr pc, und_addr </span><br><span class="line">		ldr pc, swi_addr</span><br><span class="line">		...</span><br><span class="line">	und_addr:</span><br><span class="line">		.word do_und</span><br><span class="line">	swi_addr:</span><br><span class="line">		.word do_swi</span><br><span class="line"></span><br><span class="line">reset：</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	看门狗</span></span><br><span class="line"><span class="comment">	时钟</span></span><br><span class="line"><span class="comment">	set SP</span></span><br><span class="line"><span class="comment">	sdram_init</span></span><br><span class="line"><span class="comment">	重定位</span></span><br><span class="line"><span class="comment">	bl uart0_init</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	<span class="comment">/*先进入usr模式*/</span></span><br><span class="line">	mrs r0, cpsr      <span class="comment">/* 读出cpsr 读到r0 */</span></span><br><span class="line">	<span class="comment">/*使用bic命令 bitclean 把低4位清零*/</span></span><br><span class="line">	bic r0, r0, #<span class="number">0xf</span>  <span class="comment">/* 修改M4-M0为0b10000, 进入usr模式 */</span></span><br><span class="line">	msr cpsr, r0	 <span class="comment">/* 写入cpsr */</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 设置usr模式下的栈sp_usr */</span></span><br><span class="line">	ldr sp, =<span class="number">0x33f00000</span></span><br><span class="line">	swi <span class="number">0x123</span>  <span class="comment">/* 执行此命令, 触发SWI异常, 进入0x8执行 */</span></span><br><span class="line">	ldr pc, =main  <span class="comment">/* 绝对跳转, 跳到SDRAM */</span></span><br><span class="line"></span><br><span class="line">halt:</span><br><span class="line">	b halt</span><br></pre></td></tr></table></figure>
+
+<p>那么当执行到swi 0x123，就会触发SWI异常, 进入0x8的向量去执行，调用do_swi，我们参考do_und实现我们的软中断服务程序do_swi。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">do_swi:</span><br><span class="line">	<span class="comment">/* 执行到这里之前:</span></span><br><span class="line"><span class="comment">	 * 1. lr_svc保存有被中断模式中的下一条即将执行的指令的地址</span></span><br><span class="line"><span class="comment">	 * 2. SPSR_svc保存有被中断模式的CPSR</span></span><br><span class="line"><span class="comment">	 * 3. CPSR中的M4-M0被设置为10011, 进入到svc模式</span></span><br><span class="line"><span class="comment">	 * 4. 跳到0x08的地方执行程序 </span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* sp_svc未设置, 先设置它 */</span></span><br><span class="line">	ldr sp, =<span class="number">0x33e00000</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 保存现场 */</span></span><br><span class="line">	<span class="comment">/* 在swi异常处理函数中有可能会修改r0-r12, 所以先保存 */</span></span><br><span class="line">	<span class="comment">/* lr是异常处理完后的返回地址, 也要保存 */</span></span><br><span class="line">	stmdb sp!, &#123;r0-r12, lr&#125;  </span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 处理swi异常 */</span></span><br><span class="line">	mrs r0, cpsr</span><br><span class="line">	ldr r1, =swi_string <span class="comment">/*这里r0, r1只是为了给printException传参*/</span></span><br><span class="line">	bl printException</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 恢复现场 */</span></span><br><span class="line">	ldmia sp!, &#123;r0-r12, pc&#125;^  <span class="comment">/* ^会把spsr的值恢复到cpsr里 */</span></span><br><span class="line">	</span><br><span class="line">swi_string:</span><br><span class="line">	.<span class="built_in">string</span> <span class="string">&quot;swi exception&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>完整代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br></pre></td><td class="code"><pre><span class="line">.global _start</span><br><span class="line">		b reset  </span><br><span class="line">		ldr pc, und_addr </span><br><span class="line">		ldr pc, swi_addr</span><br><span class="line">		...</span><br><span class="line">	und_addr:</span><br><span class="line">		.word do_und</span><br><span class="line">	swi_addr:</span><br><span class="line">		.word do_swi</span><br><span class="line">do_swi:</span><br><span class="line"><span class="comment">/* 执行到这里之前:</span></span><br><span class="line"><span class="comment"> * 1. lr_svc保存有被中断模式中的下一条即将执行的指令的地址</span></span><br><span class="line"><span class="comment"> * 2. SPSR_svc保存有被中断模式的CPSR</span></span><br><span class="line"><span class="comment"> * 3. CPSR中的M4-M0被设置为10011, 进入到svc模式</span></span><br><span class="line"><span class="comment"> * 4. 跳到0x08的地方执行程序 </span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* sp_svc未设置, 先设置它 */</span></span><br><span class="line">ldr sp, =<span class="number">0x33e00000</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 保存现场 */</span></span><br><span class="line"><span class="comment">/* 在swi异常处理函数中有可能会修改r0-r12, 所以先保存 */</span></span><br><span class="line"><span class="comment">/* lr是异常处理完后的返回地址, 也要保存 */</span></span><br><span class="line">stmdb sp!, &#123;r0-r12, lr&#125;  </span><br><span class="line"></span><br><span class="line"><span class="comment">/* 处理swi异常 */</span></span><br><span class="line">mrs r0, cpsr</span><br><span class="line">ldr r1, =swi_string <span class="comment">/*这里r0, r1只是为了给printException传参*/</span></span><br><span class="line">bl printException</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 恢复现场 */</span></span><br><span class="line">ldmia sp!, &#123;r0-r12, pc&#125;^  <span class="comment">/* ^会把spsr的值恢复到cpsr里 */</span></span><br><span class="line"></span><br><span class="line">swi_string:</span><br><span class="line">	.<span class="built_in">string</span> <span class="string">&quot;swi exception&quot;</span></span><br><span class="line"></span><br><span class="line">.align <span class="number">4</span></span><br><span class="line"></span><br><span class="line">reset：</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	看门狗</span></span><br><span class="line"><span class="comment">	时钟</span></span><br><span class="line"><span class="comment">	set SP</span></span><br><span class="line"><span class="comment">	sdram_init</span></span><br><span class="line"><span class="comment">	重定位</span></span><br><span class="line"><span class="comment">	bl uart0_init</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	<span class="comment">/*先进入usr模式*/</span></span><br><span class="line">	mrs r0, cpsr      <span class="comment">/* 读出cpsr 读到r0 */</span></span><br><span class="line">	<span class="comment">/*使用bic命令 bitclean 把低4位清零*/</span></span><br><span class="line">	bic r0, r0, #<span class="number">0xf</span>  <span class="comment">/* 修改M4-M0为0b10000, 进入usr模式 */</span></span><br><span class="line">	msr cpsr, r0	 <span class="comment">/* 写入cpsr */</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 设置usr模式下的栈sp_usr */</span></span><br><span class="line">	ldr sp, =<span class="number">0x33f00000</span></span><br><span class="line">	swi <span class="number">0x123</span>  <span class="comment">/* 执行此命令, 触发SWI异常, 进入0x8执行 */</span></span><br><span class="line">	ldr pc, =main  <span class="comment">/* 绝对跳转, 跳到SDRAM */</span></span><br><span class="line">halt:</span><br><span class="line">	b halt</span><br></pre></td></tr></table></figure>
+
+<p>do_swi中调用printException，打印出了软中断异常的字符串和CPSR对应的svc模式。</p>
+<h4><span id="3-2-1-1-da-yin-chu-swi-ruan-zhong-duan-hao">3.2.1.1 打印出swi软中断号</span><a href="#3-2-1-1-da-yin-chu-swi-ruan-zhong-duan-hao" class="header-anchor">#</a></h4><p>我们要读出swi 0x123指令，我们知道当执行完swi 0x123指令以后，会发生swi异常，那么lr_svc &#x3D; PC + offset。从下图看出offset是4：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/18.png"></p>
+<p>修改中断服务函数如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">do_swi:</span><br><span class="line"><span class="comment">/* 执行到这里之前:</span></span><br><span class="line"><span class="comment"> * 1. lr_svc保存有被中断模式中的下一条即将执行的指令的地址</span></span><br><span class="line"><span class="comment"> * 2. SPSR_svc保存有被中断模式的CPSR</span></span><br><span class="line"><span class="comment"> * 3. CPSR中的M4-M0被设置为10011, 进入到svc模式</span></span><br><span class="line"><span class="comment"> * 4. 跳到0x08的地方执行程序 </span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* sp_svc未设置, 先设置它 */</span></span><br><span class="line">ldr sp, =<span class="number">0x33e00000</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 保存现场 */</span></span><br><span class="line"><span class="comment">/* 在swi异常处理函数中有可能会修改r0-r12, 所以先保存 */</span></span><br><span class="line"><span class="comment">/* lr是异常处理完后的返回地址, 也要保存 */</span></span><br><span class="line">stmdb sp!, &#123;r0-r12, lr&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们要把lr拿出来保存,因为bl printException会破坏lr，那么把lr保存在哪个个寄存器比较好呢？</p>
+<p>我们知道当调用<code>bl printException</code>可能会修改某些寄存器，但是又会恢复这些寄存器，那么得知道它会保护哪些些寄存器。<br>来看下ATPCS规则：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/19.png" alt="img"></p>
+<p>在子程序中,使用R4~R11来保存局部变量,子程序进入时必须保存这些寄存器的值,在返回前必须恢复这些寄存器的值。所以对于 r4 ~ r11在C函数里会保存这几个寄存器，执行完C函数再把它释放掉并且恢复原来的值。我们把lr 保存在r4寄存器里，r4寄存器不会被C语言破坏。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov r4, lr</span><br><span class="line"><span class="comment">/* 处理swi异常 */</span></span><br><span class="line">mrs r0, cpsr</span><br><span class="line">ldr r1, =swi_string</span><br><span class="line">bl printException</span><br></pre></td></tr></table></figure>
+
+<p>当执行完<code>swi 0x123</code>指令后，会发生swi异常，swi异常模式里的lr寄存器会保存下一条指令的地址（即’ldr pc, &#x3D;main’），我们把lr寄存器的地址减去4就是<code>swi 0x123</code>这条指令的地址。</p>
+<p>把r4的寄存器赋给r0让后打印我们得写出打印函数：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">    mov r0, r4</span><br><span class="line"></span><br><span class="line">    sub r0, r4, #<span class="number">4</span>	<span class="comment">//得到swi指令的地址</span></span><br><span class="line">    bl printSWIVal</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 恢复现场 */</span></span><br><span class="line">	ldmia sp!, &#123;r0-r12, pc&#125;^  <span class="comment">/* ^会把spsr的值恢复到cpsr里 */</span></span><br><span class="line">	</span><br><span class="line">swi_string:</span><br><span class="line">	.<span class="built_in">string</span> <span class="string">&quot;swi exception&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>在uart.c添加printSWIVal打印函数:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">printSWIVal</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> *pSWI)</span> &#123;</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;SWI val = &quot;</span>);</span><br><span class="line">	printHEx(*pSWI &amp; ~<span class="number">0xff000000</span>); <span class="comment">//高8位忽略掉  </span></span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;\n\r&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-3-irq-wai-bu-zhong-duan">3.3 irq-外部中断</span><a href="#3-3-irq-wai-bu-zhong-duan" class="header-anchor">#</a></h2><h3><span id="3-3-1-yin-ru-wai-bu-zhong-duan">3.3.1 引入外部中断</span><a href="#3-3-1-yin-ru-wai-bu-zhong-duan" class="header-anchor">#</a></h3><p>我们想实现一个按键点灯程序，我们知道有以下两种方案：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span>轮询方案:轮询检测按键的电平状态，当检测到被按下后，对应的gpio会拉低，点亮对应的led;(略)</span><br><span class="line"><span class="number">2.</span>中断方案:将按键配置成外部中断源，当有按键按下，触发中断，在中断服务程序（isr）中去完成点灯。</span><br></pre></td></tr></table></figure>
+
+<p>我们用按键作为外部中断源，我们把按键对应的gpio配置成中断引脚，当按键按下，相应的gpio产生了电平跳变，就会触发外部中断。</p>
+<h3><span id="3-3-2-wai-bu-zhong-duan-shi-li">3.3.2 外部中断示例</span><a href="#3-3-2-wai-bu-zhong-duan-shi-li" class="header-anchor">#</a></h3><p>我们想达到按下按键灯亮, 松开按键灯灭这种效果（配成双边沿触发，按下的时候产生下降沿中断，进行点亮，松开产生上升沿中断，进行熄灭）。当然也可做成按一下点亮，再按一下熄灭的效果（设成单边沿触发，每来一次中断，对led电平进行一次取反）。<br>原理图如下：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/20.png"><br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/21.png"></p>
+<p>从按键的原理图中得知，当按键没有按下时，接上拉电阻，按键为高电平状态。当按键按下时，电位被拉低，按键处于低电平状态。s2-s5分别对应GPF0，GPF2，GPG3，GPG11; D10-D12这3盏led所对应的gpio分别是GPF4，GPF5，GPF6。</p>
+<p>那么我们让s2,s3,s4分别控制D10,D11,D12；s5对D10-D12同时控制（按下s5同时点亮3个led）。</p>
+<h4><span id="3-3-1-1-pei-zhi-gpio-he-zhong-duan-yuan">3.3.1.1 配置GPIO和中断源</span><a href="#3-3-1-1-pei-zhi-gpio-he-zhong-duan-yuan" class="header-anchor">#</a></h4><p>配置D10-D12的gpio为输出模式，s2-s4的gpio为外部中断模式。</p>
+<p>打开芯片手册找到第九章 IO ports，找到对应的gpio控制寄存器，将对应的gpio配置成中断模式。</p>
+<ol>
+<li>配置GPF GPIO为中断引脚：<br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/22.png"><br>同理GPG的寄存器类似。</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">GPFCON &amp;= ~((<span class="number">3</span>&lt;&lt;<span class="number">0</span>) | (<span class="number">3</span>&lt;&lt;<span class="number">4</span>));	<span class="comment">//先把eint0和eint2这两个引脚清零</span></span><br><span class="line">GPFCON |= ((<span class="number">2</span>&lt;&lt;<span class="number">0</span>) | (<span class="number">2</span>&lt;&lt;<span class="number">4</span>));   <span class="comment">//S2,S3被配置为中断引脚</span></span><br><span class="line"></span><br><span class="line">GPGCON &amp;= ~((<span class="number">3</span>&lt;&lt;<span class="number">6</span>) | (<span class="number">3</span>&lt;&lt;<span class="number">22</span>));</span><br><span class="line">GPGCON |= ((<span class="number">2</span>&lt;&lt;<span class="number">6</span>) | (<span class="number">2</span>&lt;&lt;<span class="number">22</span>));   <span class="comment">//S4,S5被配置为中断引脚</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>设置中断触发方式:</li>
+</ol>
+<p>当电平从高变低时，此时表示按键按下，当电平由低变高，表示松开按键。不妨设置中断方式为双边沿触发，按下按键，触发下降沿中断，中断服务程序就可以去点亮led，反之，松开触发上升沿中断，就可以去熄灭led。<br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/23.png"><br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/24.png"><br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/25.png"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">EXTINT0 |= (<span class="number">7</span>&lt;&lt;<span class="number">0</span>) | (<span class="number">7</span>&lt;&lt;<span class="number">8</span>);     <span class="comment">/* S2,S3 */</span></span><br><span class="line">EXTINT1 |= (<span class="number">7</span>&lt;&lt;<span class="number">12</span>);             <span class="comment">/* S4 */</span></span><br><span class="line">EXTINT2 |= (<span class="number">7</span>&lt;&lt;<span class="number">12</span>);             <span class="comment">/* S5 */</span></span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>设置外部中断屏蔽寄存器EINTMASK：<br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/26.png"></li>
+</ol>
+<p>从上图我们知道外部中断0-3是直接连接到中断控制器，而外部中断4-7、外部中断8-23还要经过EINTMASK,那么我们需要配置EINTMASK来打开中断的通道：<br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/27.png"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EINTMASK &amp;= ~((<span class="number">1</span>&lt;&lt;<span class="number">11</span>) | (<span class="number">1</span>&lt;&lt;<span class="number">19</span>));    <span class="comment">//打开外部中断通道</span></span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>外部中断挂起寄存器EINTPEND:</li>
+</ol>
+<p>当一个外部中断（EINT4-EINT23）发生后，那么相应的位会被置1, 所以中断结束后需要清除对应位。这个寄存器可以用来区分外部中断4-23的哪一个中断源。</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/28.png"></p>
+<h4><span id="3-3-3-2-zhong-duan-kong-zhi-qi-she-zhi">3.3.3.2 中断控制器设置</span><a href="#3-3-3-2-zhong-duan-kong-zhi-qi-she-zhi" class="header-anchor">#</a></h4><p>我们先来看下中断控制器的总框图：<br> <img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/29.png"></p>
+<p><strong>1. 首先是SRCPND:用来表示哪个中断源发出了中断请求。</strong></p>
+<p>先看下中断源:<br> <img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/30.png"></p>
+<p>从上图我们发现外部中断有24个外部中断，除了外部中断EINT，还有定时器中断，ADC中断，UART中断等…。</p>
+<p>我们来认识下SRCPND寄存器：（用来表示哪个（哪些）中断源已产生中断请求，中断结束后要清中断）<br> <img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/31.png"></p>
+<p>从上图中我们发现EINT4-7共用1bit，EINT8-23共用1bit，那么肯定有其他寄存器来区分它们，那就是EINTPEND寄存器（后面5会讲）。</p>
+<p><strong>2. 然后到达INTMSK：（中断屏蔽寄存器）</strong></p>
+<p>我们需要把INTMSK寄存器配置成非屏蔽状态，默认是中断源时屏蔽的，见下图：<br> <img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/32.png"></p>
+<p><strong>3.INTMOD（中断模式，是fiq还是irq）</strong><br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/33.png"></p>
+<p><strong>4.Priroty:</strong></p>
+<p><strong>5.INTPND:</strong><br>INTPND 用来显示当前优先级最高的、正在发生的中断, 需要清除对应位。</p>
+<p>中断发生后，SRCPND中会有bit置1，可能好几个（因为同时可能发生几个中断），这些中断会由优先级仲裁器选出一个最紧迫的，然后把INTPND中相应位置1。所以只有INTPND置1，CPU才会处理。</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/34.png"></p>
+<p>我们知道有可能同时出现多个中断请求，那么INTPND就挑选出当前优先级最高的、正在发生的中断。</p>
+<p>当产生irq后，要去分辨是哪个中断源，根据不同的中断源去中断服务程序isr中做不同的事情，那么如何得知当前产生的中断是哪一个外部中断源产生的呢？那么就可以访问这个INTPND寄存器。</p>
+<p>可是我们要去手工去解析INTPND里面的位，才能知道是哪个中断源产生了中断请求。那么有没有什么比较快捷的方式自动帮我们解析INTPND呢，直接返回中断号给我们？</p>
+<p>当然有啦，有一个INTOFFSET寄存器的值就是代表哪个中断请求产生了，如果INTOFFSET&#x3D;0表示EINT0产生了中断请求，INTOFFSET&#x3D;2表示EINT2产生了中断请求。具体见下图：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/35.png"></p>
+<p>我们从上图看到ENIT4-7共用一个offset， EINT8-23也共用一个offset，那么要通过访问EINTPEND寄存器来区分它们。</p>
+<p>中断控制器设置代码入下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 初始化中断控制器 */</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">interrupt_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="comment">//1是屏蔽我们需要清零，外部中断0 外部中断2 外部中8_23里面还有外部中断11到19</span></span><br><span class="line">    INTMSK &amp;= ~((<span class="number">1</span>&lt;&lt;<span class="number">0</span>) | (<span class="number">1</span>&lt;&lt;<span class="number">2</span>) | (<span class="number">1</span>&lt;&lt;<span class="number">5</span>)); </span><br><span class="line">    <span class="comment">//INTMOD默认是irq，可以不设置</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-3-3-3-zhong-duan-zong-kai-guan">3.3.3.3 中断总开关</span><a href="#3-3-3-3-zhong-duan-zong-kai-guan" class="header-anchor">#</a></h4><p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/36.png"></p>
+<p>CPSR有I位，是irq的总开关，我们需要把CPSR寄存器 bit7给清零，这是中断的总开关，如果bit7设置为1，CPU无法响应任何中断。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 把bit7这一位清零 */</span></span><br><span class="line">bic r0, r0, #(<span class="number">1</span>&lt;&lt;<span class="number">7</span>)  <span class="comment">/* 清除I位, 使能中断 */</span></span><br><span class="line">msr cpsr, r0</span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-3-3-4-zhong-duan-fu-wu-cheng-xu">3.3.3.4 中断服务程序</span><a href="#3-3-3-4-zhong-duan-fu-wu-cheng-xu" class="header-anchor">#</a></h4><p>到这里中断前的初始化工作知识点就已经讲完了，当然要提前准备好led初始化工作（就是将led对应的gpio配置成输出模式，这个不讲解）。</p>
+<p>那么中断产生后，我们之前讲过，会跳转到0x18异常向量，执行跳转指令<code>ldr pc, =_irq</code>，和之前的swi异常，und异常框架一样。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">.text</span><br><span class="line">.global _start</span><br><span class="line"></span><br><span class="line">_start:</span><br><span class="line">	b reset  <span class="comment">/* vector 0 : reset */</span> </span><br><span class="line">	</span><br><span class="line">	ldr pc, und_addr <span class="comment">/* vector 4 : und（绝对跳转） */</span></span><br><span class="line">	ldr pc, swi_addr <span class="comment">/* vector 8 : swi */</span></span><br><span class="line">	b halt			 <span class="comment">/* vector 0x0c : prefetch aboot */</span></span><br><span class="line">	b halt			 <span class="comment">/* vector 0x10 : data abort */</span></span><br><span class="line">	b halt			 <span class="comment">/* vector 0x14 : reserved */</span></span><br><span class="line">	ldr pc, irq_addr <span class="comment">/* vector 0x18 : irq */</span></span><br><span class="line">	b halt			 <span class="comment">/* vector 0x1c : fiq */</span></span><br><span class="line"></span><br><span class="line">und_addr:</span><br><span class="line">	.word do_und</span><br><span class="line">swi_addr:</span><br><span class="line">	.word do_swi</span><br><span class="line">irq_addr:</span><br><span class="line">	.word do_irq</span><br><span class="line"></span><br><span class="line">reset:</span><br><span class="line">	<span class="comment">/* 关闭看门狗 */</span></span><br><span class="line">	<span class="comment">/*初始化时钟*/</span></span><br><span class="line">	<span class="comment">/*初始化sdram,设置栈*/</span></span><br><span class="line">	<span class="comment">/*代码重定位,清bss*/</span></span><br><span class="line">	</span><br><span class="line">    <span class="comment">/* 把bit7这一位清零(打开中断总开关) */</span></span><br><span class="line">	bic r0, r0, #(<span class="number">1</span>&lt;&lt;<span class="number">7</span>)  <span class="comment">/* 清除I位, 使能中断 */</span></span><br><span class="line">	msr cpsr, r0</span><br><span class="line"></span><br><span class="line">	ldr pc, =main  <span class="comment">/* 绝对跳转, 跳到SDRAM */</span></span><br><span class="line"></span><br><span class="line">halt:</span><br><span class="line">	b halt</span><br></pre></td></tr></table></figure>
+
+<p>1.我们在start.s中用汇编代码设置cpsr的I位，开启中断开关；</p>
+<p>2.在main函数中初始化中断源key_eint_init，初始化中断控制器interrupt_init；</p>
+<p>3.然后继续执行main主函数。</p>
+<p>4.当中断产生，触发irq异常，进入0x18异常向量，执行do_irq。</p>
+<p>do_irq实现如下（和do_und, do_swi类似）：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">do_irq:</span><br><span class="line">	<span class="comment">/* 执行到这里之前: */</span></span><br><span class="line">	<span class="comment">/* 1. lr_irq保存有被中断模式中的下一条即将执行的指令的地址 */</span></span><br><span class="line">	<span class="comment">/* 2. SPSR_irq保存有被中断模式的CPSR */</span></span><br><span class="line">	<span class="comment">/* 3. CPSR中的M4-M0被设置为10010, 进入到irq模式 */</span></span><br><span class="line">	<span class="comment">/* 4. 跳到0x18的地方执行程序 */</span> </span><br><span class="line">	<span class="comment">/* sp_irq未设置, 先设置它 */</span></span><br><span class="line">	ldr sp, =<span class="number">0x33d00000</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 保存现场 */</span></span><br><span class="line">	<span class="comment">/* 在irq异常处理函数中有可能会修改r0-r12, 所以先保存 */</span></span><br><span class="line">	<span class="comment">/* lr-4是异常处理完后的返回地址, 也要保存 */</span></span><br><span class="line">	sub lr, lr, #<span class="number">4</span></span><br><span class="line">	stmdb sp!, &#123;r0-r12, lr&#125;  </span><br><span class="line">		</span><br><span class="line">	<span class="comment">/* 处理irq异常 */</span></span><br><span class="line">	bl handle_irq_c</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 恢复现场 */</span></span><br><span class="line">	ldmia sp!, &#123;r0-r12, pc&#125;^  <span class="comment">/* ^会把spsr_irq的值恢复到cpsr里 */</span></span><br></pre></td></tr></table></figure>
+
+
+<p>handle_irq_c函数实现如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">key_eint_irq</span><span class="params">(<span class="type">int</span> irq)</span> &#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> val = EINTPEND;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> val1 = GPFDAT;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> val2 = GPGDAT;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">if</span> (irq == <span class="number">0</span>) <span class="comment">/* eint0 : s2 控制 D12 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (val1 &amp; (<span class="number">1</span>&lt;&lt;<span class="number">0</span>)) <span class="comment">/* s2 --&gt; gpf6 */</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">/* 松开 */</span></span><br><span class="line">			GPFDAT |= (<span class="number">1</span>&lt;&lt;<span class="number">6</span>);</span><br><span class="line">		&#125; <span class="keyword">else</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">/* 按下 */</span></span><br><span class="line">			GPFDAT &amp;= ~(<span class="number">1</span>&lt;&lt;<span class="number">6</span>);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (irq == <span class="number">2</span>) <span class="comment">/* eint2 : s3 控制 D11 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (val1 &amp; (<span class="number">1</span>&lt;&lt;<span class="number">2</span>)) <span class="comment">/* s3 --&gt; gpf5 */</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">/* 松开 */</span></span><br><span class="line">			GPFDAT |= (<span class="number">1</span>&lt;&lt;<span class="number">5</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="comment">/* 按下 */</span></span><br><span class="line">			GPFDAT &amp;= ~(<span class="number">1</span>&lt;&lt;<span class="number">5</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (irq == <span class="number">5</span>) <span class="comment">/* eint8_23, eint11--s4 控制 D10, eint19---s5 控制所有LED */</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="keyword">if</span> (val &amp; (<span class="number">1</span>&lt;&lt;<span class="number">11</span>)) <span class="comment">/* eint11 */</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (val2 &amp; (<span class="number">1</span>&lt;&lt;<span class="number">3</span>)) <span class="comment">/* s4 --&gt; gpf4 */</span></span><br><span class="line">			&#123;</span><br><span class="line">				<span class="comment">/* 松开 */</span></span><br><span class="line">				GPFDAT |= (<span class="number">1</span>&lt;&lt;<span class="number">4</span>);</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">else</span></span><br><span class="line">			&#123;</span><br><span class="line">				<span class="comment">/* 按下 */</span></span><br><span class="line">				GPFDAT &amp;= ~(<span class="number">1</span>&lt;&lt;<span class="number">4</span>);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span> (val &amp; (<span class="number">1</span>&lt;&lt;<span class="number">19</span>)) <span class="comment">/* eint19 */</span></span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (val2 &amp; (<span class="number">1</span>&lt;&lt;<span class="number">11</span>))</span><br><span class="line">			&#123;</span><br><span class="line">				<span class="comment">/* 松开 */</span></span><br><span class="line">				<span class="comment">/* 熄灭所有LED */</span></span><br><span class="line">				GPFDAT |= ((<span class="number">1</span>&lt;&lt;<span class="number">4</span>) | (<span class="number">1</span>&lt;&lt;<span class="number">5</span>) | (<span class="number">1</span>&lt;&lt;<span class="number">6</span>));</span><br><span class="line">			&#125;</span><br><span class="line">			<span class="keyword">else</span></span><br><span class="line">			&#123;</span><br><span class="line">				<span class="comment">/* 按下: 点亮所有LED */</span></span><br><span class="line">				GPFDAT &amp;= ~((<span class="number">1</span>&lt;&lt;<span class="number">4</span>) | (<span class="number">1</span>&lt;&lt;<span class="number">5</span>) | (<span class="number">1</span>&lt;&lt;<span class="number">6</span>));</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	EINTPEND = val; 	<span class="comment">/* 清中断 : 源头*/</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*INTOFFSET中哪一位被设置成1，就表示哪一个 中断源*/</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">handle_irq_c</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">/* 分辨中断源 */</span></span><br><span class="line">	<span class="type">int</span> bit = INTOFFSET;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 调用对应的处理函数 */</span></span><br><span class="line">	<span class="keyword">if</span> (bit == <span class="number">0</span> || bit == <span class="number">2</span> || bit == <span class="number">5</span>)  <span class="comment">/* eint0,2,bit==5还需细分eint8_23 */</span></span><br><span class="line">	&#123;</span><br><span class="line">		key_eint_irq(bit); <span class="comment">/* 处理中断, 清中断源EINTPEND（eint11,2 eint11, eint11） */</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 清中断 : 从源头开始清 */</span></span><br><span class="line">	SRCPND = (<span class="number">1</span>&lt;&lt;bit);<span class="comment">/*清EINT0，EINT2，EINT5*/</span></span><br><span class="line">	INTPND = (<span class="number">1</span>&lt;&lt;bit);	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-4-irq-ding-shi-qi-zhong-duan">3.4 irq-定时器中断</span><a href="#3-4-irq-ding-shi-qi-zhong-duan" class="header-anchor">#</a></h2><h3><span id="3-4-1-yin-ru-kan-men-gou-ding-shi-qi">3.4.1 引入看门狗定时器</span><a href="#3-4-1-yin-ru-kan-men-gou-ding-shi-qi" class="header-anchor">#</a></h3><p>s3c2440共有2种定时器：</p>
+<pre><code>1.Watchdog看门狗定时器
+2.PWM脉冲可调制定时器
+</code></pre>
+<p>下面详细介绍2种定时器的原理，来了解定时器是如何产生定时器中断的。</p>
+<h4><span id="3-4-1-1-watchdog-ding-shi-qi-yuan-li">3.4.1.1 WatchDog定时器原理</span><a href="#3-4-1-1-watchdog-ding-shi-qi-yuan-li" class="header-anchor">#</a></h4><p>Watchdog定时器的原理很简单，寄存器很少，框图如下：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/37.png"></p>
+<ol>
+<li>定时器，定时器那肯定是需要用到时钟的，从框图中可以看到Watchdog定时器采用的时钟源是PCLK，从<a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/">s3c2440时钟体系</a>中也可以体现出来，接的是APB总线。</li>
+<li>然后到达一个8 bit的分频器，可以通过配置WTCON[15:8]来设置分频器的预设值。</li>
+<li>再设置WTCON[4:3]来设置除数因子来进一步分频。<br>所以最终的Watchdog定时器的时钟周期<code>t_watchdog = 1/[ PCLK / (Prescaler value + 1) / Division_factor ]</code></li>
+<li>到达WTCNT：看门狗递减寄存器。WTCNT里的数据就开始在输入时钟频率下递减。WTCNT的值由WTDAT寄存器提供。</li>
+<li>WTDAT：WTDAT寄存器用于指定计数器的初始值，也就是它的超时时间，<strong>系统上电之后硬件自动的将0x8000的初始值载入到WTCNT里，在发生了第一次超时操作时，WTDAT的值才会载入到WTCNT寄存器</strong>。</li>
+</ol>
+<p>当WTCNT的值减到0时，就会触发看门狗定时器中断，进而产生复位。中断框图中可以看到可以设置WTCON[2]来设置是否产生中断信号，可以设置WTCON[0]来设置是否产生复位信号。</p>
+<h5><span id="3-4-1-1-1-wtcon-ji-cun-qi">3.4.1.1.1 WTCON寄存器</span><a href="#3-4-1-1-1-wtcon-ji-cun-qi" class="header-anchor">#</a></h5><p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/38.png"></p>
+<h5><span id="3-4-1-1-2-wtcnt-wtdat-ji-cun-qi">3.4.1.1.2 WTCNT、WTDAT寄存器</span><a href="#3-4-1-1-2-wtcnt-wtdat-ji-cun-qi" class="header-anchor">#</a></h5><p> <img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/39.png"></p>
+<h3><span id="3-4-2-watchdog-ding-shi-qi-zhong-duan-shi-li">3.4.2 WatchDog定时器中断示例</span><a href="#3-4-2-watchdog-ding-shi-qi-zhong-duan-shi-li" class="header-anchor">#</a></h3><h4><span id="3-4-2-1-ding-shi-qi-chu-shi-hua">3.4.2.1 定时器初始化</span><a href="#3-4-2-1-ding-shi-qi-chu-shi-hua" class="header-anchor">#</a></h4><p>在之前的章节中，我们在start.s启动代码中首先做的就是关闭看门狗，把WTCON[5]&#x3D;0，也就是把Watchdog timer给disable。那么Watchdog Timer就不再工作了，这样做是为了防止在启动代码进行硬件初始化的时候出现超时，发出复位信号又去重启硬件，这样就陷入了不断重启过程中。因为s3c2440芯片默认WTCON[5]是1，也就是Watchdog Timer默认是处于使能状态。</p>
+<p>从<a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/">s3c2440时钟体系</a>中配置了PCLK&#x3D;50M Hz, 那么让WTDAT取默认值0x8000，那么根据公式算出从开机到触发复位重启的时间：</p>
+<p><code>t=WTDAT*( 1/[ PCLK / (Prescaler value + 1) / Division_factor ])</code>。</p>
+<p>根据WTCON寄存器配置Prescaler value&#x3D;255，配置Division_factor&#x3D;128，这样最终定时器分得的频率更低，那么减数器递减的更慢，也就代表从开机到触发复位重启的时间:</p>
+<p><code>T=0x8000 * (1/[50*10^6/(255+1)/128]) = 21474836.48us = 21s</code>。</p>
+<p>之前的start.s中把看门狗已经关闭了，那么我们在跳转到main函数中调用wtd_timer_init函数实现如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">wtd_timer_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	WTCON |= (<span class="number">1</span>&lt;&lt;<span class="number">0</span>) | (<span class="number">1</span>&lt;&lt;<span class="number">5</span>);<span class="comment">//使能定时器，开启reset复位</span></span><br><span class="line">	WTCON |= (<span class="number">3</span>&lt;&lt;<span class="number">3</span>) | (<span class="number">255</span>&lt;&lt;<span class="number">8</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们查看测试结果：<br>果然初始化wtd_timer_init后，过21s后板子重启了，说明我们watchdog定时器功能已经OK了。</p>
+<p>现在修改代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">wtd_timer_init2</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	WTCON |= (<span class="number">1</span>&lt;&lt;<span class="number">0</span>) | (<span class="number">1</span>&lt;&lt;<span class="number">2</span>);<span class="comment">//使能定时器，开启watchdog定时器中断</span></span><br><span class="line">	WTCON |= (<span class="number">3</span>&lt;&lt;<span class="number">3</span>) | (<span class="number">255</span>&lt;&lt;<span class="number">8</span>);</span><br><span class="line">	WTDAT = <span class="number">0x4000</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们看到我们现在定时器的初值被修改成了0x4000, 相对于默认值少了一半，那么触发wtd_timer中断的时间应该减半，也就是约等于10s。</p>
+<h4><span id="3-4-2-2-ding-shi-qi-zhong-duan-fu-wu-cheng-xu">3.4.2.2 定时器中断服务程序</span><a href="#3-4-2-2-ding-shi-qi-zhong-duan-fu-wu-cheng-xu" class="header-anchor">#</a></h4><p>那么需要写一个wtd_timer的中断服务程序，同样需要先在do_irq中去保护现场、调用handle_irq_c、恢复现场。查看INTOFFSET寄存器：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/40.png"></p>
+<p>得知：<br>handle_irq_c代码修改如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">handle_irq_c</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/* 分辨中断源 */</span></span><br><span class="line">    <span class="type">int</span> bit = INTOFFSET;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 调用对应的处理函数 */</span></span><br><span class="line">    <span class="keyword">if</span> (bit == <span class="number">0</span> || bit == <span class="number">2</span> || bit == <span class="number">5</span>)  <span class="comment">/* eint0,2,bit==5还需细分eint8_23 */</span></span><br><span class="line">    &#123;</span><br><span class="line">        key_eint_irq(bit); <span class="comment">/* 处理中断, 清中断源EINTPEND（eint11,2 eint11, eint11） */</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(bit == <span class="number">9</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        这里还需区分子中断源</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">/* 清中断 : 从源头开始清 */</span></span><br><span class="line">    SRCPND = (<span class="number">1</span>&lt;&lt;bit);</span><br><span class="line">    INTPND = (<span class="number">1</span>&lt;&lt;bit);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>查看芯片手册查找“INT_WDT_AC97”如下图：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/41.png"></p>
+<p>从上图可以看到SRCPND和SUBSRCPND的映射关系。<br>SUBSRCPND寄存器如下图：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/42.png"></p>
+<p>我们可以读取SUBSRCPND来区分到底是哪一个子中断源产生了中断，当SUBSRCPND中哪一位被置1，表示对应的中断源发生了中断。</p>
+<p>前面做完wtd_timer_init，还要进行中断控制器的初始化，查看INTMSK寄存器如下图：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/43.png"></p>
+<p>查看INTSUBMSK寄存器如下图：<br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/44.png"></p>
+<p>在interrupt_init中添加：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">INTMSK &amp;= ~(<span class="number">1</span>&lt;&lt;<span class="number">9</span>);<span class="comment">//不屏蔽INT_WDT_AC97</span></span><br><span class="line">INTSUBMSK &amp;= ~(<span class="number">1</span>&lt;&lt;<span class="number">14</span>);<span class="comment">//不屏蔽INT_AC97</span></span><br></pre></td></tr></table></figure>
+
+<p>修改handle_irq_c:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> (bit == <span class="number">9</span>)<span class="comment">//INTOFFSET==9</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">if</span> (SUBSRCPND &amp; <span class="number">1</span>&lt;&lt;<span class="number">14</span>)</span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;watchdog timer interrupt occured.\n&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-4-3-pwm-mai-chong-kuan-du-diao-zhi-ding-shi-qi">3.4.3 PWM脉冲宽度调制定时器</span><a href="#3-4-3-pwm-mai-chong-kuan-du-diao-zhi-ding-shi-qi" class="header-anchor">#</a></h3><p>PWM（Pulse Width Modulation），字面上是脉冲可调制的意思，就是可以调节占空比。</p>
+<p>s3c2440有5个定时器，其中定时器0、1、2和3具有脉宽调制（PWM）功能。定时器4是一个无输出引脚的内部定时器。</p>
+<p>先认识下s3c2440的pwm timer的框架：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/45.jpg"></p>
+<pre><code>1.时钟源为PCLK
+2.pclk经过8 bit的预分频系数（Prescaler），和4 bit的时钟除数因子（clock divider）,进行分频
+3.经过MUX选择器选择用哪个定时器（5选1）
+4.设置TCMPB0和TCNTB0和TCONn寄存器
+</code></pre>
+<h4><span id="3-4-1-1-pwm-ding-shi-qi-yuan-li">3.4.1.1 pwm定时器原理</span><a href="#3-4-1-1-pwm-ding-shi-qi-yuan-li" class="header-anchor">#</a></h4><p>pwm定时器的逻辑控制单元结构如下：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/46.png"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> TCMPBn和TCNTBn寄存器中的值分别加载到TCMPn和TCNTn寄存器</span><br><span class="line"><span class="number">2</span> 每来一个clk(时钟)这个TCNTn减去<span class="number">1</span></span><br><span class="line"><span class="number">3</span> 当TCNTn == TCMPn时，可以产生中断，pwm输出引脚反转</span><br><span class="line"><span class="number">4</span> TCNTn继续减<span class="number">1</span>，当TCNTn == <span class="number">0</span>时，又产生一次中断，pwm引脚再次反转</span><br><span class="line"><span class="number">5</span> 重复<span class="number">1</span><span class="number">-4</span>过程</span><br></pre></td></tr></table></figure>
+
+<p>设置TCNTBn寄存器来设置加载初值，设置后TCNTn中的值就会按照时钟周期递减。<br>设置TCMPBn寄存器来设置占空比，从而控制高低电平持续时间的比例。</p>
+<h4><span id="3-4-3-2-pwm-ding-shi-qi-bian-cheng-shi-xian">3.4.3.2 pwm定时器编程实现</span><a href="#3-4-3-2-pwm-ding-shi-qi-bian-cheng-shi-xian" class="header-anchor">#</a></h4><p>要开始一个PWM定时器功能的步骤如下：(假设使用的是timer0)</p>
+<h5><span id="3-4-3-2-1-chu-shi-hua-pwm-ding-shi-qi">3.4.3.2.1 初始化pwm定时器</span><a href="#3-4-3-2-1-chu-shi-hua-pwm-ding-shi-qi" class="header-anchor">#</a></h5><p>定义一个pwm_timer_init()函数。</p>
+<ol>
+<li><p>设置时钟：<br> <img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/47.png"><br> <img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/48.png"></p>
+<p> 分别设置定时器0的预分频器值(prescaler)和时钟分频值(clock divider)，从而控制TCNT0减数器的频率。</p>
+</li>
+</ol>
+<p>根据公式：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">pwm Timer clk = PCLK / &#123;(预分频数)prescaler value+<span class="number">1</span>&#125; / &#123;divider value(<span class="number">5.1</span>MUX值)&#125; </span><br></pre></td></tr></table></figure>
+<p>PCLK是50M，设置prescaler value&#x3D;99， divider value&#x3D;16,所以pwm Timer clk&#x3D; 50000000&#x2F;(99+1)&#x2F;16 &#x3D; 31250 Hz</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TCFG0 = <span class="number">99</span>; </span><br><span class="line">TCFG1 &amp;= ~<span class="number">0xf</span>;</span><br><span class="line">TCFG1 |= <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>设置初值：</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 设置比较缓存寄存器TCMPB0和计数缓存寄存器TCNTB0的初始值*/</span></span><br><span class="line">TCNTB0 = <span class="number">31250</span> &lt;&lt; <span class="number">1</span>;  <span class="comment">/* 2s中断一次 */</span></span><br><span class="line">TCMPB0 = <span class="number">31250</span> &gt;&gt; <span class="number">1</span>;  <span class="comment">/* 设置占空比*/</span></span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li><p>开启定时器0的手动更新TCNTB0&amp;TCMPB0功能(设置TCON的第1位)：</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/49.png"></p>
+</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TCON |= (<span class="number">1</span>&lt;&lt;<span class="number">1</span>); <span class="comment">//开始需要手工更新,这样才能将TCNTB0&amp;TCMPB0同步到TCNT0&amp;TCMP0</span></span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>开启定时器0的自动加载：</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">TCON &amp;= ~(<span class="number">1</span>&lt;&lt;<span class="number">1</span>); <span class="comment">//开启自动加载要先清除手动更新</span></span><br><span class="line">TCON |= (<span class="number">1</span>&lt;&lt;<span class="number">3</span>);</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>启动定时器0(设置TCON的第0位)；</li>
+</ol>
+<p>	</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">TCON |= (<span class="number">1</span>&lt;&lt;<span class="number">0</span>);</span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li>初始化中断控制器:</li>
+</ol>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/50.png"><br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/51.png"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">interrupt_init()&#123;</span><br><span class="line">	...</span><br><span class="line">	INTMSK &amp;= ~(<span class="number">1</span>&lt;&lt;<span class="number">10</span>);  <span class="comment">/* enable timer0 int */</span>		</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>做完这些初始化工作，就可以产生定时器中断了,同样我们需要在handle_irq_c函数中区分中断源：</p>
+<h5><span id="3-4-3-2-2-pwm-ding-shi-qi-zhong-duan-fu-wu-cheng-xu">3.4.3.2.2 pwm定时器中断服务程序</span><a href="#3-4-3-2-2-pwm-ding-shi-qi-zhong-duan-fu-wu-cheng-xu" class="header-anchor">#</a></h5><p>我们可以通过查看TCNTO0寄存器来查看当前TCNT的值。</p>
+<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/52.png"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">handle_irq_c</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">/* 分辨中断源 */</span></span><br><span class="line">    <span class="type">int</span> bit = INTOFFSET;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 调用对应的处理函数 */</span></span><br><span class="line">    <span class="keyword">if</span> (bit == <span class="number">0</span> || bit == <span class="number">2</span> || bit == <span class="number">5</span>)  <span class="comment">/* eint0,2,bit==5还需细分eint8_23 */</span></span><br><span class="line">    &#123;</span><br><span class="line">        key_eint_irq(bit); <span class="comment">/* 处理中断, 清中断源EINTPEND（eint11,2 eint11, eint11） */</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span>(bit == <span class="number">9</span>) <span class="comment">//INT_WDT_AC97</span></span><br><span class="line">	&#123;</span><br><span class="line">		...</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span>(bit == <span class="number">10</span>) <span class="comment">//timer0</span></span><br><span class="line">	&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;timer0 interrupt occured.\n&quot;</span>);</span><br><span class="line">		print_hex(TCNTO0);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 清中断 : 从源头开始清 */</span></span><br><span class="line">    SRCPND = (<span class="number">1</span>&lt;&lt;bit);</span><br><span class="line">    INTPND = (<span class="number">1</span>&lt;&lt;bit);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="3-5-irq-de-you-hua-gai-jin">3.5 irq的优化改进</span><a href="#3-5-irq-de-you-hua-gai-jin" class="header-anchor">#</a></h2><p>我们对比irq外部中断， irq定时器中断，发现每增加一个中断源，又要去修改中断控制器的初始化interrupt_init()和handle_irq_c(),要在handle_irq_c()中去添加分支去执行不同的中断服务。</p>
+<p>那么我们现在不去改变interrupt文件，在timer.c、key_eint.c中去注册自己的中断服务程序即可，这里我们使用<strong>函数指针数组</strong>，建立一个中断号和中断服务程序的映射关系。这样就可以根据中断号来执行对应的中断服务程序，即在handle_irq_c()中去回调不同类型的中断源注册下来的函数即可。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 定义函数指针数组 */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IRQ_NUM	32</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="title function_">void</span><span class="params">(*irq_func)</span><span class="params">(<span class="type">int</span>)</span>;</span><br><span class="line">irq_func irq_array[IRQ_NUM];</span><br></pre></td></tr></table></figure>
+
+<p>然后实现一个register_irq(…)如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">register_irq</span> <span class="params">(<span class="type">int</span> irq, irq_func fp)</span></span><br><span class="line">&#123;</span><br><span class="line">	irq_array[irq] = fp;</span><br><span class="line">	INTMASK &amp;= ~(<span class="number">1</span> &lt;&lt; irq)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>handle_irq_c()修改实现如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">handle_irq_c</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">/* 分辨中断源 */</span></span><br><span class="line">	<span class="type">int</span> bit = INTOFFSET;</span><br><span class="line"></span><br><span class="line">	irq_array[bit](bit); <span class="comment">//根据中断号回调不同的中断处理函数</span></span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 清中断 */</span></span><br><span class="line">	SRCPND = (<span class="number">1</span>&lt;&lt;bit);</span><br><span class="line">	INTPND = (<span class="number">1</span>&lt;&lt;bit);	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这样子我们的irq中断就被统一管理了起来，只要在其他各中断模块初始化的时候调用register_irq(…)注册即可。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/" data-id="clwni9ky6000uewuf9y27814a" data-title="s3c2440裸机-异常中断" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-s3c2440裸机编程-代码重定位和清bss" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/" class="article-date">
@@ -2159,250 +2682,6 @@ DIV:用分频器进行分频
 
 
   
-    <article id="post-mipi-csi硬件篇" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/" class="article-date">
-  <time class="dt-published" datetime="2024-04-02T06:28:07.000Z" itemprop="datePublished">2024-04-02</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/">mipi-csi硬件篇</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-mipi-csi-ying-jian">1 mipi-csi硬件</a><ul>
-<li><a href="#1-1-mipi-csi-gai-nian">1.1 mipi-csi概念</a></li>
-<li><a href="#1-2-mipi-vs-dvp">1.2 MIPI vs DVP</a></li>
-<li><a href="#1-3-csi-gui-ge">1.3 CSI规格</a></li>
-<li><a href="#1-4-csi-jie-kou-lei-xing">1.4 CSI接口類型</a></li>
-<li><a href="#1-5-csi-ying-jian-yin-jiao-ji-jie-xian">1.5 CSI 硬件引脚及接线</a><ul>
-<li><a href="#1-5-1-mipi-sensor-yin-jiao-miao-shu">1.5.1 mipi sensor引脚描述:</a></li>
-<li><a href="#1-5-2-dian-lu-tu-xian-lu-jie-gou">1.5.2 电路图线路结构</a></li>
-</ul>
-</li>
-<li><a href="#1-6-chai-fen-xin-hao-jie-shao">1.6 差分信号介绍</a></li>
-<li><a href="#1-7-mipi-sensor-de-power-on-shi-xu">1.7 MIPI sensor的 power on时序</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-# 1 mipi-csi硬件
-
-<h2><span id="1-1-mipi-csi-gai-nian">1.1 mipi-csi概念</span><a href="#1-1-mipi-csi-gai-nian" class="header-anchor">#</a></h2><p><strong>DSI （Display serial interface）</strong>定义了一个位于处理器和显示模组之间的高速串行接口,对应MIPI-TX.<br><strong>CSI(Camera Serial Interface）</strong>定义了一个位于处理器和摄像模组之间的高速串行接口,也就是接下来要讲的MIPI-RX。</p>
-<p>MIPI Rx (Mobile Industry Processor Interface Receiver) 模塊主要功能為接收由 CMOS sensor 所傳送的視頻數據， 支持 MIPI D-PHY、 sub-LVDS (Low-Voltage Differential Signal)、 HiSPi (High-Speed Serial Pixel Interface) 等不同的串行視頻信號輸入， 並將其處理轉化為內部視頻時序，傳遞給下一級的視頻處理模塊 (ISP)。MIPI Rx 模塊中可細分為 PHY 和 Controller 兩部分，其中 PHY 模塊集成了模擬和數字兩個部分，主要將串行信號轉換為並行信號，而 Controller 模塊則負責解碼不同的視頻數據格式，傳送給後端的視頻處理模塊 (ISP)。功能框圖及在系統中的位置如下图所示:</p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/1.png" alt="img"></p>
-<h2><span id="1-2-mipi-vs-dvp">1.2 MIPI vs DVP</span><a href="#1-2-mipi-vs-dvp" class="header-anchor">#</a></h2><p><strong>DVP:</strong></p>
-<p>并口传输数据需要帧同步信号（Vsync）、行同步信号（Hsync）和八条数据线，共十根数据线, DVP 接口在信号完整性方面受限制，速率也受限制。</p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/2.png" alt="img"></p>
-<p><strong>MIPI:</strong></p>
-<p>MIPI 传输只需要帧同步信号（Vsync）、行同步信号（Hsync）、mipi 时钟（mipi_clk）、mipi 数据（mipi_data）和像素时钟（PCLK）5 根数据线。对比MIPI 接口比 DVP 的接口信号线少，由于是低压差分信号，产生的干扰小，抗干扰能力也强。</p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/3.png" alt="img"></p>
-<h2><span id="1-3-csi-gui-ge">1.3 CSI规格</span><a href="#1-3-csi-gui-ge" class="header-anchor">#</a></h2><p>可同時支持 2 路 sensor 輸入（2组D-PHY， 每组5对差分线（1C4D））</p>
-<p>• sensor 0 最大支持 4K2K @60fps HDR or @30fps 線性輸入</p>
-<p>• sensor 1 最大支持 3M(2304x1296) @60fps HDR or linear 輸入</p>
-<p>• 單路最多支持 4-Lane MIPI D-PHY 接口，最大支持 2.5Gbps&#x2F;Lane</p>
-<p>• 單路最多支持 4-Lane sub-LVDS&#x2F; HiSPi 接口，最大支持 1.5Gbps&#x2F;Lane</p>
-<p>• 支持 RAW8&#x2F; RAW10&#x2F; RAW12 數據類型的解析</p>
-<p>• 支持 YUV422 8-bit&#x2F; YUV422 10-bit 數據類型的解析</p>
-<p>• 最多支持 2 幀 WDR，支持多種 WDR 時序</p>
-<p>• 支持 sub-LVDS&#x2F; HiSPi 模式像素&#x2F;同步碼大小端配置</p>
-<p>• 支持 Lane 數和 Lane 順序可配置</p>
-<p>MIPI Rx 的帶寬有兩部分限制： PHY 的接口數據率和內部處理速度。</p>
-<p>輸入接口最大支持 2.5Gbps&#x2F;Lane，內部處理速度最大為 600M*1pixels&#x2F;s（MAC clk）</p>
-<h2><span id="1-4-csi-jie-kou-lei-xing">1.4 CSI接口類型</span><a href="#1-4-csi-jie-kou-lei-xing" class="header-anchor">#</a></h2><table>
-<thead>
-<tr>
-<th>Common modevoltage</th>
-<th>Differential modevoltage</th>
-<th>Maximum clockfrequency</th>
-<th>Maximum datarate per lane</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>MIPI DPHY</strong> 200mV</td>
-<td>200mV</td>
-<td>1.25GHz</td>
-<td>2.5Gbps</td>
-</tr>
-<tr>
-<td>Sub-LVDS 900mV</td>
-<td>150mV</td>
-<td>750MHz</td>
-<td>1.5Gbps</td>
-</tr>
-<tr>
-<td>HiSPi(HiVCM) 900mV</td>
-<td>280mV</td>
-<td>750MHz</td>
-<td>1.5Gbps</td>
-</tr>
-<tr>
-<td>HiSPi(SLVDS) 200mV</td>
-<td>200mV</td>
-<td>750MHz</td>
-<td>1.5Gbps</td>
-</tr>
-</tbody></table>
-<h2><span id="1-5-csi-ying-jian-yin-jiao-ji-jie-xian">1.5 CSI 硬件引脚及接线</span><a href="#1-5-csi-ying-jian-yin-jiao-ji-jie-xian" class="header-anchor">#</a></h2><p>常用的电脑摄像头是USB接口, 主流的智能手机摄像头是MIPI接口, 下面讲解常用的智能手机 camera MIPI接口。</p>
-<p>MIPI CSI一般会有1对I2C通信引脚，1对MIPI差分时钟引脚和1~4对MIPI差分数据信号引脚, 也就是1CD4(1 clk lane &amp; 4 data lane)。</p>
-<h3><span id="1-5-1-mipi-sensor-yin-jiao-miao-shu">1.5.1 mipi sensor引脚描述:</span><a href="#1-5-1-mipi-sensor-yin-jiao-miao-shu" class="header-anchor">#</a></h3><table>
-<thead>
-<tr>
-<th>信号名</th>
-<th>引脚类型</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>DOVDD</td>
-<td>电源</td>
-<td>1.8V IO 电源</td>
-</tr>
-<tr>
-<td>DVDD</td>
-<td>电源</td>
-<td>1.2V 数字电源</td>
-</tr>
-<tr>
-<td>AVDD</td>
-<td>电源</td>
-<td>2.8V 模拟电源</td>
-</tr>
-<tr>
-<td>SCL</td>
-<td>输入</td>
-<td>I2C 时钟线</td>
-</tr>
-<tr>
-<td>SDA</td>
-<td>输入&#x2F;输出</td>
-<td>I2C 数据线(open drain)</td>
-</tr>
-<tr>
-<td>SID0</td>
-<td>输入</td>
-<td>I2C Device ID 的选择 0 (内置下拉电阻，默认Device ID 是 7’h30)</td>
-</tr>
-<tr>
-<td>SID1</td>
-<td>输入</td>
-<td>I2C Device ID 的选择 1 (内置下拉电阻，默认Device ID 是 7’h30)</td>
-</tr>
-<tr>
-<td>XSHUTDN （RST）</td>
-<td>输入</td>
-<td>复位信号输入(内置上拉电阻，低电位有效)</td>
-</tr>
-<tr>
-<td>EXTCLK</td>
-<td>输入</td>
-<td>时钟输入</td>
-</tr>
-<tr>
-<td>PWDNB</td>
-<td>输入</td>
-<td>Power Down 信号输入(内置上拉电阻， 低电位有效)</td>
-</tr>
-<tr>
-<td>D&lt;3&gt;(MD3P)</td>
-<td>输出</td>
-<td>DVP 输出 bit[3]&#x2F;MIPI 数据 3 正极信号</td>
-</tr>
-<tr>
-<td>D&lt;5&gt;(MD1P)</td>
-<td>输出</td>
-<td>DVP 输出 bit[5]&#x2F;MIPI 数据 1 正极信号</td>
-</tr>
-<tr>
-<td>D&lt;7&gt;(MCP)</td>
-<td>输出</td>
-<td>DVP 输出 bit[7]&#x2F;MIPI 时钟正极信号</td>
-</tr>
-<tr>
-<td>D&lt;8&gt;(MD0P)</td>
-<td>输出</td>
-<td>DVP 输出 bit[8]&#x2F;MIPI 数据 0 正极信号</td>
-</tr>
-<tr>
-<td>D&lt;10&gt;(MD2P)</td>
-<td>输出</td>
-<td>DVP 输出 bit[10]&#x2F;MIPI 数据 2 正极信号</td>
-</tr>
-<tr>
-<td>D&lt;4&gt;(MD3N)</td>
-<td>输出</td>
-<td>DVP 输出 bit[4]&#x2F;MIPI 数据 3 负极信号</td>
-</tr>
-<tr>
-<td>D&lt;6&gt;(MD1N)</td>
-<td>输出</td>
-<td>DVP 输出 bit[6]&#x2F;MIPI 数据 1 负极信号</td>
-</tr>
-<tr>
-<td>PCLK(MCN)</td>
-<td>输出</td>
-<td>DVP 输出时钟&#x2F;MIPI 时钟负极信号</td>
-</tr>
-<tr>
-<td>D&lt;9&gt;(MD0N)</td>
-<td>输出</td>
-<td>DVP 输出 bit[9]&#x2F;MIPI 数据 0 负极信号</td>
-</tr>
-<tr>
-<td>D&lt;11&gt;(MD2N)</td>
-<td>输出</td>
-<td>DVP 输出 bit[11]&#x2F;MIPI 数据 2 负极信号</td>
-</tr>
-</tbody></table>
-<h3><span id="1-5-2-dian-lu-tu-xian-lu-jie-gou">1.5.2 电路图线路结构</span><a href="#1-5-2-dian-lu-tu-xian-lu-jie-gou" class="header-anchor">#</a></h3><p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/4.png" alt="img"></p>
-<p>一般mipi接口的sensor支持4 lane，2 lane，1 lane等数据传输方式。上图硬件上的连接了1组clk lane, 4组data lane。这幅图只连接了i2c和lane总线，还有EXTCLK ，PWDN, RST, VDD等引脚的连线需要外部soc去提供。这里就需要驱动人员会看原理图，知道lane id和pn swap的接线。clk lane, data lane等。</p>
-<h2><span id="1-6-chai-fen-xin-hao-jie-shao">1.6 差分信号介绍</span><a href="#1-6-chai-fen-xin-hao-jie-shao" class="header-anchor">#</a></h2><p>我们用一个方法对差分信号做一下比喻，差分信号就好比是跷跷板上的两个人，当一个人被跷上去的时候，另一个人被跷下来了 - 但是他们的平均位置是不变的。继续跷跷板的类推，正值可以表示左边的人比右边的人高，而负值表示右边的人比左边的人高。0 表示两个人都是同一水平。</p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/5.png" alt="img"></p>
-<p>下图，应用到电学上，这两个跷跷板用一对标识为V+和V-的导线来表示。当V+ &gt; V-时，信号定义成正极信号，V+ &lt; V-时，信号定义成负极信号。 差分对的平均电压设置成 2.5V。</p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/6.png" alt="img"></p>
-<h2><span id="1-7-mipi-sensor-de-power-on-shi-xu">1.7 MIPI sensor的 power on时序</span><a href="#1-7-mipi-sensor-de-power-on-shi-xu" class="header-anchor">#</a></h2><p><strong>Sony imx334：</strong></p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/7.png" alt="img"></p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/8.png" alt="img"></p>
-<p><strong>SC4210：</strong></p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/9.png" alt="img"></p>
-<p>这里列举了sony imx334和格科微gc2093, sc4210的上电时序，现在市面上大部分的mipi接口sensor都可以让VDD，PWDN, RST，EXTCLK讯号同时发出，然后过一段时间后就可以进行I2c通信了。</p>
-<p>在HW交接到SW后，要确保最基本的power on时序是ok的，最好是用示波器对VDD，PWDN, RST，EXTCLK，I2c等波形进行测量无误后再porting到SW手上。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/" data-id="clwni9ky5000pewufe5jm494t" data-title="mipi-csi硬件篇" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -2421,7 +2700,7 @@ DIV:用分频器进行分频
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
     </div>
   </div>
 
@@ -2431,7 +2710,7 @@ DIV:用分频器进行分频
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 20px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 14.29px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.57px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 12.86px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.86px;">mipi图像处理</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17.14px;">外设驱动</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.43px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.86px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.86px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 15.71px;">通信协议</a>
+      <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 20px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 14.29px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.57px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 14.29px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.86px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 10px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17.14px;">外设驱动</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.43px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.86px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.86px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 15.71px;">通信协议</a>
     </div>
   </div>
 
@@ -2453,6 +2732,10 @@ DIV:用分频器进行分频
       <ul>
         
           <li>
+            <a href="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/">uboot-命令和环境变量</a>
+          </li>
+        
+          <li>
             <a href="/2024/06/08/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-dynamic-debug/">Linux日志管理-dynamic_debug</a>
           </li>
         
@@ -2466,10 +2749,6 @@ DIV:用分频器进行分频
         
           <li>
             <a href="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/">linux基本命令集合</a>
-          </li>
-        
-          <li>
-            <a href="/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/">markdown语法教程</a>
           </li>
         
       </ul>
