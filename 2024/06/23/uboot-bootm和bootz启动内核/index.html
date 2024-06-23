@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>uboot-bootm和bootz启动内核 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 images 全局变量 1.1 bootm头部结构 1.1.1 系统镜像头部结构 1.1.2 系统镜像结构     2 do_bootz 函数 2.1 bootz_start 2.1.1 bootm_start 2.1.2 bootz_setup 2.1.3 bootm_find_images   2.2 do_bootm_states 2.2.1 bootm_os_get_boot">
+<meta property="og:type" content="article">
+<meta property="og:title" content="uboot-bootm和bootz启动内核">
+<meta property="og:url" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 images 全局变量 1.1 bootm头部结构 1.1.1 系统镜像头部结构 1.1.2 系统镜像结构     2 do_bootz 函数 2.1 bootz_start 2.1.1 bootm_start 2.1.2 bootz_setup 2.1.3 bootm_find_images   2.2 do_bootm_states 2.2.1 bootm_os_get_boot">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/1.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/2.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/3.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/4.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/5.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/6.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/7.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/8.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/9.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/10.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/11.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/12.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/13.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/14.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/15.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/16.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/17.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/18.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/19.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/20.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/21.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/22.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/23.png">
+<meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/24.png">
+<meta property="article:published_time" content="2024-06-23T09:56:01.000Z">
+<meta property="article:modified_time" content="2024-06-23T10:23:34.000Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="linux系统构建">
+<meta property="article:tag" content="boot启动">
+<meta property="article:tag" content="uboot">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-uboot-bootm和bootz启动内核" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/" class="article-date">
+  <time class="dt-published" datetime="2024-06-23T09:56:01.000Z" itemprop="datePublished">2024-06-23</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      uboot-bootm和bootz启动内核
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-images-quan-ju-bian-liang">1 images 全局变量</a><ul>
+<li><a href="#1-1-bootm-tou-bu-jie-gou">1.1 bootm头部结构</a><ul>
+<li><a href="#1-1-1-xi-tong-jing-xiang-tou-bu-jie-gou">1.1.1 系统镜像头部结构</a></li>
+<li><a href="#1-1-2-xi-tong-jing-xiang-jie-gou">1.1.2 系统镜像结构</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-do-bootz-han-shu">2 do_bootz 函数</a><ul>
+<li><a href="#2-1-bootz-start">2.1 bootz_start</a><ul>
+<li><a href="#2-1-1-bootm-start">2.1.1 bootm_start</a></li>
+<li><a href="#2-1-2-bootz-setup">2.1.2 bootz_setup</a></li>
+<li><a href="#2-1-3-bootm-find-images">2.1.3 bootm_find_images</a></li>
+</ul>
+</li>
+<li><a href="#2-2-do-bootm-states">2.2 do_bootm_states</a><ul>
+<li><a href="#2-2-1-bootm-os-get-boot-func">2.2.1 bootm_os_get_boot_func</a></li>
+<li><a href="#2-2-2-boot-pre-linux">2.2.2 boot_pre_linux</a></li>
+<li><a href="#2-2-3-boot-jump-linux">2.2.3 boot_jump_linux</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-zong-jie-bootz-qi-dong-guo-cheng">3 总结bootz启动过程</a></li>
+<li><a href="#4-uboot-qi-dong-linux-ce-shi">4 uboot 启动 Linux 测试</a><ul>
+<li><a href="#4-1-emmc-qi-dong-linux">4.1 EMMC 启动 Linux</a></li>
+<li><a href="#4-2-wang-luo-qi-dong-linux">4.2 网络启动 Linux</a></li>
+</ul>
+</li>
+<li><a href="#5-fu-lu-bi-te-yu-shi-liu-jin-zhi-zhuan-huan-kuai-cha-biao">5 附录：比特与十六进制转换快查表</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-images-quan-ju-bian-liang">1 images 全局变量</span><a href="#1-images-quan-ju-bian-liang" class="header-anchor">#</a></h1><p>不管是<code>bootz</code>还是<code>bootm</code>命令,启动kernel都会用到<code>images</code>全局变量。<code>images 定义在文件 cmd/bootm.c</code>：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/1.png" alt="image"><br><code>include/image.h </code>中的定义了<code>bootm_headers_t</code>结构：该结构描述的是<code>bootm</code>启动时的头部信息。该结构又包含了系统镜像头部和系统镜像。</p>
+<h2><span id="1-1-bootm-tou-bu-jie-gou">1.1 bootm头部结构</span><a href="#1-1-bootm-tou-bu-jie-gou" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">304</span> <span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">bootm_headers</span> &#123;</span></span><br><span class="line"><span class="number">305</span> 	<span class="comment">/*</span></span><br><span class="line"><span class="comment">306 	* Legacy os image header, if it is a multi component image</span></span><br><span class="line"><span class="comment">307 	* then boot_get_ramdisk() and get_fdt() will attempt to get</span></span><br><span class="line"><span class="comment">308 	* data from second and third component accordingly.</span></span><br><span class="line"><span class="comment">309 	*/</span></span><br><span class="line"><span class="number">310</span> 	<span class="type">image_header_t</span> *legacy_hdr_os; <span class="comment">/* image header pointer */</span></span><br><span class="line"><span class="number">311</span> 	<span class="type">image_header_t</span> legacy_hdr_os_copy; <span class="comment">/* header copy */</span></span><br><span class="line"><span class="number">312</span> 	ulong legacy_hdr_valid;</span><br><span class="line"><span class="number">313</span></span><br><span class="line">......</span><br><span class="line"><span class="number">333</span></span><br><span class="line"><span class="number">334</span> 	<span class="meta">#<span class="keyword">ifndef</span> USE_HOSTCC</span></span><br><span class="line"><span class="number">335</span> 	<span class="type">image_info_t</span> os; <span class="comment">/* OS 镜像信息 */</span></span><br><span class="line"><span class="number">336</span> 	ulong ep; <span class="comment">/* OS 入口点 */</span></span><br><span class="line"><span class="number">337</span></span><br><span class="line"><span class="number">338</span> 	ulong rd_start, rd_end; <span class="comment">/* ramdisk 开始和结束位置 */</span></span><br><span class="line"><span class="number">339</span></span><br><span class="line"><span class="number">340</span> 	<span class="type">char</span> *ft_addr; <span class="comment">/* 设备树地址 */</span></span><br><span class="line"><span class="number">341</span> 	ulong ft_len; <span class="comment">/* 设备树长度 */</span></span><br><span class="line"><span class="number">342</span></span><br><span class="line"><span class="number">343</span> 	ulong initrd_start; <span class="comment">/* initrd 开始位置 */</span> </span><br><span class="line"><span class="number">344</span> 	ulong initrd_end; <span class="comment">/* initrd 结束位置 */</span></span><br><span class="line"><span class="number">345</span> 	ulong cmdline_start; <span class="comment">/* cmdline 开始位置 */</span></span><br><span class="line"><span class="number">346</span> 	ulong cmdline_end; <span class="comment">/* cmdline 结束位置 */</span></span><br><span class="line"><span class="number">347</span> 	<span class="type">bd_t</span> *kbd;</span><br><span class="line"><span class="number">348</span> <span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="number">349</span></span><br><span class="line"><span class="number">350</span> 	<span class="type">int</span> verify; <span class="comment">/* getenv(&quot;verify&quot;)[0] != &#x27;n&#x27; */</span></span><br><span class="line"><span class="number">351</span></span><br><span class="line"><span class="number">352</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_START (0x00000001)</span></span><br><span class="line"><span class="number">353</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_FINDOS (0x00000002)</span></span><br><span class="line"><span class="number">354</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_FINDOTHER (0x00000004)</span></span><br><span class="line"><span class="number">355</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_LOADOS (0x00000008)</span></span><br><span class="line"><span class="number">356</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_RAMDISK (0x00000010)</span></span><br><span class="line"><span class="number">357</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_FDT (0x00000020)</span></span><br><span class="line"><span class="number">358</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_OS_CMDLINE (0x00000040)</span></span><br><span class="line"><span class="number">359</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_OS_BD_T (0x00000080)</span></span><br><span class="line"><span class="number">360</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_OS_PREP (0x00000100)</span></span><br><span class="line"><span class="number">361</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_OS_FAKE_GO (0x00000200)<span class="comment">/*&#x27;Almost&#x27; run the OS*/</span></span></span><br><span class="line"><span class="number">362</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_OS_GO (0x00000400)</span></span><br><span class="line"><span class="number">363</span> 	<span class="type">int</span> state;</span><br><span class="line"><span class="number">364</span></span><br><span class="line"><span class="number">365</span> 	<span class="meta">#<span class="keyword">ifdef</span> CONFIG_LMB</span></span><br><span class="line"><span class="number">366</span> 	<span class="class"><span class="keyword">struct</span> <span class="title">lmb</span> <span class="title">lmb</span>;</span> <span class="comment">/* 内存管理相关，不深入研究 */</span></span><br><span class="line"><span class="number">367</span> <span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="number">368</span> &#125; <span class="type">bootm_headers_t</span>;</span><br></pre></td></tr></table></figure>
+
+<p>第 352~362 行这 11 个宏定义表示 BOOT 的不同阶段。</p>
+<h3><span id="1-1-1-xi-tong-jing-xiang-tou-bu-jie-gou">1.1.1 系统镜像头部结构</span><a href="#1-1-1-xi-tong-jing-xiang-tou-bu-jie-gou" class="header-anchor">#</a></h3><p>先来看下<code>image_header_t</code>结构，也就是系统镜像头部信息：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/2.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">image_header</span> &#123;</span></span><br><span class="line">	__be32		ih_magic;	<span class="comment">/* Image Header Magic Number	*/</span></span><br><span class="line">	__be32		ih_hcrc;	<span class="comment">/* Image Header CRC Checksum	*/</span></span><br><span class="line">	__be32		ih_time;	<span class="comment">/* Image Creation Timestamp	*/</span></span><br><span class="line">	__be32		ih_size;	<span class="comment">/* Image Data Size		*/</span></span><br><span class="line">	__be32		ih_load;	<span class="comment">/* Data	 Load  Address		*/</span></span><br><span class="line">	__be32		ih_ep;		<span class="comment">/* Entry Point Address		*/</span></span><br><span class="line">	__be32		ih_dcrc;	<span class="comment">/* Image Data CRC Checksum	*/</span></span><br><span class="line">	<span class="type">uint8_t</span>		ih_os;		<span class="comment">/* Operating System		*/</span></span><br><span class="line">	<span class="type">uint8_t</span>		ih_arch;	<span class="comment">/* CPU architecture		*/</span></span><br><span class="line">	<span class="type">uint8_t</span>		ih_type;	<span class="comment">/* Image Type			*/</span></span><br><span class="line">	<span class="type">uint8_t</span>		ih_comp;	<span class="comment">/* Compression Type		*/</span></span><br><span class="line">	<span class="type">uint8_t</span>		ih_name[IH_NMLEN];	<span class="comment">/* Image Name		*/</span></span><br><span class="line">&#125; <span class="type">image_header_t</span>;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="1-1-2-xi-tong-jing-xiang-jie-gou">1.1.2 系统镜像结构</span><a href="#1-1-2-xi-tong-jing-xiang-jie-gou" class="header-anchor">#</a></h3><p>再来看下<code>image_info_t</code>结构，也就是系统镜像信息结构：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/3.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">image_info</span> &#123;</span></span><br><span class="line">	ulong		start, end;		<span class="comment">/* start/end of blob */</span></span><br><span class="line">	ulong		image_start, image_len; <span class="comment">/* start of image within blob, len of image */</span></span><br><span class="line">	ulong		load;			<span class="comment">/* load addr for the image */</span></span><br><span class="line">	<span class="type">uint8_t</span>		comp, type, os;		<span class="comment">/* compression, type of image, os type */</span></span><br><span class="line">	<span class="type">uint8_t</span>		arch;			<span class="comment">/* CPU architecture */</span></span><br><span class="line">&#125; <span class="type">image_info_t</span>;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="2-do-bootz-han-shu">2 do_bootz 函数</span><a href="#2-do-bootz-han-shu" class="header-anchor">#</a></h1><p><code>do_bootz </code>函数定义在<code>cmd/bootm.c</code>：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/4.png" alt="image"><br>先执行<code>bootz_start</code>。先执行<code>BOOTM_STATE_START </code>阶段。<br>第 638 行，设置<code>images.os.os</code>为<code> IH_OS_LINUX</code>，也就是设置系统镜像为 Linux，表示我们要启动的是 Linux 系统！后面会用到 <code>images.os.os </code>来挑选具体的启动函数。<br>第 639 行，调用函数<code>do_bootm_states</code>来执行不同的 BOOT 阶段，这里要执行的 BOOT 阶段有：<code>BOOTM_STATE_OS_PREP 、BOOTM_STATE_OS_FAKE_GO 和BOOTM_STATE_OS_GO</code>。</p>
+<h2><span id="2-1-bootz-start">2.1 bootz_start</span><a href="#2-1-bootz-start" class="header-anchor">#</a></h2><p><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/5.png" alt="image"></p>
+<ol>
+<li><p>调用函数<code> do_bootm_states</code>，执行 <code>BOOTM_STATE_START </code>阶段。</p>
+</li>
+<li><p>593 行，设置<code> images 的 ep</code>，也就是系统镜像的入口点，使用<code>bootz</code>命令启动系统的时候就会设置系统在 DRAM 中的存储位置，这个存储位置就是系统镜像的入口点，因此<code> images-&gt;ep=0X80800000</code>。镜像加载地址定义在<code>include/configs/mx6ullevk.h</code><br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/6.png" alt="image"></p>
+</li>
+<li><p>调用<code>bootz_setup</code>函数，此函数会判断当前的系统镜像文件是否为 Linux 的镜像文件，并且会打印出镜像相关信息，<code>bootz_setup </code>函数稍后会讲解。</p>
+</li>
+<li><p>调用<code>bootm_find_images</code>查找<code>ramdisk</code>和<code>设备树(dtb)</code>文件，但是我们没有用到 <code>ramdisk</code>，因此此函数在这里仅仅用于查找<code>设备树(dtb)</code>文件，此函数稍后也会讲解。</p>
+</li>
+</ol>
+<h3><span id="2-1-1-bootm-start">2.1.1 bootm_start</span><a href="#2-1-1-bootm-start" class="header-anchor">#</a></h3><p>执行<code>BOOTM_STATE_START</code>阶段时，执行<code>bootm_start</code>：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/7.png" alt="image"><br>初始化<code>verfify </code>成员， 设置<code>images</code>状态为 <code>BOOTM_STATE_START</code>。</p>
+<h3><span id="2-1-2-bootz-setup">2.1.2 bootz_setup</span><a href="#2-1-2-bootz-setup" class="header-anchor">#</a></h3><p>定义在文件 <code>arch/arm/lib/bootm.c</code>:<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/8.png" alt="image"></p>
+<ol>
+<li>宏<code>LINUX_ARM_ZIMAGE_MAGIC</code>就是 ARM Linux 系统<code>魔术数</code>。</li>
+<li>从传递进来的参数<code> image(也就是系统镜像首地址)</code>中获取<code>zimage</code>头。</li>
+<li>判断<code>image</code>是否为 ARM 的 Linux 系统镜像，如果不是的话就直接返回，并且打印出<code>“Bad Linux ARM zImage magic!”</code>，比如我们输入一个错误的启动命令：<br><code>bootz 80000000 – 900000000</code><br>因为我们并没有在<code>0X80000000</code>处存放 <code>Linux 镜像文件(zImage)</code>，因此上面的命令肯定会执行出错如下:<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/9.png" alt="image"></li>
+<li>初始化函数<code>bootz_setup</code>的参数<code> start 和 end</code>。</li>
+<li>打印启动信息，如果 Linux 系统镜像正常的话打印如下：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/10.png" alt="image"></li>
+</ol>
+<h3><span id="2-1-3-bootm-find-images">2.1.3 bootm_find_images</span><a href="#2-1-3-bootm-find-images" class="header-anchor">#</a></h3><p>定义在文件<code> common/bootm.c</code>：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/11.png" alt="image"></p>
+<ol>
+<li>查找<code> ramdisk</code>，但是我们没有用到 <code>ramdisk</code>，因此这部分代码不用管。</li>
+<li>查找<code>设备树(dtb)</code>文件，找到以后就将设备树的起始地址和长度分别写到<code>images </code>的<code>ft_addr</code>和 <code>ft_len </code>成员变量中。我们使用 <code>bootz </code>启动 Linux 的时候已经指明了设备树在DRAM 中的存储地址，因此<code> images.ft_addr=0X83000000</code>，长度根据具体的设备树文件而定，比如我现在使用的设备树文件长度为<code> 0X8C81</code>，因此<code> images.ft_len=0X8C81</code>。</li>
+</ol>
+<h2><span id="2-2-do-bootm-states">2.2 do_bootm_states</span><a href="#2-2-do-bootm-states" class="header-anchor">#</a></h2><p><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/12.png" alt="image"><br>前面将<code>state</code>先处理了<code>BOOTM_STATE_START</code>阶段，接下来处里下面三个状态：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BOOTM_STATE_OS_PREP | BOOTM_STATE_OS_FAKE_GO | BOOTM_STATE_OS_GO</span><br></pre></td></tr></table></figure>
+<h3><span id="2-2-1-bootm-os-get-boot-func">2.2.1 bootm_os_get_boot_func</span><a href="#2-2-1-bootm-os-get-boot-func" class="header-anchor">#</a></h3><p>进入第658行，通过<code>bootm_os_get_boot_func</code>来查找系统启动函数。由于前面提到<code>images-&gt;os.os </code>就是系统类型设置 为 <code>IH_OS_LINUX</code>，根据这个<code>os</code>类型来选择对应的启动函数名为<code>do_bootm_linux</code>:<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/13.png" alt="image"></p>
+<h3><span id="2-2-2-boot-pre-linux">2.2.2 boot_pre_linux</span><a href="#2-2-2-boot-pre-linux" class="header-anchor">#</a></h3><p>第 676-677 行，处理<code>BOOTM_STATE_OS_PREP</code>状态，调用函数<code> do_bootm_linux，do_bootm_linux</code>调用<code>boot_prep_linux</code>来完成具体的处理过程。<code>boot_prep_linux </code>主要用于处理环境变量<code>bootargs，bootargs </code>保存着传递给<code>Linux kernel</code>的参数：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/14.png" alt="image"></p>
+<pre><code>设备树的chosen节点下存放了子节点bootargs，bootargs子节点存放bootargs环境变量
+</code></pre>
+<h3><span id="2-2-3-boot-jump-linux">2.2.3 boot_jump_linux</span><a href="#2-2-3-boot-jump-linux" class="header-anchor">#</a></h3><p>第699行，调用函数<code>boot_selected_os</code>启动 Linux 内核，此函数第 4 个参数为 Linux 系统镜像头，第 5 个参数就是 Linux 系统启动函数<code> do_bootm_linux</code>。<code>boot_selected_os </code>函数定义在文件<code>common/bootm_os.c</code>如下：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/15.png" alt="image"><br>最终调用<code> boot_selected_os-&gt;boot_fn(即do_bootm_linux)-&gt;boot_jump_linux</code>来启动 Linux 内核：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/16.png" alt="image"><br><code>boot_jump_linux</code>：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/17.png" alt="image"></p>
+<ol>
+<li><p>我们的板子IMX6ULL是armv7 32位架构，因此从else开始，第293 行，变量 <code>machid </code>保存机器 ID，如果不使用设备树的话这个机器 ID 会被传递给 Linux内核，Linux 内核会在自己的机器 ID 列表里面查找是否存在与<code>uboot</code>传递进来的<code>machid</code>匹配的项目，如果存在就说明 Linux 内核支持这个机器，那么 Linux 就会启动！如果使用设备树的话这个<code>machid</code>就无效了，设备树存有一个“兼容性”这个属性，Linux 内核会比较“兼容性”属性的值(字符串)来查看是否支持这个机器。</p>
+</li>
+<li><p>第 295 行，函数<code> kernel_entry</code>，看名字“内核_进入”，说明此函数是进入 Linux 内核的，也就是最终的大boss！此函数有三个参数：<code>zero，arch，params</code>，第一个参数<code>zero</code>同样为 0；第二个参数为<code>机器 ID</code>；第三个参数<code> ATAGS 或者设备树(DTB)首地址</code>，<code>ATAGS </code>是传统的方法，用于传递一些命令行信息啥的，如果使用设备树的话就要传递<code>设备树(DTB)</code>。</p>
+</li>
+<li><p>第 299 行，获取 <code>kernel_entry </code>函数，函数<code>kernel_entry</code>并不是 <code>uboot </code>定义的，而是 Linux 内核定义的，Linux 内核镜像文件的第一行代码就是函数<code> kernel_entry</code>，而 <code>images-&gt;ep </code>保存着 Linux内核镜像的起始地址，起始地址保存的正是 Linux 内核第一行代码！</p>
+</li>
+<li><p>第 313 行，调用函数<code>announce_and_cleanup</code>来打印一些信息并做一些清理工作：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/18.png" alt="image"><br>因此每次启动 Linux 之前输出<code>“Starting kernel ...”</code>信息如下：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/19.png" alt="image"></p>
+</li>
+<li><p>继续回到函数<code> boot_jump_linux</code>,第 315~318 行是设置寄存器<code> r2</code> 的值。为什么要设置<code>r2</code>的值呢？Linux 内核一开始是汇编代码，因此函数<code>kernel_entry</code>就是个汇编函数。向汇编函数传递参数要使用<code> r0、r1 和 r2</code>(参数数量不超过 3 个的时候)，所以<code> r2</code> 寄存器就是函数<code>kernel_entry</code>的第三个参数。</p>
+</li>
+<li><p>第 316 行，如果使用设备树的话，<code>r2 </code>应该是设备树的起始地址，而设备树地址保存在<code> images</code>的<code>ftd_addr</code>成员变量中。</p>
+</li>
+<li><p>第 317 行，如果不使用设备树的话，<code>r2</code> 应该是<code>uboot</code>传递给 Linux 的参数起始地址，也就是环境变量<code>bootargs</code>的值，</p>
+</li>
+<li><p>最后调用调用<code>kernel_entry</code>函数进入 Linux 内核，至此<code>Uboot</code>的整个运行流程结束，<code>uboot </code>的使命也就完成了。</p>
+</li>
+</ol>
+<h1><span id="3-zong-jie-bootz-qi-dong-guo-cheng">3 总结bootz启动过程</span><a href="#3-zong-jie-bootz-qi-dong-guo-cheng" class="header-anchor">#</a></h1><p><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/20.png" alt="image"></p>
+<h1><span id="4-uboot-qi-dong-linux-ce-shi">4 uboot 启动 Linux 测试</span><a href="#4-uboot-qi-dong-linux-ce-shi" class="header-anchor">#</a></h1><h2><span id="4-1-emmc-qi-dong-linux">4.1 EMMC 启动 Linux</span><a href="#4-1-emmc-qi-dong-linux" class="header-anchor">#</a></h2><p>编译出来的 Linux 镜像文件 <code>zImage </code>和设备树文件保存在 EMMC中，<code>uboot </code>从 EMMC 中读取这两个文件并启动，这个是我们产品最终的启动方式。但是我们目前还没有讲解如何移植linux 和设备树文件，以及如何将 <code>zImage </code>和设备树文件保存到 EMMC中。不过大家拿到手的 I.MX6U-ALPHA 开发板(EMMC 版本)已经将<code> zImage</code> 文件和设备树文件烧写到了 EMMC 中，所以我们可以直接读取来测试。先检查一下 EMMC 的分区 1 中有没有<code>zImage </code>文件和设备树文件，输入命令<code>ls mmc 1:1</code>:<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/21.png" alt="image"><br>EMMC 分区 1 中存在<code>zimage</code>和 <code>imx6ull-alientek-emmc.dtb</code>这两个文件，所以我们可以测试新移植的 uboot能不能启动 linux 内核。设置 <code>bootargs </code>和<code> bootcmd</code>这两个环境变量:<br><code>setenv bootargs &#39;console=ttymxc0,115200 root=/dev/mmcblk1p2 rootwait rw&#39;</code><br><code>setenv bootcmd &#39;mmc dev 1; fatload mmc 1:1 80800000 zImage; fatload mmc 1:1 83000000 imx6ull-alientek-emmc.dtb; bootz 80800000 - 83000000;&#39;</code><br><code>saveenv</code><br>直接输入<code> boot</code>，或者<code>run bootcmd</code>即可启动 Linux 内核，如果 Linux 内核启动成功的话就会输出如下：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/22.png" alt="image"></p>
+<h2><span id="4-2-wang-luo-qi-dong-linux">4.2 网络启动 Linux</span><a href="#4-2-wang-luo-qi-dong-linux" class="header-anchor">#</a></h2><p>调试过程中由于我们不断更改kernel, 那么如果每次都烧录进emmc，从emmc启动就很繁琐，直接从网络启动。<br>先将<code>zImage</code>和<code>dtb</code>文件放在tftp共享目录下，通过<code>nfs 或者 tftp</code>从 Ubuntu 中下载<code>zImage</code>和设备树文件：</p>
+<p><code>setenv bootargs &#39;console=ttymxc0,115200 root=/dev/mmcblk1p2 rootwait rw&#39;</code><br><code>setenv bootcmd &#39;tftp 80800000 zImage; tftp 83000000 imx6ull-alientek-emmc.dtb; bootz 80800000 - 83000000&#39;</code><br><code>saveenv</code><br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/23.png" alt="image"><br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/24.png" alt="image"></p>
+<h1><span id="5-fu-lu-bi-te-yu-shi-liu-jin-zhi-zhuan-huan-kuai-cha-biao">5 附录：比特与十六进制转换快查表</span><a href="#5-fu-lu-bi-te-yu-shi-liu-jin-zhi-zhuan-huan-kuai-cha-biao" class="header-anchor">#</a></h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * include/linux/sizes.h</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * This program is free software; you can redistribute it and/or modify</span></span><br><span class="line"><span class="comment"> * it under the terms of the GNU General Public License version 2 as</span></span><br><span class="line"><span class="comment"> * published by the Free Software Foundation.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> __LINUX_SIZES_H__</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __LINUX_SIZES_H__</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1				0x00000001</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2				0x00000002</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_4				0x00000004</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_8				0x00000008</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_16				0x00000010</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_32				0x00000020</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_64				0x00000040</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_128				0x00000080</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_256				0x00000100</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_512				0x00000200</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1K				0x00000400</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2K				0x00000800</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_4K				0x00001000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_8K				0x00002000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_16K				0x00004000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_32K				0x00008000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_64K				0x00010000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_128K				0x00020000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_256K				0x00040000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_512K				0x00080000</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1M				0x00100000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2M				0x00200000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_4M				0x00400000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_8M				0x00800000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_16M				0x01000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_32M				0x02000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_64M				0x04000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_128M				0x08000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_256M				0x10000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_512M				0x20000000</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1G				0x40000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2G				0x80000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">/* __LINUX_SIZES_H__ */</span></span></span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/" data-id="clxrelant004f7kufc380cqom" data-title="uboot-bootm和bootz启动内核" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">uboot-启动流程</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 20px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.67px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.89px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 15.56px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.22px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14.44px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17.78px;">外设驱动</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.22px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.22px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.33px;">通信协议</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/">uboot-bootm和bootz启动内核</a>
+          </li>
+        
+          <li>
+            <a href="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">uboot-启动流程</a>
+          </li>
+        
+          <li>
+            <a href="/2024/06/23/uboot-%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AClds%E5%88%86%E6%9E%90/">uboot-链接脚本lds分析</a>
+          </li>
+        
+          <li>
+            <a href="/2024/06/22/uboot-%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8BMake%E5%88%86%E6%9E%90/">uboot-编译过程Make分析</a>
+          </li>
+        
+          <li>
+            <a href="/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/">uboot-编译defconfig分析</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
