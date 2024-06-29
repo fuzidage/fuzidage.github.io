@@ -69,6 +69,143 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-s3c2440裸机编程-UART体系" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/" class="article-date">
+  <time class="dt-published" datetime="2024-04-11T09:11:05.000Z" itemprop="datePublished">2024-04-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/">s3c2440裸机编程-UART体系</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-uart-ying-jian-jie-shao">1 uart硬件介绍</a></li>
+<li><a href="#2-uart-de-can-shu-he-ge-shi">2 uart的参数和格式</a></li>
+<li><a href="#3-uart-chuan-shu-yuan-li">3 UART传输原理</a><ul>
+<li><a href="#3-1-ru-he-chuan-shu-yi-ge-zi-fu-a">3.1 如何传输一个字符A</a><ul>
+<li><a href="#3-1-1-rs232">3.1.1 RS232</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#4-uart-kong-zhi-qi">4 UART控制器</a></li>
+<li><a href="#5-uart-kong-zhi-qi-bian-cheng">5 UART控制器编程</a><ul>
+<li><a href="#5-1-chu-shi-hua-uart">5.1 初始化UART</a><ul>
+<li><a href="#5-1-1-yin-jiao-chu-shi-hua">5.1.1 引脚初始化</a></li>
+<li><a href="#5-1-2-uart-kong-zhi-qi-chu-shi-hua">5.1.2 UART控制器初始化</a><ul>
+<li><a href="#5-1-2-1-she-zhi-shi-zhong-yuan">5.1.2.1 设置时钟源</a></li>
+<li><a href="#5-1-2-2-she-zhi-bo-te-lu">5.1.2.2 设置波特率</a></li>
+<li><a href="#5-1-2-3-she-zhi-shu-ju-ge-shi">5.1.2.3 设置数据格式</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#5-2-putchar-getchar">5.2 putchar&#x2F;getchar</a></li>
+<li><a href="#5-3-puts">5.3 puts</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-uart-ying-jian-jie-shao">1 uart硬件介绍</span><a href="#1-uart-ying-jian-jie-shao" class="header-anchor">#</a></h1><p>UART的全称是Universal Asynchronous Receiver and Transmitter（异步收发器)。 uart主要用于：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.打印调试</span><br><span class="line">2.数据传输</span><br></pre></td></tr></table></figure>
+<p>串口通过三根线即可，发送、接收、地线。<br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/1.jpg"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">pc的TxD -&gt; arm的RxD (UART write)</span><br><span class="line">arm的TxD -&gt; pc的RxD  (UART <span class="built_in">read</span>)</span><br></pre></td></tr></table></figure>
+<h1><span id="2-uart-de-can-shu-he-ge-shi">2 uart的参数和格式</span><a href="#2-uart-de-can-shu-he-ge-shi" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">波特率：表示每秒传输多少bit，bits per second(bps).一般波特率都会有9600,19200,115200等选项。</span><br><span class="line">起始位: 先发出一个逻辑”0”的信号，表示传输数据的开始。</span><br><span class="line">数据位：可以是5~8位逻辑”0”或”1”。一般7位，刚好可以传输所有ASCII码。</span><br><span class="line">校验位：</span><br><span class="line">	奇校验：（校验位+数据位）使得“1”的位数为奇数</span><br><span class="line">	偶校验：（校验位+数据位）使得“1”的位数为偶数</span><br><span class="line">	举个栗子：</span><br><span class="line">	‘A’的ASCII值是0x41,二进制就是01000001,那么奇校验就在校验位写‘1’,偶校验就在校验位写‘0’	</span><br><span class="line">停止位：它是一个字符数据的结束标志。</span><br></pre></td></tr></table></figure>
+<h1><span id="3-uart-chuan-shu-yuan-li">3 UART传输原理</span><a href="#3-uart-chuan-shu-yuan-li" class="header-anchor">#</a></h1><h2><span id="3-1-ru-he-chuan-shu-yi-ge-zi-fu-a">3.1 如何传输一个字符A</span><a href="#3-1-ru-he-chuan-shu-yi-ge-zi-fu-a" class="header-anchor">#</a></h2><p>‘A’的ASCII值是0x41#,二进制就是01000001，怎样把这8位数据发送给PC机呢？</p>
+<pre><code>1.双方约定好波特率（每一位占据的时间）
+2.规定传输协议
+</code></pre>
+<p>现在处于这种模式：arm的TxD -&gt; pc的RxD  (UART read)</p>
+<pre><code>1.arm拉低uart总线1bit的时间（起始位）
+2.arm根据数据位依次驱动TxD的电平，同时PC依次读取uart总线，数据到达PC的RxD引脚，pc依次获得数据位
+</code></pre>
+<p>为了能够进行远距离的传输数据，我们的PC是使用的RS-232逻辑电平，而arm开发板使用的TTL&#x2F;CMOS逻辑电平。这里先讲解下什么是TTL逻辑电平，什么是RS-232逻辑电平。</p>
+<p>TTL&#x2F;CMOS逻辑电平：</p>
+<pre><code>0（低电平0-0.7v）表示逻辑&#39;0&#39;
+1（高电平2-5v）  表示逻辑&#39;1&#39;
+</code></pre>
+<p>RS-232逻辑电平：</p>
+<pre><code>(+3V ~ +12V) 表示逻辑&#39;0&#39;
+(-12V ~ -3V) 表示逻辑&#39;1&#39;
+</code></pre>
+<p>TTL逻辑电平的波形：<br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/2.jpg"><br>RS232逻辑电平的波形：<br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/3.jpg"></p>
+<p>那么在起始信号开始后开始计时，arm每隔一个时钟往TxD放1bit数据，同时pc也从RxD get 1bit数据.</p>
+<pre><code>    arm				pc
+TxD=data[0:]，    data[0:]=RxD
+TxD=data[1:]，    data[1:]=RxD
+...	
+TxD=data[7:]，    data[7:]=RxD
+</code></pre>
+<h3><span id="3-1-1-rs232">3.1.1 RS232</span><a href="#3-1-1-rs232" class="header-anchor">#</a></h3><p>我们知道RS232的逻辑’0’和逻辑’1’相差较大，比TTL&#x2F;CMOS差距大，那么逻辑电平不容易出现反转，能传输更远的距离，在工业上用得比较多。</p>
+<p>所以我们上面PC拿到的数据是不对的,那么需要一个TTL转RS232的电平转换芯片。</p>
+<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/4.jpg"></p>
+<h1><span id="4-uart-kong-zhi-qi">4 UART控制器</span><a href="#4-uart-kong-zhi-qi" class="header-anchor">#</a></h1><p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/5.png"></p>
+<p>发送数据：<br>    内存将数据放入发送FIFO（64byte），通过发送移位器将数据一位一位的依次发送到TXDn，这样PC就可以从总线上依次get到数据。</p>
+<p>接收数据：<br>    当pc的TXDn端将数据发送到总线后，arm获取RXDn的引脚电平依次get到数据，逐位放进接收移位器，再放入FIFO，写入内存。</p>
+<p>当然,也可不使用fifo,直接让内存与移位器交互，不过这样会造成浪费内存资源，内存的频率是很高滴，降低了内存的吞吐量。</p>
+<h1><span id="5-uart-kong-zhi-qi-bian-cheng">5 UART控制器编程</span><a href="#5-uart-kong-zhi-qi-bian-cheng" class="header-anchor">#</a></h1><p>s3c2440支持3个UART串口，以uart0为例讲解。<br>那么我们需要实现以下这几个函数完成串口的最基本功能：	</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">（<span class="number">1</span>）uart0_init()用于初始化串口</span><br><span class="line">（<span class="number">2</span>）<span class="built_in">putchar</span>()用于发送一个字符</span><br><span class="line">（<span class="number">3</span>）getchar()用于接收一个字符</span><br><span class="line">（<span class="number">4</span>）<span class="built_in">puts</span>()用于发送一串字符</span><br></pre></td></tr></table></figure>
+
+<h2><span id="5-1-chu-shi-hua-uart">5.1 初始化UART</span><a href="#5-1-chu-shi-hua-uart" class="header-anchor">#</a></h2><h3><span id="5-1-1-yin-jiao-chu-shi-hua">5.1.1 引脚初始化</span><a href="#5-1-1-yin-jiao-chu-shi-hua" class="header-anchor">#</a></h3><p>配置uart0引脚</p>
+<ol>
+<li>根据原理图GPH2,3用于TxD0, RxD0。<br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/6.png"></li>
+<li>查看dataset,配置GPH控制寄存器，让GPH2,3配成uart模式；为了将其保持为高电平，先设置其为上拉。<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">GPHCON &amp;= ~((<span class="number">3</span>&lt;&lt;<span class="number">4</span>) | (<span class="number">3</span>&lt;&lt;<span class="number">6</span>));</span><br><span class="line">GPHCON |= ((<span class="number">2</span>&lt;&lt;<span class="number">4</span>) | (<span class="number">2</span>&lt;&lt;<span class="number">6</span>));</span><br><span class="line">GPHUP &amp;= ~((<span class="number">1</span>&lt;&lt;<span class="number">2</span>) | (<span class="number">1</span>&lt;&lt;<span class="number">3</span>));  <span class="comment">/* 使能内部上拉 */</span></span><br></pre></td></tr></table></figure>
+<img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/7.png"></li>
+</ol>
+<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/8.png"></p>
+<h3><span id="5-1-2-uart-kong-zhi-qi-chu-shi-hua">5.1.2 UART控制器初始化</span><a href="#5-1-2-uart-kong-zhi-qi-chu-shi-hua" class="header-anchor">#</a></h3><h4><span id="5-1-2-1-she-zhi-shi-zhong-yuan">5.1.2.1 设置时钟源</span><a href="#5-1-2-1-she-zhi-shi-zhong-yuan" class="header-anchor">#</a></h4><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">UCON0 = <span class="number">0x00000005</span>; <span class="comment">/* 时钟源选择PCLK,中断/查询模式 */</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/9.png"><br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/10.png"></p>
+<h4><span id="5-1-2-2-she-zhi-bo-te-lu">5.1.2.2 设置波特率</span><a href="#5-1-2-2-she-zhi-bo-te-lu" class="header-anchor">#</a></h4><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* uart clock=50M，假设我们想要波特率=115200，</span></span><br><span class="line"><span class="comment">** 根据公式UBRDIVn = (int)(UART clock/( buad rate x 16) ) –1</span></span><br><span class="line"><span class="comment">** 得到UBRDIVn = (int)( 50000000 / ( 115200 x 16) ) –1 = 26</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">UBRDIV0 = <span class="number">26</span>;</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/11.png"></p>
+<h4><span id="5-1-2-3-she-zhi-shu-ju-ge-shi">5.1.2.3 设置数据格式</span><a href="#5-1-2-3-she-zhi-shu-ju-ge-shi" class="header-anchor">#</a></h4><p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/12.png"><br>数据格式设置为常用的8n1，表示8个数据位, 无较验位, 1个停止位</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ULCON0 = <span class="number">0x00000003</span>; <span class="comment">/* 8n1: 8个数据位（数据+校验）, 无较验位, 1个停止位 */</span></span><br></pre></td></tr></table></figure>
+<h2><span id="5-2-putchar-x2f-getchar">5.2 putchar&#x2F;getchar</span><a href="#5-2-putchar-x2f-getchar" class="header-anchor">#</a></h2><pre><code>putchar就是向发送寄存器(UTXH0)写入值进去。
+getchar就是从接受寄存器(URXH0)取出值。
+无论是getchar还是putchar都可以通过读取状态寄存器（UTRSTAT0）来作为传输结束判断标志。
+</code></pre>
+<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/13.png"></p>
+<pre><code>查询其第2位判断发送buff是否为空，即上一次发送是否完成，如果完成即向UTXH0写入要发送的新数据；
+查询其第0位判断接收buff是否有数据接受到，如果有数据接收到，返回接收buffer的值。
+</code></pre>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="built_in">int</span> <span class="title">putchar</span>(<span class="params"><span class="built_in">int</span> c</span>)</span>&#123;</span><br><span class="line">	<span class="keyword">while</span> (!(UTRSTAT0 &amp; (<span class="number">1</span>&lt;&lt;<span class="number">2</span>)));</span><br><span class="line">	UTXH0 = (unsigned <span class="built_in">char</span>)c;	</span><br><span class="line">&#125;	</span><br><span class="line"><span class="function"><span class="built_in">int</span> <span class="title">getchar</span>(<span class="params"><span class="keyword">void</span></span>)</span>&#123;</span><br><span class="line">	<span class="keyword">while</span> (!(UTRSTAT0 &amp; (<span class="number">1</span>&lt;&lt;<span class="number">0</span>)));</span><br><span class="line">	<span class="keyword">return</span> URXH0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2><span id="5-3-puts">5.3 puts</span><a href="#5-3-puts" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="built_in">int</span> <span class="title">puts</span>(<span class="params"><span class="keyword">const</span> <span class="built_in">char</span> *s</span>)</span>&#123;</span><br><span class="line">	<span class="keyword">while</span> (*s)&#123;</span><br><span class="line">		putchar(*s);</span><br><span class="line">		s++;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/" data-id="clxztkv8v001htouf0vfl79f0" data-title="s3c2440裸机编程-UART体系" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-s3c2440裸机编程-时钟体系" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" class="article-date">
@@ -162,7 +299,7 @@ DIV:用分频器进行分频
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" data-id="clxrnlp4i001osguf4pjhdpn3" data-title="s3c2440裸机编程-时钟体系" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" data-id="clxztkv8x001ptoufes1h9idd" data-title="s3c2440裸机编程-时钟体系" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -281,7 +418,7 @@ DIV:用分频器进行分频
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/" data-id="clxrnlp4p0048sguf4k0m7rai" data-title="循环队列FIFO原理图解" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/11/%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97FIFO%E5%8E%9F%E7%90%86%E5%9B%BE%E8%A7%A3/" data-id="clxztkv960059touf41d89vpl" data-title="循环队列FIFO原理图解" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -468,7 +605,7 @@ DIV:用分频器进行分频
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/11/tailq%E9%98%9F%E5%88%97/" data-id="clxrnlp4j001tsgufhvrjhe01" data-title="tailq队列" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/11/tailq%E9%98%9F%E5%88%97/" data-id="clxztkv8x001ttoufeq2w6ss6" data-title="tailq队列" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -579,7 +716,7 @@ DIV:用分频器进行分频
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/" data-id="clxrnlp4n003tsgufazwaghbg" data-title="union和bit_field巧妙进行寄存器位操作" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/" data-id="clxztkv950051touferdeb9kl" data-title="union和bit_field巧妙进行寄存器位操作" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -659,7 +796,7 @@ DIV:用分频器进行分频
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/03/%E5%8D%B7%E5%B8%98%E5%BF%AB%E9%97%A8RollingShutter%E4%B8%8E%E5%85%A8%E5%B1%80%E5%BF%AB%E9%97%A8GlobalShutter/" data-id="clxrnlp4o003zsguf613f43f8" data-title="卷帘快门RollingShutter与全局快门GlobalShutter" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/03/%E5%8D%B7%E5%B8%98%E5%BF%AB%E9%97%A8RollingShutter%E4%B8%8E%E5%85%A8%E5%B1%80%E5%BF%AB%E9%97%A8GlobalShutter/" data-id="clxztkv960055touf2b5dar75" data-title="卷帘快门RollingShutter与全局快门GlobalShutter" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1062,7 +1199,7 @@ DIV:用分频器进行分频
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/" data-id="clxrnlp4f0013sgufblechabb" data-title="mipi-csi软件篇" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/02/mipi-csi%E8%BD%AF%E4%BB%B6%E7%AF%87/" data-id="clxztkv8t0012touf0ch08nlu" data-title="mipi-csi软件篇" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1306,7 +1443,7 @@ DIV:用分频器进行分频
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/" data-id="clxrnlp4f0011sguf4zaz84re" data-title="mipi-csi硬件篇" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/" data-id="clxztkv8t0010toufe51y6bw5" data-title="mipi-csi硬件篇" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1703,7 +1840,7 @@ set cscopequickfix=s-,c-,d-,i-,t-,e-
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/" data-id="clxrnlp4a0008sguf9zq90cfo" data-title="Vim配置成类似source-insight的IDE" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/" data-id="clxztkv8n0008touf0l3pgoh5" data-title="Vim配置成类似source-insight的IDE" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1814,103 +1951,7 @@ E:\ -name:nfs_udisk -public -maproot:0 *(rw,sync,no_root_squash)
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/" data-id="clxrnlp4b000asgufa0x34xkm" data-title="Windows10搭建NFS服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-virtualbox配置实现PC-虚拟机-开发板互ping" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/" class="article-date">
-  <time class="dt-published" datetime="2024-03-30T06:13:08.000Z" itemprop="datePublished">2024-03-30</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/">virtualbox配置实现PC-虚拟机-开发板互ping</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-she-zhi-virtualbox-wang-qia">1 设置virtualbox网卡</a><ul>
-<li><a href="#1-1-guan-bi-xu-ni-ji">1.1 关闭虚拟机</a></li>
-<li><a href="#1-2-she-zhi-tian-jia-wang-qia">1.2 设置添加网卡</a><ul>
-<li><a href="#1-2-1-tian-jia-wang-qia-1-nat-wang-luo">1.2.1 添加网卡1(NAT网络)</a></li>
-<li><a href="#1-2-2-tian-jia-wang-qia-2-host-only-wang-luo">1.2.2 添加网卡2(host only网络)</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#2-pei-zhi-windows-he-xu-ni-ji">2 配置windows和虚拟机</a><ul>
-<li><a href="#2-1-pei-zhi-window-yi-tai-wang-qia">2.1 配置window以太网卡</a></li>
-<li><a href="#2-2-pei-zhi-xu-ni-ji-wang-luo">2.2 配置虚拟机网络</a></li>
-</ul>
-</li>
-<li><a href="#3-ce-shi-shang-wang-zhuang-tai">3 测试上网状态</a></li>
-<li><a href="#4-gai-jin-he-you-hua">4 改进和优化</a><ul>
-<li><a href="#4-1-windows-ping-xu-ni-ji">4.1 windows ping 虚拟机</a></li>
-<li><a href="#4-2-xu-ni-ji-ping-windows">4.2 虚拟机 ping windows</a></li>
-<li><a href="#4-3-kai-fa-ban-ping-windows-he-xu-ni-ji">4.3 开发板 ping windows和虚拟机</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-
-<h1><span id="1-she-zhi-virtualbox-wang-qia">1 设置virtualbox网卡</span><a href="#1-she-zhi-virtualbox-wang-qia" class="header-anchor">#</a></h1><h2><span id="1-1-guan-bi-xu-ni-ji">1.1 关闭虚拟机</span><a href="#1-1-guan-bi-xu-ni-ji" class="header-anchor">#</a></h2><h2><span id="1-2-she-zhi-tian-jia-wang-qia">1.2 设置添加网卡</span><a href="#1-2-she-zhi-tian-jia-wang-qia" class="header-anchor">#</a></h2><p>进入设置-网络</p>
-<h3><span id="1-2-1-tian-jia-wang-qia-1-nat-wang-luo">1.2.1 添加网卡1(NAT网络)</span><a href="#1-2-1-tian-jia-wang-qia-1-nat-wang-luo" class="header-anchor">#</a></h3><p>这个网络是主机通过网络地址转换到虚拟机，比如主机用无线网卡WLAN上网，用NAT转换比较合适，这样虚拟机也可以访问外网。<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/1.png"></p>
-<h3><span id="1-2-2-tian-jia-wang-qia-2-host-only-wang-luo">1.2.2 添加网卡2(host only网络)</span><a href="#1-2-2-tian-jia-wang-qia-2-host-only-wang-luo" class="header-anchor">#</a></h3><p>这个网络是主机通过无线网卡WLAN上外网，但是虚拟机想通过有线网卡和主机、甚至与开发板互相ping通，传输文件。<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/2.png"></p>
-<p>当然开启host only模式前先确保windows下的virtual host only网卡有开启，如下图：<br><img src="https://img2020.cnblogs.com/blog/1876680/202009/1876680-20200923151634434-1218500133.png"></p>
-<p>如果没有请按照下图操作：（这里是添加host only网卡）<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/3.png"><br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/4.png"></p>
-<h1><span id="2-pei-zhi-windows-he-xu-ni-ji">2 配置windows和虚拟机</span><a href="#2-pei-zhi-windows-he-xu-ni-ji" class="header-anchor">#</a></h1><h2><span id="2-1-pei-zhi-window-yi-tai-wang-qia">2.1 配置window以太网卡</span><a href="#2-1-pei-zhi-window-yi-tai-wang-qia" class="header-anchor">#</a></h2><p>刚添加了虚拟机虚拟virtual host only网卡, 那么我们反正用的WLAN上的外网，为了方便，设置windows下的以太网卡网段和virtual host only网卡保持一致。<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/5.png"><br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/6.png"></p>
-<h2><span id="2-2-pei-zhi-xu-ni-ji-wang-luo">2.2 配置虚拟机网络</span><a href="#2-2-pei-zhi-xu-ni-ji-wang-luo" class="header-anchor">#</a></h2><p>一般默认情况下，虚拟机是通过NAT共享网络给虚拟机用的，那么此时虚拟机也是可以上网的，只是不能和外界开发板进行互相ping, 同时windows主机也不能ping虚拟机。 如下图：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/7.png"><br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/8.png"><br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/9.png"><br>图中可以看到两块网卡，enp0s3是Ubuntu默认的网卡（NAT），enp0s8是新增的网卡(host only)，可以看到enp0s8还没有分配IP地址，我们需要手工指定一下。sudo vim &#x2F;etc&#x2F;network&#x2F;interfaces将文件内容修改为如下所示：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_"># </span><span class="language-bash">interfaces(5) file used by ifup(8) and ifdown(8)</span></span><br><span class="line">auto lo</span><br><span class="line">iface lo inet loopback</span><br><span class="line"></span><br><span class="line">auto enp0s8</span><br><span class="line">iface enp0s8 inet static</span><br><span class="line">address 192.168.56.101</span><br><span class="line">netmask 255.255.255.0</span><br></pre></td></tr></table></figure>
-<p>再来看下网卡ip信息：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/10.png"></p>
-<h1><span id="3-ce-shi-shang-wang-zhuang-tai">3 测试上网状态</span><a href="#3-ce-shi-shang-wang-zhuang-tai" class="header-anchor">#</a></h1><p><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/11.png"><br>从测试结果上可以看到虚拟机上外网和ping windows主机都是ok的。</p>
-<pre><code>  10.80.0.75时无线网卡的ip，
-  192.168.56.100是以太网卡的ip,
-  192.168.56.101是host only网卡的ip。 
-</code></pre>
-<p>同理用Windows ping虚拟机也是ok的。<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/12.png"></p>
-<p>用开发板ping主机和虚拟机发现，只能ping通windows主机，无法ping通虚拟机，如下图。这是为什么呢？<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/13.png"></p>
-<p>这是由于我们windows主机和开发板用的网线直连，两个以太网卡在同一网段下，当然能够ping通。但是虚拟机和windows主机用的确是host only网卡（NAT方式用来上外网），这样只能保证虚拟机和Windows主机是互通的，但是却无法被开发板访问，我们的开发板是没有无线网卡的，所以不能用WLAN，因此我们要想让开发板访问到虚拟机还得经过windows的以太网卡。</p>
-<p>那么我们虚拟机和windows主机是host only方式，所以我们无法用到以太网卡进行虚拟机和windows主机的交互。所以我们可以采取将host only网卡桥接到以太网卡，进入 网络-更改适配器-同时选中host only网卡和以太网卡，点击右键-选择桥接，如下图所示：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/14.png"></p>
-<p>这样我们的虚拟机的host only网卡就可以透过以太网卡和开发板交互了，效果如下：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/15.png"><br>开发板能够ping windows主机和虚拟机。</p>
-<h1><span id="4-gai-jin-he-you-hua">4 改进和优化</span><a href="#4-gai-jin-he-you-hua" class="header-anchor">#</a></h1><p>如果不想在windows下进行host only网卡和以太网卡桥接，也可直接把virtualbox的第2路网卡由原来的host only修改成以太网卡桥接模式，如下：<br><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/16.png"></p>
-<p>这样需要配置虚拟机的enp0s8网卡和windows主机的以太网卡网段保持一致的。（和前面2.2操作一样）</p>
-<h2><span id="4-1-windows-ping-xu-ni-ji">4.1 windows ping 虚拟机</span><a href="#4-1-windows-ping-xu-ni-ji" class="header-anchor">#</a></h2><p><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/17.png"></p>
-<h2><span id="4-2-xu-ni-ji-ping-windows">4.2 虚拟机 ping windows</span><a href="#4-2-xu-ni-ji-ping-windows" class="header-anchor">#</a></h2><p><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/18.png"></p>
-<h2><span id="4-3-kai-fa-ban-ping-windows-he-xu-ni-ji">4.3 开发板 ping windows和虚拟机</span><a href="#4-3-kai-fa-ban-ping-windows-he-xu-ni-ji" class="header-anchor">#</a></h2><p><img src="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/19.png"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/" data-id="clxrnlp4o003vsgufg56790ar" data-title="virtualbox配置实现PC-虚拟机-开发板互ping" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/" data-id="clxztkv8o000atouf7mza9xi7" data-title="Windows10搭建NFS服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1942,7 +1983,7 @@ E:\ -name:nfs_udisk -public -maproot:0 *(rw,sync,no_root_squash)
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
     </div>
   </div>
 
@@ -1952,7 +1993,7 @@ E:\ -name:nfs_udisk -public -maproot:0 *(rw,sync,no_root_squash)
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 20px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17.5px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.75px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 16.25px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.5px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17.5px;">外设驱动</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.25px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.5px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.5px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.75px;">通信协议</a>
+      <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 20px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17.14px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.57px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 17.14px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.86px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15.71px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17.14px;">外设驱动</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.43px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.86px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.86px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 14.29px;">通信协议</a>
     </div>
   </div>
 
@@ -1974,6 +2015,10 @@ E:\ -name:nfs_udisk -public -maproot:0 *(rw,sync,no_root_squash)
       <ul>
         
           <li>
+            <a href="/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/">Makefile-常用函数和通用模板</a>
+          </li>
+        
+          <li>
             <a href="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/">uboot-menuconfig和Kconfig图像化配置</a>
           </li>
         
@@ -1987,10 +2032,6 @@ E:\ -name:nfs_udisk -public -maproot:0 *(rw,sync,no_root_squash)
         
           <li>
             <a href="/2024/06/23/uboot-%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AClds%E5%88%86%E6%9E%90/">uboot-链接脚本lds分析</a>
-          </li>
-        
-          <li>
-            <a href="/2024/06/22/uboot-%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8BMake%E5%88%86%E6%9E%90/">uboot-编译过程Make分析</a>
           </li>
         
       </ul>
