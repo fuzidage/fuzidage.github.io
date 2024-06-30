@@ -19,7 +19,7 @@
 <meta property="og:image" content="http://example.com/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/4.png">
 <meta property="og:image" content="http://example.com/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/5.png">
 <meta property="article:published_time" content="2024-06-24T14:19:55.000Z">
-<meta property="article:modified_time" content="2024-06-29T07:39:02.000Z">
+<meta property="article:modified_time" content="2024-06-29T11:28:31.565Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="linux嵌入式环境搭建">
 <meta property="article:tag" content="linux系统构建">
@@ -139,13 +139,25 @@
 <li><a href="#3-2-5-addsuffix">3.2.5 <code>addsuffix</code></a></li>
 <li><a href="#3-2-6-addprefix">3.2.6 <code>addprefix</code></a></li>
 <li><a href="#3-2-7-wildcard">3.2.7 <code>wildcard</code></a></li>
+<li><a href="#3-2-8-join">3.2.8<code> join</code></a></li>
+<li><a href="#3-2-9-realpath">3.2.9<code>realpath</code></a></li>
+<li><a href="#3-2-10-abspath">3.2.10 <code>abspath</code></a></li>
+<li><a href="#3-2-11-file">3.2.11 <code>file</code></a></li>
 </ul>
 </li>
 <li><a href="#3-3-qi-ta-han-shu">3.3 其他函数</a><ul>
 <li><a href="#3-3-1-foreach">3.3.1 <code>foreach</code></a></li>
 <li><a href="#3-3-2-origin">3.3.2 <code>origin</code></a></li>
+<li><a href="#3-3-3-word">3.3.3 <code>word</code></a></li>
+<li><a href="#3-3-4-wordlist">3.3.4<code>wordlist</code></a></li>
+<li><a href="#3-3-5-words">3.3.5 <code>words</code></a></li>
+<li><a href="#3-3-6-firstword-lastword">3.3.6 <code>firstword/lastword </code></a></li>
+<li><a href="#3-3-7-call">3.3.7 <code>call</code></a></li>
 </ul>
 </li>
+<li><a href="#3-4-vpath-xuan-xiang">3.4 VPATH选项</a></li>
+<li><a href="#3-5-make-huan-jing-bian-liang">3.5 make环境变量</a></li>
+<li><a href="#3-6-make-bian-yi-xuan-xiang">3.6 make编译选项</a></li>
 </ul>
 </li>
 <li><a href="#4-tong-yong-xing-makefile">4 通用型<code>makefile</code></a><ul>
@@ -313,6 +325,20 @@
 <figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">c_src := <span class="variable">$(<span class="built_in">wildcard</span> \*.c)</span></span><br></pre></td></tr></table></figure>
 
 <p>结果为<code>1.c 2.c</code></p>
+<h3><span id="3-2-8-join">3.2.8<code> join</code></span><a href="#3-2-8-join" class="header-anchor">#</a></h3><p><code>$(join list1,list2)</code></p>
+<p>逐个地将list2中的元素链接到list1。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">LIST1 := foo bar</span><br><span class="line">LIST2 := .c  .p</span><br><span class="line">RESULT := $&#123;join $&#123;LIST1&#125; , $&#123;LIST2&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果为：<code>foo.c bar.p</code></p>
+<h3><span id="3-2-9realpath">3.2.9<code>realpath</code></span><a href="#3-2-9realpath" class="header-anchor">#</a></h3><p><code>$(realpath names…)</code></p>
+<p>对<code>names中</code>的每个文件，求其绝对路径，当目标为链接时，将解析链接。</p>
+<h3><span id="3-2-10-abspath">3.2.10 <code>abspath</code></span><a href="#3-2-10-abspath" class="header-anchor">#</a></h3><p><code>$(abspath names…)</code></p>
+<p>对<code>names中</code>的每个文件，求其绝对路径。不解析链接。</p>
+<h3><span id="3-2-11-file">3.2.11 <code>file</code></span><a href="#3-2-11-file" class="header-anchor">#</a></h3><p><code>$(file op filename[,text])</code></p>
+<p>向文件执行文本的输入输出.</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">TEXT := <span class="string">&quot;hello world&quot;</span></span><br><span class="line">RESULT := \$&#123;file &gt; test,$&#123;TEXT&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>前目录下存在test文件时，<code>&quot;hello world&quot;</code>被写入到test中，当不存在test文件时，文件被创建且同时写入<code>&quot;hello world&quot;</code>.</p>
 <h2><span id="3-3-qi-ta-han-shu">3.3 其他函数</span><a href="#3-3-qi-ta-han-shu" class="header-anchor">#</a></h2><h3><span id="3-3-1-foreach">3.3.1 <code>foreach</code></span><a href="#3-3-1-foreach" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">foreach</span> var,list,text)</span></span><br></pre></td></tr></table></figure>
 
 <p>比如：</p>
@@ -333,6 +359,34 @@
 <p><img src="/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/5.png" alt="img"></p>
 <p>将所有的信息都输出到同一个文件中：</p>
 <figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make xxx &gt; build_output_all.txt 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-3-3-word">3.3.3 <code>word</code></span><a href="#3-3-3-word" class="header-anchor">#</a></h3><p><code>$(word n,text)</code></p>
+<p>返回text列表中第n个元素.</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">TEXT := foo.c foo.h bar.c</span><br><span class="line">RESULT := $&#123;word 2,$&#123;TEXT&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果：<code>foo.h</code></p>
+<h3><span id="3-3-4wordlist">3.3.4<code>wordlist</code></span><a href="#3-3-4wordlist" class="header-anchor">#</a></h3><p><code>$(wordlist s,e,text)</code></p>
+<p>返回text列表中指定的由s(start)开始由e(end)结尾的元素集合.</p>
+<h3><span id="3-3-5-words">3.3.5 <code>words</code></span><a href="#3-3-5-words" class="header-anchor">#</a></h3><p><code>$(words text)</code></p>
+<p>返回text列表中的元素数量。</p>
+<h3><span id="3-3-6-firstword-lastword">3.3.6 <code>firstword/lastword </code></span><a href="#3-3-6-firstword-lastword" class="header-anchor">#</a></h3><p><code>$(firstword names…) \$(lastword names…)</code></p>
+<p>返回names列表中的第一个、最后一个元素.</p>
+<h3><span id="3-3-7-call">3.3.7  <code>call</code></span><a href="#3-3-7-call" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">func = $1.$2</span><br><span class="line">foo = <span class="variable">$(<span class="built_in">call</span> func,a,b)</span></span><br><span class="line"><span class="section">all:</span></span><br><span class="line">    @echo <span class="variable">$(foo)</span></span><br></pre></td></tr></table></figure>
+
+<p>结果：<code>a.b</code>, 子函数调用，数的参数会被赋值给临时参数·&#x3D;<code>\$1,\$2,\$0</code>则代表函数名本身.</p>
+<h2><span id="3-4-vpath-xuan-xiang">3.4 VPATH选项</span><a href="#3-4-vpath-xuan-xiang" class="header-anchor">#</a></h2><p>VPATH中添加的目录，即使是文件处于其他目录，我们也可以像操作当前目录一样操作其他目录的文件，例如：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">VPATH += src</span><br><span class="line"><span class="section">all:foo.c</span></span><br><span class="line">cc <span class="variable">$^</span> -o <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+
+<p>等效于：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">all:src/foo.c</span></span><br><span class="line">cc <span class="variable">$^</span> -o <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+
+<p>但是写成下面这样是不行的：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">VPATH += src</span><br><span class="line"><span class="section">all:</span></span><br><span class="line">cc foo.c -o <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+
+<p>这是因为：<code>VPATH</code>是<code>makefile中</code>的语法规则，而命令部分是由<code>shell</code>解析，所以<code>shell</code>并不会解析<code>VPATH</code>。</p>
+<h2><span id="3-5-make-huan-jing-bian-liang">3.5 make环境变量</span><a href="#3-5-make-huan-jing-bian-liang" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">AR 打包程序，默认值为ar，对目标文件进行打包，封装静态库</span><br><span class="line">AS 汇编程序，默认值为as，将汇编指令编译成机器指令</span><br><span class="line">CC c编译器，默认值为cc，通常情况下，cc是一个指向gcc的链接，负责将c程序编译成汇编程序。</span><br><span class="line">CXX c++编译器，默认值为g++</span><br><span class="line">CPP 预处理器，默认值为 &quot;$(CC) -E&quot;，注意这里的CPP不是C++，而是预处理器。</span><br><span class="line">RM 删除文件，默认值为 &quot;rm -f&quot;，-f表示强制删除</span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-6-make-bian-yi-xuan-xiang">3.6 make编译选项</span><a href="#3-6-make-bian-yi-xuan-xiang" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ARFLAGS 指定$(AR)运行时的参数，默认值为&quot;ar&quot;</span><br><span class="line">ASFLAGS 指定$(AS)运行时的参数，无默认值</span><br><span class="line">CFLAGS 指定$(CC)运行时的参数，无默认值</span><br><span class="line">CXXFLAGS 指定$(CXX)运行时的参数，无默认值</span><br><span class="line">CPPFLAGS 指定$(CPP)运行时的参数，无默认值，注意这里的CPP不是C++，而是预处理器</span><br><span class="line">LDFLAGS 指定ld链接器运行时的参数，无默认值</span><br><span class="line">LDLIBS 指定ld链接器运行时的链接库参数，无默认值。</span><br><span class="line"></span><br><span class="line">make --debug</span><br><span class="line">	输出每一步输出的详细流程，对于调试时非常方便。</span><br></pre></td></tr></table></figure>
 
 <h1><span id="4-tong-yong-xing-makefile">4 通用型<code>makefile</code></span><a href="#4-tong-yong-xing-makefile" class="header-anchor">#</a></h1><p>本<code>makefile</code>是参考linux内核的<code>makefile</code>框架改编简化，大家可以参考Linux内核中<code>built-in.o</code>的产生过程来进一步了解该流程。</p>
 <p>顶层目录下，存在<code>Makefile</code>和<code>Makefile.build</code>两个文件。这两个文件非常重要，make命令能递归查找每个子目录，就是这2个<code>Makefile</code>文件的功劳。</p>
@@ -458,9 +512,9 @@ make[1]: Leaving directory '/media/cvitek/robin.lee/my_test/study/weidongshan/im
 gcc -o test built-in.o -lpthread -lfreetype -lm
 test has been built!
 </code></pre></details>
-### 4.3.3 编译入口
 
-<p>首先编译目标<code>start_recursive_build</code>， 列出目标、要进行编译的子目录模块，进入当前Makefile所在目录，按照顶层<code>Makefile.build</code>的规则编译，打印如下：</p>
+
+<h3><span id="4-3-3-bian-yi-ru-kou">4.3.3 编译入口</span><a href="#4-3-3-bian-yi-ru-kou" class="header-anchor">#</a></h3><p>首先编译目标<code>start_recursive_build</code>， 列出目标、要进行编译的子目录模块，进入当前Makefile所在目录，按照顶层<code>Makefile.build</code>的规则编译，打印如下：</p>
 <figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">start_recursive_build</span><br><span class="line">obj-y = display/ ui/ page/ config/ business/</span><br></pre></td></tr></table></figure>
 
 <h3><span id="4-3-4-bian-yi-build">4.3.4 编译<code>__build</code></span><a href="#4-3-4-bian-yi-build" class="header-anchor">#</a></h3><p>执行顶层<code>Makefile.build</code>，执行目标<code>__build</code>，执行<code>echo_obj</code>， 打印:</p>
