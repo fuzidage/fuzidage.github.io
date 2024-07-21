@@ -6,12 +6,12 @@
   
   <title>Linux内核启动流程 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="1 链接脚本vmlinux.lds 2 Linux 内核启动流程 2.0 Linux kernel启动流程概述 2.1 Linux 内核入口 stext 2.1.1 __mmap_switched 2.1.1.1 start_kernel 2.1.1.1.1 setup_arch 2.1.1.1.2 setup_command_line、parse_early_param以及parse_">
+  <meta name="description" content="1 链接脚本vmlinux.lds 2 Linux 内核启动流程 2.0 Linux kernel启动流程概述 2.1 Linux 内核入口 stext 2.1.0 __create_page_tables 2.1.1 __enable_mmu 2.1.1.1 __mmap_switched 2.1.1.1.1 start_kernel 2.1.1.1.1.1 setup_arch 2.">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux内核启动流程">
 <meta property="og:url" content="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="1 链接脚本vmlinux.lds 2 Linux 内核启动流程 2.0 Linux kernel启动流程概述 2.1 Linux 内核入口 stext 2.1.1 __mmap_switched 2.1.1.1 start_kernel 2.1.1.1.1 setup_arch 2.1.1.1.2 setup_command_line、parse_early_param以及parse_">
+<meta property="og:description" content="1 链接脚本vmlinux.lds 2 Linux 内核启动流程 2.0 Linux kernel启动流程概述 2.1 Linux 内核入口 stext 2.1.0 __create_page_tables 2.1.1 __enable_mmu 2.1.1.1 __mmap_switched 2.1.1.1.1 start_kernel 2.1.1.1.1.1 setup_arch 2.">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/0.png">
 <meta property="og:image" content="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/1.png">
@@ -29,7 +29,7 @@
 <meta property="og:image" content="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/11.png">
 <meta property="og:image" content="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/12.png">
 <meta property="article:published_time" content="2024-07-20T06:13:25.000Z">
-<meta property="article:modified_time" content="2024-07-20T08:20:01.430Z">
+<meta property="article:modified_time" content="2024-07-21T07:56:23.054Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="linux系统构建">
 <meta property="article:tag" content="linux内核">
@@ -120,11 +120,15 @@
 <li><a href="#2-linux-nei-he-qi-dong-liu-cheng">2 Linux 内核启动流程</a><ul>
 <li><a href="#2-0-linux-kernel-qi-dong-liu-cheng-gai-shu">2.0 Linux kernel启动流程概述</a></li>
 <li><a href="#2-1-linux-nei-he-ru-kou-stext">2.1 Linux 内核入口 stext</a><ul>
-<li><a href="#2-1-1-mmap-switched">2.1.1 <code>__mmap_switched</code></a><ul>
-<li><a href="#2-1-1-1-start-kernel">2.1.1.1 start_kernel</a><ul>
-<li><a href="#2-1-1-1-1-setup-arch">2.1.1.1.1 setup_arch</a></li>
-<li><a href="#2-1-1-1-2-setup-command-line-parse-early-param-yi-ji-parse-args">2.1.1.1.2 setup_command_line、parse_early_param以及parse_args</a></li>
-<li><a href="#2-1-1-1-n-reset-init">2.1.1.1.n reset_init</a></li>
+<li><a href="#2-1-0-create-page-tables">2.1.0 <code>__create_page_tables</code></a></li>
+<li><a href="#2-1-1-enable-mmu">2.1.1 <code>__enable_mmu</code></a><ul>
+<li><a href="#2-1-1-1-mmap-switched">2.1.1.1 <code>__mmap_switched</code></a><ul>
+<li><a href="#2-1-1-1-1-start-kernel">2.1.1.1.1 start_kernel</a><ul>
+<li><a href="#2-1-1-1-1-1-setup-arch">2.1.1.1.1.1 setup_arch</a></li>
+<li><a href="#2-1-1-1-1-2-setup-command-line-parse-early-param-yi-ji-parse-args">2.1.1.1.1.2 setup_command_line、parse_early_param以及parse_args</a></li>
+<li><a href="#2-1-1-1-1-n-reset-init">2.1.1.1.1.n reset_init</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -178,9 +182,15 @@
 
 <p>每种处理器都抽象为一个 proc_info_list 结构体，每种处理器都对应一个procinfo。因此可以通过处理器 ID 来找到对应的 procinfo 结构，<code>__lookup_processor_type </code>函数找到对应处理器的 procinfo 以后会将其保存到 r5 寄存器中。</p>
 <p>第121行，函数<code>__vet_atags </code>验证 atags 或设备树(dtb)的合法性。函数<code>__vet_atags </code>定义在文件 <code>arch/arm/kernel/head-common.S </code>中。<br>第128行，调用函数<code>__create_page_tables </code>创建页表。<br>第 137 行，将函数<code>__mmap_switched</code> 的地址保存到 r13 寄存器中。<code>__mmap_switched </code>定义在文件 <code>arch/arm/kernel/head-common.S</code>，<code>__mmap_switched</code> 最终会调用 start_kernel 函数。<br>第 144 行 ， 调 用 <code>__enable_mmu </code>函 数 使 能 MMU ，<code>__enable_mmu</code>定 义 在 文 件<code>arch/arm/kernel/head.S </code>中。<code>__enable_mmu</code> 最终会通过调用<code>__turn_mmu_on </code>来打开 MMU，<code>__turn_mmu_on </code>最后会执行 r13 里面保存的<code>__mmap_switched </code>函数。</p>
-<h3><span id="2-1-1-mmap-switched">2.1.1  <code>__mmap_switched</code></span><a href="#2-1-1-mmap-switched" class="header-anchor">#</a></h3><p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/2.png" alt="image"></p>
-<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/3.png" alt="image"><br>前面讲到<code>__enable_mmu</code>会调用<code>__mmap_switched </code>函数（通过调用<code>__turn_mmu_on</code> 再调用r13）。现在具体分析它：<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/4.png" alt="image"><br>可以看到<code>__mmap_switched</code>主要就是做clear bss,然后保存处理器ID, 序列号，最终跳转start_kernel函数。</p>
-<h4><span id="2-1-1-1-start-kernel">2.1.1.1  start_kernel</span><a href="#2-1-1-1-start-kernel" class="header-anchor">#</a></h4><p>start_kernel会调用大量的子函数完成linux启动前的一些初始化工作，start_kernel 函数里面调用的子函数太多，而这些子函数又很复杂。我们简单的来看一下一些重要的子函数。精简并添加注释后的 start_kernel 函数内容如下：</p>
+<h3><span id="2-1-0-create-page-tables">2.1.0 <code>__create_page_tables</code></span><a href="#2-1-0-create-page-tables" class="header-anchor">#</a></h3><ul>
+<li>内核所在物理内存块的初始地址，保存在寄存器 r8 中。</li>
+<li>内核代码相对于初始地址的偏移值，是在程序编译前就确定的一个宏：TEXT_OFFSET，arm32 中通常是 0x8000，也就是偏移地址为 32 K，前面保留的 32K 内存就是用来存放页表。</li>
+</ul>
+<p>在建立页表之前，目前所处的相关寄存器环境为：r8 &#x3D; phys_offset, r9 &#x3D; cpuid, r10 &#x3D; procinfo.</p>
+<h3><span id="2-1-1-enable-mmu">2.1.1  <code>__enable_mmu</code></span><a href="#2-1-1-enable-mmu" class="header-anchor">#</a></h3><p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/2.png" alt="image"></p>
+<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/3.png" alt="image"></p>
+<h4><span id="2-1-1-1-mmap-switched">2.1.1.1 <code>__mmap_switched</code></span><a href="#2-1-1-1-mmap-switched" class="header-anchor">#</a></h4><p>前面讲到<code>__enable_mmu</code>会调用<code>__mmap_switched </code>函数（通过调用<code>__turn_mmu_on</code> 再调用r13）。现在具体分析它：<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/4.png" alt="image"><br>可以看到<code>__mmap_switched</code>主要就是做clear bss,然后保存处理器ID, 序列号，最终跳转start_kernel函数。</p>
+<h5><span id="2-1-1-1-1-start-kernel">2.1.1.1.1  start_kernel</span><a href="#2-1-1-1-1-start-kernel" class="header-anchor">#</a></h5><p>start_kernel会调用大量的子函数完成linux启动前的一些初始化工作，start_kernel 函数里面调用的子函数太多，而这些子函数又很复杂。我们简单的来看一下一些重要的子函数。精简并添加注释后的 start_kernel 函数内容如下：</p>
 <details>
 <summary>init/main/start_kenel函数</summary>
 
@@ -199,15 +209,13 @@
 <p>（6）虚拟文件系统</p>
 <p>（7）文件系统</p>
 <p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/4.1.png" alt="image-20240720151715291"></p>
-<h5><span id="2-1-1-1-1-setup-arch">2.1.1.1.1 setup_arch</span><a href="#2-1-1-1-1-setup-arch" class="header-anchor">#</a></h5><p>内核架构相关的初始化函数, 包含了处理器相关参数的初始化、内核启动参数（tagged list）的获取和前期处理、内存子系统的早期初始化。</p>
+<h6><span id="2-1-1-1-1-1-setup-arch">2.1.1.1.1.1 setup_arch</span><a href="#2-1-1-1-1-1-setup-arch" class="header-anchor">#</a></h6><p>内核架构相关的初始化函数, 包含了处理器相关参数的初始化、内核启动参数（tagged list）的获取和前期处理、内存子系统的早期初始化。</p>
 <p><code>setup_arch(&amp;command_line);</code></p>
 <p>若uboot中bootargs的值为空，<code>command_line = default_command_line</code>，即为内核中的默认命令行参数，其值在<code>.config</code>文件中配置，对应<code>CONFIG_CMDLINE</code>配置项。</p>
-<h5><span id="2-1-1-1-2-setup-command-line-parse-early-param-yi-ji-parse-args">2.1.1.1.2 setup_command_line、parse_early_param以及parse_args</span><a href="#2-1-1-1-2-setup-command-line-parse-early-param-yi-ji-parse-args" class="header-anchor">#</a></h5><p>完成命令行参数的解析、保存。譬如：</p>
+<h6><span id="2-1-1-1-1-2-setup-command-line-parse-early-param-yi-ji-parse-args">2.1.1.1.1.2 setup_command_line、parse_early_param以及parse_args</span><a href="#2-1-1-1-1-2-setup-command-line-parse-early-param-yi-ji-parse-args" class="header-anchor">#</a></h6><p>完成命令行参数的解析、保存。譬如：</p>
 <figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cmdline = console=ttySAC2,115200 root=/dev/mmcblk0p2 rw</span><br><span class="line">init=/linuxrc rootfstype=ext3 <span class="comment">#解析为一下四个参数：</span></span><br><span class="line">console=ttySAC2,115200 <span class="comment">#指定控制台的串口设备号，及其波特率</span></span><br><span class="line">root=/dev/mmcblk0p2 rw <span class="comment">#指定根文件系统rootfs的路径</span></span><br><span class="line">init=/linuxrc <span class="comment">#指定第一个用户进程init的路径rootf stype=ext3</span></span><br></pre></td></tr></table></figure>
 
-
-
-<h5><span id="2-1-1-1-n-reset-init">2.1.1.1.n reset_init</span><a href="#2-1-1-1-n-reset-init" class="header-anchor">#</a></h5><p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/4.2.png" alt="image-20240720161109653"></p>
+<h6><span id="2-1-1-1-1-n-reset-init">2.1.1.1.1.n reset_init</span><a href="#2-1-1-1-1-n-reset-init" class="header-anchor">#</a></h6><p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/4.2.png" alt="image-20240720161109653"></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1）调用kernel_thread函数启动了2个内核线程，分别是：kernel_init和kthreadd。</span><br><span class="line">    kernel_init线程中调用prepare_namespace函数挂载根文件系统rootfs；</span><br><span class="line">    然后调用init_post函数，执行根文件系统rootfs下的第一个用户进程init。</span><br><span class="line">    用户进程有4个备选方案，若command_line中init的路径错误，则会执行备用方案。</span><br><span class="line">    第一备用：/sbin/init，第二备用：/etc/init，第三备用：/bin/init，第四备用：/bin/sh。</span><br><span class="line"></span><br><span class="line">2）调用schedule函数开启内核调度系统；</span><br><span class="line">3）调用cpu_idle函数，启动空闲进程idle，完成内核启动。</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> noinline <span class="type">void</span> __init_refok <span class="title function_">rest_init</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> pid;</span><br><span class="line"></span><br><span class="line">	rcu_scheduler_starting();</span><br><span class="line">	smpboot_thread_init();</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * We need to spawn init first so that it obtains pid 1, however</span></span><br><span class="line"><span class="comment">	 * the init task will end up wanting to create kthreads, which, if</span></span><br><span class="line"><span class="comment">	 * we schedule it before we create kthreadd, will OOPS.</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	kernel_thread(kernel_init, <span class="literal">NULL</span>, CLONE_FS);</span><br><span class="line">	numa_default_policy();</span><br><span class="line">	pid = kernel_thread(kthreadd, <span class="literal">NULL</span>, CLONE_FS | CLONE_FILES);</span><br><span class="line">	rcu_read_lock();</span><br><span class="line">	kthreadd_task = find_task_by_pid_ns(pid, &amp;init_pid_ns);</span><br><span class="line">	rcu_read_unlock();</span><br><span class="line">	complete(&amp;kthreadd_done);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * The boot idle thread must execute schedule()</span></span><br><span class="line"><span class="comment">	 * at least once to get things moving:</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	init_idle_bootup_task(current);</span><br><span class="line">	schedule_preempt_disabled();</span><br><span class="line">	<span class="comment">/* Call into cpu_idle with preempt disabled */</span></span><br><span class="line">	cpu_startup_entry(CPUHP_ONLINE);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -345,6 +353,10 @@
       <ul>
         
           <li>
+            <a href="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/">Linux内核-kmalloc与vmalloc及CMA内存</a>
+          </li>
+        
+          <li>
             <a href="/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/">Linux内核-并发与同步</a>
           </li>
         
@@ -358,10 +370,6 @@
         
           <li>
             <a href="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/">Linux内核Makefile编译过程</a>
-          </li>
-        
-          <li>
-            <a href="/2024/07/18/Linux%E5%86%85%E6%A0%B8%E9%A1%B6%E5%B1%82Makefile%E8%AF%A6%E8%A7%A3/">Linux内核顶层Makefile详解</a>
           </li>
         
       </ul>
