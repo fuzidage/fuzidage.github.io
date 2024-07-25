@@ -69,6 +69,357 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-markdown语法教程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/" class="article-date">
+  <time class="dt-published" datetime="2024-05-26T09:24:38.000Z" itemprop="datePublished">2024-05-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/">markdown语法教程</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-duo-ji-biao-ti-mu-lu-jie-gou">1 多级标题目录结构</a></li>
+<li><a href="#yi-ji-biao-ti">一级标题</a><ul>
+<li><a href="#er-ji-biao-ti">二级标题</a><ul>
+<li><a href="#san-ji-biao-ti">三级标题</a><ul>
+<li><a href="#si-ji-biao-ti">四级标题</a><ul>
+<li><a href="#wu-ji-biao-ti">五级标题</a><ul>
+<li><a href="#liu-ji-biao-ti">六级标题</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-duan-luo">2 段落</a><ul>
+<li><a href="#2-1-huan-xing">2.1 换行</a></li>
+</ul>
+</li>
+<li><a href="#3-zi-ti">3 字体</a></li>
+<li><a href="#4-zi-ti-yan-se-da-xiao">4 字体颜色,大小</a></li>
+<li><a href="#5-zi-ti-bei-jing-yan-se">5 字体背景颜色</a></li>
+<li><a href="#5-xia-hua-xian">5 下划线</a></li>
+<li><a href="#6-lie-biao-xiang">6 列表项</a></li>
+<li><a href="#7-dai-ma-kuai-yu-yu-fa-gao-liang">7 代码块与语法高亮</a><ul>
+<li><a href="#7-1-xing-nei-dai-ma">7.1 行内代码</a></li>
+<li><a href="#7-2-kuai-dai-ma">7.2 块代码</a></li>
+</ul>
+</li>
+<li><a href="#8-dai-ma-zhe-die">8 代码折叠</a></li>
+<li><a href="#9-cha-ru-lian-jie">9 插入链接</a><ul>
+<li><a href="#9-1-zi-dong-lian-jie">9.1 自动链接</a></li>
+</ul>
+</li>
+<li><a href="#10-tian-jia-tu-pian">10 添加图片</a></li>
+<li><a href="#11-biao-ge">11 表格</a></li>
+<li><a href="#12-zhuan-yi-zi-fu">12 转义字符</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-duo-ji-biao-ti-mu-lu-jie-gou">1 多级标题目录结构</span><a href="#1-duo-ji-biao-ti-mu-lu-jie-gou" class="header-anchor">#</a></h1><pre><code># 一级标题
+## 二级标题
+### 三级标题
+#### 四级标题
+##### 五级标题
+###### 六级标题
+</code></pre>
+<p>效果如下：</p>
+<h1><span id="yi-ji-biao-ti">一级标题</span><a href="#yi-ji-biao-ti" class="header-anchor">#</a></h1><h2><span id="er-ji-biao-ti">二级标题</span><a href="#er-ji-biao-ti" class="header-anchor">#</a></h2><h3><span id="san-ji-biao-ti">三级标题</span><a href="#san-ji-biao-ti" class="header-anchor">#</a></h3><h4><span id="si-ji-biao-ti">四级标题</span><a href="#si-ji-biao-ti" class="header-anchor">#</a></h4><h5><span id="wu-ji-biao-ti">五级标题</span><a href="#wu-ji-biao-ti" class="header-anchor">#</a></h5><h6><span id="liu-ji-biao-ti">六级标题</span><a href="#liu-ji-biao-ti" class="header-anchor">#</a></h6><h1><span id="2-duan-luo">2 段落</span><a href="#2-duan-luo" class="header-anchor">#</a></h1><h2><span id="2-1-huan-xing">2.1 换行</span><a href="#2-1-huan-xing" class="header-anchor">#</a></h2><p>Markdown段落的换行是使用两个以上空格加上回车，当然也可以在段落后面使用一个空行来表示重新开始一个段落。</p>
+<h1><span id="3-zi-ti">3 字体</span><a href="#3-zi-ti" class="header-anchor">#</a></h1><pre><code>*斜体*
+**粗体**
+***加粗斜体***
+
+&lt;font face=&quot;黑体&quot;&gt;我是黑体字&lt;/font&gt;
+&lt;font face=&quot;微软雅黑&quot;&gt;我是微软雅黑&lt;/font&gt;
+&lt;font face=&quot;STCAIYUN&quot;&gt;我是华文彩云&lt;/font&gt;
+</code></pre>
+<p>效果：</p>
+<p><em>斜体</em><br><strong>粗体</strong><br><em><strong>加粗斜体</strong></em></p>
+<p><font face="黑体">我是黑体字</font><br><font face="微软雅黑">我是微软雅黑</font><br><font face="STCAIYUN">我是华文彩云</font></p>
+<h1><span id="4-zi-ti-yan-se-da-xiao">4 字体颜色,大小</span><a href="#4-zi-ti-yan-se-da-xiao" class="header-anchor">#</a></h1><pre><code>&lt;font color=#0099ff size=12 face=&quot;黑体&quot;&gt;黑体&lt;/font&gt;
+&lt;font color=gray size=5&gt;gray&lt;/font&gt;
+&lt;font color=#00ffff size=3&gt;null&lt;/font&gt;
+</code></pre>
+<p>效果：</p>
+<p><font color="#0099ff" size="12" face="黑体">黑体</font><br><font color="gray" size="5">gray</font><br><font color="#00ffff" size="3">null</font></p>
+<h1><span id="5-zi-ti-bei-jing-yan-se">5 字体背景颜色</span><a href="#5-zi-ti-bei-jing-yan-se" class="header-anchor">#</a></h1><pre><code>&lt;table&gt;&lt;td bgcolor=pink&gt; 
+背景色是pink &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=LightGoldenRodYellow&gt; 
+LightGoldenRodYellow &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=PeachPuff&gt; 
+PeachPuff &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=PapayaWhip&gt; 
+PapayaWhip &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=PaleGreen&gt; 
+PaleGreen &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=PaleGoldenRod&gt; 
+PaleGoldenRod &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=MistyRose&gt; 
+MistyRose &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=Linen&gt; 
+Linen &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=LightPink&gt; 
+LightPink &lt;/table&gt;
+
+&lt;table&gt;&lt;td bgcolor=BurlyWood&gt; 
+BurlyWood &lt;/table&gt;
+</code></pre>
+<p>效果：</p>
+<table><td bgcolor="pink"> 
+背景色是pink </td></table>
+
+<table><td bgcolor="LightGoldenRodYellow"> 
+LightGoldenRodYellow </td></table>
+
+<table><td bgcolor="PeachPuff"> 
+PeachPuff </td></table>
+
+<table><td bgcolor="PapayaWhip"> 
+PapayaWhip </td></table>
+
+<table><td bgcolor="PaleGreen"> 
+PaleGreen </td></table>
+
+<table><td bgcolor="PaleGoldenRod"> 
+PaleGoldenRod </td></table>
+
+<table><td bgcolor="MistyRose"> 
+MistyRose </td></table>
+
+<table><td bgcolor="Linen"> 
+Linen </td></table>
+
+<table><td bgcolor="LightPink"> 
+LightPink </td></table>
+
+<table><td bgcolor="BurlyWood"> 
+BurlyWood </td></table>
+
+
+<h1><span id="5-xia-hua-xian">5 下划线</span><a href="#5-xia-hua-xian" class="header-anchor">#</a></h1><p>写法：<br>    <code>&lt;u&gt;下划线&lt;/u&gt;</code></p>
+<p>效果如下：<br><u>下划线</u></p>
+<h1><span id="6-lie-biao-xiang">6 列表项</span><a href="#6-lie-biao-xiang" class="header-anchor">#</a></h1><p>无序列表使用星号(*)、加号(+)或是减号(-)作为列表标记：</p>
+<pre><code>* 第一项
+* 第二项
+* 第三项
+</code></pre>
+<p>显示效果：  </p>
+<ul>
+<li>第一项</li>
+<li>第二项</li>
+<li>第三项</li>
+</ul>
+<p>有序列表使用数字并加上 <code>.</code> 号来表示： 	<br>    1. 第一项<br>        1. 小一项<br>        2. 小二项<br>    2. 第二项<br>    3. 第三项<br>显示效果： </p>
+<ol>
+<li>第一项<ol>
+<li>小一项</li>
+<li>小二项</li>
+</ol>
+</li>
+<li>第二项</li>
+<li>第三项</li>
+</ol>
+<h1><span id="7-dai-ma-kuai-yu-yu-fa-gao-liang">7 代码块与语法高亮</span><a href="#7-dai-ma-kuai-yu-yu-fa-gao-liang" class="header-anchor">#</a></h1><h2><span id="7-1-xing-nei-dai-ma">7.1 行内代码</span><a href="#7-1-xing-nei-dai-ma" class="header-anchor">#</a></h2><p>用反引号 &#96;&#96; 来标记或插入代码区段</p>
+<p>效果：<br><code>int main(void)</code></p>
+<h2><span id="7-2-kuai-dai-ma">7.2 块代码</span><a href="#7-2-kuai-dai-ma" class="header-anchor">#</a></h2><p>用tab键或者用&#96;&#96;&#96;</p>
+<p>效果：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(vpod)</span> &#123;</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;hello world\n&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="8-dai-ma-zhe-die">8 代码折叠</span><a href="#8-dai-ma-zhe-die" class="header-anchor">#</a></h1><p>写法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;details&gt;</span><br><span class="line">&lt;summary&gt;点击展开代码&lt;/summary&gt;</span><br><span class="line">&lt;pre&gt;&lt;code&gt;</span><br><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">int main(int argc, char **argv)</span><br><span class="line">&#123;</span><br><span class="line">    printf(&quot;hello world\n&quot;);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/code&gt;&lt;/pre&gt;</span><br><span class="line">&lt;/details&gt;</span><br></pre></td></tr></table></figure>
+
+<p>效果如下：</p>
+<details>
+<summary>点击展开代码</summary>
+<pre><code>
+    #include &lt;stdio.h&gt;
+    int main(int argc, char **argv)
+    &#123;
+        printf("hello world\n");
+        return 0;
+    &#125;
+
+<p></p></code></pre><p></p>
+</details>
+
+<h1><span id="9-cha-ru-lian-jie">9 插入链接</span><a href="#9-cha-ru-lian-jie" class="header-anchor">#</a></h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">用:</span><br><span class="line">[fuzidage的博客](https://www.cnblogs.com/fuzidage/)</span><br></pre></td></tr></table></figure>
+<p>效果：</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/">fuzidage的博客</a></p>
+<h2><span id="9-1-zi-dong-lian-jie">9.1 自动链接</span><a href="#9-1-zi-dong-lian-jie" class="header-anchor">#</a></h2><p>只要是用&lt;&gt;包起来， Markdown 就会自动把它转成链接：</p>
+<p>效果：<br><a target="_blank" rel="noopener" href="https://github.com/fuzidage">https://github.com/fuzidage</a></p>
+<h1><span id="10-tian-jia-tu-pian">10 添加图片</span><a href="#10-tian-jia-tu-pian" class="header-anchor">#</a></h1><pre><code>写法：![](https://img2018.cnblogs.com/blog/1876680/201912/1876680-20191214155002138-1798053565.png)
+当然如果是本地图片写法：
+![](./markdown语法教程/1.png)
+</code></pre>
+<p>引用网络效果：</p>
+<p><img src="https://img2018.cnblogs.com/blog/1876680/201912/1876680-20191214155002138-1798053565.png"></p>
+<p>引用本地图片效果：<br><img src="/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/1.png" alt="image-20240526174126727"></p>
+<h1><span id="11-biao-ge">11 表格</span><a href="#11-biao-ge" class="header-anchor">#</a></h1><p>写法：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">| 左对齐 | 右对齐 | 居中对齐 |</span><br><span class="line">| :-----| ----: | :----:|</span><br><span class="line">| 单元格 | 单元格 | 单元格 |</span><br><span class="line">| 单元格 | 单元格 | 单元格 |</span><br></pre></td></tr></table></figure>
+<p>效果：</p>
+<table>
+<thead>
+<tr>
+<th align="left">左对齐</th>
+<th align="right">右对齐</th>
+<th align="center">居中对齐</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">单元格</td>
+<td align="right">单元格</td>
+<td align="center">单元格</td>
+</tr>
+<tr>
+<td align="left">单元格</td>
+<td align="right">单元格</td>
+<td align="center">单元格</td>
+</tr>
+</tbody></table>
+<h1><span id="12-zhuan-yi-zi-fu">12 转义字符</span><a href="#12-zhuan-yi-zi-fu" class="header-anchor">#</a></h1><table>
+<thead>
+<tr>
+<th>显示结果</th>
+<th>描述</th>
+<th>输入</th>
+<th>实体编号</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td>空格</td>
+<td>&amp;nbsp；</td>
+<td>&amp;#160；</td>
+</tr>
+<tr>
+<td>&lt;</td>
+<td>小于号</td>
+<td>&amp;lt；</td>
+<td>&amp;#60；</td>
+</tr>
+<tr>
+<td>&gt;</td>
+<td>大于号</td>
+<td>&amp;gt；</td>
+<td>&amp;#62；</td>
+</tr>
+<tr>
+<td>&amp;</td>
+<td>和号</td>
+<td>&amp;amp；</td>
+<td>&amp;#38；</td>
+</tr>
+<tr>
+<td>“</td>
+<td>引号</td>
+<td>&amp;quot；</td>
+<td>&amp;#34；</td>
+</tr>
+<tr>
+<td>‘</td>
+<td>撇号</td>
+<td>&amp;apos；</td>
+<td>(IE不支持)	&amp;#39；</td>
+</tr>
+<tr>
+<td>￠</td>
+<td>分</td>
+<td>&amp;cent；</td>
+<td>&amp;#162；</td>
+</tr>
+<tr>
+<td>£</td>
+<td>镑</td>
+<td>&amp;pound；</td>
+<td>&amp;#163；</td>
+</tr>
+<tr>
+<td>¥</td>
+<td>日圆</td>
+<td>&amp;yen；</td>
+<td>&amp;#165；</td>
+</tr>
+<tr>
+<td>§</td>
+<td>节</td>
+<td>&amp;sect；</td>
+<td>&amp;#167；</td>
+</tr>
+<tr>
+<td>©</td>
+<td>版权</td>
+<td>&amp;copy；</td>
+<td>&amp;#169；</td>
+</tr>
+<tr>
+<td>®</td>
+<td>注册商标</td>
+<td>&amp;reg；</td>
+<td>&amp;#174；</td>
+</tr>
+<tr>
+<td>×</td>
+<td>乘号</td>
+<td>&amp;times；</td>
+<td>&amp;#215；</td>
+</tr>
+<tr>
+<td>÷</td>
+<td>除号</td>
+<td>&amp;divide；</td>
+<td>&amp;#247；</td>
+</tr>
+</tbody></table>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/" data-id="clyylnk8n00177wufhpuw5rwg" data-title="markdown语法教程" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-I2c-SMBus协议和I2C-Tools" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/05/26/I2c-SMBus%E5%8D%8F%E8%AE%AE%E5%92%8CI2C-Tools/" class="article-date">
@@ -297,7 +648,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/26/I2c-SMBus%E5%8D%8F%E8%AE%AE%E5%92%8CI2C-Tools/" data-id="clyvr7idb0003wkuf1595at5i" data-title="I2C-SMBus协议和I2C Tool" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/26/I2c-SMBus%E5%8D%8F%E8%AE%AE%E5%92%8CI2C-Tools/" data-id="clyylnk8d00017wuf57ffgv8m" data-title="I2C-SMBus协议和I2C Tool" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -497,7 +848,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/25/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E4%B8%8Efreetype%E7%A7%BB%E6%A4%8D/" data-id="clyvr7idq002ywkuf93qrd2mj" data-title="字符编码与freetype移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/25/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E4%B8%8Efreetype%E7%A7%BB%E6%A4%8D/" data-id="clyylnk92006c7wuf0r5g66wb" data-title="字符编码与freetype移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -648,7 +999,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/" data-id="clyvr7idi0010wkufgrud63k9" data-title="ini_parse配置解析功能移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/" data-id="clyylnk8l000v7wufess612kt" data-title="ini_parse配置解析功能移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -733,11 +1084,11 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/" data-id="clyvr7idy0068wkufgawmhy9z" data-title="通用裸机-传感器" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/" data-id="clyylnk92006d7wuf5igoa12z" data-title="通用裸机-传感器" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li></ul>
 
     </footer>
   </div>
@@ -1166,7 +1517,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/03/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-arm%E6%B1%87%E7%BC%96/" data-id="clyvr7idy006awkuf62cee1b6" data-title="通用裸机-arm汇编" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/03/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-arm%E6%B1%87%E7%BC%96/" data-id="clyylnk92006f7wuf4bhr2ucx" data-title="通用裸机-arm汇编" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1321,11 +1672,11 @@ CPHA:表示相位，即第一个还是第二个时钟沿采样数据，0为第�
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/02/imx6ull%E8%A3%B8%E6%9C%BA-SPI/" data-id="clyvr7idi000zwkufert47c32" data-title="imx6ull裸机-SPI" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/02/imx6ull%E8%A3%B8%E6%9C%BA-SPI/" data-id="clyylnk8l000q7wufdk1sbqus" data-title="imx6ull裸机-SPI" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
 
     </footer>
   </div>
@@ -1428,11 +1779,11 @@ CPHA:表示相位，即第一个还是第二个时钟沿采样数据，0为第�
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/02/imx6ull%E8%A3%B8%E6%9C%BA-%E5%AE%9A%E6%97%B6%E5%99%A8/" data-id="clyvr7idi0013wkufclk50gjd" data-title="imx6ull裸机-定时器" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/02/imx6ull%E8%A3%B8%E6%9C%BA-%E5%AE%9A%E6%97%B6%E5%99%A8/" data-id="clyylnk8m000w7wuf8zv12yft" data-title="imx6ull裸机-定时器" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li></ul>
 
     </footer>
   </div>
@@ -1511,11 +1862,11 @@ CPHA:表示相位，即第一个还是第二个时钟沿采样数据，0为第�
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/" data-id="clyvr7idh000wwkufca1k4bop" data-title="imx6ull裸机-ADC" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/" data-id="clyylnk8l000s7wuf4tr8fd1t" data-title="imx6ull裸机-ADC" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li></ul>
 
     </footer>
   </div>
@@ -1778,401 +2129,11 @@ CPHA:表示相位，即第一个还是第二个时钟沿采样数据，0为第�
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/01/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E7%94%B5%E9%98%BB%E8%A7%A6%E6%91%B8%E5%B1%8F/" data-id="clyvr7idn002bwkuf79btfjbs" data-title="s3c2440裸机编程-电阻触摸屏" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/01/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E7%94%B5%E9%98%BB%E8%A7%A6%E6%91%B8%E5%B1%8F/" data-id="clyylnk8r00217wuf4na8a3b3" data-title="s3c2440裸机编程-电阻触摸屏" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-s3c2440裸机编程-LDC" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/" class="article-date">
-  <time class="dt-published" datetime="2024-04-19T09:57:39.000Z" itemprop="datePublished">2024-04-19</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/">s3c2440裸机编程-LDC</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-lcd-ying-jian-yuan-li">1 LCD硬件原理</a><ul>
-<li><a href="#1-1-lcd-xiang-su-sao-miao">1.1 LCD像素扫描</a></li>
-<li><a href="#1-2-lcd-ying-jian-yuan-li-tu">1.2 LCD硬件原理图</a><ul>
-<li><a href="#1-2-1-rgb-lcd-mo-shi">1.2.1 RGB LCD模式</a></li>
-<li><a href="#1-2-2-lcd-shi-xu-fen-xi">1.2.2 LCD时序分析</a><ul>
-<li><a href="#1-2-2-1-xing-shi-xu">1.2.2.1 行时序</a></li>
-<li><a href="#1-2-2-2-zheng-shi-xu">1.2.2.2 帧时序</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#1-2-framebuffer-he-bpp-gai-nian">1.2 FrameBuffer和BPP概念</a></li>
-<li><a href="#1-3-lcd-chong-lei">1.3 LCD种类</a></li>
-<li><a href="#1-4-lcd-fang-wen-kuang-jia">1.4 LCD访问框架</a></li>
-</ul>
-</li>
-<li><a href="#2-lcd-kong-zhi-qi">2 LCD控制器</a><ul>
-<li><a href="#2-1-s3c2440-lcd-kong-zhi-qi-kuang-tu">2.1 s3c2440 LCD控制器框图</a></li>
-<li><a href="#2-2-ji-cun-qi-jie-shao">2.2 寄存器介绍</a><ul>
-<li><a href="#2-2-1-shu-ju-cun-chu-ge-shi">2.2.1 数据存储格式</a><ul>
-<li><a href="#2-2-1-1-bswp-hwswp-ji-cun-qi">2.2.1.1 BSWP&#x2F;HWSWP寄存器</a><ul>
-<li><a href="#2-2-2-1-1-24bpp">2.2.2.1.1 24BPP</a></li>
-<li><a href="#2-2-2-1-2-16bpp">2.2.2.1.2 16BPP</a></li>
-<li><a href="#2-2-2-1-3-8bpp">2.2.2.1.3 8BPP</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#2-2-2-diao-se-ban-ji-cun-qi">2.2.2 调色板寄存器</a><ul>
-<li><a href="#2-2-2-1-diao-se-ban-ge-shi">2.2.2.1 调色板格式</a></li>
-</ul>
-</li>
-<li><a href="#2-2-3-lcd-kong-zhi-ji-cun-qi-1">2.2.3 LCD控制寄存器1</a></li>
-<li><a href="#2-2-4-lcd-kong-zhi-ji-cun-qi-2-chui-zhi-fang-xiang-can-shu">2.2.4 LCD控制寄存器2(垂直方向参数)</a></li>
-<li><a href="#2-2-5-lcd-kong-zhi-ji-cun-qi-3-shui-ping-fang-xiang-can-shu">2.2.5 LCD控制寄存器3(水平方向参数)</a></li>
-<li><a href="#2-2-5-lcd-kong-zhi-ji-cun-qi-4">2.2.5 LCD控制寄存器4</a></li>
-<li><a href="#2-2-5-lcd-kong-zhi-ji-cun-qi-5">2.2.5 LCD控制寄存器5</a></li>
-<li><a href="#2-2-6-lcdsaddr1-ji-cun-qi">2.2.6 LCDSADDR1寄存器</a></li>
-<li><a href="#2-2-7-lcdsaddr2-ji-cun-qi">2.2.7 LCDSADDR2寄存器</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#3-lcd-luo-ji-bian-cheng">3 LCD裸机编程</a><ul>
-<li><a href="#3-1-ruan-jian-kuang-jia">3.1 软件框架</a></li>
-<li><a href="#3-2-shu-ju-jie-gou-ding-yi">3.2 数据结构定义</a><ul>
-<li><a href="#3-2-1-lcd-she-bei-jie-gou-ti">3.2.1 LCD设备结构体</a></li>
-</ul>
-</li>
-<li><a href="#3-3-cao-zuo-fang-fa-ding-yi">3.3 操作方法定义</a><ul>
-<li><a href="#3-3-1-lcd-cao-zuo-fang-fa-lcd-controller-c">3.3.1 LCD操作方法-lcd_controller.c</a></li>
-<li><a href="#3-3-2-ju-ti-xing-hao-lcd-guan-li-ldc-c">3.3.2 具体型号LCD管理-ldc.c</a></li>
-</ul>
-</li>
-<li><a href="#3-4-lcd-chu-shi-hua">3.4 LCD初始化</a><ul>
-<li><a href="#3-4-1-chu-shi-hua-lcd-kong-zhi-qi">3.4.1 初始化lcd控制器</a><ul>
-<li><a href="#3-4-1-1-chu-shi-hua-yin-jiao">3.4.1.1 初始化引脚</a><ul>
-<li><a href="#3-4-1-1-1-bei-guang-yin-jiao">3.4.1.1.1 背光引脚</a></li>
-<li><a href="#3-4-1-1-2-kong-zhi-yin-jiao-he-shu-ju-yin-jiao">3.4.1.1.2 控制引脚和数据引脚</a></li>
-<li><a href="#3-4-1-1-3-pwren-yin-jiao">3.4.1.1.3 PWREN引脚</a></li>
-</ul>
-</li>
-<li><a href="#3-4-1-2-chu-shi-hua-lcd-kong-zhi-ji-cun-qi-di-zhi-ji-cun-qi">3.4.1.2 初始化LCD控制寄存器、地址寄存器</a></li>
-<li><a href="#3-4-1-3-shi-neng-jin-yong-bei-guang-yin-jiao">3.4.1.3 使能、禁用背光引脚</a></li>
-</ul>
-</li>
-<li><a href="#3-4-2-chu-shi-hua-lcd-she-bei">3.4.2 初始化lcd设备</a></li>
-</ul>
-</li>
-<li><a href="#3-5-shi-xian-xian-shi-gong-neng">3.5 实现显示功能</a><ul>
-<li><a href="#3-5-1-lcd-xian-shi-man-ping-hong-se">3.5.1 LCD显示满屏红色</a><ul>
-<li><a href="#3-5-1-1-chu-shi-hua-lcd">3.5.1.1 初始化LCD</a></li>
-<li><a href="#3-5-1-2-shi-neng-lcd">3.5.1.2 使能LCD</a></li>
-<li><a href="#3-5-1-3-huo-qu-lcd-can-shu">3.5.1.3 获取LCD参数</a></li>
-<li><a href="#3-5-1-4-wang-framebuffer-zhong-xie-shu-ju">3.5.1.4 往framebuffer中写数据</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#3-6-shi-xian-hui-zhi-dian-xian-yuan-han-shu">3.6 实现绘制点线圆函数</a><ul>
-<li><a href="#3-6-1-hua-dian">3.6.1 画点</a></li>
-<li><a href="#3-6-2-32bppto16bpp-han-shu">3.6.2 32bppto16bpp函数</a></li>
-<li><a href="#3-6-3-hua-xian-hua-yuan">3.6.3 画线画圆</a></li>
-<li><a href="#3-6-4-ce-shi">3.6.4 测试</a></li>
-</ul>
-</li>
-<li><a href="#3-7-zi-fu-ku-yi-zhi">3.7 字符库移植</a><ul>
-<li><a href="#3-7-1-xian-shi-zi-fu-chuan">3.7.1 显示字符串</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-lcd-ying-jian-yuan-li">1 LCD硬件原理</span><a href="#1-lcd-ying-jian-yuan-li" class="header-anchor">#</a></h1><h2><span id="1-1-lcd-xiang-su-sao-miao">1.1 LCD像素扫描</span><a href="#1-1-lcd-xiang-su-sao-miao" class="header-anchor">#</a></h2><p>里面的每个点就是一个像素点。</p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/1.jpg"></p>
-<p>它里面有一个电子枪，一边移动，一边发出各种颜色的光。用动态图表示如下：<br><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/2.jpg"></p>
-<ol>
-<li><p>电子枪是如何移动的？</p>
-<pre><code> 有一条CLK时钟线与LCD相连，每发出一次CLK(高低电平)，电子枪就移动一个像素。
-</code></pre>
-</li>
-<li><p>颜色如何确定？</p>
-<pre><code> 由连接LCD的三组线RGB三原色混合而成：R(Red)、G(Green)、B(Blue)确定。
-</code></pre>
-</li>
-<li><p>电子枪如何得知应跳到下一行？</p>
-<pre><code> 有一条HSYNC信号线与LCD相连，每发出一次脉冲(高低电平)，电子枪就跳到下一行，该信号叫做行同步信号。
-</code></pre>
-</li>
-<li><p>电子枪如何得知应跳到原点？</p>
-<pre><code> 有一条VSYNC信号线与LCD相连，每发出一次脉冲(高低电平)，电子枪就跳到原点，该信号叫做帧同步信号。
-</code></pre>
-</li>
-<li><p>RGB线上的数据从何而来？</p>
-<pre><code> 内存里面划分一块显存(FrameBuffer)，里面存放了要显示的数据，LCD控制器从里面将数据读出来，通过RGB三组线传给电子枪，电子枪再依次打到显示屏上。
-</code></pre>
-</li>
-<li><p>前面的信号由谁发给LCD？</p>
-<pre><code> 有S3C2440里面的LCD控制器来控制发出信号。
-</code></pre>
-</li>
-</ol>
-<h2><span id="1-2-lcd-ying-jian-yuan-li-tu">1.2 LCD硬件原理图</span><a href="#1-2-lcd-ying-jian-yuan-li-tu" class="header-anchor">#</a></h2><p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/3.png"></p>
-<p>①是时钟信号，每来一个CLK，电子枪就移动一个像素；</p>
-<p>②是用来传输颜色数据；</p>
-<p>③是垂直方向同步信号，FRAME(帧)；</p>
-<p>④是水平方向同步信号，LINE(行)；</p>
-<p>⑤LED+、LED-背光灯电源。</p>
-<p>⑥TSYP、TSXP、TSYM、TSXM是触摸屏信号，暂时不用。</p>
-<p>⑦VM接DE是数据使能</p>
-<h3><span id="1-2-1-rgb-lcd-mo-shi">1.2.1 RGB LCD模式</span><a href="#1-2-1-rgb-lcd-mo-shi" class="header-anchor">#</a></h3><p>HV模式: HS与VS来控制刷新。比如对于分辨率为1024x600RGB的LCD，LCD控制器发出HS信号后，就会发出1024个DCLK，在每个DCLK上传输像素数据；当发出600个HS信号后，就会发出一个VS信号<br>DE模式：DE信号来控制刷新，比如对于分辨率为1024x600RGB的LCD，LCD控制器发出DE信号后，就要发出1024个DCLK，在每个DCLK上传输像素数据；当发出600个DE信号，刷新完一帧数据</p>
-<h3><span id="1-2-2-lcd-shi-xu-fen-xi">1.2.2 LCD时序分析</span><a href="#1-2-2-lcd-shi-xu-fen-xi" class="header-anchor">#</a></h3><p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/4.png" alt="image"><br><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/5.png"></p>
-<p>①从一行最开始的像素开始分析，如上图标号①，DE信号开始有效，电子枪每次在CLK下降沿时从数据线Dn0-Dn7上得到数据（Dn0-Dn7上的数据来源于FrameBuffer，后面会讲），然后发射到显示屏上，然后移动到下一个位置。从<em>1 st pixel</em>到<em>last pixel</em>，就这样从一行的最左边，一直移动到一行的最右边，完成了一行的显示，假设一行有x个pixel。可以看到每发送一个pixel，需要1个时钟周期（1&#x2F;tc）。</p>
-<p>②当打完一行的最后一个数据后，会收到Hsync行同步信号，那么电子枪会跳到下一行，如上图标号②，根据时序图，一个Hsync周期，也就是一行数据刷新时间th, 可以大致分为五部分组成：thp、thb、1&#x2F;tc、thd、thf。<br>    thp:称为脉冲宽度，这个时间不能太短，太短电子枪可能识别不到。<br>    thb:电子枪正确识别到thp后，会从最右端移动最左端，这个移动的时间就是thb，称之为移动时间。<br>    thd：表示显示一行数据的时间<br>    thf：表示显示完最右像素，再过多久Hsync才来。</p>
-<p>③同理，当电子枪移动到最后一行时，就会发送一个Vsync垂直同步信号，让电子枪移动回最上边。如上图标号③，根据时序图，一个Vsync周期，也就是一帧数据刷新时间tv, 可以大致分为：tvp、tvb、tvd、tvf。<br>    tvp:Vsync信号的脉冲宽度<br>    tvb：电子枪从最后一行移动到第一行的移动时间<br>    tvf：表示显示完最后一行像素，再过多久Vsync才来。</p>
-<p> 假设一共有y行，那么LCD的分辨率就是x*y。</p>
-<p>下面是LCD显示配置示意图：<br><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/6.png"></p>
-<p>从左往右看，可以看到Total width &#x3D; HSYNC width + HBP + Active width + HFP。当发出一个HSYNC信号后，电子枪就会从最右边花费HBP时长移动到最左边，等到了最右边后，等待HFP时长后下一轮HSYNC信号才会发出。因此，HBP和HFP分别决定了左边和右边的黑框。</p>
-<pre><code> HSYNC是行同步信号的脉冲宽度（低电平有效）
- HBP表示屏幕左边黑框的宽度（电子枪要花多久才能从最右边移动到最左边）行后肩
- Active width表示有效数据宽度
- HFP表示屏幕右边黑框的宽度（再过多久HSYNC才会发出）行前肩
-</code></pre>
-<p>同理从上往下看，Total height &#x3D; Vsync width + VBP + Active width + VFP。当发出一个VSYNC信号后，电子枪就会从最下边花费VBP时长移动到最上边，等到了最下边后，等待VFP时长后下一轮VSYNC信号才会发出。因此，VBP和VFP分别决定了上边和下边的黑框。 中间灰色区域才是有效显示区域。</p>
-<pre><code>VSYNC是帧同步信号的脉冲宽度（低电平有效）
-VBP表示屏幕上边黑框的宽度（电子枪要花多久才能从最后一行移动到最上面一行）帧后肩
-Active height表示有效数据高度
-VFP表示屏幕下边黑框的宽度(再过多久VSYNC才会发出) 帧前肩
-</code></pre>
-<p>总结：</p>
-<h4><span id="1-2-2-1-xing-shi-xu">1.2.2.1 行时序</span><a href="#1-2-2-1-xing-shi-xu" class="header-anchor">#</a></h4><p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/7.png" alt="image"></p>
-<pre><code>HSPW：有些地方也叫做 thp，是 HSYNC 信号宽度，也就是 HSYNC 信号持续时间。HSYNC信号不是一个脉冲，而是需要持续一段时间才是有效的，单位为 CLK。
-HOZVAL：有些地方叫做 thd，显示一行数据所需的时间，假如屏幕分辨率为 1024*600，那么 HOZVAL 就是 1024，单位为 CLK。
-</code></pre>
-<h4><span id="1-2-2-2-zheng-shi-xu">1.2.2.2 帧时序</span><a href="#1-2-2-2-zheng-shi-xu" class="header-anchor">#</a></h4><p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/8.png" alt="image"></p>
-<pre><code>VSPW：有些地方也叫做 tvp，是 VSYNC 信号宽度，也就是 VSYNC 信号持续时间，单位为 1 行的时间
-LINE：有些地方叫做 tvd，显示一帧有效数据所需的时间，假如屏幕分辨率为 1024*600，那么 LINE 就是 600 行的时间。
-</code></pre>
-<h2><span id="1-2-framebuffer-he-bpp-gai-nian">1.2 FrameBuffer和BPP概念</span><a href="#1-2-framebuffer-he-bpp-gai-nian" class="header-anchor">#</a></h2><p>FrameBuffer是在内存中的一段区域，这段区域专门用来存放颜色数据的。如下图：<br><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/9.png"></p>
-<p>BPP(Bits Per Pixels)表示每个像素占据多少位。 前面的LCD引脚功能图里，有R0-R7、G0-G7、B0-B7，那么每个像素是占据3<em>8&#x3D;24位的，*<em>所以硬件上LCD的BPP是确定的.</em></em></p>
-<p>那么在FrameBuffer中，每个像素在FrameBuffer中，占据多少位BPP(Bits Per Pixels)？</p>
-<p>虽然LCD上的引脚是固定的，但我们使用的时候，可以根据实际情况进行取舍，查看我们的硬件原理图，发现我们的LCD硬件上只有R1-R5、G0-G5、B1-B5与SOC相连，5+6+5&#x3D;16BPP，所以每个像素就只占据16位数据。等效连接图如下：<br><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/10.png"></p>
-<h2><span id="1-3-lcd-chong-lei">1.3 LCD种类</span><a href="#1-3-lcd-chong-lei" class="header-anchor">#</a></h2><p>S3C2440芯片手册介绍了LCD控制器支持TFT和STN两种LCD，我们常用的都是TFT材质的，本开发板采用的就是一款TFT材质的LCD.</p>
-<h2><span id="1-4-lcd-fang-wen-kuang-jia">1.4 LCD访问框架</span><a href="#1-4-lcd-fang-wen-kuang-jia" class="header-anchor">#</a></h2><p>如下图，LCD控制器从SDRAM中的FrameBuffer区域取出颜色数据，发送给电子枪，电子枪按照特定的时钟周期将颜色数据显示在LCD上。<br><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/11.png"></p>
-<h1><span id="2-lcd-kong-zhi-qi">2 LCD控制器</span><a href="#2-lcd-kong-zhi-qi" class="header-anchor">#</a></h1><h2><span id="2-1-s3c2440-lcd-kong-zhi-qi-kuang-tu">2.1 s3c2440 LCD控制器框图</span><a href="#2-1-s3c2440-lcd-kong-zhi-qi-kuang-tu" class="header-anchor">#</a></h2><p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/12.png"></p>
-<p>S3C2440 LCD控制器用于传输视频数据并且生成必要的控制信号，如VFRAME，VLINE，VCLK，VM等。除了控制信号，S3C2440还有视频数据端口，即VD [23：0]。通过设置REGBANK(寄存器组)，LCDCDMA会自动(无需CPU参与)把内存上FrameBuffer里的数据，通过VIDPRCS发送到引脚VD[23:0]数据总线上，再配合VIDEOMUX引脚的控制信号，正确的显示出来。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">REGBANK：具有<span class="number">17</span>个可编程寄存器组和<span class="number">256</span>x16调色板存储器，用于配置LCD控制器。 </span><br><span class="line">TIMEGEN：产生控制信号，例如 VSYNC、HSYNC、VCLK等信号</span><br><span class="line">LCDCDMA：可以自动从FrameBuff中把数据copy出来。</span><br><span class="line">VIDPRCS：从LCDCDMA接收视频数据，将数据输出到VD[<span class="number">23</span>:<span class="number">0</span>]数据总线上。</span><br></pre></td></tr></table></figure>
-
-<p>总结LCD控制器主要功能如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> 取：从内存(FrameBuffer)取出某个像素的数据（之后需要把FrameBuffer地址、BPP、分辨率告诉LCD控制器）</span><br><span class="line"><span class="number">2.</span> 发：配合其它信号把FrameBuffer中的数据发给LCD；（那么需要设置LCD控制器时序、设置引脚极性）</span><br></pre></td></tr></table></figure>
-
-<h2><span id="2-2-ji-cun-qi-jie-shao">2.2 寄存器介绍</span><a href="#2-2-ji-cun-qi-jie-shao" class="header-anchor">#</a></h2><h3><span id="2-2-1-shu-ju-cun-chu-ge-shi">2.2.1 数据存储格式</span><a href="#2-2-1-shu-ju-cun-chu-ge-shi" class="header-anchor">#</a></h3><p>可以配置寄存器的BSWP、HWSWP来设置Framebuff中的像素存储格式。</p>
-<h4><span id="2-2-1-1-bswp-x2f-hwswp-ji-cun-qi">2.2.1.1 BSWP&#x2F;HWSWP寄存器</span><a href="#2-2-1-1-bswp-x2f-hwswp-ji-cun-qi" class="header-anchor">#</a></h4><h5><span id="2-2-2-1-1-24bpp">2.2.2.1.1 24BPP</span><a href="#2-2-2-1-1-24bpp" class="header-anchor">#</a></h5><p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/13.png"></p>
-<p>从图中可以看到24bpp的像素，在lcd控制器的VD[7:0]表示BLUE， VD[15:8]表示GREEN，VD[23:16]表示RED。在内存中的FrameBuffer中每一个像素占据4个字节，当BPP24BL&#x3D;0时，低24位为颜色数据，当BPP24BL&#x3D;1时，高24位为颜色数据。</p>
-<h5><span id="2-2-2-1-2-16bpp">2.2.2.1.2 16BPP</span><a href="#2-2-2-1-2-16bpp" class="header-anchor">#</a></h5><p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/14.png"></p>
-<p>也可以看到16bpp的像素，在内存中的FrameBuffer中每一个像素占据2个字节，HWSWP用来设置像素数据的存放方式。</p>
-<p>再看下LCD控制器的VD引脚输出情况，可以看到16bpp时分5:6:5和5：5：5：i两种数据格式。当5：6：5模式时，VD[7:3]表示BLUE， VD[15:10]表示Green数据，VD[23:19]表示RED。当5：5:5：i模式时，VD[7:3]表示BLUE， VD[15:11]表示Green，VD[23:19]表示RED。其中i表示透明度。</p>
-<h5><span id="2-2-2-1-3-8bpp">2.2.2.1.3 8BPP</span><a href="#2-2-2-1-3-8bpp" class="header-anchor">#</a></h5><p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/15.png"></p>
-<h3><span id="2-2-2-diao-se-ban-ji-cun-qi">2.2.2 调色板寄存器</span><a href="#2-2-2-diao-se-ban-ji-cun-qi" class="header-anchor">#</a></h3><p>我们外接的LCD硬件上只有R1-R5、G0-G5、B1-B5与SOC相连，5+6+5&#x3D;16BPP，所以LCD上每个像素就只占据16位数据。那么当我们的Frame buffer中是8BPP颜色数据时，是如何把颜色数据填充到LCD上的呢？</p>
-<p><code>用调色板</code></p>
-<p>S3C2440A 中的 TFT LCD 控制器支持 1、2、4 或 8bpp调色显示（伪彩色）和16、24bpp无调色显示（真彩色）。S3C2440A 可以支持 256 色调色板给各种色彩映射的选择，以提供灵活操作给用户。</p>
-<p>假如是16BPP的数据，LCD控制器从FB取出16bit数据，显示到LCD上，如下图所示：</p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/16.png"></p>
-<p>那么当8BPP的数据时，就需要用到调色板，调色板里存放了256个16bit的数据，FB(frame buffer)只存放每个像素的索引，根据索引去调色板找到对应的数据传给LCD控制器，比如从FB中的第0个元素拿到调色板中的第0个16bit数据，再通过电子枪显示出来，如下图所示：</p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/17.png"></p>
-<p>调色板支持 5:6:5（R:G:B）格式和 5:5:5:I（R:G:B:I）格式。当用户使用5:5:5:I格式时，I表示强度，也就是透明度。I是用作每个RGB 数据的共用 LSB 位，因此 5:5:5:I与R(5+I):G(5+I):B(5+I)格式相同。</p>
-<h4><span id="2-2-2-1-diao-se-ban-ge-shi">2.2.2.1 调色板格式</span><a href="#2-2-2-1-diao-se-ban-ge-shi" class="header-anchor">#</a></h4><p>0x4D000400为调色板起始地址:</p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/18.png"></p>
-<h3><span id="2-2-3-lcd-kong-zhi-ji-cun-qi-1">2.2.3 LCD控制寄存器1</span><a href="#2-2-3-lcd-kong-zhi-ji-cun-qi-1" class="header-anchor">#</a></h3><p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/19.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">27</span>:<span class="number">18</span>]为只读数据位，不需要设置；</span><br><span class="line">[<span class="number">17</span>:<span class="number">8</span>]设置CLKVAL(像素时钟频率)，我们使用的是TFT屏，因此采用的公式是VCLK = HCLK / [(CLKVAL+<span class="number">1</span>) x <span class="number">2</span>]，其中HCLK为<span class="number">100</span>M。LCD手册里面Clock cycle的要求范围为<span class="number">5</span><span class="number">-12</span>MHz即可，那么取VCLK=<span class="number">9</span>，根据公式<span class="number">9</span>=<span class="number">100</span>/[(CLKVAL+<span class="number">1</span>)x2],算出CLKVAL≈<span class="number">4.5</span>=<span class="number">5</span>，设置CLKVAL=<span class="number">5</span>。</span><br><span class="line">[<span class="number">7</span>]不用管，默认即可；</span><br><span class="line">[<span class="number">6</span>:<span class="number">5</span>]TFT lcd配置为<span class="number">0b11</span>；</span><br><span class="line">[<span class="number">4</span>:<span class="number">1</span>]设置bpp模式，用户可选</span><br><span class="line">[<span class="number">0</span>]LCD输出使能，先暂时关闭不输出；</span><br></pre></td></tr></table></figure>
-
-<h3><span id="2-2-4-lcd-kong-zhi-ji-cun-qi-2-chui-zhi-fang-xiang-can-shu">2.2.4 LCD控制寄存器2(垂直方向参数)</span><a href="#2-2-4-lcd-kong-zhi-ji-cun-qi-2-chui-zhi-fang-xiang-can-shu" class="header-anchor">#</a></h3><p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/20.png"></p>
-<p>s3c2440 LCD控制器时序图如下：</p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/21.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">31</span>:<span class="number">24</span>] : VBPD = tvb - <span class="number">1</span> （表示显示完最后一行像素，再过多久Vsync才来，表示上边黑框）</span><br><span class="line">[<span class="number">23</span>:<span class="number">14</span>] : LINEVAL = 每帧有多少行 - <span class="number">1</span> </span><br><span class="line">[<span class="number">13</span>:<span class="number">6</span>]  : VFPD = tvf - <span class="number">1</span>（下边黑框）</span><br><span class="line">[<span class="number">5</span>:<span class="number">0</span>]  : VSPW = tvp - <span class="number">1</span> （Vsync信号的脉冲宽度）</span><br></pre></td></tr></table></figure>
-
-
-
-<h3><span id="2-2-5-lcd-kong-zhi-ji-cun-qi-3-shui-ping-fang-xiang-can-shu">2.2.5 LCD控制寄存器3(水平方向参数)</span><a href="#2-2-5-lcd-kong-zhi-ji-cun-qi-3-shui-ping-fang-xiang-can-shu" class="header-anchor">#</a></h3><p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/22.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">25</span>:<span class="number">19</span>] : HBPD = thb - <span class="number">1</span>（左边黑框）</span><br><span class="line">[<span class="number">18</span>:<span class="number">8</span>]  : HOZVAL = 每行有多少列 - <span class="number">1</span></span><br><span class="line">[<span class="number">7</span>:<span class="number">0</span>]  : HFPD = thf - <span class="number">1</span> （右边黑框）</span><br></pre></td></tr></table></figure>
-
-<h3><span id="2-2-5-lcd-kong-zhi-ji-cun-qi-4">2.2.5 LCD控制寄存器4</span><a href="#2-2-5-lcd-kong-zhi-ji-cun-qi-4" class="header-anchor">#</a></h3><p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/23.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">7</span>:<span class="number">0</span>]: HSPW = thp - <span class="number">1</span> (Hsync信号的脉冲宽度)</span><br></pre></td></tr></table></figure>
-
-<h3><span id="2-2-5-lcd-kong-zhi-ji-cun-qi-5">2.2.5 LCD控制寄存器5</span><a href="#2-2-5-lcd-kong-zhi-ji-cun-qi-5" class="header-anchor">#</a></h3><p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/24.png"></p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/25.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">12</span>] : BPP24BL（表示<span class="number">24b</span>pp的数据是大端还是小端）</span><br><span class="line">[<span class="number">11</span>] : FRM565 （数据存放格式）</span><br><span class="line">[<span class="number">10</span>] : INVVCLK（时钟是否反转极性，当配置成<span class="number">0</span>时数据在时钟下降沿被锁存）</span><br><span class="line">[<span class="number">9</span>]  : HSYNC是否反转</span><br><span class="line">[<span class="number">8</span>]  : VSYNC是否反转</span><br><span class="line">[<span class="number">7</span>]  : INVVD, rgb是否反转</span><br><span class="line">[<span class="number">6</span>]  : INVVDEN</span><br><span class="line">[<span class="number">5</span>]  : INVPWREN</span><br><span class="line">[<span class="number">4</span>]  : INVLEND</span><br><span class="line">[<span class="number">3</span>]  : PWREN(LCD_PWREN output signal enable/disable)</span><br><span class="line">[<span class="number">2</span>]  : ENLEND</span><br><span class="line">[<span class="number">1</span>]  : BSWP</span><br><span class="line">[<span class="number">0</span>]  : HWSWP</span><br></pre></td></tr></table></figure>
-
-<h3><span id="2-2-6-lcdsaddr1-ji-cun-qi">2.2.6 LCDSADDR1寄存器</span><a href="#2-2-6-lcdsaddr1-ji-cun-qi" class="header-anchor">#</a></h3><p>frame buffer的起始地址寄存器：</p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/26.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">29</span>:<span class="number">21</span>] : LCDBANK, A[<span class="number">30</span>:<span class="number">22</span>] of fb</span><br><span class="line">[<span class="number">20</span>:<span class="number">0</span>]  : LCDBASEU, A[<span class="number">21</span>:<span class="number">1</span>] of fb</span><br><span class="line">即[<span class="number">29</span>:<span class="number">0</span>]表示Frame buffer的起始地址的[<span class="number">30</span>:<span class="number">1</span>]。</span><br></pre></td></tr></table></figure>
-
-<h3><span id="2-2-7-lcdsaddr2-ji-cun-qi">2.2.7 LCDSADDR2寄存器</span><a href="#2-2-7-lcdsaddr2-ji-cun-qi" class="header-anchor">#</a></h3><p>frame buffer的结束地址寄存器：</p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/27.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[<span class="number">20</span>:<span class="number">0</span>] : LCDBASEL，A[<span class="number">21</span>:<span class="number">1</span>] of end addr,即framebuffer的结束地址。</span><br></pre></td></tr></table></figure>
-
-<h1><span id="3-lcd-luo-ji-bian-cheng">3 LCD裸机编程</span><a href="#3-lcd-luo-ji-bian-cheng" class="header-anchor">#</a></h1><h2><span id="3-1-ruan-jian-kuang-jia">3.1 软件框架</span><a href="#3-1-ruan-jian-kuang-jia" class="header-anchor">#</a></h2><p>为了让程序更加好扩展，体现出<strong>高内聚、低耦合</strong>的特点，能够兼容各种不同型号的lcd，假如有两款尺寸大小的lcd，如何快速的在两个lcd上切换？</p>
-<p>首先我们抽象出lcd_3.5.c和lcd_4.3.c的共同点，比如都有初始化函数init(),我们可以新建一个lcd.c，然后定义一个结构体：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">lcd_opr</span>&#123;</span></span><br><span class="line">    <span class="type">void</span> (*init)(<span class="type">void</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>用户不接触lcd_3.5.c和lcd_4.3.c，只需要在lcd.c里通过指针访问对应的结构体的函数，也就调用了不同init():</p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/28.jpg" alt="img"></p>
-<p>我们的目的是在LCD显示屏上画线、画圆(geomentry.c)和写字(font.c)其核心是画点(farmebuffer.c)，这些都属于纯软件。此外还需要一个lcd_test.c测试程序提供操作菜单，调用画线、画圆和写字操作。</p>
-<p>往下操作的是LCD相关的内容，不同的LCD，其配置的参数也会不一样，通过lcd_3.5.c或lcd_4.3.c来设置属性参数。</p>
-<p>根据LCD的特性，来设置LCD控制器，首先编写lcd_controller.c，它向上要接收不同LCD的参数，向下要使用这些参数设置对应具体的某一款LCD控制器。</p>
-<p>对于我们开发板，就是s3c2440_lcd_controller.c，假如希望在其它开发板上也实现LCD显示，只需添加相应的代码文件即可。文件自上而下的框架如下：</p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/29.jpg"></p>
-<h2><span id="3-2-shu-ju-jie-gou-ding-yi">3.2 数据结构定义</span><a href="#3-2-shu-ju-jie-gou-ding-yi" class="header-anchor">#</a></h2><h3><span id="3-2-1-lcd-she-bei-jie-gou-ti">3.2.1 LCD设备结构体</span><a href="#3-2-1-lcd-she-bei-jie-gou-ti" class="header-anchor">#</a></h3><p>我们知道LCD的参数属性有：引脚的极性、时序、数据的格式bpp、分辨率等，使用面向对象的思维方式，将这些封装成结构体放在lcd.h中：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> &#123;</span></span><br><span class="line">	NORMAL = <span class="number">0</span>,</span><br><span class="line">	INVERT = <span class="number">1</span>,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* NORMAL : 正常极性</span></span><br><span class="line"><span class="comment"> * INVERT : 反转极性</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">pins_polarity</span> &#123;</span></span><br><span class="line">	<span class="type">int</span> vclk;  <span class="comment">/* normal: 在下降沿获取数据 */</span></span><br><span class="line">	<span class="type">int</span> rgb;   <span class="comment">/* normal: 高电平表示1 */</span></span><br><span class="line">	<span class="type">int</span> hsync; <span class="comment">/* normal: 高脉冲 */</span></span><br><span class="line">	<span class="type">int</span> vsync; <span class="comment">/* normal: 高脉冲 */</span></span><br><span class="line">&#125; pins_polarity, *p_pins_polarity;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">time_sequence</span> &#123;</span></span><br><span class="line">	<span class="comment">/* 垂直方向 */</span></span><br><span class="line">	<span class="type">int</span> tvp; <span class="comment">/* vysnc脉冲宽度 */</span></span><br><span class="line">	<span class="type">int</span> tvb; <span class="comment">/* 上边黑框, Vertical Back porch */</span></span><br><span class="line">	<span class="type">int</span> tvf; <span class="comment">/* 下边黑框, Vertical Front porch */</span></span><br><span class="line">	<span class="comment">/* 水平方向 */</span></span><br><span class="line">	<span class="type">int</span> thp; <span class="comment">/* hsync脉冲宽度 */</span></span><br><span class="line">	<span class="type">int</span> thb; <span class="comment">/* 左边黑框, Horizontal Back porch */</span></span><br><span class="line">	<span class="type">int</span> thf; <span class="comment">/* 右边黑框, Horizontal Front porch */</span></span><br><span class="line">	<span class="type">int</span> vclk;</span><br><span class="line">&#125; time_sequence, *p_time_sequence;</span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">lcd_params</span> &#123;</span></span><br><span class="line">	<span class="comment">/* 引脚极性 */</span></span><br><span class="line">	pins_polarity pins_pol;</span><br><span class="line">	<span class="comment">/* 时序 */</span></span><br><span class="line">	time_sequence time_seq;</span><br><span class="line">	<span class="comment">/* 分辨率, bpp */</span></span><br><span class="line">	<span class="type">int</span> xres;</span><br><span class="line">	<span class="type">int</span> yres;</span><br><span class="line">	<span class="type">int</span> bpp;</span><br><span class="line">	<span class="comment">/* framebuffer的地址 */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> fb_base;</span><br><span class="line">&#125; lcd_params, *p_lcd_params;</span><br></pre></td></tr></table></figure>
-
-<h2><span id="3-3-cao-zuo-fang-fa-ding-yi">3.3 操作方法定义</span><a href="#3-3-cao-zuo-fang-fa-ding-yi" class="header-anchor">#</a></h2><h3><span id="3-3-1-lcd-cao-zuo-fang-fa-lcd-controller-c">3.3.1  LCD操作方法-lcd_controller.c</span><a href="#3-3-1-lcd-cao-zuo-fang-fa-lcd-controller-c" class="header-anchor">#</a></h3><p>我们知道在c++中是面向对象编程的，那么一个对象就有它的属性和方法，LCD属性我们上面已经定义好了，那么方法我们可以定义一个lcd_controller.c用来控制管理LCD，定义个一个lcd_controller.h, struct lcd_controller结构体放置lcd对象的一些成员函数，即对象的方法，或者称之为对象的行为：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">lcd_controller</span> &#123;</span></span><br><span class="line">    <span class="type">char</span> *name;</span><br><span class="line">    <span class="type">void</span> (*init)(p_lcd_params plcdparams);</span><br><span class="line">    <span class="type">void</span> (*enable)(<span class="type">void</span>);</span><br><span class="line">    <span class="type">void</span> (*disable)(<span class="type">void</span>);</span><br><span class="line">    <span class="type">void</span> (*init_palette)(<span class="type">void</span>);</span><br><span class="line">&#125; lcd_controller, *p_lcd_controller;</span><br></pre></td></tr></table></figure>
-<p>那么lcd_controller.c相当于一个管理者，会去选择具体型号的LCD对象去执行具体的成员函数，比如管理s3c2440_lcd_controller.c，它向上接受传入的LCD参数，向下传给具体的LCD控制器。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">lcd_controller_init</span><span class="params">(p_lcd_params plcdparams)</span> &#123;</span><br><span class="line">    <span class="comment">/* 调用2440的LCD控制器的初始化函数，lcd_controller是一个被选中的对象，即s3c2440_lcd_controller*/</span></span><br><span class="line">    lcd_controller.init(plcdparams);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这样在s3c2440_lcd_controller.c再构造一个具体的lcd对象：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">lcd_controller</span> <span class="title">s3c2440_lcd_controller</span> =</span> &#123;</span><br><span class="line">	.name    = xxx,</span><br><span class="line">	.init    = xxx,</span><br><span class="line">	.enalbe  = xxx,</span><br><span class="line">	.disable = xxx,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>lcd_controller.c代码框架如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;lcd_controller.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LCD_CONTROLLER_NUM 10</span></span><br><span class="line"></span><br><span class="line"><span class="type">static</span> p_lcd_controller p_array_lcd_controller[LCD_CONTROLLER_NUM];</span><br><span class="line"><span class="type">static</span> p_lcd_controller g_p_lcd_controller_selected;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">register_lcd_controller</span><span class="params">(p_lcd_controller plcdcon)</span> &#123;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; LCD_CONTROLLER_NUM; i++) &#123;</span><br><span class="line">		<span class="keyword">if</span> (!p_array_lcd_controller[i]) &#123;</span><br><span class="line">			p_array_lcd_controller[i] = plcdcon;</span><br><span class="line">			<span class="keyword">return</span> i;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">-1</span>;		</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">select_lcd_controller</span><span class="params">(<span class="type">char</span> *name)</span> &#123;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; LCD_CONTROLLER_NUM; i++) &#123;</span><br><span class="line">		<span class="keyword">if</span> (p_array_lcd_controller[i] &amp;&amp; !<span class="built_in">strcmp</span>(p_array_lcd_controller[i]-&gt;name, name)) &#123;</span><br><span class="line">			g_p_lcd_controller_selected = p_array_lcd_controller[i];</span><br><span class="line">			<span class="keyword">return</span> i;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">-1</span>;		</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 向上: 接收不同LCD的参数</span></span><br><span class="line"><span class="comment"> * 向下: 使用这些参数设置对应的LCD控制器</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">lcd_controller_init</span><span class="params">(p_lcd_params plcdparams)</span> &#123;</span><br><span class="line">	<span class="comment">/* 调用所选择的LCD控制器的初始化函数 */</span></span><br><span class="line">	<span class="keyword">if</span> (g_p_lcd_controller_selected) &#123;</span><br><span class="line">		g_p_lcd_controller_selected-&gt;init(plcdparams);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">lcd_controller_enable</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> (g_p_lcd_controller_selected)</span><br><span class="line">		g_p_lcd_controller_selected-&gt;enable();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">lcd_controller_disable</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="keyword">if</span> (g_p_lcd_controller_selected)</span><br><span class="line">		g_p_lcd_controller_selected-&gt;disable();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>下面详细分析lcd_controller.c框架的含义以及作用：</p>
-<ol>
-<li>开始定义了一个p_array_lcd_controller数组和g_p_lcd_controller_selected，p_array_lcd_controller数组表示lcd控制器的集合，g_p_lcd_controller_selected表示被选中的那一个lcd_controller;</li>
-<li>当我们初始化时要先调用register_lcd_controller，select_lcd_controller选中具体的lcd_controller；</li>
-<li>然后才能调用lcd_controller_init初始化具体的lcd_controller，去控制具体型号的lcd。</li>
-</ol>
-<p>同理，也通过lcd.c去管理lcd_4.3.c,思路如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a. 有一个数组存放各类lcd的参数；</span><br><span class="line">b. 有一个register_lcd给下面的lcd程序来设置数组；</span><br><span class="line">c. 有一个select_lcd，供上层选择某款LCD；</span><br></pre></td></tr></table></figure>
-<h3><span id="3-3-2-ju-ti-xing-hao-lcd-guan-li-ldc-c">3.3.2 具体型号LCD管理-ldc.c</span><a href="#3-3-2-ju-ti-xing-hao-lcd-guan-li-ldc-c" class="header-anchor">#</a></h3><p>参考前面的lcd_controller.c编辑lcd.c如下:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> LCD_NUM 10</span></span><br><span class="line"><span class="type">static</span> p_lcd_params p_array_lcd[LCD_NUM];</span><br><span class="line"><span class="type">static</span> p_lcd_params g_p_lcd_selected;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">register_lcd</span><span class="params">(p_lcd_params plcd)</span> &#123;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; LCD_NUM; i++) &#123;</span><br><span class="line">		<span class="keyword">if</span> (!p_array_lcd[i]) &#123;</span><br><span class="line">			p_array_lcd[i] = plcd;</span><br><span class="line">			<span class="keyword">return</span> i;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">-1</span>;		</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">select_lcd</span><span class="params">(<span class="type">char</span> *name)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; LCD_NUM; i++) &#123;</span><br><span class="line">		<span class="keyword">if</span> (p_array_lcd[i] &amp;&amp; !<span class="built_in">strcmp</span>(p_array_lcd[i]-&gt;name, name)) &#123;</span><br><span class="line">			g_p_lcd_selected = p_array_lcd[i];</span><br><span class="line">			<span class="keyword">return</span> i;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">-1</span>;		</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">get_lcd_params</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> *fb_base, <span class="type">int</span> *xres, <span class="type">int</span> *yres, <span class="type">int</span> *bpp)</span> &#123;</span><br><span class="line">	*fb_base = g_p_lcd_selected-&gt;fb_base;</span><br><span class="line">	*xres = g_p_lcd_selected-&gt;xres;</span><br><span class="line">	*yres = g_p_lcd_selected-&gt;yres;</span><br><span class="line">	*bpp = g_p_lcd_selected-&gt;bpp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2><span id="3-4-lcd-chu-shi-hua">3.4 LCD初始化</span><a href="#3-4-lcd-chu-shi-hua" class="header-anchor">#</a></h2><h3><span id="3-4-1-chu-shi-hua-lcd-kong-zhi-qi">3.4.1 初始化lcd控制器</span><a href="#3-4-1-chu-shi-hua-lcd-kong-zhi-qi" class="header-anchor">#</a></h3><h4><span id="3-4-1-1-chu-shi-hua-yin-jiao">3.4.1.1 初始化引脚</span><a href="#3-4-1-1-chu-shi-hua-yin-jiao" class="header-anchor">#</a></h4><h5><span id="3-4-1-1-1-bei-guang-yin-jiao">3.4.1.1.1 背光引脚</span><a href="#3-4-1-1-1-bei-guang-yin-jiao" class="header-anchor">#</a></h5><p>我们配置LCD的背光引脚成输出模式：</p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/30.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">GPBCON &amp;= ~<span class="number">0x3</span>;</span><br><span class="line">GPBCON |= <span class="number">0x01</span>;</span><br></pre></td></tr></table></figure>
-
-<h5><span id="3-4-1-1-2-kong-zhi-yin-jiao-he-shu-ju-yin-jiao">3.4.1.1.2 控制引脚和数据引脚</span><a href="#3-4-1-1-2-kong-zhi-yin-jiao-he-shu-ju-yin-jiao" class="header-anchor">#</a></h5><p>然后再配置LCD的控制引脚和数据引脚，LCD控制引脚和数据引脚分别复用了GPC和GPD，如下图所示：</p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/31.png"><br><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/32.png"></p>
-<p>设置GPC, GPD均为0xaaaa,aaaa。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* LCD专用引脚 */</span></span><br><span class="line">GPCCON = <span class="number">0xaaaaaaaa</span>;</span><br><span class="line">GPDCON = <span class="number">0xaaaaaaaa</span>;</span><br></pre></td></tr></table></figure>
-
-<h5><span id="3-4-1-1-3-pwren-yin-jiao">3.4.1.1.3 PWREN引脚</span><a href="#3-4-1-1-3-pwren-yin-jiao" class="header-anchor">#</a></h5><p>设置GPG4成PWREN引脚</p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/33.png"><br><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/34.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">GPGCON |= (<span class="number">3</span>&lt;&lt;<span class="number">8</span>);</span><br></pre></td></tr></table></figure>
-
-<h4><span id="3-4-1-2-chu-shi-hua-lcd-kong-zhi-ji-cun-qi-di-zhi-ji-cun-qi">3.4.1.2 初始化LCD控制寄存器、地址寄存器</span><a href="#3-4-1-2-chu-shi-hua-lcd-kong-zhi-ji-cun-qi-di-zhi-ji-cun-qi" class="header-anchor">#</a></h4><p>前面介绍了LCDCON1，LCDCON2，LCDCON3…LCDSADDR1等寄存器，代码如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">s3c2440_lcd_controller_init</span><span class="params">(p_lcd_params plcdparams)</span> &#123;</span><br><span class="line">	<span class="comment">/* [17:8]: CLKVAL, vclk = HCLK / [(CLKVAL+1) x 2]</span></span><br><span class="line"><span class="comment">	 *                   如：9   = 100M /[(CLKVAL+1) x 2], 所以CLKVAL = 4.5 = 5</span></span><br><span class="line"><span class="comment">	 *                 CLKVAL = 100/vclk/2-1</span></span><br><span class="line"><span class="comment">	 * [6:5]: 0b11, tft lcd</span></span><br><span class="line"><span class="comment">	 * [4:1]: bpp mode</span></span><br><span class="line"><span class="comment">	 * [0]  : LCD video output and the logic enable/disable</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="type">int</span> clkval = (<span class="type">double</span>)HCLK/plcdparams-&gt;time_seq.vclk/<span class="number">2</span><span class="number">-1</span>+<span class="number">0.5</span>;</span><br><span class="line">	<span class="type">int</span> bppmode = plcdparams-&gt;bpp == <span class="number">8</span>  ? <span class="number">0xb</span> :\</span><br><span class="line">				  plcdparams-&gt;bpp == <span class="number">16</span> ? <span class="number">0xc</span> :\</span><br><span class="line">				  <span class="number">0xd</span>;  <span class="comment">/* 0xd: 24bpp */</span></span><br><span class="line">	LCDCON1 = (clkval&lt;&lt;<span class="number">8</span>) | (<span class="number">3</span>&lt;&lt;<span class="number">5</span>) | (bppmode&lt;&lt;<span class="number">1</span>) ;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* [31:24] : VBPD    = tvb - 1</span></span><br><span class="line"><span class="comment">	 * [23:14] : LINEVAL = line - 1</span></span><br><span class="line"><span class="comment">	 * [13:6]  : VFPD    = tvf - 1</span></span><br><span class="line"><span class="comment">	 * [5:0]   : VSPW    = tvp - 1</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	LCDCON2 = 	((plcdparams-&gt;time_seq.tvb - <span class="number">1</span>)&lt;&lt;<span class="number">24</span>) | \</span><br><span class="line">	            ((plcdparams-&gt;yres - <span class="number">1</span>)&lt;&lt;<span class="number">14</span>)         | \</span><br><span class="line">				((plcdparams-&gt;time_seq.tvf - <span class="number">1</span>)&lt;&lt;<span class="number">6</span>)  | \</span><br><span class="line">				((plcdparams-&gt;time_seq.tvp - <span class="number">1</span>)&lt;&lt;<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* [25:19] : HBPD	 = thb - 1</span></span><br><span class="line"><span class="comment">	 * [18:8]  : HOZVAL  = 列 - 1</span></span><br><span class="line"><span class="comment">	 * [7:0]   : HFPD	 = thf - 1</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	LCDCON3 =	((plcdparams-&gt;time_seq.thb - <span class="number">1</span>)&lt;&lt;<span class="number">19</span>) | \</span><br><span class="line">				((plcdparams-&gt;xres - <span class="number">1</span>)&lt;&lt;<span class="number">8</span>)		      | \</span><br><span class="line">				((plcdparams-&gt;time_seq.thf - <span class="number">1</span>)&lt;&lt;<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* </span></span><br><span class="line"><span class="comment">	 * [7:0]   : HSPW	 = thp - 1</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	LCDCON4 =	((plcdparams-&gt;time_seq.thp - <span class="number">1</span>)&lt;&lt;<span class="number">0</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* 用来设置引脚极性, 设置16bpp, 设置内存中象素存放的格式</span></span><br><span class="line"><span class="comment">     * [12] : BPP24BL</span></span><br><span class="line"><span class="comment">	 * [11] : FRM565, 1-565</span></span><br><span class="line"><span class="comment">	 * [10] : INVVCLK, 0 = The video data is fetched at VCLK falling edge</span></span><br><span class="line"><span class="comment">	 * [9]  : HSYNC是否反转</span></span><br><span class="line"><span class="comment">	 * [8]  : VSYNC是否反转</span></span><br><span class="line"><span class="comment">	 * [7]  : INVVD, rgb是否反转</span></span><br><span class="line"><span class="comment">	 * [6]  : INVVDEN</span></span><br><span class="line"><span class="comment">	 * [5]  : INVPWREN</span></span><br><span class="line"><span class="comment">	 * [4]  : INVLEND</span></span><br><span class="line"><span class="comment">	 * [3]  : PWREN, LCD_PWREN output signal enable/disable</span></span><br><span class="line"><span class="comment">	 * [2]  : ENLEND</span></span><br><span class="line"><span class="comment">	 * [1]  : BSWP</span></span><br><span class="line"><span class="comment">	 * [0]  : HWSWP</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line"></span><br><span class="line">	pixelplace = plcdparams-&gt;bpp == <span class="number">24</span> ? (<span class="number">0</span>) : |\</span><br><span class="line">	             plcdparams-&gt;bpp == <span class="number">16</span> ? (<span class="number">1</span>) : |\</span><br><span class="line">	             (<span class="number">1</span>&lt;&lt;<span class="number">1</span>);  <span class="comment">/* 8bpp */</span></span><br><span class="line">	LCDCON5 = (plcdparams-&gt;pins_pol.vclk&lt;&lt;<span class="number">10</span>) |\</span><br><span class="line">	          (plcdparams-&gt;pins_pol.rgb&lt;&lt;<span class="number">7</span>)   |\</span><br><span class="line">	          (plcdparams-&gt;pins_pol.hsync&lt;&lt;<span class="number">9</span>) |\</span><br><span class="line">	          (plcdparams-&gt;pins_pol.vsync&lt;&lt;<span class="number">8</span>) |\</span><br><span class="line"> 			  (plcdparams-&gt;pins_pol.de&lt;&lt;<span class="number">6</span>)    |\</span><br><span class="line">			  (plcdparams-&gt;pins_pol.pwren&lt;&lt;<span class="number">5</span>) |\</span><br><span class="line">			  (<span class="number">1</span>&lt;&lt;<span class="number">11</span>) | pixelplace;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* framebuffer地址 */</span></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	 * [29:21] : LCDBANK, A[30:22] of fb</span></span><br><span class="line"><span class="comment">	 * [20:0]  : LCDBASEU, A[21:1] of fb</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	addr = plcdparams-&gt;fb_base &amp; ~(<span class="number">1</span>&lt;&lt;<span class="number">31</span>);</span><br><span class="line">	LCDSADDR1 = (addr &gt;&gt; <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* </span></span><br><span class="line"><span class="comment">	 * [20:0] : LCDBASEL, A[21:1] of end addr</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	addr = plcdparams-&gt;fb_base + plcdparams-&gt;xres*plcdparams-&gt;yres*plcdparams-&gt;bpp/<span class="number">8</span>;</span><br><span class="line">	addr &gt;&gt;=<span class="number">1</span>;</span><br><span class="line">	addr &amp;= <span class="number">0x1fffff</span>;</span><br><span class="line">	LCDSADDR2 = addr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-
-<h4><span id="3-4-1-3-shi-neng-jin-yong-bei-guang-yin-jiao">3.4.1.3 使能、禁用背光引脚</span><a href="#3-4-1-3-shi-neng-jin-yong-bei-guang-yin-jiao" class="header-anchor">#</a></h4><p>根据背光电路背光引脚是GPB0，那么配置GPBDAT[0]置1，使能背光引脚，设置LCDCON5和<br>LCDCON1使能power enable和LCD输出，反之。代码如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">s3c2440_lcd_controller_enalbe</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="comment">/* 背光引脚 : GPB0 */</span></span><br><span class="line">	GPBDAT |= (<span class="number">1</span>&lt;&lt;<span class="number">0</span>);</span><br><span class="line">	<span class="comment">/* pwren    : 给LCD提供AVDD  */</span></span><br><span class="line">	LCDCON5 |= (<span class="number">1</span>&lt;&lt;<span class="number">3</span>);</span><br><span class="line">	<span class="comment">/* LCDCON1&#x27;BIT 0 : 设置LCD控制器是否输出信号 */</span></span><br><span class="line">	LCDCON1 |= (<span class="number">1</span>&lt;&lt;<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">s3c2440_lcd_controller_disable</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="comment">/* 背光引脚 : GPB0 */</span></span><br><span class="line">	GPBDAT &amp;= ~(<span class="number">1</span>&lt;&lt;<span class="number">0</span>);</span><br><span class="line">	<span class="comment">/* pwren	: 给LCD提供AVDD  */</span></span><br><span class="line">	LCDCON5 &amp;= ~(<span class="number">1</span>&lt;&lt;<span class="number">3</span>);</span><br><span class="line">	<span class="comment">/* LCDCON1&#x27;BIT 0 : 设置LCD控制器是否输出信号 */</span></span><br><span class="line">	LCDCON1 &amp;= ~(<span class="number">1</span>&lt;&lt;<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这样我们的s3c2440的lcd控制器初始化就编写完了，那么用户只要调用s3c2440_lcd_controller_init去设置LCD的属性即可。下面开始介绍如何设置LCD属性，让LCD控制器能够适应具体型号的LCD。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">lcd_controller</span> <span class="title">s3c2440_lcd_controller</span> =</span> &#123;</span><br><span class="line">	.name    = <span class="string">&quot;s3c2440&quot;</span>,</span><br><span class="line">	.init    = s3c2440_lcd_controller_init,</span><br><span class="line">	.enable  = s3c2440_lcd_controller_enalbe,</span><br><span class="line">	.disable = s3c2440_lcd_controller_disable,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<h3><span id="3-4-2-chu-shi-hua-lcd-she-bei">3.4.2 初始化lcd设备</span><a href="#3-4-2-chu-shi-hua-lcd-she-bei" class="header-anchor">#</a></h3><p>参考AT043TN24 LCD数据手册上的参数性能，见下表：</p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/35.png"></p>
-<p>配置lcd_params属性如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> LCD_FB_BASE 0x33c00000</span></span><br><span class="line">lcd_params lcd_4_3_params = &#123;</span><br><span class="line">	.name = <span class="string">&quot;lcd_4.3&quot;</span></span><br><span class="line">	.pins_polarity = &#123;</span><br><span class="line">		.de    = NORMAL,	<span class="comment">/* normal: 高电平时可以传输数据 */</span></span><br><span class="line">		.vclk  = NORMAL,	<span class="comment">/* normal: 在下降沿获取数据 */</span></span><br><span class="line">		.rgb   = NORMAL,	<span class="comment">/* normal: 高电平表示1 */</span></span><br><span class="line">		.hsync = INVERT,    <span class="comment">/* normal: 高脉冲 */</span></span><br><span class="line">		.vsync = INVERT, 	<span class="comment">/* normal: 高脉冲 */</span></span><br><span class="line">	&#125;,</span><br><span class="line">	.time_sequence = &#123;</span><br><span class="line">		<span class="comment">/* 垂直方向 */</span></span><br><span class="line">		.tvp=	<span class="number">10</span>, <span class="comment">/* vysnc脉冲宽度 */</span></span><br><span class="line">		.tvb=	<span class="number">2</span>,  <span class="comment">/* 上边黑框, Vertical Back porch */</span></span><br><span class="line">		.tvf=	<span class="number">2</span>,  <span class="comment">/* 下边黑框, Vertical Front porch */</span></span><br><span class="line"></span><br><span class="line">		<span class="comment">/* 水平方向 */</span></span><br><span class="line">		.thp=	<span class="number">41</span>, <span class="comment">/* hsync脉冲宽度 */</span></span><br><span class="line">		.thb=	<span class="number">2</span>,  <span class="comment">/* 左边黑框, Horizontal Back porch */</span></span><br><span class="line">		.thf=	<span class="number">2</span>,  <span class="comment">/* 右边黑框, Horizontal Front porch */</span></span><br><span class="line"></span><br><span class="line">		.vclk=	<span class="number">9</span>,  <span class="comment">/* MHz */</span></span><br><span class="line">	&#125;,</span><br><span class="line">	.xres = <span class="number">480</span>,</span><br><span class="line">	.yres = <span class="number">272</span>,</span><br><span class="line">	.bpp  = <span class="number">16</span>,</span><br><span class="line">	.fb_base = LCD_FB_BASE,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">.de表示数据输出使能引脚，高电平有效，所以配置成NORMAL；</span><br><span class="line">.pwren表示LCD_PWREN引脚，高电平有效；</span><br><span class="line">.vclk表示LCD的时钟，从手册的LCD时序图中可以看到下降沿有效，所以配置NORMAL；</span><br><span class="line">.rgb表示颜色数据的引脚极性，高电平表示<span class="number">1</span>，配置成NORMAL；</span><br><span class="line">.hsync表示行同步信号，normal表示高脉冲，参考手册发现该信号低脉冲有效，所以配置成INVERT；</span><br></pre></td></tr></table></figure>
-
-<p>什么是高低脉冲？</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">高脉冲：即从逻辑<span class="number">0</span>变化bai到逻辑du1再变化到逻辑<span class="number">0</span>，如此便是一个高脉zhi冲。在单片机中定义高脉冲就是让某个I/O先输出逻辑<span class="number">0</span>，接着保持一定的时间（延时），再输出逻辑<span class="number">1</span>，同样保持一定的时间（延时），最后再转变输出为逻辑<span class="number">0</span>+延时。</span><br><span class="line">低脉冲：反之</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">.vsync表示帧同步信号，同.hsync；</span><br><span class="line">.time_sequence时序设置参考上表配置。我们看到thf + thp + thb = <span class="number">2</span> + <span class="number">41</span> +<span class="number">2</span> = <span class="number">45</span> clk &gt; <span class="number">44</span> clk，满足上面的注意事项；</span><br><span class="line">.xres .yres表示分辨率</span><br><span class="line">.bpp表示像素点颜色模式</span><br><span class="line">.fb_base指定frame buffer的基地址</span><br></pre></td></tr></table></figure>
-
-<p>那么最终LCD初始化函数封装如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">lcd_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="comment">/* 注册LCD,把具体的LCD属性配置下去 */</span></span><br><span class="line">	register_lcd(&amp;lcd_4_3_params);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 注册LCD控制器 */</span></span><br><span class="line">	register_lcd_controller(&amp;s3c2440_lcd_controller);</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 选择某款LCD */</span></span><br><span class="line">	select_lcd(<span class="string">&quot;lcd_4.3&quot;</span>);</span><br><span class="line">	<span class="comment">/* 选择某款LCD控制器 */</span></span><br><span class="line">	select_lcd_controller(<span class="string">&quot;s3c2440&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 使用LCD的参数, 初始化LCD控制器 */</span></span><br><span class="line">	lcd_controller_init(g_p_lcd_selected);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>总结：我们可以看到，调用的函数都是一些通用型框架型接口，具体的实现本质还得根据硬件本身的特性来配置寄存器来驱动硬件工作。</p>
-<h2><span id="3-5-shi-xian-xian-shi-gong-neng">3.5 实现显示功能</span><a href="#3-5-shi-xian-xian-shi-gong-neng" class="header-anchor">#</a></h2><h3><span id="3-5-1-lcd-xian-shi-man-ping-hong-se">3.5.1 LCD显示满屏红色</span><a href="#3-5-1-lcd-xian-shi-man-ping-hong-se" class="header-anchor">#</a></h3><p>想要在LCD上显示出数据，所需步骤如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">a. 初始化LCD</span><br><span class="line">b. 使能LCD</span><br><span class="line">c. 获取LCD参数: fb_base, xres, yres, bpp</span><br><span class="line">d. 往framebuffer中写数据</span><br></pre></td></tr></table></figure>
-
-<h4><span id="3-5-1-1-chu-shi-hua-lcd">3.5.1.1 初始化LCD</span><a href="#3-5-1-1-chu-shi-hua-lcd" class="header-anchor">#</a></h4><p>前面已详细实现。</p>
-<h4><span id="3-5-1-2-shi-neng-lcd">3.5.1.2 使能LCD</span><a href="#3-5-1-2-shi-neng-lcd" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">lcd_enable</span><span class="params">()</span> &#123;</span><br><span class="line">	lcd_controller_enalbe(); <span class="comment">//会间接调用s3c2440_lcd_controller_enalbe</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4><span id="3-5-1-3-huo-qu-lcd-can-shu">3.5.1.3 获取LCD参数</span><a href="#3-5-1-3-huo-qu-lcd-can-shu" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">get_lcd_params</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> *fb_base, <span class="type">int</span> *xres, <span class="type">int</span> *yres, <span class="type">int</span> *bpp)</span> &#123;</span><br><span class="line">	*fb_base = g_p_lcd_selected-&gt;fb_base;</span><br><span class="line">	*xres = g_p_lcd_selected-&gt;xres;</span><br><span class="line">	*yres = g_p_lcd_selected-&gt;yres;</span><br><span class="line">	*bpp = g_p_lcd_selected-&gt;bpp;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4><span id="3-5-1-4-wang-framebuffer-zhong-xie-shu-ju">3.5.1.4 往framebuffer中写数据</span><a href="#3-5-1-4-wang-framebuffer-zhong-xie-shu-ju" class="header-anchor">#</a></h4><p>假设我们初始化配置了BPP&#x3D;16，那么如何让全屏显示红色？</p>
-<p>就需要从framebuffer基地址开始的整个屏幕的像素点都填充红色值。 对于16BPP，RGB&#x3D;565，想显示红色，即[15:11]全为1表示红色，[10:5]全为0表示无绿色，[4:0]全为0表示无蓝色，0b1111100000000000&#x3D;0xF800。<br>以基地址为起点，分别以xres和yres为边界，依次填充颜色。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">p = (<span class="type">unsigned</span> <span class="type">short</span> *)fb_base;</span><br><span class="line"><span class="keyword">for</span> (x = <span class="number">0</span>; x &lt; xres; x++)</span><br><span class="line">	<span class="keyword">for</span> (y = <span class="number">0</span>; y &lt; yres; y++)</span><br><span class="line">		*p++ = <span class="number">0xf800</span>;</span><br></pre></td></tr></table></figure>
-<p>假设我们初始化配置了BPP&#x3D;24 或者BPP &#x3D;32，那么如何让全屏显示红色？</p>
-<p>其实无论是24bpp还是32bpp，在frame buffer中每个像素点都占4 bytes，对于24BPP or 32 bpp，即RGB:888，每个颜色占8位，一共占据24位。代码如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">p = (<span class="type">unsigned</span> <span class="type">int</span> *)fb_base;</span><br><span class="line"><span class="keyword">for</span> (x = <span class="number">0</span>; x &lt; xres; x++)</span><br><span class="line">	<span class="keyword">for</span> (y = <span class="number">0</span>; y &lt; yres; y++)</span><br><span class="line">		*p++ = <span class="number">0xff0000</span>;</span><br></pre></td></tr></table></figure>
-<p>当Frame buffer中填满颜色数据时，LCD控制器会参照我们之前的配置将数据填充到LCD显示器上。那前面的24BPP、32BPP是怎样在 只能接收16BPP(硬件上只有16根数据线)的LCD上显示的呢？</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">这是因为在使用<span class="number">24B</span>PP时，发出的<span class="number">8</span>条红色，<span class="number">8</span>条绿色，<span class="number">8</span>条蓝色数据，只用了高<span class="number">5</span>条红色，高<span class="number">6</span>条绿色，高<span class="number">5</span>条蓝色与LCD相连。（前面LCD硬件原理的FrameBuffer和BPP概念有讲）</span><br></pre></td></tr></table></figure>
-
-<h2><span id="3-6-shi-xian-hui-zhi-dian-xian-yuan-han-shu">3.6 实现绘制点线圆函数</span><a href="#3-6-shi-xian-hui-zhi-dian-xian-yuan-han-shu" class="header-anchor">#</a></h2><h3><span id="3-6-1-hua-dian">3.6.1 画点</span><a href="#3-6-1-hua-dian" class="header-anchor">#</a></h3><p>无论是何种图形，都是基于点来构成的，因此我们需要先实现画点，其他的都是上层的一些数据处理了，像各种图形、甚至色彩鲜艳的图片无非都是一些由点构造出的数据而已。</p>
-<p>我们在在farmebuffer.c实现画点，在geomentry.c实现画线、画圆等几何图形，font.c实现画字。</p>
-<p>那么一个像素点要显示到lcd上，我们要知道它的位置坐标，然后还要知道它的颜色值，假设该像素点的坐标为（x,y）,那么该像素的地址为：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">（x,y）= fb_base + (xres*(bpp/<span class="number">8</span>))*y +x*bpp/<span class="number">8</span>;</span><br></pre></td></tr></table></figure>
-
-<p>那么所以在画点前需要先获取lcd参数：fb_base、xres、yres、bpp;</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> fb_base;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> xres, yres, bpp;</span><br><span class="line"><span class="type">void</span> <span class="title function_">fb_get_lcd_params</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	get_lcd_params(&amp;fb_base, &amp;xres, &amp;yres, &amp;bpp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>然后画点函数如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> fb_base;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> xres, yres, bpp;</span><br><span class="line"><span class="type">void</span> <span class="title function_">fb_put_pixel</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y, <span class="type">unsigned</span> <span class="type">int</span> color)</span> &#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span>  *pc;  <span class="comment">/* 8bpp */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">short</span> *pw;  <span class="comment">/* 16bpp */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span>   *pdw; <span class="comment">/* 32bpp */</span></span><br><span class="line"></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> pixel_base = fb_base + (xres * bpp / <span class="number">8</span>) * y + x * bpp / <span class="number">8</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">switch</span> (bpp) &#123; <span class="comment">//根据像素不同bpp格式，在Frame buffer中存放方式不一样，但对用户来说，不关心颜色格式，通通当做32位色颜色处理，所以这里需要做格式转换</span></span><br><span class="line">		<span class="keyword">case</span> <span class="number">8</span>:</span><br><span class="line">			pc = (<span class="type">unsigned</span> <span class="type">char</span> *) pixel_base;</span><br><span class="line">			*pc = color;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">16</span>:</span><br><span class="line">			pw = (<span class="type">unsigned</span> <span class="type">short</span> *) pixel_base;</span><br><span class="line">			*pw = convert32bppto16bpp(color);</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		<span class="keyword">case</span> <span class="number">32</span>:</span><br><span class="line">			pdw = (<span class="type">unsigned</span> <span class="type">int</span> *) pixel_base;</span><br><span class="line">			*pdw = color;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>用户传入的颜色数据一般都是32bit的，即格式为：0x00RRGGBB。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">对于<span class="number">8</span>PP，通过的是调色板索引实现的，这个后续再讲解，直接*pc = color即可（这样只取了高<span class="number">8</span>位，低精度的数据就丢了）。</span><br><span class="line">对于<span class="number">16</span>PP，那么需要进行颜色转换后再存放进frame buffer。</span><br><span class="line">对于<span class="number">32</span>PP，大小刚好对应，直接*pc = color即可。</span><br></pre></td></tr></table></figure>
-
-<h3><span id="3-6-2-32bppto16bpp-han-shu">3.6.2 32bppto16bpp函数</span><a href="#3-6-2-32bppto16bpp-han-shu" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//先分别取出RGB，再相应的清除低位数据，实现将RGB888变为RGB565</span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">short</span> <span class="title function_">convert32bppto16bpp</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> rgb)</span> &#123;</span><br><span class="line">	<span class="type">int</span> r = (rgb &gt;&gt; <span class="number">16</span>)&amp; <span class="number">0xff</span>;</span><br><span class="line">	<span class="type">int</span> g = (rgb &gt;&gt; <span class="number">8</span>) &amp; <span class="number">0xff</span>;</span><br><span class="line">	<span class="type">int</span> b = rgb &amp; <span class="number">0xff</span>;</span><br><span class="line">	<span class="comment">/* rgb565 */</span></span><br><span class="line">	r = r &gt;&gt; <span class="number">3</span>;<span class="comment">//取低5位</span></span><br><span class="line">	g = g &gt;&gt; <span class="number">2</span>;<span class="comment">//取低6位</span></span><br><span class="line">	b = b &gt;&gt; <span class="number">3</span>;<span class="comment">//取低5位</span></span><br><span class="line">	<span class="keyword">return</span> ((r&lt;&lt;<span class="number">11</span>) | (g&lt;&lt;<span class="number">5</span>) | (b));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3><span id="3-6-3-hua-xian-hua-yuan">3.6.3 画线画圆</span><a href="#3-6-3-hua-xian-hua-yuan" class="header-anchor">#</a></h3><p>画圆画线的具体原理不是本主题的重点，这些属于研究算法的范畴了，比如这里就有现成的算法可以用，如这篇博客：<a target="_blank" rel="noopener" href="https://blog.csdn.net/p1126500468/article/details/50428613">https://blog.csdn.net/p1126500468/article/details/50428613</a>，里面有画圆画线的函数实现，直接使用就可以了，套用画点的”轮子”就可以了。</p>
-<h3><span id="3-6-4-ce-shi">3.6.4 测试</span><a href="#3-6-4-ce-shi" class="header-anchor">#</a></h3><p>新建一个geometry.c，复制博客中代码，替换里面的描点显示函数即可。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 画线 */</span></span><br><span class="line">draw_line(<span class="number">0</span>, <span class="number">0</span>, xres - <span class="number">1</span>, <span class="number">0</span>, <span class="number">0xff0000</span>); <span class="comment">//(0,0) 到（xres - 1, 0）两点间的线</span></span><br><span class="line">draw_line(xres - <span class="number">1</span>, <span class="number">0</span>, xres - <span class="number">1</span>, yres - <span class="number">1</span>, <span class="number">0xffff00</span>);</span><br><span class="line">draw_line(<span class="number">0</span>, yres - <span class="number">1</span>, xres - <span class="number">1</span>, yres - <span class="number">1</span>, <span class="number">0xff00aa</span>);</span><br><span class="line">draw_line(<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, yres - <span class="number">1</span>, <span class="number">0xff00ef</span>);</span><br><span class="line">draw_line(<span class="number">0</span>, <span class="number">0</span>, xres - <span class="number">1</span>, yres - <span class="number">1</span>, <span class="number">0xff4500</span>);</span><br><span class="line">draw_line(xres - <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, yres - <span class="number">1</span>, <span class="number">0xff0780</span>);</span><br><span class="line"></span><br><span class="line">delay(<span class="number">1000000</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 画圆 */</span></span><br><span class="line">draw_circle(xres/<span class="number">2</span>, yres/<span class="number">2</span>, yres/<span class="number">4</span>, <span class="number">0xff00</span>);</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/36.jpg"></p>
-<h2><span id="3-7-zi-fu-ku-yi-zhi">3.7 字符库移植</span><a href="#3-7-zi-fu-ku-yi-zhi" class="header-anchor">#</a></h2><p>字符也是由点构成的，一个个点组成的点阵，其实本质上要显示文字就是把字库移植到对应的自己型号相匹配的board上，字库中的每一个字符都是一些点按照对应格式组合成的集合。</p>
-<p>从linux内核源码中随便挑选一个字库文件，比如linux-4.18.16&#x2F;lib&#x2F;fonts这个目录下就有对应的很多字库文件。在这里我挑选font_8x16.c，如下图：</p>
-<p><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/37.png"></p>
-<p>其中8x16表示每个字符所占的像素点的大小，表示每个字符占的大小为长*宽&#x3D;8*16个像素点。</p>
-<p>我们来看下一个字符’A’是如何显示的？从font_8x16.c我们找到字符’A’的数据，如下图：<br><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/38.png"><br><img src="/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/39.png"><br>那么我们如何让font_8x16.c这个字库的数据显示到lcd上呢？font_8x16.c见附件。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">a. 根据要显示的字符的ascii码作为索引，在fontdata_8x16中得到点阵数据</span></span><br><span class="line"><span class="comment">b. 根据点阵来设置对应象素的颜色</span></span><br><span class="line"><span class="comment">c. 根据点阵的某位决定是否描颜色</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">fb_print_char</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y, <span class="type">char</span> c, <span class="type">unsigned</span> <span class="type">int</span> color)</span> &#123;</span><br><span class="line">	<span class="type">int</span> i, j;</span><br><span class="line">	<span class="comment">/* 根据c的ascii码作为索引在fontdata_8x16中得到点阵数据（fontdata_8x16是字库的数据集合）*/</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> *dots = &amp;fontdata_8x16[c * <span class="number">16</span>];</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> data;</span><br><span class="line">	<span class="type">int</span> bit;</span><br><span class="line">	<span class="comment">/* 根据点阵来设置对应象素的颜色 */</span></span><br><span class="line">	<span class="keyword">for</span> (j = y; j &lt; y+<span class="number">16</span>; j++) &#123;</span><br><span class="line">		data = *dots++;</span><br><span class="line">		bit = <span class="number">7</span>;</span><br><span class="line">		<span class="keyword">for</span> (i = x; i &lt; x+<span class="number">8</span>; i++) &#123;</span><br><span class="line">			<span class="comment">/* 根据点阵的某位决定是否描颜色 */</span></span><br><span class="line">			<span class="keyword">if</span> (data &amp; (<span class="number">1</span>&lt;&lt;bit))</span><br><span class="line">				fb_put_pixel(i, j, color);</span><br><span class="line">			bit--;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>在font_8x16.c里面，每个字符占据16字节，因此想要根据ascii码找到对应的点阵数据，需要对应的乘16，再取地址，得到该字符的首地址。</p>
-<p>在显示之前，还需要获取LCD参数：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="type">const</span> <span class="type">unsigned</span> <span class="type">char</span> fontdata_8x16[];</span><br><span class="line"><span class="comment">/* 获得LCD参数 */</span></span><br><span class="line"><span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> fb_base;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> xres, yres, bpp;</span><br><span class="line"><span class="type">void</span> <span class="title function_">font_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	get_lcd_params(&amp;fb_base, &amp;xres, &amp;yres, &amp;bpp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h3><span id="3-7-1-xian-shi-zi-fu-chuan">3.7.1 显示字符串</span><a href="#3-7-1-xian-shi-zi-fu-chuan" class="header-anchor">#</a></h3><p>如果想显示字符串，那就在每显示完一个字符后，x轴加8即可，同时考虑是否超出屏幕显示范围进行换行处理：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* &quot;abc\n\r123&quot; */</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">fb_print_string</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y, <span class="type">char</span>* str, <span class="type">unsigned</span> <span class="type">int</span> color)</span> &#123;</span><br><span class="line">    	<span class="type">int</span> i = <span class="number">0</span>, j;</span><br><span class="line">    	<span class="keyword">while</span> (str[i]) &#123;</span><br><span class="line">        		<span class="keyword">if</span> (str[i] == <span class="string">&#x27;\n&#x27;</span>)</span><br><span class="line">            			y = y+<span class="number">16</span>;</span><br><span class="line">        		<span class="keyword">else</span> <span class="keyword">if</span> (str[i] == <span class="string">&#x27;\r&#x27;</span>)</span><br><span class="line">            			x = <span class="number">0</span>;</span><br><span class="line">        		<span class="keyword">else</span> &#123;</span><br><span class="line">            			fb_print_char(x, y, str[i], color);</span><br><span class="line">            			x = x+<span class="number">8</span>;</span><br><span class="line">            			<span class="keyword">if</span> (x &gt;= xres) &#123;</span><br><span class="line">                				x = <span class="number">0</span>;</span><br><span class="line">                				y = y+<span class="number">16</span>;</span><br><span class="line">            			&#125;</span><br><span class="line">        		&#125;</span><br><span class="line">        		i++;</span><br><span class="line">    	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/" data-id="clyvr7idl001pwkuf6xts2219" data-title="s3c2440裸机编程-LDC" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li></ul>
 
     </footer>
   </div>
@@ -2200,7 +2161,7 @@ LINE：有些地方叫做 tvd，显示一帧有效数据所需的时间，假如
   <div class="widget-wrap">
     <h3 class="widget-title">Tags</h3>
     <div class="widget">
-      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">linux内存管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">linux内存管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
     </div>
   </div>
 
@@ -2210,7 +2171,7 @@ LINE：有些地方叫做 tvd，显示一帧有效数据所需的时间，假如
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.89px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.67px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 14.44px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.78px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.22px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15.56px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.67px;">外设驱动</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.22px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.22px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.33px;">通信协议</a>
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 10px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.89px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.67px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 14.44px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.78px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.22px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15.56px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.22px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.22px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.67px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.33px;">通信协议</a>
     </div>
   </div>
 
@@ -2232,6 +2193,10 @@ LINE：有些地方叫做 tvd，显示一帧有效数据所需的时间，假如
       <ul>
         
           <li>
+            <a href="/2024/07/24/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-1-GPIO%E9%A9%B1%E5%8A%A8LED%E7%A4%BA%E4%BE%8B/">字符设备驱动-1-GPIO驱动LED示例</a>
+          </li>
+        
+          <li>
             <a href="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/">Linux内核-kmalloc与vmalloc及CMA内存</a>
           </li>
         
@@ -2245,10 +2210,6 @@ LINE：有些地方叫做 tvd，显示一帧有效数据所需的时间，假如
         
           <li>
             <a href="/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">Linux内核启动流程</a>
-          </li>
-        
-          <li>
-            <a href="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/">Linux内核Makefile编译过程</a>
           </li>
         
       </ul>
