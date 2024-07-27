@@ -36,8 +36,11 @@
 <meta property="og:image" content="http://example.com/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/21.png">
 <meta property="og:image" content="http://example.com/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/22.png">
 <meta property="og:image" content="http://example.com/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/23.png">
+<meta property="og:image" content="http://example.com/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/24.png">
+<meta property="og:image" content="http://example.com/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/25.png">
+<meta property="og:image" content="http://example.com/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/26.png">
 <meta property="article:published_time" content="2024-07-21T06:45:55.000Z">
-<meta property="article:modified_time" content="2024-07-21T16:13:10.931Z">
+<meta property="article:modified_time" content="2024-07-27T12:08:46.742Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="linux内核">
 <meta property="article:tag" content="linux系统构建">
@@ -182,6 +185,7 @@
 <li><a href="#5-2-huo-de-reserved-memory-fan-wei">5.2 获得reserved-memory范围</a></li>
 </ul>
 </li>
+<li><a href="#6-dts-de-reserved-memory-nei-rong-jie-xi">6 dts的reserved-memory内容解析</a></li>
 </ul>
 <!-- tocstop -->
 
@@ -320,6 +324,7 @@
 <h2><span id="5-2-huo-de-reserved-memory-fan-wei">5.2 获得reserved-memory范围</span><a href="#5-2-huo-de-reserved-memory-fan-wei" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cat</span> /sys/kernel/debug/memblock/reserved </span><br><span class="line">   0: 0x10004000..0x10007fff</span><br><span class="line">   1: 0x10100000..0x10960677</span><br><span class="line">   2: 0x12000000..0x127fffff</span><br><span class="line">   3: 0x1579b000..0x157a1fff</span><br><span class="line">   4: 0x17ea1cc0..0x17eb9fc3</span><br><span class="line">   5: 0x17eba000..0x17ee0fff</span><br><span class="line">   6: 0x17ee3180..0x17ee347f</span><br><span class="line">   7: 0x17ee34b0..0x17ffefff</span><br><span class="line">   8: 0x17fff100..0x17fff177</span><br><span class="line">   9: 0x17fff180..0x17fff1c4</span><br><span class="line">  10: 0x17fff200..0x17fff23b</span><br><span class="line">  11: 0x17fff240..0x17fff3c3</span><br><span class="line">  12: 0x17fff400..0x17fff5c4</span><br><span class="line">  13: 0x17fff600..0x17fff677</span><br><span class="line">  14: 0x17fff680..0x17fff68b</span><br><span class="line">  15: 0x17fff6c0..0x17fff6cb</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
 
 <p>通过这个命令可以知道系统已预留的内存信息，这些已预留的内存信息不可使用。</p>
+<h1><span id="6-dts-de-reserved-memory-nei-rong-jie-xi">6 dts的reserved-memory内容解析</span><a href="#6-dts-de-reserved-memory-nei-rong-jie-xi" class="header-anchor">#</a></h1><p>通常使用memory-region将设备和reserved memory 关联起，cvifb 通过 memory-region 关联到 fb_reserved 这块 reserved memory 上面.<br><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/24.png" alt="image"><br><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/25.png" alt="image"><br>通过<code>cvifb</code>节点的<code>memory-region</code>属性找到<code>reserved-memory</code>，<code>of_reserved_mem_lookup</code>根据关联的<code>reserved-momory</code>节点找到预留内存地址.<br><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/26.png" alt="image"></p>
 
       
     </div>
@@ -378,7 +383,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 10px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.89px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.67px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 14.44px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.78px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.22px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15.56px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.22px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.22px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.67px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.33px;">通信协议</a>
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 11.11px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.89px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.67px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 14.44px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.78px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.22px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15.56px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.22px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.22px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.67px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.33px;">通信协议</a>
     </div>
   </div>
 
@@ -400,6 +405,10 @@
       <ul>
         
           <li>
+            <a href="/2024/07/26/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-2-%E6%80%BB%E7%BA%BF%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%B9%B3%E5%8F%B0%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/">字符设备驱动-2-总线模型和平台设备驱动</a>
+          </li>
+        
+          <li>
             <a href="/2024/07/24/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-1-GPIO%E9%A9%B1%E5%8A%A8LED%E7%A4%BA%E4%BE%8B/">字符设备驱动-1-GPIO驱动LED示例</a>
           </li>
         
@@ -413,10 +422,6 @@
         
           <li>
             <a href="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/">Linux内核-rootfs构建移植</a>
-          </li>
-        
-          <li>
-            <a href="/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">Linux内核启动流程</a>
           </li>
         
       </ul>
