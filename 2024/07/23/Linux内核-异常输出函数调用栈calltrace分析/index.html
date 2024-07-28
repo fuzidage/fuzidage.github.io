@@ -9,34 +9,34 @@
   <meta name="description" content="1 dump_stack函数 2 内核态异常call trace等级 2.1 WARN_ON函数 2.2 BUG_ON函数 2.3 panic函数   3 Ftrace工具集 3.1 Ftrace是如何记录信息的 3.1.1 静态插桩 3.1.2 动态插桩   3.2 使能Ftrace 3.2.1 挂载debugfs   3.3 Ftrace 使用 3.3.1 &#x2F;sys&amp;#x2">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux内核-异常输出函数调用栈calltrace分析">
-<meta property="og:url" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/index.html">
+<meta property="og:url" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/index.html">
 <meta property="og:site_name" content="Hexo">
 <meta property="og:description" content="1 dump_stack函数 2 内核态异常call trace等级 2.1 WARN_ON函数 2.2 BUG_ON函数 2.3 panic函数   3 Ftrace工具集 3.1 Ftrace是如何记录信息的 3.1.1 静态插桩 3.1.2 动态插桩   3.2 使能Ftrace 3.2.1 挂载debugfs   3.3 Ftrace 使用 3.3.1 &#x2F;sys&amp;#x2">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/1.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/2.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/3.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/4.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/5.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/6.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/7.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/8.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/9.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/10.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/11.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/12.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/13.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/14.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/15.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/16.png">
-<meta property="og:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/17.png">
-<meta property="article:published_time" content="2024-07-27T14:36:29.000Z">
-<meta property="article:modified_time" content="2024-07-28T09:10:13.143Z">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/1.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/2.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/3.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/4.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/5.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/6.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/7.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/8.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/9.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/10.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/11.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/12.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/13.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/14.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/15.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/16.png">
+<meta property="og:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/17.png">
+<meta property="article:published_time" content="2024-07-23T14:36:29.000Z">
+<meta property="article:modified_time" content="2024-07-28T09:53:15.053Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="linux内核">
 <meta property="article:tag" content="linux系统构建">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/1.png">
+<meta name="twitter:image" content="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/1.png">
   
     <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
   
@@ -93,8 +93,8 @@
       <div class="outer">
         <section id="main"><article id="post-Linux内核-异常输出函数调用栈calltrace分析" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
-    <a href="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/" class="article-date">
-  <time class="dt-published" datetime="2024-07-27T14:36:29.000Z" itemprop="datePublished">2024-07-27</time>
+    <a href="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/" class="article-date">
+  <time class="dt-published" datetime="2024-07-23T14:36:29.000Z" itemprop="datePublished">2024-07-23</time>
 </a>
     
   </div>
@@ -168,27 +168,27 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/delay.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">aaa</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    printk(KERN_EMERG <span class="string">&quot;aaa\n&quot;</span>);</span><br><span class="line">    dump_stack();</span><br><span class="line">    msleep(<span class="number">100</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">bbb</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    printk(KERN_EMERG <span class="string">&quot;bbb\n&quot;</span>);</span><br><span class="line">    aaa();</span><br><span class="line">    msleep(<span class="number">100</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">ccc</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    printk(KERN_EMERG <span class="string">&quot;ccc\n&quot;</span>);</span><br><span class="line">    bbb();</span><br><span class="line">    msleep(<span class="number">100</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">ddd</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    printk(KERN_EMERG <span class="string">&quot;ddd\n&quot;</span>);</span><br><span class="line">    msleep(<span class="number">100</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">chrdevTest_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    printk(KERN_EMERG <span class="string">&quot;INIT func\r\n&quot;</span>);</span><br><span class="line">    ccc();</span><br><span class="line">    ddd();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> __exit <span class="title function_">chrdevTest_exit</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    printk(KERN_EMERG <span class="string">&quot;EXIT func\r\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line">module_init(chrdevTest_init);</span><br><span class="line">module_exit(chrdevTest_exit);</span><br><span class="line">MODULE_LICENSE(<span class="string">&quot;GPL&quot;</span>);</span><br></pre></td></tr></table></figure>
 
 <p>可以看到当打印完<code>aaa</code>后开始<code>dump_stack</code>, 打印出函数调用栈。</p>
-<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/1.png" alt="image-20240727224310304"></p>
+<p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/1.png" alt="image-20240727224310304"></p>
 <h1><span id="2-nei-he-tai-yi-chang-call-trace-deng-ji">2 内核态异常call trace等级</span><a href="#2-nei-he-tai-yi-chang-call-trace-deng-ji" class="header-anchor">#</a></h1><p>内核态call trace 有三种出错情况，分别是<code>bug</code>, <code>oops</code>和<code>panic</code>。</p>
 <p>1、 <code>bug</code>- <strong>bug只是提示警告</strong>。<br><code>BUG: sleeping function called from invalid context at …</code>, 比如在原子上下文中休眠，总断服务函数休眠，spin_lock中进行might_sleep等。</p>
 <p>我在某个设备驱动的中断处理函数 <code>XXX_ISR()</code> 里加了 <code>msleep(10) </code>之后：</p>
-<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/2.png" alt="image-20240727230940026"></p>
+<p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/2.png" alt="image-20240727230940026"></p>
 <p>可以看到跑出了BUG打印，为什么是<code>BUG: scheduling while atomic</code>呢？而不是<code>BUG: sleeping function called from invalid context at …</code></p>
 <p>那是因为在原子上文中发生了调度，我们调用might_sleep是会时间片到了啊，让出CPU自然就进行了schedule。</p>
 <p><code>BUG: spinlock bad magic on CPU</code>错误表示自旋锁使用时没有初始化。</p>
 <p>2、 <code>Oops</code>- <strong>oops会终止进程，但是不会系统崩溃</strong>。<br>程序在内核态进入一种异常情况，比如引用非法指针导致的数据异常，数组越界导致的取指异常，此时异常处理机制能够捕获此异常，并将系统关键信息打印到串口上，正常情况下Oops消息会被记录到系统日志中去。</p>
 <p>3、<code> Panic</code> -<strong>panic系统崩溃</strong>。<br>当Oops发生在中断上下文中或者在进程0和1中，系统将彻底挂起，因为中断服务程序异常后，将无法恢复，这种情况即称为内核panic。</p>
 <h2><span id="2-1-warn-on-han-shu">2.1  WARN_ON函数</span><a href="#2-1-warn-on-han-shu" class="header-anchor">#</a></h2><p>我们把上面的实验<code>aaa</code>函数中<code>dump_stack</code>改成<code>WARN_ON(1)</code>函数。可以看到<code>WARN_ON(1)</code>就是调用了<code>dump_stack</code>，多了绿色打印部分而已:</p>
-<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/3.png" alt="image-20240727232452233"></p>
-<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/4.png" alt="image-20240727232843642"></p>
+<p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/3.png" alt="image-20240727232452233"></p>
+<p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/4.png" alt="image-20240727232843642"></p>
 <p>注意只有当<code>condition=1</code>时才会真正调用<code>__warn</code>:</p>
-<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/5.png" alt=":"></p>
+<p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/5.png" alt=":"></p>
 <h2><span id="2-2-bug-on-han-shu">2.2 BUG_ON函数</span><a href="#2-2-bug-on-han-shu" class="header-anchor">#</a></h2><p><code>BUG_ON</code>这句，一旦执行就会抛出<code>oops</code>，导致栈的回溯和错误信息的打印，大部分体系结构把<code>BUG()</code>和<code>BUG_ON()</code>定义成某种非法操作，这样自然会产生需要的oops。类似一种断言，让进程终止。我们把上面的实验<code>aaa</code>函数中<code>dump_stack</code>改成<code>BUG_ON(1)</code>函数:</p>
-<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/6.png" alt="image-20240727233540771"></p>
+<p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/6.png" alt="image-20240727233540771"></p>
 <h2><span id="2-3-panic-han-shu">2.3 panic函数</span><a href="#2-3-panic-han-shu" class="header-anchor">#</a></h2><p>当Oops发生在中断上下文中或者在进程0和1中，系统将彻底挂起，因为中断服务程序异常后，将无法恢复，这种情况即称为内核panic</p>
 <h1><span id="3-ftrace-gong-ju-ji">3 Ftrace工具集</span><a href="#3-ftrace-gong-ju-ji" class="header-anchor">#</a></h1><p><code>Ftrace</code>是<code>Function Trace</code>的简写。它是一个内核函数追踪工具，旨在帮助内核设计和开发人员去追踪系统内部的函数调用流程。</p>
 <p>还可以用来调试和分析系统的延迟和性能问题，并发展成为一个追踪类调试工具的框架：</p>
-<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/7.png" alt="image-20240728145336807"></p>
+<p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/7.png" alt="image-20240728145336807"></p>
 <p>可以看到还包括了用户态的<code>ltrace</code>和<code>ftrace</code>。</p>
 <h2><span id="3-1-ftrace-shi-ru-he-ji-lu-xin-xi-de">3.1 Ftrace是如何记录信息的</span><a href="#3-1-ftrace-shi-ru-he-ji-lu-xin-xi-de" class="header-anchor">#</a></h2><p><code>Ftrace</code>采用了静态插桩和动态插桩两种方式来实现。</p>
 <h3><span id="3-1-1-jing-tai-cha-zhuang">3.1.1 静态插桩</span><a href="#3-1-1-jing-tai-cha-zhuang" class="header-anchor">#</a></h3><p><code>Kernel</code>中打开了<code>CONFIG_FUNCTION_TRACER</code>功能后，会增加一个<code>-pg</code>的一个编译选项，这样每个函数入口处，都会插入<code>bl mcount</code>跳转指令，使得每个函数运行时都会进入<code>mcount</code>函数。</p>
@@ -205,11 +205,11 @@
 
 <h3><span id="3-2-1-gua-zai-debugfs">3.2.1 挂载debugfs</span><a href="#3-2-1-gua-zai-debugfs" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#用户态需要挂载debugfs,or通过配置修改etc/fstab文件</span></span><br><span class="line">mount -t debugfs none /sys/kernel/debug</span><br><span class="line">或者 mount -t tracefs nodev /sys/kernel/tracing</span><br></pre></td></tr></table></figure>
 
-<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/8.png" alt="img"></p>
+<p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/8.png" alt="img"></p>
 <p>我们能够在<code>/sys/kernel/debug</code>下看到内核支持的所有的调试信息:</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cd /sys/kernel/debug/</span></span><br><span class="line"><span class="comment"># ls</span></span><br><span class="line"> asoc                gpio                regmap</span><br><span class="line"> bdi                 ieee80211           sched_debug</span><br><span class="line"> block               memblock            sched_features</span><br><span class="line"> clk                 mmc0                sleep_time</span><br><span class="line"> device_component    mmc1                suspend_stats</span><br><span class="line"> devices_deferred    mtd                 tracing</span><br><span class="line"> dma_buf             opp                 ubi</span><br><span class="line"> extfrag             pinctrl             ubifs</span><br><span class="line"> fault_around_bytes  pm_qos              wakeup_sources</span><br></pre></td></tr></table></figure>
 
-<h2><span id="3-3-ftrace-shi-yong">3.3 Ftrace 使用</span><a href="#3-3-ftrace-shi-yong" class="header-anchor">#</a></h2><h3><span id="3-3-1-x2f-sys-x2f-kernel-x2f-tracing-jie-shao">3.3.1 &#x2F;sys&#x2F;kernel&#x2F;tracing介绍</span><a href="#3-3-1-x2f-sys-x2f-kernel-x2f-tracing-jie-shao" class="header-anchor">#</a></h3><p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/9.png" alt="image-20240728163630564"></p>
+<h2><span id="3-3-ftrace-shi-yong">3.3 Ftrace 使用</span><a href="#3-3-ftrace-shi-yong" class="header-anchor">#</a></h2><h3><span id="3-3-1-x2f-sys-x2f-kernel-x2f-tracing-jie-shao">3.3.1 &#x2F;sys&#x2F;kernel&#x2F;tracing介绍</span><a href="#3-3-1-x2f-sys-x2f-kernel-x2f-tracing-jie-shao" class="header-anchor">#</a></h3><p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/9.png" alt="image-20240728163630564"></p>
 <h3><span id="3-3-2-trace-he-trace-pipe-shi-yong">3.3.2 trace和trace_pipe使用</span><a href="#3-3-2-trace-he-trace-pipe-shi-yong" class="header-anchor">#</a></h3><p><code>cat trace_pipe</code>是堵塞读取，有数据就读，没数据就等待。</p>
 <p>打开关闭追踪：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">echo <span class="number">1</span> &gt; tracing_on             <span class="comment">// 打开跟踪</span></span><br><span class="line">do_someting</span><br><span class="line">echo <span class="number">0</span> &gt; tracing_on             <span class="comment">// 关闭跟踪</span></span><br></pre></td></tr></table></figure>
@@ -218,9 +218,9 @@
 
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">cat current_tracer                    <span class="comment">// 查看当前追踪器</span></span><br><span class="line">cat available_tracers                 <span class="comment">// 查看当前内核中可用跟踪器</span></span><br><span class="line">cat available_events                  <span class="comment">// 查看当前内核中可用事件</span></span><br><span class="line">cat available_filter_functions        </span><br><span class="line"><span class="comment">// 查看当前内核中可用函数,可以被追踪的函数列表，</span></span><br><span class="line"><span class="comment">// 即可以写到 set_ftrace_filter，set_ftrace_notrace，set_graph_function，</span></span><br><span class="line"><span class="comment">// set_graph_notrace 文件的函数列表</span></span><br><span class="line"></span><br><span class="line">echo function &gt; current_tracer        <span class="comment">// 选用 function 追踪器，</span></span><br><span class="line">echo function_graph &gt; current_tracer  <span class="comment">// 选用 function_graph 追踪器，</span></span><br><span class="line">echo [func] &gt; set_ftrace_filter       <span class="comment">// 选择追踪指定 [func] 函数的调用栈</span></span><br><span class="line">echo [pid] &gt; set_ftrace_pid           <span class="comment">// 选择追踪指定 [pid] 进程的调用栈</span></span><br></pre></td></tr></table></figure>
 
-<h4><span id="3-3-2-1-xuan-yong-han-shu-zhui-zong">3.3.2.1 选用函数追踪</span><a href="#3-3-2-1-xuan-yong-han-shu-zhui-zong" class="header-anchor">#</a></h4><p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/10.png" alt="image-20240728153553129"></p>
-<h4><span id="3-3-2-2-xuan-yong-tu-xiang-hua-han-shu-zhui-zong">3.3.2.2 选用图像化函数追踪</span><a href="#3-3-2-2-xuan-yong-tu-xiang-hua-han-shu-zhui-zong" class="header-anchor">#</a></h4><p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/11.png" alt="image-20240728153651223"></p>
-<h4><span id="3-3-2-3-xuan-yong-dong-tai-guo-lu-zhui-zong">3.3.2.3 选用动态过滤追踪</span><a href="#3-3-2-3-xuan-yong-dong-tai-guo-lu-zhui-zong" class="header-anchor">#</a></h4><p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/12.png" alt="image-20240728155333300"></p>
+<h4><span id="3-3-2-1-xuan-yong-han-shu-zhui-zong">3.3.2.1 选用函数追踪</span><a href="#3-3-2-1-xuan-yong-han-shu-zhui-zong" class="header-anchor">#</a></h4><p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/10.png" alt="image-20240728153553129"></p>
+<h4><span id="3-3-2-2-xuan-yong-tu-xiang-hua-han-shu-zhui-zong">3.3.2.2 选用图像化函数追踪</span><a href="#3-3-2-2-xuan-yong-tu-xiang-hua-han-shu-zhui-zong" class="header-anchor">#</a></h4><p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/11.png" alt="image-20240728153651223"></p>
+<h4><span id="3-3-2-3-xuan-yong-dong-tai-guo-lu-zhui-zong">3.3.2.3 选用动态过滤追踪</span><a href="#3-3-2-3-xuan-yong-dong-tai-guo-lu-zhui-zong" class="header-anchor">#</a></h4><p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/12.png" alt="image-20240728155333300"></p>
 <h4><span id="3-3-2-4-zhui-zong-te-ding-jin-cheng">3.3.2.4 追踪特定进程</span><a href="#3-3-2-4-zhui-zong-te-ding-jin-cheng" class="header-anchor">#</a></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"> <span class="built_in">echo</span> 0 &gt; tracing_on                                 <span class="comment"># 关闭追踪器</span></span><br><span class="line"> <span class="built_in">echo</span> <span class="keyword">function</span> &gt; current_tracer                      <span class="comment"># 设置当前追踪类别</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> &gt; trace; <span class="built_in">echo</span> $$ &gt; set_ftrace_pid; <span class="built_in">echo</span> 1 &gt; tracing_on; your_command; <span class="built_in">echo</span> 0 &gt; tracing_on</span><br></pre></td></tr></table></figure>
 
 <p><code>$$</code>表示当前bash的pid,这样可以追踪任意命令。</p>
@@ -257,24 +257,24 @@
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="type">int</span> n = <span class="number">10</span>;</span><br><span class="line">	<span class="type">int</span> *arr = (<span class="type">int</span> *)<span class="built_in">malloc</span>(n * <span class="keyword">sizeof</span>(<span class="type">int</span>));</span><br><span class="line">	<span class="keyword">if</span> (arr == <span class="literal">NULL</span>) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;failed!\r\n&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">memset</span>(arr, <span class="number">2</span>, n*<span class="keyword">sizeof</span>(<span class="type">int</span>));</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;%d\t&quot;</span>, arr[i]);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>1.查看c库调用：</p>
-<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/13.png" alt="image-20240728165618548"></p>
+<p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/13.png" alt="image-20240728165618548"></p>
 <p>2.查看c库调用次数：</p>
-<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/14.png" alt="image-20240728165742636"></p>
+<p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/14.png" alt="image-20240728165742636"></p>
 <p>3.查看c库执行时间：</p>
-<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/15.png" alt="image-20240728165842926"></p>
+<p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/15.png" alt="image-20240728165842926"></p>
 <p>4.查看系统调用情况：</p>
-<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/16.png" alt="image-20240728170027545"></p>
+<p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/16.png" alt="image-20240728170027545"></p>
 <h3><span id="3-4-2-strace">3.4.2 strace</span><a href="#3-4-2-strace" class="header-anchor">#</a></h3><p>跟踪进程系统调用<code>System Call</code>使用情况。</p>
 <p>常用的参数如下:</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">-c 统计每一系统调用的所执行的时间,次数和出错的次数等.</span><br><span class="line">-d 输出strace关于标准错误的调试信息.</span><br><span class="line">-f 跟踪由fork调用所产生的子进程.</span><br><span class="line">-ff 如果提供-o filename,则所有进程的跟踪结果输出到相应的filename.pid中,pid是各进程的进程号.</span><br><span class="line">-F 尝试跟踪vfork调用.在-f时,vfork不被跟踪.</span><br><span class="line">-h 输出简要的帮助信息.</span><br><span class="line">-i 输出系统调用的入口指针.</span><br><span class="line">-q 禁止输出关于脱离的消息.</span><br><span class="line">-r 打印出相对时间关于,,每一个系统调用.</span><br><span class="line">-t 在输出中的每一行前加上时间信息.</span><br><span class="line">-tt 在输出中的每一行前加上时间信息,微秒级.</span><br><span class="line">-ttt 微秒级输出,以秒了表示时间.</span><br><span class="line">-T 显示每一调用所耗的时间.</span><br><span class="line">-v 输出所有的系统调用.一些调用关于环境变量,状态,输入输出等调用由于使用频繁,默认不输出.</span><br><span class="line">-V 输出strace的版本信息.</span><br><span class="line">-x 以十六进制形式输出非标准字符串</span><br><span class="line">-xx 所有字符串以十六进制形式输出.</span><br><span class="line">-a column 设置返回值的输出位置.默认 为40.</span><br><span class="line">-e expr 指定一个表达式,用来控制如何跟踪.格式：[qualifier=][!]value1[,value2]...</span><br><span class="line">qualifier只能是 trace,abbrev,verbose,raw,signal,read,write其中之一.value是用来限定的符号或数字.默认的 qualifier是 trace.感叹号是否定符号.例如:-eopen等价于 -e trace=open,表示只跟踪open调用.而-etrace!=open 表示跟踪除了open以外的其他调用.有两个特殊的符号 all 和 none. 注意有些shell使用!来执行历史记录里的命令,所以要使用\\.</span><br><span class="line">-e trace=set 只跟踪指定的系统 调用.例如:-e trace=open,close,rean,write表示只跟踪这四个系统调用.默认的为set=all.</span><br><span class="line">-e signal=set 指定跟踪的系统信号.默认为all.如 signal=!SIGIO(或者signal=!io),表示不跟踪SIGIO信号.</span><br><span class="line">-e read=set 输出从指定文件中读出 的数据.例如: -e read=3,5</span><br><span class="line">-e write=set 输出写入到指定文件中的数据.</span><br><span class="line">-o filename 将strace的输出写入文件filename</span><br><span class="line">-p pid 跟踪指定的进程pid.</span><br></pre></td></tr></table></figure>
 
 <p>查看系统调用的时间：</p>
-<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/17.png" alt="image-20240728170644866"></p>
+<p><img src="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/17.png" alt="image-20240728170644866"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/" data-id="clz5cft7f000088ufbhfr0pql" data-title="Linux内核-异常输出函数调用栈calltrace分析" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/" data-id="clz5cft7f000088ufbhfr0pql" data-title="Linux内核-异常输出函数调用栈calltrace分析" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -286,10 +286,19 @@
     
 <nav id="article-nav">
   
+    <a href="/2024/07/24/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-1-GPIO%E9%A9%B1%E5%8A%A8LED%E7%A4%BA%E4%BE%8B/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          字符设备驱动-1-GPIO驱动LED示例
+        
+      </div>
+    </a>
   
-    <a href="/2024/07/26/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-2-%E6%80%BB%E7%BA%BF%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%B9%B3%E5%8F%B0%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" id="article-nav-older" class="article-nav-link-wrap">
+  
+    <a href="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">字符设备驱动-2-总线模型和平台设备驱动</div>
+      <div class="article-nav-title">Linux内核-kmalloc与vmalloc及CMA内存</div>
     </a>
   
 </nav>
@@ -319,7 +328,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 11.25px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.75px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.25px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.5px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.5px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.25px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.5px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.5px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.25px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.75px;">通信协议</a>
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 13.75px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.75px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.25px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.5px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.5px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.25px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.5px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.5px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.25px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.75px;">通信协议</a>
     </div>
   </div>
 
@@ -341,7 +350,15 @@
       <ul>
         
           <li>
-            <a href="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/">Linux内核-异常输出函数调用栈calltrace分析</a>
+            <a href="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-5-%E8%AE%BE%E5%A4%87%E6%A0%91%E5%87%BD%E6%95%B0/">字符设备驱动-5-设备树函数</a>
+          </li>
+        
+          <li>
+            <a href="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/">字符设备驱动-4-设备树</a>
+          </li>
+        
+          <li>
+            <a href="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-3-GPIO%E9%A9%B1%E5%8A%A8KEY%E7%A4%BA%E4%BE%8B/">字符设备驱动-3-GPIO驱动KEY示例</a>
           </li>
         
           <li>
@@ -350,14 +367,6 @@
         
           <li>
             <a href="/2024/07/24/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-1-GPIO%E9%A9%B1%E5%8A%A8LED%E7%A4%BA%E4%BE%8B/">字符设备驱动-1-GPIO驱动LED示例</a>
-          </li>
-        
-          <li>
-            <a href="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/">Linux内核-kmalloc与vmalloc及CMA内存</a>
-          </li>
-        
-          <li>
-            <a href="/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/">Linux内核-并发与同步</a>
           </li>
         
       </ul>
