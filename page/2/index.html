@@ -69,6 +69,514 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Makefile-常用函数和通用模板" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/" class="article-date">
+  <time class="dt-published" datetime="2024-06-24T14:19:55.000Z" itemprop="datePublished">2024-06-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/">Makefile-常用函数和通用模板</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-makefile-gui-ze">1 Makefile规则</a></li>
+<li><a href="#2-yi-bu-yi-bu-wan-shan-makefile">2 一步一步完善 Makefile</a><ul>
+<li><a href="#2-1-mo-shi-gui-ze">2.1 模式规则</a></li>
+<li><a href="#2-2-zi-dong-bian-liang">2.2 自动变量</a><ul>
+<li><a href="#2-2-1-han-shu-chuan-can">2.2.1 函数传参</a></li>
+</ul>
+</li>
+<li><a href="#2-3-li-ji-bian-liang-he-yan-shi-bian-liang">2.3 立即变量和延时变量</a></li>
+<li><a href="#2-3-bian-liang-dao-chu">2.3 变量导出</a></li>
+<li><a href="#2-4-makefile-zhong-shi-yong-shell-ming-ling">2.4 Makefile 中使用 shell 命令</a></li>
+<li><a href="#2-5-wei-mu-biao">2.5 伪目标</a></li>
+<li><a href="#2-6-chan-sheng-yi-lai-wen-jian">2.6 产生依赖文件</a></li>
+</ul>
+</li>
+<li><a href="#3-chang-yong-han-shu">3 常用函数</a><ul>
+<li><a href="#3-1-zi-fu-chuan-xiang-guan">3.1 字符串相关</a><ul>
+<li><a href="#3-1-1-subst">3.1.1 <code>subst</code></a></li>
+<li><a href="#3-1-2-patsubst">3.1.2 <code>patsubst</code></a></li>
+<li><a href="#3-1-3-strip">3.1.3 <code>strip</code></a></li>
+<li><a href="#3-1-4-findstring">3.1.4 <code>findstring</code></a></li>
+<li><a href="#3-1-6-filter-out">3.1.6 <code>filter-out</code></a></li>
+<li><a href="#3-1-7-sort">3.1.7 <code>sort</code></a></li>
+</ul>
+</li>
+<li><a href="#3-2-wen-jian-ming-xiang-guan">3.2 文件名相关</a><ul>
+<li><a href="#3-2-1-dir">3.2.1 <code>dir</code></a></li>
+<li><a href="#3-2-2-notdir">3.2.2 <code>notdir</code></a></li>
+<li><a href="#3-2-3-suffix">3.2.3 <code>suffix</code></a></li>
+<li><a href="#3-2-4-basename">3.2.4 <code>basename</code></a></li>
+<li><a href="#3-2-5-addsuffix">3.2.5 <code>addsuffix</code></a></li>
+<li><a href="#3-2-6-addprefix">3.2.6 <code>addprefix</code></a></li>
+<li><a href="#3-2-7-wildcard">3.2.7 <code>wildcard</code></a></li>
+<li><a href="#3-2-8-join">3.2.8<code> join</code></a></li>
+<li><a href="#3-2-9-realpath">3.2.9<code>realpath</code></a></li>
+<li><a href="#3-2-10-abspath">3.2.10 <code>abspath</code></a></li>
+<li><a href="#3-2-11-file">3.2.11 <code>file</code></a></li>
+</ul>
+</li>
+<li><a href="#3-3-qi-ta-han-shu">3.3 其他函数</a><ul>
+<li><a href="#3-3-1-foreach">3.3.1 <code>foreach</code></a></li>
+<li><a href="#3-3-2-origin">3.3.2 <code>origin</code></a></li>
+<li><a href="#3-3-3-word">3.3.3 <code>word</code></a></li>
+<li><a href="#3-3-4-wordlist">3.3.4<code>wordlist</code></a></li>
+<li><a href="#3-3-5-words">3.3.5 <code>words</code></a></li>
+<li><a href="#3-3-6-firstword-lastword">3.3.6 <code>firstword/lastword </code></a></li>
+<li><a href="#3-3-7-call">3.3.7 <code>call</code></a></li>
+</ul>
+</li>
+<li><a href="#3-4-vpath-xuan-xiang">3.4 VPATH选项</a></li>
+<li><a href="#3-5-make-huan-jing-bian-liang">3.5 make环境变量</a></li>
+<li><a href="#3-6-make-bian-yi-xuan-xiang">3.6 make编译选项</a></li>
+</ul>
+</li>
+<li><a href="#4-tong-yong-xing-makefile">4 通用型<code>makefile</code></a><ul>
+<li><a href="#4-1-ding-ceng-makefile">4.1 顶层<code>Makefile</code></a></li>
+<li><a href="#4-2-makefile-build">4.2 <code>Makefile.build</code></a></li>
+<li><a href="#4-3-make-guo-cheng-ju-li">4.3 Make过程举例</a><ul>
+<li><a href="#4-3-1-zi-mu-lu-makefile-display-wei-li">4.3.1 子目录<code>MakeFIle-display</code>为例</a></li>
+<li><a href="#4-3-2-bian-yi-xiang-xi-shu-chu-ri-zhi">4.3.2 编译详细输出日志</a></li>
+<li><a href="#4-3-3-bian-yi-ru-kou">4.3.3 编译入口</a></li>
+<li><a href="#4-3-4-bian-yi-build">4.3.4 编译<code>__build</code></a><ul>
+<li><a href="#4-3-4-1-bian-yi-subdir-y">4.3.4.1 编译<code>$(subdir-y)</code></a></li>
+<li><a href="#4-3-4-2-da-bao-cheng-zong-de-built-in-o">4.3.4.2 打包成总的<code>built-in.o</code></a></li>
+</ul>
+</li>
+<li><a href="#4-3-5-bian-yi-chu-kou">4.3.5 编译出口</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#5-tong-yong-xing-makefile2-luo-ji-ban">5 通用型<code>makefile2</code>-裸机版</a><ul>
+<li><a href="#5-1-wen-jian-gong-cheng-mu-lu">5.1 文件工程目录</a></li>
+<li><a href="#5-2-lds-lian-jie-jiao-ben">5.2 lds链接脚本</a></li>
+<li><a href="#5-3-makefile">5.3 <code>Makefile</code></a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-makefile-gui-ze">1 Makefile规则</span><a href="#1-makefile-gui-ze" class="header-anchor">#</a></h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">目标(target)…: 依赖(prerequiries)…</span><br><span class="line">&lt;tab&gt;命令(command)</span><br></pre></td></tr></table></figure>
+
+<p>如果<code>“依赖文件”</code>比<code>“目标文件”</code>更加新，那么执行<code>“命令”</code>来重新生成<code>“目标文件”</code>。</p>
+<p>命令被执行的 2 个条件：依赖文件比目标文件新，或是 目标文件还没生成。</p>
+<h1><span id="2-yi-bu-yi-bu-wan-shan-makefile">2 一步一步完善 Makefile</span><a href="#2-yi-bu-yi-bu-wan-shan-makefile" class="header-anchor">#</a></h1><p>第 1 个 Makefile，简单粗暴，效率低：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">test : main.c sub.c sub.h</span><br><span class="line">　　gcc -o test main.c sub.c</span><br></pre></td></tr></table></figure>
+
+<p>第 2 个 Makefile，效率高，相似规则太多太啰嗦，不支持检测头文件:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">test : main.o sub.o</span><br><span class="line">　　gcc -o test main.o sub.o</span><br><span class="line">main.o : main.c</span><br><span class="line">　　gcc -c -o main.o main.c</span><br><span class="line">sub.o : sub.c</span><br><span class="line">　　gcc -c -o sub.o sub.c</span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">　　rm *.o test -f</span><br></pre></td></tr></table></figure>
+
+<p>第 3 个 Makefile，效率高，精炼，不支持检测头文件：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">test : main.o sub.o</span><br><span class="line">　　gcc -o test main.o sub.o</span><br><span class="line">%.o : %.c</span><br><span class="line">　　gcc -c -o <span class="variable">$@</span> <span class="variable">$&lt;</span></span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">　　rm *.o test -f</span><br></pre></td></tr></table></figure>
+
+<p>第 4 个 Makefile，效率高，精炼，支持检测头文件(但是需要手工添加头文件规则)：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">test : main.o sub.o</span><br><span class="line">　　gcc -o test main.o sub.o</span><br><span class="line">%.o : %.c</span><br><span class="line">　　gcc -c -o <span class="variable">$@</span> <span class="variable">$&lt;</span></span><br><span class="line">sub.o : sub.h</span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">　　rm *.o test -f</span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-1-mo-shi-gui-ze">2.1 模式规则</span><a href="#2-1-mo-shi-gui-ze" class="header-anchor">#</a></h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">%.o:%.c</span></span><br><span class="line">　　<span class="variable">$(CC)</span> -c  <span class="variable">$&lt;</span> -o <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+
+<p>前面第3第4个Makefile都用到了模式规则。</p>
+<h2><span id="2-2-zi-dong-bian-liang">2.2 自动变量</span><a href="#2-2-zi-dong-bian-liang" class="header-anchor">#</a></h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$@</span>--目标文件</span><br><span class="line"><span class="variable">$^</span>--所有的依赖文件</span><br><span class="line"><span class="variable">$&lt;</span>--第一个依赖文件</span><br><span class="line"><span class="variable">$?</span>--所有的比目标新的依赖文件</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-2-1-han-shu-chuan-can">2.2.1 函数传参</span><a href="#2-2-1-han-shu-chuan-can" class="header-anchor">#</a></h3><p><img src="/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/1.png" alt="img"></p>
+<p>函数传参也属于自动变量。上图的make结果为：</p>
+<p><img src="/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/2.png" alt="img"></p>
+<h2><span id="2-3-li-ji-bian-liang-he-yan-shi-bian-liang">2.3 立即变量和延时变量</span><a href="#2-3-li-ji-bian-liang-he-yan-shi-bian-liang" class="header-anchor">#</a></h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">A := <span class="variable">$(C)</span> //立即变量</span><br><span class="line">B = <span class="variable">$(C)</span>  // 延时变量</span><br><span class="line">C = abc  // 延时变量</span><br><span class="line"><span class="comment">#D = 100ask</span></span><br><span class="line">D ?= weidongshan//延时变量，只有第一次定义时赋值才成功；如果曾定义过，此赋值无效</span><br><span class="line"><span class="section">all:</span></span><br><span class="line">        @echo A = <span class="variable">$(A)</span></span><br><span class="line">        @echo B = <span class="variable">$(B)</span></span><br><span class="line">        @echo D = <span class="variable">$(D)</span></span><br><span class="line">C += 123</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/3.png" alt="img"></p>
+<h2><span id="2-3-bian-liang-dao-chu">2.3 变量导出</span><a href="#2-3-bian-liang-dao-chu" class="header-anchor">#</a></h2><p><code>A makefile</code>中的变量无法在<code>B makefile</code>识别，因此要用<code>export</code>导出如：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> CC = <span class="variable">$(CROSS_COMPILE)</span>gcc</span><br><span class="line"><span class="keyword">export</span> BUILD_DIR=/home/book/100ask_imx6ull-sdk</span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-4-makefile-zhong-shi-yong-shell-ming-ling">2.4 Makefile 中使用 shell 命令</span><a href="#2-4-makefile-zhong-shi-yong-shell-ming-ling" class="header-anchor">#</a></h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PWD=<span class="variable">$(<span class="built_in">shell</span> pwd)</span></span><br><span class="line">CP=<span class="variable">$(<span class="built_in">shell</span> cp)</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-5-wei-mu-biao">2.5 伪目标</span><a href="#2-5-wei-mu-biao" class="header-anchor">#</a></h2><p><code>.PHONY</code>表示伪目标。表示无条件执行目标。makefile将不会判断该目标是否存在或者该目标是否需要更新。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">clean:</span></span><br><span class="line">　　rm -f <span class="variable">$(<span class="built_in">shell</span> find -name &quot;*.o&quot;)</span></span><br><span class="line">　　rm -f <span class="variable">$(TARGET)</span></span><br><span class="line">.PHONY : clean</span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-6-chan-sheng-yi-lai-wen-jian">2.6 产生依赖文件</span><a href="#2-6-chan-sheng-yi-lai-wen-jian" class="header-anchor">#</a></h2><p>第5个Makefile。效率高，精炼，支持自动检测头文件：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">objs := main.o sub.o</span><br><span class="line">test : <span class="variable">$(objs)</span></span><br><span class="line">　　gcc -o test <span class="variable">$^</span></span><br><span class="line"><span class="comment"># 需要判断是否存在依赖文件</span></span><br><span class="line"><span class="comment"># .main.o.d .sub.o.d</span></span><br><span class="line">dep_files := <span class="variable">$(<span class="built_in">foreach</span> f, <span class="variable">$(objs)</span>, .<span class="variable">$(f)</span>.d)</span></span><br><span class="line"><span class="comment">#dep_files := $(patsubst %,.%.d, $(objs))</span></span><br><span class="line">dep_files := <span class="variable">$(<span class="built_in">wildcard</span> <span class="variable">$(dep_files)</span>)</span></span><br><span class="line"><span class="comment"># 把依赖文件包含进来</span></span><br><span class="line"><span class="keyword">ifneq</span> (<span class="variable">$(dep_files)</span>,)</span><br><span class="line"><span class="keyword">include</span> <span class="variable">$(dep_files)</span></span><br><span class="line"><span class="keyword">endif</span></span><br><span class="line">%.o : %.c</span><br><span class="line">gcc -Wp,-MD,.<span class="variable">$@</span>.d -c -o <span class="variable">$@</span> <span class="variable">$&lt;</span></span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">rm *.o test -f</span><br><span class="line"><span class="section">distclean:</span></span><br><span class="line">rm <span class="variable">$(dep_files)</span> *.o test -f</span><br></pre></td></tr></table></figure>
+
+<h1><span id="3-chang-yong-han-shu">3 常用函数</span><a href="#3-chang-yong-han-shu" class="header-anchor">#</a></h1><h2><span id="3-1-zi-fu-chuan-xiang-guan">3.1 字符串相关</span><a href="#3-1-zi-fu-chuan-xiang-guan" class="header-anchor">#</a></h2><h3><span id="3-1-1-subst">3.1.1 <code>subst</code></span><a href="#3-1-1-subst" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">subst</span> from,to,text)</span></span><br></pre></td></tr></table></figure>
+
+<p>在文本<code>text</code>中使用<code>to</code>替换每一处<code>from</code>。</p>
+<p>比如： </p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">subst</span> ee,EE,feet on the street)</span></span><br></pre></td></tr></table></figure>
+
+<p>结果为<code>fEEt on the strEEt</code></p>
+<h3><span id="3-1-2-patsubst">3.1.2 <code>patsubst</code></span><a href="#3-1-2-patsubst" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">patsubst</span> pattern,replacement,text)</span></span><br></pre></td></tr></table></figure>
+
+<p>寻找<code>text</code>中符合格式<code>pattern</code>的字，用<code>replacement</code>替换它们。</p>
+<p><code>pattern</code>和<code>replacement</code> 中可以使用通配符。</p>
+<p>比如： </p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">patsubst</span> %.c,%.o,x.c.c bar.c)</span></span><br></pre></td></tr></table></figure>
+
+<p>结果为： <code>x.c.o bar.o</code></p>
+<h3><span id="3-1-3-strip">3.1.3  <code>strip</code></span><a href="#3-1-3-strip" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">strip</span> string)</span></span><br></pre></td></tr></table></figure>
+
+<p>去掉前导和结尾空格，并将中间的多个空格压缩为单个空格。</p>
+<p>比如： </p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">strip</span> a      b c )</span></span><br></pre></td></tr></table></figure>
+
+<p>结果为：<code>foo.c bar.c baz.s</code></p>
+<h3><span id="3-1-4-findstring">3.1.4 <code>findstring</code></span><a href="#3-1-4-findstring" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">findstring</span> find,in)</span></span><br></pre></td></tr></table></figure>
+
+<p>在字符串<code>in</code>中搜寻<code>find</code>，如果找到，则返回值是<code>find</code>，否则返回值为空。</p>
+<p>比如：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">findstring</span> a,a b c)</span></span><br><span class="line"><span class="variable">$(<span class="built_in">findstring</span> a,b c)</span></span><br></pre></td></tr></table></figure>
+
+<p>将分别产生值<code>a</code>和(空字符串)</p>
+<p>3.1.5 <code>filter</code></p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">filter</span> pattern...,text)</span></span><br></pre></td></tr></table></figure>
+
+<p>返回在<code>text</code>中由空格隔开且匹配格式<code>pattern...</code>的字，去除不符合格式<code>pattern...</code>的字。</p>
+<p>比如： </p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">filter</span> %.c %.s,foo.c bar.c baz.s ugh.h)</span></span><br></pre></td></tr></table></figure>
+
+<p>结果为<code>foo.c bar.c baz.s</code>。</p>
+<h3><span id="3-1-6-filter-out">3.1.6 <code>filter-out</code></span><a href="#3-1-6-filter-out" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">filter</span>-out pattern...,text)</span></span><br></pre></td></tr></table></figure>
+
+<p>返回在<code>text</code>中由空格隔开且不匹配格式<code>pattern...</code>的字，去除符合格式<code>pattern...</code>的字。它是函数 filter 的反函数。</p>
+<p>比如： </p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">filter</span> %.c %.s,foo.c bar.c baz.s ugh.h)</span></span><br></pre></td></tr></table></figure>
+
+<p>结果为<code>ugh.h</code>。</p>
+<h3><span id="3-1-7-sort">3.1.7 <code>sort</code></span><a href="#3-1-7-sort" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">sort</span> list)</span></span><br></pre></td></tr></table></figure>
+
+<p>将<code>list</code>中的字按字母顺序排序，并去掉重复的字。输出由单个空格隔开的字的列表。</p>
+<p>比如： </p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">sort</span> foo bar lose)</span></span><br></pre></td></tr></table></figure>
+
+<p>返回值是<code>bar foo lose</code></p>
+<h2><span id="3-2-wen-jian-ming-xiang-guan">3.2 文件名相关</span><a href="#3-2-wen-jian-ming-xiang-guan" class="header-anchor">#</a></h2><h3><span id="3-2-1-dir">3.2.1 <code>dir</code></span><a href="#3-2-1-dir" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">dir</span> names...)</span></span><br></pre></td></tr></table></figure>
+
+<p>抽取<code>names...</code>中每一个文件名的路径部分，文件名的路径部分包括从文件名的首字符到最后一个斜杠(含斜杠)之前的一切字符。</p>
+<p>比如： </p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">dir</span> src/foo.c hacks)</span></span><br></pre></td></tr></table></figure>
+
+<p>结果为<code>src/ ./</code>。</p>
+<h3><span id="3-2-2-notdir">3.2.2 <code>notdir</code></span><a href="#3-2-2-notdir" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">notdir</span> names...)</span></span><br></pre></td></tr></table></figure>
+
+<p>抽取<code>names...</code>中每一个文件名中除路径部分外一切字符（真正的文件名）。</p>
+<p>比如：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">notdir</span> src/foo.c hacks)</span></span><br></pre></td></tr></table></figure>
+
+<p>结果为<code>foo.c hacks</code>。</p>
+<h3><span id="3-2-3-suffix">3.2.3 <code>suffix</code></span><a href="#3-2-3-suffix" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">suffix</span> names...)</span></span><br></pre></td></tr></table></figure>
+
+<p>抽取<code>names...</code>中每一个文件名的后缀。</p>
+<p>比如： </p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">suffix</span> src/foo.c src-1.0/bar.c hacks)</span></span><br></pre></td></tr></table></figure>
+
+<p>结果为<code>.c .c</code>。</p>
+<h3><span id="3-2-4-basename">3.2.4 <code>basename</code></span><a href="#3-2-4-basename" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">basename</span> names...)</span></span><br></pre></td></tr></table></figure>
+<p>抽取<code>names...</code>中每一个文件名中除后缀外一切字符。</p>
+<p>比如： </p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">basename</span> src/foo.c src-1.0/bar hacks)</span></span><br></pre></td></tr></table></figure>
+
+<p>结果为<code>src/foo src-1.0/bar hacks</code>。</p>
+<h3><span id="3-2-5-addsuffix">3.2.5 <code>addsuffix</code></span><a href="#3-2-5-addsuffix" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">addsuffix</span> <span class="built_in">suffix</span>,names...)</span></span><br></pre></td></tr></table></figure>
+
+<p>参数<code> names...</code>是一系列的文件名，文件名之间用空格隔开； suffix 是一个后缀名。将 suffix(后缀)的值附加在每一个独立文件名的后面，完成后将文件名串联起来，它们之间用单个空格隔开。</p>
+<p>比如： </p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">addsuffix</span> .c,foo bar)</span></span><br></pre></td></tr></table></figure>
+
+<p>结果为<code>foo.c bar.c</code>。</p>
+<h3><span id="3-2-6-addprefix">3.2.6 <code>addprefix</code></span><a href="#3-2-6-addprefix" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">addprefix</span> prefix,names...)</span></span><br></pre></td></tr></table></figure>
+
+<p>参数<code> names</code>是一系列的文件名，文件名之间用空格隔开； prefix 是一个前缀名。将 preffix(前缀)的值附加在每一个独立文件名的前面，完成后将文件名串联起来，它们之间用单个空格隔开。</p>
+<p>比如： </p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">addprefix</span> src/,foo bar)</span></span><br></pre></td></tr></table></figure>
+
+<p>结果为<code>src/foo src/bar</code>。</p>
+<h3><span id="3-2-7-wildcard">3.2.7 <code>wildcard</code></span><a href="#3-2-7-wildcard" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">wildcard</span> pattern)</span></span><br></pre></td></tr></table></figure>
+
+<p>参数<code>pattern</code>是一个文件名格式，包含有通配符(通配符和 shell 中的用法一样)。函数 wildcard 的结果是一列和格式匹配的且真实存在的文件的名称，文件名之间用一个空格隔开。</p>
+<p>比如若当前目录下有文件 1.c、 2.c、 1.h、 2.h，则：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">c_src := <span class="variable">$(<span class="built_in">wildcard</span> \*.c)</span></span><br></pre></td></tr></table></figure>
+
+<p>结果为<code>1.c 2.c</code></p>
+<h3><span id="3-2-8-join">3.2.8<code> join</code></span><a href="#3-2-8-join" class="header-anchor">#</a></h3><p><code>$(join list1,list2)</code></p>
+<p>逐个地将list2中的元素链接到list1。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">LIST1 := foo bar</span><br><span class="line">LIST2 := .c  .p</span><br><span class="line">RESULT := $&#123;join $&#123;LIST1&#125; , $&#123;LIST2&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果为：<code>foo.c bar.p</code></p>
+<h3><span id="3-2-9realpath">3.2.9<code>realpath</code></span><a href="#3-2-9realpath" class="header-anchor">#</a></h3><p><code>$(realpath names…)</code></p>
+<p>对<code>names中</code>的每个文件，求其绝对路径，当目标为链接时，将解析链接。</p>
+<h3><span id="3-2-10-abspath">3.2.10 <code>abspath</code></span><a href="#3-2-10-abspath" class="header-anchor">#</a></h3><p><code>$(abspath names…)</code></p>
+<p>对<code>names中</code>的每个文件，求其绝对路径。不解析链接。</p>
+<h3><span id="3-2-11-file">3.2.11 <code>file</code></span><a href="#3-2-11-file" class="header-anchor">#</a></h3><p><code>$(file op filename[,text])</code></p>
+<p>向文件执行文本的输入输出.</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">TEXT := <span class="string">&quot;hello world&quot;</span></span><br><span class="line">RESULT := \$&#123;file &gt; test,$&#123;TEXT&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>前目录下存在test文件时，<code>&quot;hello world&quot;</code>被写入到test中，当不存在test文件时，文件被创建且同时写入<code>&quot;hello world&quot;</code>.</p>
+<h2><span id="3-3-qi-ta-han-shu">3.3 其他函数</span><a href="#3-3-qi-ta-han-shu" class="header-anchor">#</a></h2><h3><span id="3-3-1-foreach">3.3.1 <code>foreach</code></span><a href="#3-3-1-foreach" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">foreach</span> var,list,text)</span></span><br></pre></td></tr></table></figure>
+
+<p>比如：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dirs := a b c d</span><br><span class="line">files := <span class="variable">$(<span class="built_in">foreach</span> <span class="built_in">dir</span>,<span class="variable">$(dirs)</span>,$(<span class="built_in">wildcard</span> <span class="variable">$(dir)</span>/*)</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这里<code>text</code>是<code>$(wildcard $(dir)/*)</code>，它的扩展过程如下：</p>
+<p>第一个赋给变量<code>dir</code>的值是<code>a</code>， 扩展结果为<code>$(wildcard a/*)</code>；<br>第二个赋给变量<code>dir</code>的值是<code>b</code>， 扩展结果为<code>$(wildcard b/*)</code>；<br>第三个赋给变量<code>dir</code>的值是<code>c</code>， 扩展结果为<code>$(wildcard c/*)</code>；</p>
+<p>如此继续扩展。</p>
+<p>这个例子和下面的例有共同的结果：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">files := <span class="variable">$(<span class="built_in">wildcard</span> a/* b/* c/* d/*)</span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-3-2-origin">3.3.2 <code>origin</code></span><a href="#3-3-2-origin" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(<span class="built_in">origin</span> variable)</span></span><br></pre></td></tr></table></figure>
+
+<p>变量<code>variable</code>是一个查询变量的名称，不是对该变量的引用。所以，不能采用<code>$</code>和圆括号的格式书写该变量，当然，如果需要使用非常量的文件名，可以在文件名中使用变量引用。</p>
+<p>函数<code>origin</code>的结果是一个字符串，该字符串变量是这样定义的：</p>
+<p><img src="/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/4.png" alt="img"></p>
+<p>例如定义编译时用<code>verbose</code>还是<code>quiet</code>打印，<code>verbose</code>表示输出详细过程，<code>quiet</code>输出简略信息。</p>
+<p><img src="/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/5.png" alt="img"></p>
+<p>将所有的信息都输出到同一个文件中：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make xxx &gt; build_output_all.txt 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-3-3-word">3.3.3 <code>word</code></span><a href="#3-3-3-word" class="header-anchor">#</a></h3><p><code>$(word n,text)</code></p>
+<p>返回text列表中第n个元素.</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">TEXT := foo.c foo.h bar.c</span><br><span class="line">RESULT := $&#123;word 2,$&#123;TEXT&#125;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>结果：<code>foo.h</code></p>
+<h3><span id="3-3-4wordlist">3.3.4<code>wordlist</code></span><a href="#3-3-4wordlist" class="header-anchor">#</a></h3><p><code>$(wordlist s,e,text)</code></p>
+<p>返回text列表中指定的由s(start)开始由e(end)结尾的元素集合.</p>
+<h3><span id="3-3-5-words">3.3.5 <code>words</code></span><a href="#3-3-5-words" class="header-anchor">#</a></h3><p><code>$(words text)</code></p>
+<p>返回text列表中的元素数量。</p>
+<h3><span id="3-3-6-firstword-lastword">3.3.6 <code>firstword/lastword </code></span><a href="#3-3-6-firstword-lastword" class="header-anchor">#</a></h3><p><code>$(firstword names…) \$(lastword names…)</code></p>
+<p>返回names列表中的第一个、最后一个元素.</p>
+<h3><span id="3-3-7-call">3.3.7  <code>call</code></span><a href="#3-3-7-call" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">func = $1.$2</span><br><span class="line">foo = <span class="variable">$(<span class="built_in">call</span> func,a,b)</span></span><br><span class="line"><span class="section">all:</span></span><br><span class="line">    @echo <span class="variable">$(foo)</span></span><br></pre></td></tr></table></figure>
+
+<p>结果：<code>a.b</code>, 子函数调用，数的参数会被赋值给临时参数·&#x3D;<code>\$1,\$2,\$0</code>则代表函数名本身.</p>
+<h2><span id="3-4-vpath-xuan-xiang">3.4 VPATH选项</span><a href="#3-4-vpath-xuan-xiang" class="header-anchor">#</a></h2><p>VPATH中添加的目录，即使是文件处于其他目录，我们也可以像操作当前目录一样操作其他目录的文件，例如：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">VPATH += src</span><br><span class="line"><span class="section">all:foo.c</span></span><br><span class="line">cc <span class="variable">$^</span> -o <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+
+<p>等效于：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">all:src/foo.c</span></span><br><span class="line">cc <span class="variable">$^</span> -o <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+
+<p>但是写成下面这样是不行的：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">VPATH += src</span><br><span class="line"><span class="section">all:</span></span><br><span class="line">cc foo.c -o <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+
+<p>这是因为：<code>VPATH</code>是<code>makefile中</code>的语法规则，而命令部分是由<code>shell</code>解析，所以<code>shell</code>并不会解析<code>VPATH</code>。</p>
+<h2><span id="3-5-make-huan-jing-bian-liang">3.5 make环境变量</span><a href="#3-5-make-huan-jing-bian-liang" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">AR 打包程序，默认值为ar，对目标文件进行打包，封装静态库</span><br><span class="line">AS 汇编程序，默认值为as，将汇编指令编译成机器指令</span><br><span class="line">CC c编译器，默认值为cc，通常情况下，cc是一个指向gcc的链接，负责将c程序编译成汇编程序。</span><br><span class="line">CXX c++编译器，默认值为g++</span><br><span class="line">CPP 预处理器，默认值为 &quot;$(CC) -E&quot;，注意这里的CPP不是C++，而是预处理器。</span><br><span class="line">RM 删除文件，默认值为 &quot;rm -f&quot;，-f表示强制删除</span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-6-make-bian-yi-xuan-xiang">3.6 make编译选项</span><a href="#3-6-make-bian-yi-xuan-xiang" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ARFLAGS 指定$(AR)运行时的参数，默认值为&quot;ar&quot;</span><br><span class="line">ASFLAGS 指定$(AS)运行时的参数，无默认值</span><br><span class="line">CFLAGS 指定$(CC)运行时的参数，无默认值</span><br><span class="line">CXXFLAGS 指定$(CXX)运行时的参数，无默认值</span><br><span class="line">CPPFLAGS 指定$(CPP)运行时的参数，无默认值，注意这里的CPP不是C++，而是预处理器</span><br><span class="line">LDFLAGS 指定ld链接器运行时的参数，无默认值</span><br><span class="line">LDLIBS 指定ld链接器运行时的链接库参数，无默认值。</span><br><span class="line"></span><br><span class="line">make --debug</span><br><span class="line">	输出每一步输出的详细流程，对于调试时非常方便。</span><br></pre></td></tr></table></figure>
+
+<h1><span id="4-tong-yong-xing-makefile">4 通用型<code>makefile</code></span><a href="#4-tong-yong-xing-makefile" class="header-anchor">#</a></h1><p>本<code>makefile</code>是参考linux内核的<code>makefile</code>框架改编简化，大家可以参考Linux内核中<code>built-in.o</code>的产生过程来进一步了解该流程。</p>
+<p>顶层目录下，存在<code>Makefile</code>和<code>Makefile.build</code>两个文件。这两个文件非常重要，make命令能递归查找每个子目录，就是这2个<code>Makefile</code>文件的功劳。</p>
+<h2><span id="4-1-ding-ceng-makefile">4.1 顶层<code>Makefile</code></span><a href="#4-1-ding-ceng-makefile" class="header-anchor">#</a></h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 延时变量, 只有第一次定义赋值才成功.而该变量在/etc/profile中. 已定义为arm-linux-gnueabihf-</span></span><br><span class="line">CROSS_COMPILE ?=</span><br><span class="line"><span class="comment"># 定义延时变量</span></span><br><span class="line">AS                = <span class="variable">$(CROSS_COMPILE)</span>as</span><br><span class="line">LD                = <span class="variable">$(CROSS_COMPILE)</span>ld</span><br><span class="line">CC                = <span class="variable">$(CROSS_COMPILE)</span>gcc</span><br><span class="line">CPP                = <span class="variable">$(CC)</span> -E</span><br><span class="line">AR                = <span class="variable">$(CROSS_COMPILE)</span>ar</span><br><span class="line">NM                = <span class="variable">$(CROSS_COMPILE)</span>nm</span><br><span class="line">STRIP                = <span class="variable">$(CROSS_COMPILE)</span>strip</span><br><span class="line">OBJCOPY                = <span class="variable">$(CROSS_COMPILE)</span>objcopy</span><br><span class="line">OBJDUMP                = <span class="variable">$(CROSS_COMPILE)</span>objdump</span><br><span class="line"><span class="comment"># export全局变量, 可供其他Makefile使用</span></span><br><span class="line"><span class="keyword">export</span> AS LD CC CPP AR NM</span><br><span class="line"><span class="keyword">export</span> STRIP OBJCOPY OBJDUMP</span><br><span class="line">CFLAGS := -Wall -O2 -g</span><br><span class="line">CFLAGS += -I <span class="variable">$(<span class="built_in">shell</span> pwd)</span>/<span class="keyword">include</span></span><br><span class="line">LDFLAGS := -lpthread -lfreetype -lm</span><br><span class="line"><span class="keyword">export</span> CFLAGS LDFLAGS</span><br><span class="line"></span><br><span class="line">TOPDIR := <span class="variable">$(<span class="built_in">shell</span> pwd)</span></span><br><span class="line"><span class="keyword">export</span> TOPDIR</span><br><span class="line"></span><br><span class="line">TARGET := test</span><br><span class="line"></span><br><span class="line">obj-y += display/</span><br><span class="line"><span class="comment"># obj-y += unittest/</span></span><br><span class="line"><span class="comment">#obj-y += input/</span></span><br><span class="line"><span class="comment">#obj-y += font/</span></span><br><span class="line">obj-y += ui/</span><br><span class="line">obj-y += page/</span><br><span class="line">obj-y += config/</span><br><span class="line">obj-y += business/</span><br><span class="line"></span><br><span class="line">all : start_recursive_build <span class="variable">$(TARGET)</span></span><br><span class="line">        @echo <span class="variable">$(TARGET)</span> has been built!</span><br><span class="line"></span><br><span class="line"><span class="section">start_recursive_build:</span></span><br><span class="line">        @echo <span class="variable">$@</span></span><br><span class="line">        @echo obj-y = $(obj-y)</span><br><span class="line">        make -C ./ -f <span class="variable">$(TOPDIR)</span>/Makefile.build</span><br><span class="line"></span><br><span class="line"><span class="variable">$(TARGET)</span> : built-in.o</span><br><span class="line">        <span class="variable">$(CC)</span> -o <span class="variable">$(TARGET)</span> built-in.o <span class="variable">$(LDFLAGS)</span></span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">        rm -f <span class="variable">$(<span class="built_in">shell</span> find -name &quot;*.o&quot;)</span></span><br><span class="line">        rm -f <span class="variable">$(TARGET)</span></span><br><span class="line"><span class="section">distclean:</span></span><br><span class="line">        rm -f <span class="variable">$(<span class="built_in">shell</span> find -name &quot;*.o&quot;)</span></span><br><span class="line">        rm -f <span class="variable">$(<span class="built_in">shell</span> find -name &quot;*.d&quot;)</span></span><br><span class="line">        rm -f <span class="variable">$(TARGET)</span></span><br></pre></td></tr></table></figure>
+
+<p>顶层<code>Makefile</code>的作用：</p>
+<ol>
+<li>提供项目make命令的执行入口，提供所有编译target目标。</li>
+<li>定义全局变量，编译选项，链接选项等。</li>
+<li>通过<code>obj-y</code>指定要搜索的子目录。</li>
+<li>切换目录，递归执行make命令，并执行根目录的<code>Makefile.build</code>文件</li>
+</ol>
+<h2><span id="4-2-makefile-build">4.2 <code>Makefile.build</code></span><a href="#4-2-makefile-build" class="header-anchor">#</a></h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br></pre></td><td class="code"><pre><span class="line">PHONY := __build echo_obj</span><br><span class="line"><span class="section">__build:</span></span><br><span class="line">obj-y :=</span><br><span class="line">subdir-y :=</span><br><span class="line">EXTRA_CFLAGS :=</span><br><span class="line"></span><br><span class="line"><span class="comment">#包含当前执行目录的Makefile</span></span><br><span class="line"><span class="keyword">include</span> Makefile</span><br><span class="line"></span><br><span class="line"><span class="comment"># obj-y := a.o b.o c/ d/</span></span><br><span class="line"><span class="comment"># $(filter %/, $(obj-y))   : c/ d/</span></span><br><span class="line"><span class="comment"># __subdir-y  : c d</span></span><br><span class="line"><span class="comment"># subdir-y    : c d</span></span><br><span class="line"><span class="comment"># $(filter %/, $(obj-y)) 从变量obj-y中过滤出以&quot;/&quot;结尾的目录名</span></span><br><span class="line"><span class="comment"># $(patsubst %/,%,$(filter %/, $(obj-y))) 去掉obj-y中以&quot;/&quot;结尾的目录名中的&quot;/&quot;</span></span><br><span class="line">__subdir-y        := <span class="variable">$(<span class="built_in">patsubst</span> %/,%,$(<span class="built_in">filter</span> %/, $(obj-y)</span>))</span><br><span class="line">subdir-y        += $(__subdir-y)</span><br><span class="line"> </span><br><span class="line"><span class="comment"># c/built-in.o d/built-in.o</span></span><br><span class="line"><span class="comment"># foreach(var,list,text), 意为foreach var in list, change it to text</span></span><br><span class="line"><span class="comment"># 将子目录列表subdir-y中, 每一项(每个文件名)f, 都修改为f/built-in.o</span></span><br><span class="line"><span class="comment"># 也就是说, 每个子目录, 都会对应生成一个名为 &quot;子目录名/built-in.o&quot;的文件 (.o文件是链接文件)</span></span><br><span class="line">subdir_objs := <span class="variable">$(<span class="built_in">foreach</span> f,$(subdir-y)</span>,<span class="variable">$(f)</span>/built-in.o)</span><br><span class="line"></span><br><span class="line"><span class="comment"># a.o b.o</span></span><br><span class="line"><span class="comment"># 从obj-y中过滤掉目录名(名称以&quot;/&quot;结尾), 只剩下普通文件(.o文件)</span></span><br><span class="line">cur_objs := <span class="variable">$(<span class="built_in">filter</span>-out %/, $(obj-y)</span>)</span><br><span class="line">dep_files := <span class="variable">$(<span class="built_in">foreach</span> f,<span class="variable">$(cur_objs)</span>,.<span class="variable">$(f)</span>.d)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果依赖文件存在, 就列出来重新赋值给dep_files</span></span><br><span class="line">dep_files := <span class="variable">$(<span class="built_in">wildcard</span> <span class="variable">$(dep_files)</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 如果依赖文件列表不为空, 就直接包含(include)依赖文件列表</span></span><br><span class="line"><span class="keyword">ifneq</span> (<span class="variable">$(dep_files)</span>,)</span><br><span class="line">  <span class="keyword">include</span> <span class="variable">$(dep_files)</span></span><br><span class="line"><span class="keyword">endif</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 每个子目录名(不含&quot;/&quot;)追加到伪目标</span></span><br><span class="line">PHONY += $(subdir-y)</span><br><span class="line"></span><br><span class="line"><span class="section">echo_obj:</span></span><br><span class="line">        @echo <span class="string">&quot;********************  echo_obj  *************************&quot;</span></span><br><span class="line">        @echo obj-y:$(obj-y)</span><br><span class="line">        @echo __subdir-y:$(__subdir-y)</span><br><span class="line">        @echo subdir-y:$(subdir-y)</span><br><span class="line">        @echo subdir_objs:<span class="variable">$(subdir_objs)</span></span><br><span class="line">        @echo cur_objs:<span class="variable">$(cur_objs)</span></span><br><span class="line">        @echo <span class="string">&quot;**********************************************************&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="section">__build: echo_obj $(subdir-y) built-in.o</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#用顶层Makefile.build的规则去子目录去编译</span></span><br><span class="line"><span class="section">$(subdir-y):</span></span><br><span class="line">        @echo subdir-y = <span class="variable">$@</span></span><br><span class="line">        make -C <span class="variable">$@</span> -f <span class="variable">$(TOPDIR)</span>/Makefile.build</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义built-in.o依赖规则，当subdir-y为空了才开始执行</span></span><br><span class="line"><span class="comment"># cur_objs 从obj-y过滤出的普通文件(.o文件)</span></span><br><span class="line"><span class="comment"># subdir_objs 子目录下的built-in.o</span></span><br><span class="line">built-in.o : <span class="variable">$(cur_objs)</span> <span class="variable">$(subdir_objs)</span></span><br><span class="line">        <span class="variable">$(LD)</span> -r -o <span class="variable">$@</span> <span class="variable">$^</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#延时变量, generate dep_file</span></span><br><span class="line">dep_file = .<span class="variable">$@</span>.d</span><br><span class="line"></span><br><span class="line">%.o : %.c</span><br><span class="line">        <span class="variable">$(CC)</span> <span class="variable">$(CFLAGS)</span> <span class="variable">$(EXTRA_CFLAGS)</span> $(CFLAGS_<span class="variable">$@</span>) -Wp,-MD,<span class="variable">$(dep_file)</span> -c -o <span class="variable">$@</span> <span class="variable">$&lt;</span></span><br><span class="line">.PHONY : <span class="variable">$(PHONY)</span></span><br></pre></td></tr></table></figure>
+
+<p><code>Makefile.build</code>作用：</p>
+<ol>
+<li>包含引用顶层Makefile。</li>
+<li>取出每个子Makefile中定义的<code>.o</code>文件，再根据<code>%.o:%.c</code>模式规则，自动寻找<code>.c</code>源码文件。</li>
+<li>取出每个子Makefile中定义的子目录，再用<code>make -C</code>切换到子目录，从而实现递归目录编译。</li>
+<li>为每个<code>.o</code>文件生成依赖文件<code>(.d)</code>,并包含进Makefile.build。</li>
+<li>为每个子目录(含有Makefile)生成一个<code>built-in.o</code>文件，便于根目录下的Makefile文件编译、链接。</li>
+<li>设置伪目标。</li>
+</ol>
+<h2><span id="4-3-make-guo-cheng-ju-li">4.3 Make过程举例</span><a href="#4-3-make-guo-cheng-ju-li" class="header-anchor">#</a></h2><p>项目目录展开如下：</p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── bin</span><br><span class="line">│   └── led.sh</span><br><span class="line">├── business</span><br><span class="line">│   ├── main.c</span><br><span class="line">│   └── Makefile</span><br><span class="line">├── config</span><br><span class="line">│   ├── config.c</span><br><span class="line">│   └── Makefile</span><br><span class="line">├── display</span><br><span class="line">│   ├── disp_manager.c</span><br><span class="line">│   ├── framebuffer.c</span><br><span class="line">│   └── Makefile</span><br><span class="line">├── font</span><br><span class="line">│   ├── font_manager.c</span><br><span class="line">│   ├── freetype.c</span><br><span class="line">│   └── Makefile</span><br><span class="line">├── include</span><br><span class="line">│   ├── <span class="keyword">common</span>.h</span><br><span class="line">│   ├── config.h</span><br><span class="line">│   ├── disp_manager.h</span><br><span class="line">│   ├── font_manager.h</span><br><span class="line">│   ├── input_manager.h</span><br><span class="line">│   ├── page_manager.h</span><br><span class="line">│   ├── tslib.h</span><br><span class="line">│   └── ui.h</span><br><span class="line">├── <span class="keyword">input</span></span><br><span class="line">│   ├── input_manager.c</span><br><span class="line">│   ├── Makefile</span><br><span class="line">│   ├── netinput.c</span><br><span class="line">│   └── touchscreen.c</span><br><span class="line">├── Makefile</span><br><span class="line">├── Makefile.build</span><br><span class="line">├── page</span><br><span class="line">│   ├── main_page.c</span><br><span class="line">│   ├── Makefile</span><br><span class="line">│   └── page_manager.c</span><br><span class="line">├── ui</span><br><span class="line">│   ├── button.c</span><br><span class="line">│   └── Makefile</span><br><span class="line">└── unittest</span><br><span class="line">    ├── client.c</span><br><span class="line">    ├── disp_test.c</span><br><span class="line">    ├── font_test.c</span><br><span class="line">    ├── input_manager_test.c</span><br><span class="line">    ├── Makefile</span><br><span class="line">    ├── page_test.c</span><br><span class="line">    └── ui_test.c</span><br></pre></td></tr></table></figure>
+
+<h3><span id="4-3-1-zi-mu-lu-makefile-display-wei-li">4.3.1 子目录<code>MakeFIle-display</code>为例</span><a href="#4-3-1-zi-mu-lu-makefile-display-wei-li" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">EXTRA_CFLAGS :=</span><br><span class="line">CFLAGS_file.o :=</span><br><span class="line">obj-y += disp_manager.o</span><br><span class="line">obj-y += framebuffer.o</span><br></pre></td></tr></table></figure>
+
+<h3><span id="4-3-2-bian-yi-xiang-xi-shu-chu-ri-zhi">4.3.2 编译详细输出日志</span><a href="#4-3-2-bian-yi-xiang-xi-shu-chu-ri-zhi" class="header-anchor">#</a></h3><p>顶层目录输入<code>make all V=1</code>来看详细的编译过程：</p>
+<details>
+<summary>点击查看代码</summary>
+<pre><code>
+start_recursive_build
+obj-y = display/ ui/ page/ config/ business/
+make -C ./ -f /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/Makefile.build
+make[1]: Entering directory '/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command'
+********************  echo_obj  *************************
+obj-y: display/ ui/ page/ config/ business/
+__subdir-y:display ui page config business
+subdir-y: display ui page config business
+subdir_objs:display/built-in.o ui/built-in.o page/built-in.o config/built-in.o business/built-in.o
+cur_objs:
+**********************************************************
+subdir-y = display
+make -C display -f /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/Makefile.build
+make[2]: Entering directory '/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/display'
+********************  echo_obj  *************************
+obj-y: disp_manager.o framebuffer.o
+__subdir-y:
+subdir-y:
+subdir_objs:
+cur_objs:disp_manager.o framebuffer.o
+**********************************************************
+gcc -Wall -O2 -g -I /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/include   -Wp,-MD,.disp_manager.o.d -c -o disp_manager.o disp_manager.c
+gcc -Wall -O2 -g -I /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/include   -Wp,-MD,.framebuffer.o.d -c -o framebuffer.o framebuffer.c
+ld -r -o built-in.o disp_manager.o framebuffer.o
+make[2]: Leaving directory '/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/display'
+subdir-y = ui
+make -C ui -f /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/Makefile.build
+make[2]: Entering directory '/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/ui'
+********************  echo_obj  *************************
+obj-y: button.o
+__subdir-y:
+subdir-y:
+subdir_objs:
+cur_objs:button.o
+**********************************************************
+gcc -Wall -O2 -g -I /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/include   -Wp,-MD,.button.o.d -c -o button.o button.c
+ld -r -o built-in.o button.o
+make[2]: Leaving directory '/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/ui'
+subdir-y = page
+make -C page -f /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/Makefile.build
+make[2]: Entering directory '/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/page'
+********************  echo_obj  *************************
+obj-y: main_page.o page_manager.o
+__subdir-y:
+subdir-y:
+subdir_objs:
+cur_objs:main_page.o page_manager.o
+**********************************************************
+gcc -Wall -O2 -g -I /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/include   -Wp,-MD,.main_page.o.d -c -o main_page.o main_page.c
+main_page.c:198:16: warning: ‘GetButtonByInputEvent’ defined but not used [-Wunused-function]
+  198 | static Button* GetButtonByInputEvent(InputEvent *pInputEvent)
+      |                ^~~~~~~~~~~~~~~~~~~~~
+main_page.c:103:13: warning: ‘GenerateButtons’ defined but not used [-Wunused-function]
+  103 | static void GenerateButtons(void)
+      |             ^~~~~~~~~~~~~~~
+gcc -Wall -O2 -g -I /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/include   -Wp,-MD,.page_manager.o.d -c -o page_manager.o page_manager.c
+ld -r -o built-in.o main_page.o page_manager.o
+make[2]: Leaving directory '/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/page'
+subdir-y = config
+make -C config -f /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/Makefile.build
+make[2]: Entering directory '/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/config'
+********************  echo_obj  *************************
+obj-y: config.o
+__subdir-y:
+subdir-y:
+subdir_objs:
+cur_objs:config.o
+**********************************************************
+gcc -Wall -O2 -g -I /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/include   -Wp,-MD,.config.o.d -c -o config.o config.c
+ld -r -o built-in.o config.o
+make[2]: Leaving directory '/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/config'
+subdir-y = business
+make -C business -f /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/Makefile.build
+make[2]: Entering directory '/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/business'
+********************  echo_obj  *************************
+obj-y: main.o
+__subdir-y:
+subdir-y:
+subdir_objs:
+cur_objs:main.o
+**********************************************************
+gcc -Wall -O2 -g -I /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/include   -Wp,-MD,.main.o.d -c -o main.o main.c
+main.c: In function ‘main’:
+main.c:12:9: warning: unused variable ‘err’ [-Wunused-variable]
+   12 |     int err;
+      |         ^~~
+ld -r -o built-in.o main.o
+make[2]: Leaving directory '/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/business'
+ld -r -o built-in.o display/built-in.o ui/built-in.o page/built-in.o config/built-in.o business/built-in.o
+make[1]: Leaving directory '/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command'
+gcc -o test built-in.o -lpthread -lfreetype -lm
+test has been built!
+</code></pre></details>
+
+
+<h3><span id="4-3-3-bian-yi-ru-kou">4.3.3 编译入口</span><a href="#4-3-3-bian-yi-ru-kou" class="header-anchor">#</a></h3><p>首先编译目标<code>start_recursive_build</code>， 列出目标、要进行编译的子目录模块，进入当前Makefile所在目录，按照顶层<code>Makefile.build</code>的规则编译，打印如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">start_recursive_build</span><br><span class="line">obj-y = display/ ui/ page/ config/ business/</span><br></pre></td></tr></table></figure>
+
+<h3><span id="4-3-4-bian-yi-build">4.3.4 编译<code>__build</code></span><a href="#4-3-4-bian-yi-build" class="header-anchor">#</a></h3><p>执行顶层<code>Makefile.build</code>，执行目标<code>__build</code>，执行<code>echo_obj</code>， 打印:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">make -C ./ -f /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/</span><br><span class="line">31_improve_command/Makefile.build</span><br><span class="line"><span class="section">make[1]: Entering directory &#x27;/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command&#x27;</span></span><br><span class="line">********************  echo_obj  *************************</span><br><span class="line"><span class="section">obj-y: display/ ui/ page/ config/ business/</span></span><br><span class="line"><span class="section">__subdir-y:display ui page config business</span></span><br><span class="line"><span class="section">subdir-y: display ui page config business</span></span><br><span class="line"><span class="section">subdir_objs:display/built-in.o ui/built-in.o page/built-in.o config/built-in.o business/built-in.o</span></span><br><span class="line"><span class="section">cur_objs:</span></span><br><span class="line">**********************************************************</span><br></pre></td></tr></table></figure>
+
+<h4><span id="4-3-4-1-bian-yi-subdir-y">4.3.4.1 编译<code>$(subdir-y)</code></span><a href="#4-3-4-1-bian-yi-subdir-y" class="header-anchor">#</a></h4><p>在每个子目录产生<code>build-in.o</code>：</p>
+<p>执行<code>$(subdir-y)</code>， 又<code>$(subdir-y)=display ui page config business</code>，因此目标编译规则展开如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">display ui page config business:</span><br><span class="line">        @echo subdir-y = <span class="variable">$@</span></span><br><span class="line">        make -C <span class="variable">$@</span> -f <span class="variable">$(TOPDIR)</span>/Makefile.build</span><br></pre></td></tr></table></figure>
+
+<p>打印如下:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">subdir-y = display</span><br><span class="line">make -C display -f /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/Makefile.build</span><br><span class="line"><span class="section">make[2]: Entering directory &#x27;/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/display&#x27;</span></span><br><span class="line">********************  echo_obj  *************************</span><br><span class="line"><span class="section">obj-y: disp_manager.o framebuffer.o</span></span><br><span class="line"><span class="section">__subdir-y:</span></span><br><span class="line"><span class="section">subdir-y:</span></span><br><span class="line"><span class="section">subdir_objs:</span></span><br><span class="line"><span class="section">cur_objs:disp_manager.o framebuffer.o</span></span><br><span class="line">**********************************************************</span><br><span class="line">gcc -Wall -O2 -g -I /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/<span class="keyword">include</span>   -Wp,-MD,.disp_manager.o.d -c -o disp_manager.o disp_manager.c</span><br><span class="line">gcc -Wall -O2 -g -I /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/<span class="keyword">include</span>   -Wp,-MD,.framebuffer.o.d -c -o framebuffer.o framebuffer.c</span><br><span class="line">ld -r -o built-in.o disp_manager.o framebuffer.o</span><br><span class="line"><span class="section">make[2]: Leaving directory &#x27;/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/display&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>分析：目标是<code>display</code>，进入<code>display</code>目录，按照顶层<code>Makefile.build</code>的规则编译，再次递归调用<code>__build</code>，可以看到只有当子目录<code>subdir-y</code>为空了，才不会递归进去，那么此时会执行<code>built-in.o</code>目标。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">built-in.o : <span class="variable">$(cur_objs)</span> <span class="variable">$(subdir_objs)</span></span><br><span class="line">        <span class="variable">$(LD)</span> -r -o <span class="variable">$@</span> <span class="variable">$^</span></span><br></pre></td></tr></table></figure>
+
+<p>此时按照推导规则进行<code>disp_manager.o， framebuffer.o</code>的编译，在<code>dispaly</code>目录下打包成<code>build-in.o</code>。</p>
+<p>同理，<code>ui</code>目录编译：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">subdir-y = ui</span><br><span class="line">make -C ui -f /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/Makefile.build</span><br><span class="line"><span class="section">make[2]: Entering directory &#x27;/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/ui&#x27;</span></span><br><span class="line">********************  echo_obj  *************************</span><br><span class="line"><span class="section">obj-y: button.o</span></span><br><span class="line"><span class="section">__subdir-y:</span></span><br><span class="line"><span class="section">subdir-y:</span></span><br><span class="line"><span class="section">subdir_objs:</span></span><br><span class="line"><span class="section">cur_objs:button.o</span></span><br><span class="line">**********************************************************</span><br><span class="line">gcc -Wall -O2 -g -I /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/<span class="keyword">include</span>   -Wp,-MD,.button.o.d -c -o button.o button.c</span><br><span class="line">ld -r -o built-in.o button.o</span><br><span class="line"><span class="section">make[2]: Leaving directory &#x27;/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/ui&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>同理，<code>page</code>目录编译：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">subdir-y = page</span><br><span class="line">make -C page -f /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/Makefile.build</span><br><span class="line"><span class="section">make[2]: Entering directory &#x27;/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/page&#x27;</span></span><br><span class="line">********************  echo_obj  *************************</span><br><span class="line"><span class="section">obj-y: main_page.o page_manager.o</span></span><br><span class="line"><span class="section">__subdir-y:</span></span><br><span class="line"><span class="section">subdir-y:</span></span><br><span class="line"><span class="section">subdir_objs:</span></span><br><span class="line"><span class="section">cur_objs:main_page.o page_manager.o</span></span><br><span class="line">**********************************************************</span><br><span class="line">gcc -Wall -O2 -g -I /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/<span class="keyword">include</span>   -Wp,-MD,.main_page.o.d -c -o main_page.o main_page.c</span><br><span class="line"><span class="section">main_page.c:198:16: warning: ‘GetButtonByInputEvent’ defined but not used [-Wunused-function]</span></span><br><span class="line">  198 | static Button* GetButtonByInputEvent(InputEvent *pInputEvent)</span><br><span class="line">      |                ^~~~~~~~~~~~~~~~~~~~~</span><br><span class="line"><span class="section">main_page.c:103:13: warning: ‘GenerateButtons’ defined but not used [-Wunused-function]</span></span><br><span class="line">  103 | static void GenerateButtons(void)</span><br><span class="line">      |             ^~~~~~~~~~~~~~~</span><br><span class="line">gcc -Wall -O2 -g -I /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/<span class="keyword">include</span>   -Wp,-MD,.page_manager.o.d -c -o page_manager.o page_manager.c</span><br><span class="line">ld -r -o built-in.o main_page.o page_manager.o</span><br><span class="line"><span class="section">make[2]: Leaving directory &#x27;/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/page&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>同理，<code>config</code>目录编译：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">subdir-y = config</span><br><span class="line">make -C config -f /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/Makefile.build</span><br><span class="line"><span class="section">make[2]: Entering directory &#x27;/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/config&#x27;</span></span><br><span class="line">********************  echo_obj  *************************</span><br><span class="line"><span class="section">obj-y: config.o</span></span><br><span class="line"><span class="section">__subdir-y:</span></span><br><span class="line"><span class="section">subdir-y:</span></span><br><span class="line"><span class="section">subdir_objs:</span></span><br><span class="line"><span class="section">cur_objs:config.o</span></span><br><span class="line">**********************************************************</span><br><span class="line">gcc -Wall -O2 -g -I /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/<span class="keyword">include</span>   -Wp,-MD,.config.o.d -c -o config.o config.c</span><br><span class="line">ld -r -o built-in.o config.o</span><br><span class="line"><span class="section">make[2]: Leaving directory &#x27;/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/config&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<p>同理，<code>business</code>目录编译：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">subdir-y = business</span><br><span class="line">make -C business -f /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/Makefile.build</span><br><span class="line"><span class="section">make[2]: Entering directory &#x27;/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/business&#x27;</span></span><br><span class="line">********************  echo_obj  *************************</span><br><span class="line"><span class="section">obj-y: main.o</span></span><br><span class="line"><span class="section">__subdir-y:</span></span><br><span class="line"><span class="section">subdir-y:</span></span><br><span class="line"><span class="section">subdir_objs:</span></span><br><span class="line"><span class="section">cur_objs:main.o</span></span><br><span class="line">**********************************************************</span><br><span class="line">gcc -Wall -O2 -g -I /media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/<span class="keyword">include</span>   -Wp,-MD,.main.o.d -c -o main.o main.c</span><br><span class="line"><span class="section">main.c: In function ‘main’:</span></span><br><span class="line"><span class="section">main.c:12:9: warning: unused variable ‘err’ [-Wunused-variable]</span></span><br><span class="line">   12 |     int err;</span><br><span class="line">      |         ^~~</span><br><span class="line">ld -r -o built-in.o main.o</span><br><span class="line"><span class="section">make[2]: Leaving directory &#x27;/media/cvitek/robin.lee/my_test/study/weidongshan/imx6study/project/electronic_test_tools/31_improve_command/business&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="4-3-4-2-da-bao-cheng-zong-de-built-in-o">4.3.4.2 打包成总的<code>built-in.o</code></span><a href="#4-3-4-2-da-bao-cheng-zong-de-built-in-o" class="header-anchor">#</a></h4><p>最后子目录的<code>built-in.o</code>都生成了，再来返回顶层<code>Makefile</code>，此时<code>subdir_objs和cur_objs</code>如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">subdir_objs:display/built-in.o ui/built-in.o page/built-in.o config/built-in.o business/built-in.o</span></span><br><span class="line"><span class="section">cur_objs:</span></span><br></pre></td></tr></table></figure>
+
+<p>那么继续：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">built-in.o : <span class="variable">$(cur_objs)</span> <span class="variable">$(subdir_objs)</span></span><br><span class="line">        <span class="variable">$(LD)</span> -r -o <span class="variable">$@</span> <span class="variable">$^</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ld -r -o built-in.o display/built-in.o ui/built-in.o page/built-in.o config/built-in.o business/built-in.o</span><br></pre></td></tr></table></figure>
+
+<p>至此，<code>__build</code>目标执行完毕。</p>
+<h3><span id="4-3-5-bian-yi-chu-kou">4.3.5 编译出口</span><a href="#4-3-5-bian-yi-chu-kou" class="header-anchor">#</a></h3><p>回到顶层<code>makefile</code>的<code>start_recursive_build</code>，回到<code>all</code>目标，执行<code>$(TARGET)</code>目标。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -o test built-in.o -lpthread -lfreetype -lm</span><br></pre></td></tr></table></figure>
+
+<p>最终回到<code>all</code>目标,打印：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">test has been built!</span><br></pre></td></tr></table></figure>
+
+<h1><span id="5-tong-yong-xing-makefile2-luo-ji-ban">5 通用型<code>makefile2</code>-裸机版</span><a href="#5-tong-yong-xing-makefile2-luo-ji-ban" class="header-anchor">#</a></h1><h2><span id="5-1-wen-jian-gong-cheng-mu-lu">5.1 文件工程目录</span><a href="#5-1-wen-jian-gong-cheng-mu-lu" class="header-anchor">#</a></h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">book@100ask:~/ftp/openedv/bak_drv_prj/05_ledc_bsp$ tree</span></span><br><span class="line">├── bsp</span><br><span class="line">│   ├── clk</span><br><span class="line">│   │   ├── bsp_clk.c</span><br><span class="line">│   │   └── bsp_clk.h</span><br><span class="line">│   ├── delay</span><br><span class="line">│   │   ├── bsp_delay.c</span><br><span class="line">│   │   └── bsp_delay.h</span><br><span class="line">│   └── led</span><br><span class="line">│       ├── bsp_led.c</span><br><span class="line">│       └── bsp_led.h</span><br><span class="line">├── imx6ul</span><br><span class="line">│   ├── cc.h</span><br><span class="line">│   ├── fsl_common.h</span><br><span class="line">│   ├── fsl_iomuxc.h</span><br><span class="line">│   ├── imx6ul.h</span><br><span class="line">│   └── MCIMX6Y2.h</span><br><span class="line">├── imx6ul.lds</span><br><span class="line">├── imxdownload</span><br><span class="line">├── Makefile</span><br><span class="line">├── obj</span><br><span class="line">└── project</span><br><span class="line">    ├── main.c</span><br><span class="line">    └── start.S</span><br></pre></td></tr></table></figure>
+
+<h2><span id="5-2-lds-lian-jie-jiao-ben">5.2 lds链接脚本</span><a href="#5-2-lds-lian-jie-jiao-ben" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">SECTIONS&#123;</span><br><span class="line">    . = <span class="number">0X87800000</span>;</span><br><span class="line">    .text :</span><br><span class="line">    &#123;</span><br><span class="line">        obj/start.o </span><br><span class="line">        *(.text)</span><br><span class="line">    &#125;</span><br><span class="line">    .rodata <span class="title function_">ALIGN</span><span class="params">(<span class="number">4</span>)</span> : &#123;*(.rodata*)&#125;     </span><br><span class="line">    .data <span class="title function_">ALIGN</span><span class="params">(<span class="number">4</span>)</span>   : &#123; *(.data) &#125;    </span><br><span class="line">    __bss_start = .;    </span><br><span class="line">    .bss <span class="title function_">ALIGN</span><span class="params">(<span class="number">4</span>)</span>  : &#123; *(.bss)  *(COMMON) &#125;    </span><br><span class="line">    __bss_end = .;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="5-3-makefile">5.3 <code>Makefile</code></span><a href="#5-3-makefile" class="header-anchor">#</a></h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line">CROSS_COMPILE ?= arm-linux-gnueabihf-</span><br><span class="line">TARGET ?= bsp</span><br><span class="line">CC := <span class="variable">$(CROSS_COMPILE)</span>gcc</span><br><span class="line">LD := <span class="variable">$(CROSS_COMPILE)</span>ld</span><br><span class="line">OBJCOPY := <span class="variable">$(CROSS_COMPILE)</span>objcopy</span><br><span class="line">OBJDUMP := <span class="variable">$(CROSS_COMPILE)</span>objdump</span><br><span class="line"></span><br><span class="line">INCDIRS := imx6ul \</span><br><span class="line">　　　　　　bsp/clk \</span><br><span class="line">　　　　　　bsp/led \</span><br><span class="line">　　　　　　bsp/delay</span><br><span class="line"></span><br><span class="line">SRCDIRS := project \</span><br><span class="line">　　　　　　bsp/clk \</span><br><span class="line">　　　　　　bsp/led \</span><br><span class="line">　　　　　　bsp/delay</span><br><span class="line"></span><br><span class="line">INCLUDE := <span class="variable">$(<span class="built_in">patsubst</span> %, -I %, <span class="variable">$(INCDIRS)</span>)</span></span><br><span class="line"></span><br><span class="line">SFILES := <span class="variable">$(<span class="built_in">foreach</span> <span class="built_in">dir</span>, <span class="variable">$(SRCDIRS)</span>, $(<span class="built_in">wildcard</span> <span class="variable">$(dir)</span>/*.S)</span>)</span><br><span class="line">CFILES := <span class="variable">$(<span class="built_in">foreach</span> <span class="built_in">dir</span>, <span class="variable">$(SRCDIRS)</span>, $(<span class="built_in">wildcard</span> <span class="variable">$(dir)</span>/*.c)</span>)</span><br><span class="line"></span><br><span class="line">SFILENDIR := <span class="variable">$(<span class="built_in">notdir</span> <span class="variable">$(SFILES)</span>)</span></span><br><span class="line">CFILENDIR := <span class="variable">$(<span class="built_in">notdir</span> <span class="variable">$(CFILES)</span>)</span></span><br><span class="line"></span><br><span class="line">SOBJS := <span class="variable">$(<span class="built_in">patsubst</span> %, obj/%, $(SFILENDIR:.S=.o)</span>)</span><br><span class="line">COBJS := <span class="variable">$(<span class="built_in">patsubst</span> %, obj/%, $(CFILENDIR:.c=.o)</span>)</span><br><span class="line">OBJS := <span class="variable">$(SOBJS)</span> <span class="variable">$(COBJS)</span></span><br><span class="line"></span><br><span class="line">VPATH := <span class="variable">$(SRCDIRS)</span></span><br><span class="line"></span><br><span class="line"><span class="meta"><span class="keyword">.PHONY</span>: clean</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$(TARGET)</span>.bin : <span class="variable">$(OBJS)</span></span><br><span class="line">　　<span class="variable">$(LD)</span> -Timx6ul.lds -o <span class="variable">$(TARGET)</span>.elf <span class="variable">$^</span></span><br><span class="line">　　<span class="variable">$(OBJCOPY)</span> -O binary -S <span class="variable">$(TARGET)</span>.elf <span class="variable">$@</span></span><br><span class="line">　　<span class="variable">$(OBJDUMP)</span> -D -m arm <span class="variable">$(TARGET)</span>.elf &gt; <span class="variable">$(TARGET)</span>.dis</span><br><span class="line"></span><br><span class="line"><span class="variable">$(SOBJS)</span> : obj/%.o : %.S</span><br><span class="line">　　<span class="variable">$(CC)</span> -Wall -nostdlib -c -O2 <span class="variable">$(INCLUDE)</span> -o <span class="variable">$@</span> <span class="variable">$&lt;</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$(COBJS)</span> : obj/%.o : %.c</span><br><span class="line">　　<span class="variable">$(CC)</span> -Wall -nostdlib -c -O2 <span class="variable">$(INCLUDE)</span> -o <span class="variable">$@</span> <span class="variable">$&lt;</span></span><br><span class="line"></span><br><span class="line"><span class="section">print:</span></span><br><span class="line">　　@echo INCDIRS=<span class="variable">$(INCDIRS)</span></span><br><span class="line">　　@echo SRCDIRS=<span class="variable">$(SRCDIRS)</span></span><br><span class="line">　　@echo INCLUDE=<span class="variable">$(INCLUDE)</span></span><br><span class="line">　　@echo SFILES=<span class="variable">$(SFILES)</span></span><br><span class="line">　　@echo CFILES=<span class="variable">$(CFILES)</span></span><br><span class="line">　　@echo SFILENDIR=<span class="variable">$(SFILENDIR)</span></span><br><span class="line">　　@echo CFILENDIR=<span class="variable">$(CFILENDIR)</span></span><br><span class="line">　　@echo SOBJS=<span class="variable">$(SOBJS)</span></span><br><span class="line">　　@echo COBJS=<span class="variable">$(COBJS)</span></span><br><span class="line"></span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">　　rm -rf <span class="variable">$(TARGET)</span>.elf <span class="variable">$(TARGET)</span>.dis <span class="variable">$(TARGET)</span>.bin <span class="variable">$(COBJS)</span> <span class="variable">$(SOBJS)</span></span><br></pre></td></tr></table></figure>
+
+<p>打印出目标和依赖文件:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">book@100ask:~/ftp/openedv/bak_drv_prj/05_ledc_bsp$ make print</span></span><br><span class="line">INCDIRS=imx6ul bsp/clk bsp/led bsp/delay</span><br><span class="line">SRCDIRS=project bsp/clk bsp/led bsp/delay</span><br><span class="line">INCLUDE= -I imx6ul -I bsp/clk -I bsp/led -I bsp/delay</span><br><span class="line">SFILES= project/start.S</span><br><span class="line">CFILES= project/main.c bsp/clk/bsp_clk.c bsp/led/bsp_led.c bsp/delay/bsp_delay.c</span><br><span class="line">SFILENDIR=start.S</span><br><span class="line">CFILENDIR=main.c bsp_clk.c bsp_led.c bsp_delay.c</span><br><span class="line">SOBJS= obj/start.o</span><br><span class="line">COBJS= obj/main.o obj/bsp_clk.o obj/bsp_led.o obj/bsp_delay.o</span><br></pre></td></tr></table></figure>
+
+<p>编译结果如下:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">book@100ask:~/ftp/openedv/bak_drv_prj/05_ledc_bsp$ make</span></span><br><span class="line">arm-buildroot-linux-gnueabihf-gcc -Wall -nostdlib -c -O2   -I imx6ul  -I bsp/clk  -I bsp/led  -I bsp/delay -o obj/start.o project/start.S</span><br><span class="line">arm-buildroot-linux-gnueabihf-gcc -Wall -nostdlib -c -O2   -I imx6ul  -I bsp/clk  -I bsp/led  -I bsp/delay -o obj/main.o project/main.c</span><br><span class="line">arm-buildroot-linux-gnueabihf-gcc -Wall -nostdlib -c -O2   -I imx6ul  -I bsp/clk  -I bsp/led  -I bsp/delay -o obj/bsp_clk.o bsp/clk/bsp_clk.c</span><br><span class="line">arm-buildroot-linux-gnueabihf-gcc -Wall -nostdlib -c -O2   -I imx6ul  -I bsp/clk  -I bsp/led  -I bsp/delay -o obj/bsp_led.o bsp/led/bsp_led.c</span><br><span class="line">arm-buildroot-linux-gnueabihf-gcc -Wall -nostdlib -c -O2   -I imx6ul  -I bsp/clk  -I bsp/led  -I bsp/delay -o obj/bsp_delay.o bsp/delay/bsp_delay.c</span><br><span class="line">arm-buildroot-linux-gnueabihf-ld -Timx6ul.lds -o bsp.elf obj/start.o obj/main.o obj/bsp_clk.o obj/bsp_led.o obj/bsp_delay.o</span><br><span class="line">arm-buildroot-linux-gnueabihf-objcopy -O binary -S bsp.elf bsp.bin</span><br><span class="line">arm-buildroot-linux-gnueabihf-objdump -D -m arm bsp.elf &gt; bsp.dis</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/" data-id="clyylnk8k000n7wufhpzwesmu" data-title="Makefile-常用函数和通用模板" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-uboot-menuconfig和Kconfig图像化配置" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/" class="article-date">
@@ -2519,323 +3027,6 @@ news - network news subsystem（网络系统信息）
 
 
   
-    <article id="post-Linux日志管理-syslog和rsyslog" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/" class="article-date">
-  <time class="dt-published" datetime="2024-06-02T10:13:09.000Z" itemprop="datePublished">2024-06-02</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/">Linux日志管理-syslog和rsyslog</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-syslogd-jian-jie">1 syslogd简介</a><ul>
-<li><a href="#1-1-ri-zhi-ge-shi">1.1 日志格式</a></li>
-<li><a href="#1-2-etc-syslog-conf-fu-wu-pei-zhi">1.2 &#x2F;etc&#x2F;syslog.conf服务配置</a><ul>
-<li><a href="#1-2-1-zong-pei-zhi-etc-syslog-conf">1.2.1 总配置&#x2F;etc&#x2F;syslog.conf</a></li>
-<li><a href="#1-2-2-rsyslog-gui-ze-etc-rsyslog-d-conf">1.2.2 rsyslog规则（&#x2F;etc&#x2F;rsyslog.d&#x2F;*.conf）</a><ul>
-<li><a href="#1-2-2-1-facility-ri-zhi-lei-xing">1.2.2.1 facility-日志类型</a></li>
-<li><a href="#1-2-2-2-level-an-yan-chong-cheng-du-you-di-dao-gao-pai-xu">1.2.2.2 level-按严重程度由低到高排序</a></li>
-<li><a href="#1-2-2-3-action-biao-shi-log-bao-cun-de-wei-zhi">1.2.2.3 action-表示log保存的位置</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#1-3-cheng-xu-ru-he-pei-zhi-syslog-zi-fu-wu-zi-ding-yi-rsyslog-gui-ze">1.3 程序如何配置syslog子服务(自定义rsyslog规则)</a></li>
-</ul>
-</li>
-<li><a href="#2-syslog-han-shu">2 syslog()函数</a><ul>
-<li><a href="#2-1-openlog-han-shu">2.1 openlog函数</a></li>
-<li><a href="#2-2-syslog-han-shu">2.2 syslog函数</a></li>
-<li><a href="#2-3-chong-ding-xiang-log">2.3 重定向log</a><ul>
-<li><a href="#2-3-1-fang-fa-1-xiu-gai-rsyslog-conf">2.3.1 方法1-修改rsyslog.conf</a></li>
-<li><a href="#2-3-2-fang-fa-2-xiu-gai-code-zhong-de-facility">2.3.2 方法2-修改code中的facility</a></li>
-</ul>
-</li>
-<li><a href="#2-4-she-zhi-log-deng-ji">2.4 设置log等级</a></li>
-<li><a href="#2-5-chong-ding-xiang-log-dao-console">2.5 重定向log到console</a></li>
-</ul>
-</li>
-<li><a href="#3-dup-han-shu-jie-shao">3 dup函数介绍</a></li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-syslogd-jian-jie">1 syslogd简介</span><a href="#1-syslogd-jian-jie" class="header-anchor">#</a></h1><p>syslogd不仅仅是记录kernel log的服务，还能记录user space中的日志。</p>
-<p>syslogd是Linux下的一个记录日志文件服务。新版本叫做rsyslogd。</p>
-<p>syslogd有一系列的子服务，例如mail、auth、cron、kern等等，这些子服务提供日志记录的功能,。当程序要记录log时,可以直接调用这些子服务将日志记录到设定的地方。</p>
-<p><strong>syslogd</strong>是一个守护进程，配置这整个守护进程以及其子服务的地方就是&#x2F;etc&#x2F;syslog.conf这个文件。可以从<a target="_blank" rel="noopener" href="https://www.rsyslog.com/doc/master/%E8%8E%B7%E5%8F%96%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3%E3%80%82">https://www.rsyslog.com/doc/master/获取官方文档。</a></p>
-<h2><span id="1-1-ri-zhi-ge-shi">1.1 日志格式</span><a href="#1-1-ri-zhi-ge-shi" class="header-anchor">#</a></h2><p>如果配置好并运行了 syslogd 或 klogd，一般所有 log的信息也会追加到<code> /var/log/messages</code>。并且kernel log信息被记录在<code>/val/log/kern.log</code>。</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/1.png" alt="img"></p>
-<p>可以看到基本日志格式包含以下四列:</p>
-<ol>
-<li>事件产生的时间(Jan 1 08:00:09)</li>
-<li>发生事件的服务器的主机名 (cvitek)</li>
-<li>产生事件的服务名或程序名 (kernel or local5)</li>
-<li>事件的具体信息(…cif a0c2000.cif:..)</li>
-</ol>
-<p>当开启rsyslogd后，不能透过&#x2F;proc&#x2F;kmsg来查看kernel log。</p>
-<h2><span id="1-2-x2f-etc-x2f-syslog-conf-fu-wu-pei-zhi">1.2 &#x2F;etc&#x2F;syslog.conf服务配置</span><a href="#1-2-x2f-etc-x2f-syslog-conf-fu-wu-pei-zhi" class="header-anchor">#</a></h2><ol>
-<li>&#x2F;etc&#x2F;rsyslog.conf 是rsyslog服务的总配置文件</li>
-<li>&#x2F;etc&#x2F;rsyslog.d 该目录是单独配置的rsyslog配置文件</li>
-</ol>
-<h3><span id="1-2-1-zong-pei-zhi-x2f-etc-x2f-syslog-conf">1.2.1 总配置&#x2F;etc&#x2F;syslog.conf</span><a href="#1-2-1-zong-pei-zhi-x2f-etc-x2f-syslog-conf" class="header-anchor">#</a></h3><p>rsyslog记录哪些日志，到底记录了什么样的日志，是通过这个<code>/etc/rsyslog.conf</code>配置文件来决定的，先分析一下rsyslogd的总配置文件：</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/2.png" alt="img"></p>
-<p>默认规则会定义在<code>/etc/rsyslog.d/50-default.conf</code>中：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#################</span></span><br><span class="line"><span class="comment">#### MODULES ####</span></span><br><span class="line"><span class="comment">#################</span></span><br><span class="line">module(load=<span class="string">&quot;imuxsock&quot;</span>) <span class="comment"># provides support for local system logging   ；加载提供对本地系统日志的支持</span></span><br><span class="line">module(load=<span class="string">&quot;imklog&quot;</span>)   <span class="comment"># provides kernel logging support；加载读取内核消息模块</span></span><br><span class="line"><span class="comment">#module(load=&quot;immark&quot;)  # provides --MARK-- message capability</span></span><br><span class="line"><span class="comment"># provides UDP syslog reception  （接收使用UDP 协议转发过来的日志，这里#注释掉了表示不启用）</span></span><br><span class="line"><span class="comment">#module(load=&quot;imudp&quot;)</span></span><br><span class="line"><span class="comment">#input(type=&quot;imudp&quot; port=&quot;514&quot;)  （允许514端口接收）</span></span><br><span class="line"><span class="comment"># provides TCP syslog reception （接收使用UDP 协议转发过来的日志）</span></span><br><span class="line"><span class="comment">#module(load=&quot;imtcp&quot;)</span></span><br><span class="line"><span class="comment">#input(type=&quot;imtcp&quot; port=&quot;514&quot;)（允许514端口接收）</span></span><br><span class="line"><span class="comment"># Enable non-kernel facility klog messages</span></span><br><span class="line"><span class="variable">$KLogPermitNonKernelFacility</span> on</span><br><span class="line"><span class="comment">###########################</span></span><br><span class="line"><span class="comment">#### GLOBAL DIRECTIVES ####</span></span><br><span class="line"><span class="comment">###########################</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Use traditional timestamp format.</span></span><br><span class="line"><span class="comment"># To enable high precision timestamps, comment out the following line.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="variable">$ActionFileDefaultTemplate</span> RSYSLOG_TraditionalFileFormat</span><br><span class="line"><span class="comment"># Filter duplicated messages</span></span><br><span class="line"><span class="variable">$RepeatedMsgReduction</span> on</span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Set the default permissions for all log files.</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="variable">$FileOwner</span> syslog</span><br><span class="line"><span class="variable">$FileGroup</span> adm</span><br><span class="line"><span class="variable">$FileCreateMode</span> 0640</span><br><span class="line"><span class="variable">$DirCreateMode</span> 0755</span><br><span class="line"><span class="variable">$Umask</span> 0022</span><br><span class="line"><span class="variable">$PrivDropToUser</span> syslog</span><br><span class="line"><span class="variable">$PrivDropToGroup</span> syslog</span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># Where to place spool and state files</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="variable">$WorkDirectory</span> /var/spool/rsyslog</span><br><span class="line">(记录所有日志类型的info级别以及大于info级别的信息到/var/log/messages,但是mail邮件信息,authpriv验证方面的信息和cron时间任务相关的信息除外)</span><br><span class="line"><span class="comment">#*.info;mail.none;authpriv.none;cron.none    /var/log/messages</span></span><br><span class="line"><span class="comment"># Include all config files in /etc/rsyslog.d/ </span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="variable">$IncludeConfig</span> /etc/rsyslog.d/*.conf  （表示加载该目录中的所有配置）</span><br></pre></td></tr></table></figure>
-
-<h3><span id="1-2-2-rsyslog-gui-ze-x2f-etc-x2f-rsyslog-d-x2f-conf">1.2.2 rsyslog规则（&#x2F;etc&#x2F;rsyslog.d&#x2F;*.conf）</span><a href="#1-2-2-rsyslog-gui-ze-x2f-etc-x2f-rsyslog-d-x2f-conf" class="header-anchor">#</a></h3><p>rsyslog规则配置文件一般由以下3部分组成，每一行表示一个项目，格式为：facility.level action，分别表示日志类型，日志等级，日志输出路径。一般系统默认的规则定义在<code>/etc/rsyslog.d/50-default.conf</code>：</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/3.png" alt="img"></p>
-<p>一般所有日志类型都会被追加在<code>/val/log/messages</code>。如：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">*.info;mail.none;authpriv.none;cron.none    /var/log/messages  </span><br></pre></td></tr></table></figure>
-
-<h4><span id="1-2-2-1-facility-ri-zhi-lei-xing">1.2.2.1 facility-日志类型</span><a href="#1-2-2-1-facility-ri-zhi-lei-xing" class="header-anchor">#</a></h4><ul>
-<li>kern: 内核信息</li>
-<li>user: 用户进程相关信息</li>
-<li>mail: 电子邮件相关信息</li>
-<li>Local0- local7: 为本地使用预留的服务</li>
-<li>daemon: 后台进程相关信息</li>
-<li>syslog: 系统日志信息</li>
-</ul>
-<h4><span id="1-2-2-2-level-an-yan-chong-cheng-du-you-di-dao-gao-pai-xu">1.2.2.2 level-按严重程度由低到高排序</span><a href="#1-2-2-2-level-an-yan-chong-cheng-du-you-di-dao-gao-pai-xu" class="header-anchor">#</a></h4><ul>
-<li>none: 没有重要级</li>
-<li>debug: 调试信息</li>
-<li>info: 打印的信息</li>
-<li>notice: 具有重要信息的普通条件</li>
-<li>warning: 警告信息</li>
-<li>err: 错误信息</li>
-<li>crit: 阻止某些工具或子系统功能实现的错误条件</li>
-<li>alert: 需要立即被修改的条件</li>
-<li>emerg: 该系统不可用</li>
-</ul>
-<h4><span id="1-2-2-3-action-biao-shi-log-bao-cun-de-wei-zhi">1.2.2.3 action-表示log保存的位置</span><a href="#1-2-2-3-action-biao-shi-log-bao-cun-de-wei-zhi" class="header-anchor">#</a></h4><p>那下面我也抄过来一份比较全面的规则定义示例供大家参考:</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 记录mail日志等级为error及以上日志</span></span><br><span class="line">mail.err                                                        /var/log/mail_err.log</span><br><span class="line"><span class="comment"># 记录mail所有等级为warn级别的日志（仅记录warn级别）</span></span><br><span class="line">mail.=warn                                                        /var/log/mail_err.log</span><br><span class="line"><span class="comment"># 记录kern所有日志</span></span><br><span class="line">kern.*                                                                /var/log/kern.log</span><br><span class="line"><span class="comment"># 将mail的所有信息，除了info以外，其他的都写入/var/adm/mail</span></span><br><span class="line">mail.*;mail.!=info   /var/adm/mail</span><br><span class="line"><span class="comment"># 将日志等级为crit或更高的内核消息定向到远程主机finlandia</span></span><br><span class="line"><span class="comment"># 如果主机崩溃，磁盘出现不可修复的错误，可能无法读取存储的消息。如果有日志在远程主机上，可以尝试找出崩溃的原因。</span></span><br><span class="line">kern.crit                                                     @finlandia</span><br><span class="line"><span class="comment"># 记录所有类型的warning等级及以上日志</span></span><br><span class="line">*.warning                                                        /var/log/syslog_warn.log</span><br><span class="line"><span class="comment"># 记录mail的warning日志和kern的error日志,其他所有的info日志</span></span><br><span class="line">*.info;mail.warning;kern.error                /var/log/messages</span><br><span class="line"><span class="comment"># 记录kernel的info到warning日志</span></span><br><span class="line">kern.info;kern.!err   /var/adm/kernel-info</span><br><span class="line"><span class="comment"># 将mail和news的info级别日志写入/var/adminfo</span></span><br><span class="line">mail,news.=info    /var/adm/info</span><br><span class="line"><span class="comment"># 将所有系统中所有类型的info日志和notice日志存入/var/log/massages,mail的所有日志除外。</span></span><br><span class="line">*.=info;*.=notice;\</span><br><span class="line">mail.none /var/log/messages</span><br><span class="line"><span class="comment"># 紧急消息（emerg级别）将使用wall显示给当前所有登录的用户，这里用等号表示只对emerg日志级别有效</span></span><br><span class="line">*.=emerg                   *</span><br><span class="line"><span class="comment"># 该规则将所有alert以及更高级别的消息定向到操作员的终端，即登录的用户“root”和“joey”的终端。</span></span><br><span class="line">*.alert      root,joey</span><br></pre></td></tr></table></figure>
-
-<h2><span id="1-3-cheng-xu-ru-he-pei-zhi-syslog-zi-fu-wu-zi-ding-yi-rsyslog-gui-ze">1.3 程序如何配置syslog子服务(自定义rsyslog规则)</span><a href="#1-3-cheng-xu-ru-he-pei-zhi-syslog-zi-fu-wu-zi-ding-yi-rsyslog-gui-ze" class="header-anchor">#</a></h2><p><strong>问题：进程如何发送消息给rsyslog守护进程，rsyslog守护进程是如何对各种日志区分开来的？</strong></p>
-<p>像<code>/usr/sbin/sshd、/usr/bin/login、/usr/bin/su</code>这些进程，它们是调用一个叫syslog的系统调用, syslog系统调用是一个用于向rsyslog守护进程发送消息的的系统函数。<br><code>/usr/sbin/sshd,/usr/bin/login、/usr/bin/su</code>这些进程专门执行登录验证时，它们在调用syslog系统函数会一般会传入<code>LOG_AUTH</code>这个常量。</p>
-<p>而<code>/usr/bin/crond和/usr/bin/at</code>这些在调用syslog系统调用会传入<code>LOG_CRON</code>这个常量（具体请看**syslog()**函数），日志归类规则如下：</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/4.png" alt="img"></p>
-<p>所以如果用<code>LOG_AUTH</code>的syslog()函数调用，那么会归类到了<code>/val/log/secure</code>。</p>
-<p>如果用<code>LOG_CRON</code>的syslog()调用则归类到了<code>/val/log/cron</code>。而kernel等其他log被记录在了<code>/val/log/messages</code>中。</p>
-<p>那么我们可以自定义规则如下:</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/5.png" alt="img"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">syslogfacility-text：表示facility日志类型</span><br><span class="line">syslogseverity-text：表示level日志级别</span><br><span class="line"></span><br><span class="line">这里对aisdk.conf用local7日志类型产生的大于warn日志级别的<span class="built_in">log</span>都将记录到/val/log/aisdk，</span><br><span class="line">对kern.conf用kern类型产生的所有级别日志都记录到/val/log/kern，</span><br><span class="line">Local5类型的日志记录到/val/log/middleware, 并且当日志级别等于或高于4（warn）时也会追加到console.</span><br></pre></td></tr></table></figure>
-
-<p>注意busybox要开启使能syslog.conf解析：<code>/etc/syslog.conf</code>解析，<code>CONFIG_FEATURE_SYSLOGD_CFG=y</code></p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/5-1.png" alt="img"></p>
-<h1><span id="2-syslog-han-shu">2 syslog()函数</span><a href="#2-syslog-han-shu" class="header-anchor">#</a></h1><p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/6.png" alt="img"></p>
-<p>用户空间也可以用syslog()函数来记录自己的进程的日志，所以用户进程可以自定义日志规则。<br>调用openlog是可选择的。如果不调用openlog，则在第一次调用syslog时，会自动调用openlog。<br>syslog的相关函数和宏定义一般在toolchain中都会有定义:</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/7.png" alt="img"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;syslog.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">openlog</span> <span class="params">(<span class="type">char</span>*ident,<span class="type">int</span> option ,<span class="type">int</span> facility)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">syslog</span><span class="params">(<span class="type">int</span> priority,<span class="type">char</span>*format,……)</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">closelog</span><span class="params">()</span>;</span><br></pre></td></tr></table></figure>
-
-
-
-<h2><span id="2-1-openlog-han-shu">2.1 openlog函数</span><a href="#2-1-openlog-han-shu" class="header-anchor">#</a></h2><p>第1个参数为ident，该参数常用来表示信息的来源。ident信息会被固定地添加在每行日志的前面：<br>第2个参数 option控制标志:</p>
-<table>
-<thead>
-<tr>
-<th>option控制标志</th>
-<th>作用</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>LOG_CONS</td>
-<td>如果将信息发送给syslogd守护进程时发生错误，直接将相关信息输出到终端</td>
-</tr>
-<tr>
-<td>LOG_PID</td>
-<td>每条日志信息中都包括进程号</td>
-</tr>
-</tbody></table>
-<p>第3个参数为facility：</p>
-<table>
-<thead>
-<tr>
-<th>facility参数</th>
-<th>syslog.conf中对应的facility取值</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>LOG_KERN</td>
-<td>kern</td>
-</tr>
-<tr>
-<td>LOG_USER</td>
-<td>user</td>
-</tr>
-<tr>
-<td>LOG_MAIL</td>
-<td>mail</td>
-</tr>
-<tr>
-<td>LOG_DAEMON</td>
-<td>daemon</td>
-</tr>
-<tr>
-<td>LOG_AUTH</td>
-<td>auth</td>
-</tr>
-<tr>
-<td>LOG_SYSLOG</td>
-<td>syslog</td>
-</tr>
-<tr>
-<td>LOG_LPR</td>
-<td>lpr</td>
-</tr>
-<tr>
-<td>LOG_NEWS</td>
-<td>news</td>
-</tr>
-<tr>
-<td>LOG_UUCP</td>
-<td>uucp</td>
-</tr>
-<tr>
-<td>LOG_CRON</td>
-<td>cron</td>
-</tr>
-<tr>
-<td>LOG_AUTHPRIV</td>
-<td>authpriv</td>
-</tr>
-<tr>
-<td>LOG_FTP</td>
-<td>ftp</td>
-</tr>
-<tr>
-<td>LOG_LOCAL0～LOG_LOCAL7</td>
-<td>local0～local7</td>
-</tr>
-</tbody></table>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/8.png" alt="img"></p>
-<h2><span id="2-2-syslog-han-shu">2.2 syslog函数</span><a href="#2-2-syslog-han-shu" class="header-anchor">#</a></h2><p>第一个参数priority表示日志级别：</p>
-<table>
-<thead>
-<tr>
-<th>priority参数</th>
-<th>syslog.conf中对应的level取值</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>LOG_EMERG</td>
-<td>emerg</td>
-</tr>
-<tr>
-<td>LOG_ALERT</td>
-<td>alert</td>
-</tr>
-<tr>
-<td>LOG_CRIT</td>
-<td>crit</td>
-</tr>
-<tr>
-<td>LOG_ERR</td>
-<td>err</td>
-</tr>
-<tr>
-<td>LOG_WARNING</td>
-<td>warning</td>
-</tr>
-<tr>
-<td>LOG_NOTICE</td>
-<td>notice</td>
-</tr>
-<tr>
-<td>LOG_INFO</td>
-<td>info</td>
-</tr>
-<tr>
-<td>LOG_DEBUG</td>
-<td>debug</td>
-</tr>
-</tbody></table>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/9.png" alt="img"></p>
-<p>下面是具体的例子：</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/10.png" alt="img"></p>
-<p>这里<code>printf(&quot;%m&quot;)等价于printf(&quot;%s&quot;,strerror(errno));</code>它表示把errno用string形式打印出来。</p>
-<p>由于我这里facility为user时，是记录在&#x2F;val&#x2F;log&#x2F;syslog中的:</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/11.png" alt="img"></p>
-<p>因此打印log如下:</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/12.png" alt="img"></p>
-<h2><span id="2-3-chong-ding-xiang-log">2.3 重定向log</span><a href="#2-3-chong-ding-xiang-log" class="header-anchor">#</a></h2><p>我们也可以把log定向到自己想要的地方。</p>
-<h3><span id="2-3-1-fang-fa-1-xiu-gai-rsyslog-conf">2.3.1 方法1-修改rsyslog.conf</span><a href="#2-3-1-fang-fa-1-xiu-gai-rsyslog-conf" class="header-anchor">#</a></h3><p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/13.png" alt="img"></p>
-<p>将<code>facility=user</code>时的所有level级别的log重定向到<code>/val/log/user.log</code>, 重启rsyslog服务:</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/14.png" alt="img"></p>
-<p>此时log将被写入到新配置的位置&#x2F;val&#x2F;log&#x2F;user.log, 当然&#x2F;val&#x2F;log&#x2F;syslog也会保留一份.（因为也符合&#x2F;val&#x2F;log&#x2F;syslog这条规则）</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/15.png" alt="img"></p>
-<h3><span id="2-3-2-fang-fa-2-xiu-gai-code-zhong-de-facility">2.3.2 方法2-修改code中的facility</span><a href="#2-3-2-fang-fa-2-xiu-gai-code-zhong-de-facility" class="header-anchor">#</a></h3><p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/16.png" alt="img"></p>
-<p>那这里的facility被设置成了local0, 那也会记录在<code>/val/log/syslog</code>:</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/17.png" alt="img"></p>
-<h2><span id="2-4-she-zhi-log-deng-ji">2.4 设置log等级</span><a href="#2-4-she-zhi-log-deng-ji" class="header-anchor">#</a></h2><ol>
-<li>这里新增一个app.conf，然后自定义log路径:</li>
-</ol>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/18.png" alt="img"></p>
-<p>当然还可以类似于这样子写， syslogfacility-text和syslogseverity-text是rsyslog自带的系统变量。</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/19.png" alt="img"></p>
-<ol start="2">
-<li><p>重启rsyslog服务</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/20.png" alt="img"></p>
-</li>
-</ol>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/21.png" alt="img"></p>
-<p>这里切成4个文件，每个文件记录1024k。</p>
-<ol start="3">
-<li><p>运行程序,查看log如下:</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/22.png" alt="img"></p>
-</li>
-</ol>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/23.png" alt="img"></p>
-<ol start="4">
-<li><p>那现在修改log等级为warn, 表示只有大于等于该等级的log才会记录。</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/24.png" alt="img"></p>
-</li>
-<li><p>再次重启rsyslog服务，运行程序，可以看到”log debug”不再打印：</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/25.png" alt="img"></p>
-</li>
-</ol>
-<h2><span id="2-5-chong-ding-xiang-log-dao-console">2.5 重定向log到console</span><a href="#2-5-chong-ding-xiang-log-dao-console" class="header-anchor">#</a></h2><p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/26.png" alt="img"></p>
-<p>再次重启rsyslog服务，运行程序，那么可以看到err级别的log打印在了console上，但是低于err级别还是会记录在&#x2F;val&#x2F;log&#x2F;app。</p>
-<p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/27.png" alt="img"></p>
-<h1><span id="3-dup-han-shu-jie-shao">3 dup函数介绍</span><a href="#3-dup-han-shu-jie-shao" class="header-anchor">#</a></h1><p><img src="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/28.png" alt="img"></p>
-<p>用来将标准输出重定向到文件：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> dup_fd;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> dup_fd_bak = <span class="number">1000</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">dup_fd</span><span class="params">(<span class="type">void</span>)</span>  &#123;</span><br><span class="line">    dup_fd = open( <span class="string">&quot;./printf_dup_log.txt &quot;</span>, O_CREAT | O_RDWR | O_TRUNC);</span><br><span class="line">    dup2(STDOUT_FILENO, dup_fd_bak);<span class="comment">/*backup stdout*/</span></span><br><span class="line">    dup2(dup_fd, STDOUT_FILENO);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">rst_fd</span><span class="params">(<span class="type">void</span>)</span>  &#123;</span><br><span class="line">    dup2(dup_fd_bak, fileno(<span class="built_in">stdout</span>));<span class="comment">/*recover stdout*/</span></span><br><span class="line">    close(dup_fd);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/" data-id="clyylnk8i000f7wuf3tw3huee" data-title="Linux日志管理-syslog和rsyslog" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -2864,7 +3055,7 @@ news - network news subsystem（网络系统信息）
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 11.11px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.89px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.67px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 14.44px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.78px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.22px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15.56px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.22px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.22px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.67px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.33px;">通信协议</a>
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 11.25px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.75px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.25px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.5px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12.5px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11.25px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.5px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.5px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.25px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.75px;">通信协议</a>
     </div>
   </div>
 
@@ -2886,6 +3077,10 @@ news - network news subsystem（网络系统信息）
       <ul>
         
           <li>
+            <a href="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/">Linux内核-异常输出函数调用栈calltrace分析</a>
+          </li>
+        
+          <li>
             <a href="/2024/07/26/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-2-%E6%80%BB%E7%BA%BF%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%B9%B3%E5%8F%B0%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/">字符设备驱动-2-总线模型和平台设备驱动</a>
           </li>
         
@@ -2899,10 +3094,6 @@ news - network news subsystem（网络系统信息）
         
           <li>
             <a href="/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/">Linux内核-并发与同步</a>
-          </li>
-        
-          <li>
-            <a href="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/">Linux内核-rootfs构建移植</a>
           </li>
         
       </ul>

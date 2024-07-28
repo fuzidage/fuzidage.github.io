@@ -11373,6 +11373,7 @@ Entry Point:  87800000
 <li><a href="#1-1-1-struct-bus-type">1.1.1 struct bus_type</a></li>
 <li><a href="#1-1-2-struct-platform-driver">1.1.2 struct platform_driver</a></li>
 <li><a href="#1-1-3-struct-platform-device">1.1.3 struct platform_device</a></li>
+<li><a href="#1-1-4-zong-xian-she-bei-qu-dong-san-zhe-guan-xi">1.1.4 总线&#x2F;设备&#x2F;驱动三者关系</a></li>
 </ul>
 </li>
 <li><a href="#1-2-platform-device-de-zhu-ce-guo-cheng">1.2 platform_device的注册过程</a></li>
@@ -11421,6 +11422,7 @@ Entry Point:  87800000
 </li>
 </ul>
 </li>
+<li><a href="#3-yin-ru-sysfs">3 引入sysfs</a></li>
 </ul>
 <!-- tocstop -->
 
@@ -11432,8 +11434,17 @@ Entry Point:  87800000
 <p>总线驱动模型优点：</p>
 <p>驱动只是一套控制驱动框架，基本不用修改，和单板硬件相关的都在设备代码里面，硬件修改只需要修改设备资源相关的代码，不用关心具体的函数实现和寄存器控制。</p>
 <h2><span id="1-1-zong-xian-x2f-ping-tai-she-bei-x2f-ping-tai-qu-dong-miao-shu">1.1 总线&#x2F;平台设备&#x2F;平台驱动描述</span><a href="#1-1-zong-xian-x2f-ping-tai-she-bei-x2f-ping-tai-qu-dong-miao-shu" class="header-anchor">#</a></h2><h3><span id="1-1-1-struct-bus-type">1.1.1 struct bus_type</span><a href="#1-1-1-struct-bus-type" class="header-anchor">#</a></h3><p><img src="/2024/07/26/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-2-%E6%80%BB%E7%BA%BF%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%B9%B3%E5%8F%B0%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/2.png" alt="img"></p>
+<p>有一个很关键的函数，<code>match</code>函数。当设备与设备枚举过程中match函数会按照规则进行匹配,规则见<code>1.3.1</code>。</p>
 <h3><span id="1-1-2-struct-platform-driver">1.1.2 struct platform_driver</span><a href="#1-1-2-struct-platform-driver" class="header-anchor">#</a></h3><p><img src="/2024/07/26/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-2-%E6%80%BB%E7%BA%BF%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%B9%B3%E5%8F%B0%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/3.png" alt="img"></p>
 <h3><span id="1-1-3-struct-platform-device">1.1.3 struct platform_device</span><a href="#1-1-3-struct-platform-device" class="header-anchor">#</a></h3><p><img src="/2024/07/26/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-2-%E6%80%BB%E7%BA%BF%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%B9%B3%E5%8F%B0%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/4.png" alt="img"></p>
+<h3><span id="1-1-4-zong-xian-x2f-she-bei-x2f-qu-dong-san-zhe-guan-xi">1.1.4 总线&#x2F;设备&#x2F;驱动三者关系</span><a href="#1-1-4-zong-xian-x2f-she-bei-x2f-qu-dong-san-zhe-guan-xi" class="header-anchor">#</a></h3><ol>
+<li><p>系统启动后，会调用<code>buses_init()</code>函数创建<code>/sys/bus</code>文件目录。</p>
+</li>
+<li><p>接下来就是通过总线注册函数<code>bus_register()</code>进行总线注册，注册完成后，在<code>/sys/bus</code>目录下生成device文件夹和driver文件夹。</p>
+</li>
+<li><p>最后分别通过<code>device_register()</code>和<code>driver_register()</code>函数注册对应的设备和驱动。<br><img src="/2024/07/26/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-2-%E6%80%BB%E7%BA%BF%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%B9%B3%E5%8F%B0%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/4_1.png" alt="image-20240727214421349"></p>
+</li>
+</ol>
 <h2><span id="1-2-platform-device-de-zhu-ce-guo-cheng">1.2 platform_device的注册过程</span><a href="#1-2-platform-device-de-zhu-ce-guo-cheng" class="header-anchor">#</a></h2><p><img src="/2024/07/26/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-2-%E6%80%BB%E7%BA%BF%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%B9%B3%E5%8F%B0%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/5.png" alt="image-20240727164939263"></p>
 <p><img src="/2024/07/26/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-2-%E6%80%BB%E7%BA%BF%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%B9%B3%E5%8F%B0%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/6.png" alt="image-20240726004737362"></p>
 <ol>
@@ -11659,10 +11670,184 @@ Entry Point:  87800000
 <h3><span id="2-5-2-is-err-or-null">2.5.2 IS_ERR_OR_NULL</span><a href="#2-5-2-is-err-or-null" class="header-anchor">#</a></h3><p>和IS_ERR基本等同，会先提前判断一下是否空。</p>
 <h3><span id="2-5-3-ptr-err">2.5.3 PTR_ERR</span><a href="#2-5-3-ptr-err" class="header-anchor">#</a></h3><p>作用：将非法指针转成错误码返回。</p>
 <p>实现见上面图片. 将传入的<code>void *</code>类型指针强转为long类型，并返回</p>
-<h3><span id="2-5-4-err-ptr">2.5.4 ERR_PTR</span><a href="#2-5-4-err-ptr" class="header-anchor">#</a></h3><p>将传入的long类型强转为void *类型指针，并返回</p>
+<h3><span id="2-5-4-err-ptr">2.5.4 ERR_PTR</span><a href="#2-5-4-err-ptr" class="header-anchor">#</a></h3><p>将传入的long类型强转为<code>void *</code>类型指针，并返回</p>
+<h1><span id="3-yin-ru-sysfs">3 引入sysfs</span><a href="#3-yin-ru-sysfs" class="header-anchor">#</a></h1><p>讲到总线设备驱动模型，那不能少了sysfs。<code>sysfs</code>是一种虚拟文件系统，旨在提供一种访问内核数据结构的方法，从而允许用户空间程序查看和控制系统的设备和资源。</p>
+<p>例如<a href="https://www.cnblogs.com/fuzidage/p/18114131">设备驱动-16-Linux 内核LED子系统 - fuzidage - 博客园 (cnblogs.com)</a> 操作led：</p>
+<p><code>echo 1 &gt; /sys/class/leds/red/brightness</code></p>
+<p>又例如某个驱动修改设置module_param:</p>
+<p><code>echo &quot;8&quot; &gt;/sys/module/my_drv/parameters/lg_lv</code></p>
+<p><img src="/2024/07/26/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-2-%E6%80%BB%E7%BA%BF%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%B9%B3%E5%8F%B0%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/42.png" alt="image-20240727220331721"></p>
+<p> <code>kobject</code> 和 <code>kset</code> 是构成 <code>/sys</code> 目录下的目录节点和文件节点的核心，也是层次化组织总线、设备、驱动的核心数据结构，<code>kobject、kset </code>数据结构都能表示一个目录或者文件节点。在这个目录下面的每一个子目录，其实都是相同类型的kobject集合。然后不同的kset组织成树状层次的结构，就构成了sysfs子系统。</p>
+<p><img src="/2024/07/26/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-2-%E6%80%BB%E7%BA%BF%E6%A8%A1%E5%9E%8B%E5%92%8C%E5%B9%B3%E5%8F%B0%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/43.png" alt="image-20240727220824743"></p>
 ]]></content>
       <tags>
         <tag>Linux设备驱动</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Linux内核-异常输出函数调用栈calltrace分析</title>
+    <url>/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/</url>
+    <content><![CDATA[<div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-dump-stack-han-shu">1 dump_stack函数</a></li>
+<li><a href="#2-nei-he-tai-yi-chang-call-trace-deng-ji">2 内核态异常call trace等级</a><ul>
+<li><a href="#2-1-warn-on-han-shu">2.1 WARN_ON函数</a></li>
+<li><a href="#2-2-bug-on-han-shu">2.2 BUG_ON函数</a></li>
+<li><a href="#2-3-panic-han-shu">2.3 panic函数</a></li>
+</ul>
+</li>
+<li><a href="#3-ftrace-gong-ju-ji">3 Ftrace工具集</a><ul>
+<li><a href="#3-1-ftrace-shi-ru-he-ji-lu-xin-xi-de">3.1 Ftrace是如何记录信息的</a><ul>
+<li><a href="#3-1-1-jing-tai-cha-zhuang">3.1.1 静态插桩</a></li>
+<li><a href="#3-1-2-dong-tai-cha-zhuang">3.1.2 动态插桩</a></li>
+</ul>
+</li>
+<li><a href="#3-2-shi-neng-ftrace">3.2 使能Ftrace</a><ul>
+<li><a href="#3-2-1-gua-zai-debugfs">3.2.1 挂载debugfs</a></li>
+</ul>
+</li>
+<li><a href="#3-3-ftrace-shi-yong">3.3 Ftrace 使用</a><ul>
+<li><a href="#3-3-1-sys-kernel-tracing-jie-shao">3.3.1 &#x2F;sys&#x2F;kernel&#x2F;tracing介绍</a></li>
+<li><a href="#3-3-2-trace-he-trace-pipe-shi-yong">3.3.2 trace和trace_pipe使用</a><ul>
+<li><a href="#3-3-2-1-xuan-yong-han-shu-zhui-zong">3.3.2.1 选用函数追踪</a></li>
+<li><a href="#3-3-2-2-xuan-yong-tu-xiang-hua-han-shu-zhui-zong">3.3.2.2 选用图像化函数追踪</a></li>
+<li><a href="#3-3-2-3-xuan-yong-dong-tai-guo-lu-zhui-zong">3.3.2.3 选用动态过滤追踪</a></li>
+<li><a href="#3-3-2-4-zhui-zong-te-ding-jin-cheng">3.3.2.4 追踪特定进程</a></li>
+<li><a href="#3-3-2-5-zhui-zong-te-ding-han-shu">3.3.2.5 追踪特定函数</a></li>
+<li><a href="#3-3-2-6-zhui-zong-te-ding-ko-mo-kuai">3.3.2.6 追踪特定ko模块</a></li>
+<li><a href="#3-3-2-7-chong-zhi-zhui-zong">3.3.2.7 重置追踪</a></li>
+<li><a href="#3-3-2-8-shi-jian-zhui-zong">3.3.2.8 事件追踪</a></li>
+<li><a href="#3-3-2-n-trace-printk-han-shu-shi-yong">3.3.2.n trace_printk函数使用</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-4-yin-ru-yong-hu-tai-ltrace-he-strace">3.4 引入用户态ltrace和strace</a><ul>
+<li><a href="#3-4-1-ltrace">3.4.1 ltrace</a></li>
+<li><a href="#3-4-2-strace">3.4.2 strace</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-dump-stack-han-shu">1 dump_stack函数</span><a href="#1-dump-stack-han-shu" class="header-anchor">#</a></h1><p>打印内核调用堆栈。举个例子：</p>
+<p>我们定义四个函数<code>aaa</code>、<code>bbb</code>、<code>ccc</code>、<code>ddd</code>，然后<code>bbb</code>中调用<code>aaa</code>，<code>ccc</code>中调用<code>bbb</code>，<code>ddd</code>函数谁都不调用。在入口函数中，我们调用<code>ccc</code>与<code>ddd</code>函数，看看堆栈打印效果如何：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/delay.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">aaa</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    printk(KERN_EMERG <span class="string">&quot;aaa\n&quot;</span>);</span><br><span class="line">    dump_stack();</span><br><span class="line">    msleep(<span class="number">100</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">bbb</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    printk(KERN_EMERG <span class="string">&quot;bbb\n&quot;</span>);</span><br><span class="line">    aaa();</span><br><span class="line">    msleep(<span class="number">100</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">ccc</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    printk(KERN_EMERG <span class="string">&quot;ccc\n&quot;</span>);</span><br><span class="line">    bbb();</span><br><span class="line">    msleep(<span class="number">100</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">ddd</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    printk(KERN_EMERG <span class="string">&quot;ddd\n&quot;</span>);</span><br><span class="line">    msleep(<span class="number">100</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">chrdevTest_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    printk(KERN_EMERG <span class="string">&quot;INIT func\r\n&quot;</span>);</span><br><span class="line">    ccc();</span><br><span class="line">    ddd();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> __exit <span class="title function_">chrdevTest_exit</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    printk(KERN_EMERG <span class="string">&quot;EXIT func\r\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line">module_init(chrdevTest_init);</span><br><span class="line">module_exit(chrdevTest_exit);</span><br><span class="line">MODULE_LICENSE(<span class="string">&quot;GPL&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<p>可以看到当打印完<code>aaa</code>后开始<code>dump_stack</code>, 打印出函数调用栈。</p>
+<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/1.png" alt="image-20240727224310304"></p>
+<h1><span id="2-nei-he-tai-yi-chang-call-trace-deng-ji">2 内核态异常call trace等级</span><a href="#2-nei-he-tai-yi-chang-call-trace-deng-ji" class="header-anchor">#</a></h1><p>内核态call trace 有三种出错情况，分别是<code>bug</code>, <code>oops</code>和<code>panic</code>。</p>
+<p>1、 <code>bug</code>- <strong>bug只是提示警告</strong>。<br><code>BUG: sleeping function called from invalid context at …</code>, 比如在原子上下文中休眠，总断服务函数休眠，spin_lock中进行might_sleep等。</p>
+<p>我在某个设备驱动的中断处理函数 <code>XXX_ISR()</code> 里加了 <code>msleep(10) </code>之后：</p>
+<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/2.png" alt="image-20240727230940026"></p>
+<p>可以看到跑出了BUG打印，为什么是<code>BUG: scheduling while atomic</code>呢？而不是<code>BUG: sleeping function called from invalid context at …</code></p>
+<p>那是因为在原子上文中发生了调度，我们调用might_sleep是会时间片到了啊，让出CPU自然就进行了schedule。</p>
+<p><code>BUG: spinlock bad magic on CPU</code>错误表示自旋锁使用时没有初始化。</p>
+<p>2、 <code>Oops</code>- <strong>oops会终止进程，但是不会系统崩溃</strong>。<br>程序在内核态进入一种异常情况，比如引用非法指针导致的数据异常，数组越界导致的取指异常，此时异常处理机制能够捕获此异常，并将系统关键信息打印到串口上，正常情况下Oops消息会被记录到系统日志中去。</p>
+<p>3、<code> Panic</code> -<strong>panic系统崩溃</strong>。<br>当Oops发生在中断上下文中或者在进程0和1中，系统将彻底挂起，因为中断服务程序异常后，将无法恢复，这种情况即称为内核panic。</p>
+<h2><span id="2-1-warn-on-han-shu">2.1  WARN_ON函数</span><a href="#2-1-warn-on-han-shu" class="header-anchor">#</a></h2><p>我们把上面的实验<code>aaa</code>函数中<code>dump_stack</code>改成<code>WARN_ON(1)</code>函数。可以看到<code>WARN_ON(1)</code>就是调用了<code>dump_stack</code>，多了绿色打印部分而已:</p>
+<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/3.png" alt="image-20240727232452233"></p>
+<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/4.png" alt="image-20240727232843642"></p>
+<p>注意只有当<code>condition=1</code>时才会真正调用<code>__warn</code>:</p>
+<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/5.png" alt=":"></p>
+<h2><span id="2-2-bug-on-han-shu">2.2 BUG_ON函数</span><a href="#2-2-bug-on-han-shu" class="header-anchor">#</a></h2><p><code>BUG_ON</code>这句，一旦执行就会抛出<code>oops</code>，导致栈的回溯和错误信息的打印，大部分体系结构把<code>BUG()</code>和<code>BUG_ON()</code>定义成某种非法操作，这样自然会产生需要的oops。类似一种断言，让进程终止。我们把上面的实验<code>aaa</code>函数中<code>dump_stack</code>改成<code>BUG_ON(1)</code>函数:</p>
+<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/6.png" alt="image-20240727233540771"></p>
+<h2><span id="2-3-panic-han-shu">2.3 panic函数</span><a href="#2-3-panic-han-shu" class="header-anchor">#</a></h2><p>当Oops发生在中断上下文中或者在进程0和1中，系统将彻底挂起，因为中断服务程序异常后，将无法恢复，这种情况即称为内核panic</p>
+<h1><span id="3-ftrace-gong-ju-ji">3 Ftrace工具集</span><a href="#3-ftrace-gong-ju-ji" class="header-anchor">#</a></h1><p><code>Ftrace</code>是<code>Function Trace</code>的简写。它是一个内核函数追踪工具，旨在帮助内核设计和开发人员去追踪系统内部的函数调用流程。</p>
+<p>还可以用来调试和分析系统的延迟和性能问题，并发展成为一个追踪类调试工具的框架：</p>
+<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/7.png" alt="image-20240728145336807"></p>
+<p>可以看到还包括了用户态的<code>ltrace</code>和<code>ftrace</code>。</p>
+<h2><span id="3-1-ftrace-shi-ru-he-ji-lu-xin-xi-de">3.1 Ftrace是如何记录信息的</span><a href="#3-1-ftrace-shi-ru-he-ji-lu-xin-xi-de" class="header-anchor">#</a></h2><p><code>Ftrace</code>采用了静态插桩和动态插桩两种方式来实现。</p>
+<h3><span id="3-1-1-jing-tai-cha-zhuang">3.1.1 静态插桩</span><a href="#3-1-1-jing-tai-cha-zhuang" class="header-anchor">#</a></h3><p><code>Kernel</code>中打开了<code>CONFIG_FUNCTION_TRACER</code>功能后，会增加一个<code>-pg</code>的一个编译选项，这样每个函数入口处，都会插入<code>bl mcount</code>跳转指令，使得每个函数运行时都会进入<code>mcount</code>函数。</p>
+<p>既然每个函数都静态插桩，这带来的性能开销是惊人的，有可能导致人们弃用<code>Ftrace</code>功能。为了解决这个问题，开发者推出了<code>Dynamic ftrace</code>，以此来优化整体的性能。</p>
+<h3><span id="3-1-2-dong-tai-cha-zhuang">3.1.2 动态插桩</span><a href="#3-1-2-dong-tai-cha-zhuang" class="header-anchor">#</a></h3><p>既然静态插桩记录这些可追踪的函数，为了减少性能消耗，将跳转函数替换为<code>nop</code>指令，动态将被调试函数的<code>nop</code>指令，替换为跳转指令，以实现追踪。</p>
+<h2><span id="3-2-shi-neng-ftrace">3.2 使能Ftrace</span><a href="#3-2-shi-neng-ftrace" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">CONFIG_FTRACE=y                             <span class="comment"># 启用了 Ftrace</span></span><br><span class="line">CONFIG_FUNCTION_TRACER=y                    <span class="comment"># 启用函数级别的追踪器</span></span><br><span class="line">CONFIG_HAVE_FUNCTION_GRAPH_TRACER=y         <span class="comment"># 表示内核支持图形显示</span></span><br><span class="line">CONFIG_FUNCTION_GRAPH_TRACER=y              <span class="comment"># 以图形的方式显示函数追踪过程</span></span><br><span class="line">CONFIG_STACK_TRACER=y                       <span class="comment"># 启用堆栈追踪器，用于跟踪内核函数调用的堆栈信息。</span></span><br><span class="line">CONFIG_DYNAMIC_FTRACE=y                     <span class="comment"># 启用动态 Ftrace，允许在运行时启用和禁用 Ftrace 功能。</span></span><br><span class="line">CONFIG_HAVE_FTRACE_NMI_ENTER=y              <span class="comment"># 表示内核支持非屏蔽中断（NMI）时进入 Ftrace 的功能</span></span><br><span class="line">CONFIG_HAVE_FTRACE_MCOUNT_RECORD=y          <span class="comment"># 表示内核支持通过 mcount 记录函数调用关系。</span></span><br><span class="line">CONFIG_FTRACE_NMI_ENTER=y                   <span class="comment"># 表示内核支持通过 mcount 记录函数调用关系。   </span></span><br><span class="line">CONFIG_FTRACE_SYSCALLS=y                    <span class="comment"># 系统调用的追踪</span></span><br><span class="line">CONFIG_FTRACE_MCOUNT_RECORD=y               <span class="comment"># 启用 mcount 记录函数调用关系。</span></span><br><span class="line">CONFIG_SCHED_TRACER=y                       <span class="comment"># 支持调度追踪</span></span><br><span class="line">CONFIG_CONTEXT_SWITCH_TRACER                <span class="comment">#使能上下文切换追踪功能，可以用来跟踪进程之间的切换。</span></span><br><span class="line">CONFIG_NOP_TRACER                           <span class="comment">#使能空操作追踪功能，可以用来在不需要追踪的情况下占位。</span></span><br><span class="line">CONFIG_FUNCTION_PROFILER=y                  <span class="comment"># 启用函数分析器，主要用于记录函数的执行时间和调用次数</span></span><br><span class="line">CONFIG_DEBUG_FS=y                           <span class="comment"># 启用 Debug 文件系统支持</span></span><br></pre></td></tr></table></figure>
+
+<p>上述配置不一定全部打开，勾选自己需要的即可，通常我们选择<code>CONFIG_FUNCTION_TRACER</code>和<code>CONFIG_HAVE_FUNCTION_GRAPH_TRACER</code>即可，然后编译烧录到开发板。</p>
+<p>通过<code>make menuconfig</code>的方式写入：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">Kernel hacking  ---&gt;</span><br><span class="line">       Tracers ─&gt;</span><br><span class="line">           [*]   Kernel Function Tracer</span><br><span class="line">           [*]     Kernel Function Graph <span class="title function_">Tracer</span> <span class="params">(NEW)</span></span><br><span class="line">           <span class="comment">// (下面还有几个追踪器的选项，可以根据自己的需要选择)</span></span><br></pre></td></tr></table></figure>
+
+<p><code>Ftrace </code>通过 <code>debugfs </code>向用户态提供了访问接口，所以还需要将<code> debugfs</code> 编译进内核:</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">Kernel hacking  ---&gt;</span><br><span class="line">        -*- Debug Filesystem</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-2-1-gua-zai-debugfs">3.2.1 挂载debugfs</span><a href="#3-2-1-gua-zai-debugfs" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#用户态需要挂载debugfs,or通过配置修改etc/fstab文件</span></span><br><span class="line">mount -t debugfs none /sys/kernel/debug</span><br><span class="line">或者 mount -t tracefs nodev /sys/kernel/tracing</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/8.png" alt="img"></p>
+<p>我们能够在<code>/sys/kernel/debug</code>下看到内核支持的所有的调试信息:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># cd /sys/kernel/debug/</span></span><br><span class="line"><span class="comment"># ls</span></span><br><span class="line"> asoc                gpio                regmap</span><br><span class="line"> bdi                 ieee80211           sched_debug</span><br><span class="line"> block               memblock            sched_features</span><br><span class="line"> clk                 mmc0                sleep_time</span><br><span class="line"> device_component    mmc1                suspend_stats</span><br><span class="line"> devices_deferred    mtd                 tracing</span><br><span class="line"> dma_buf             opp                 ubi</span><br><span class="line"> extfrag             pinctrl             ubifs</span><br><span class="line"> fault_around_bytes  pm_qos              wakeup_sources</span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-3-ftrace-shi-yong">3.3 Ftrace 使用</span><a href="#3-3-ftrace-shi-yong" class="header-anchor">#</a></h2><h3><span id="3-3-1-x2f-sys-x2f-kernel-x2f-tracing-jie-shao">3.3.1 &#x2F;sys&#x2F;kernel&#x2F;tracing介绍</span><a href="#3-3-1-x2f-sys-x2f-kernel-x2f-tracing-jie-shao" class="header-anchor">#</a></h3><p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/9.png" alt="image-20240728163630564"></p>
+<h3><span id="3-3-2-trace-he-trace-pipe-shi-yong">3.3.2 trace和trace_pipe使用</span><a href="#3-3-2-trace-he-trace-pipe-shi-yong" class="header-anchor">#</a></h3><p><code>cat trace_pipe</code>是堵塞读取，有数据就读，没数据就等待。</p>
+<p>打开关闭追踪：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">echo <span class="number">1</span> &gt; tracing_on             <span class="comment">// 打开跟踪</span></span><br><span class="line">do_someting</span><br><span class="line">echo <span class="number">0</span> &gt; tracing_on             <span class="comment">// 关闭跟踪</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">cat trace  &gt; /tmp/<span class="built_in">log</span> <span class="comment">//一次性导出log</span></span><br><span class="line">cat trace_pipe &gt; /tmp/<span class="built_in">log</span> &amp;<span class="comment">//后台导出log</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">cat current_tracer                    <span class="comment">// 查看当前追踪器</span></span><br><span class="line">cat available_tracers                 <span class="comment">// 查看当前内核中可用跟踪器</span></span><br><span class="line">cat available_events                  <span class="comment">// 查看当前内核中可用事件</span></span><br><span class="line">cat available_filter_functions        </span><br><span class="line"><span class="comment">// 查看当前内核中可用函数,可以被追踪的函数列表，</span></span><br><span class="line"><span class="comment">// 即可以写到 set_ftrace_filter，set_ftrace_notrace，set_graph_function，</span></span><br><span class="line"><span class="comment">// set_graph_notrace 文件的函数列表</span></span><br><span class="line"></span><br><span class="line">echo function &gt; current_tracer        <span class="comment">// 选用 function 追踪器，</span></span><br><span class="line">echo function_graph &gt; current_tracer  <span class="comment">// 选用 function_graph 追踪器，</span></span><br><span class="line">echo [func] &gt; set_ftrace_filter       <span class="comment">// 选择追踪指定 [func] 函数的调用栈</span></span><br><span class="line">echo [pid] &gt; set_ftrace_pid           <span class="comment">// 选择追踪指定 [pid] 进程的调用栈</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-3-2-1-xuan-yong-han-shu-zhui-zong">3.3.2.1 选用函数追踪</span><a href="#3-3-2-1-xuan-yong-han-shu-zhui-zong" class="header-anchor">#</a></h4><p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/10.png" alt="image-20240728153553129"></p>
+<h4><span id="3-3-2-2-xuan-yong-tu-xiang-hua-han-shu-zhui-zong">3.3.2.2 选用图像化函数追踪</span><a href="#3-3-2-2-xuan-yong-tu-xiang-hua-han-shu-zhui-zong" class="header-anchor">#</a></h4><p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/11.png" alt="image-20240728153651223"></p>
+<h4><span id="3-3-2-3-xuan-yong-dong-tai-guo-lu-zhui-zong">3.3.2.3 选用动态过滤追踪</span><a href="#3-3-2-3-xuan-yong-dong-tai-guo-lu-zhui-zong" class="header-anchor">#</a></h4><p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/12.png" alt="image-20240728155333300"></p>
+<h4><span id="3-3-2-4-zhui-zong-te-ding-jin-cheng">3.3.2.4 追踪特定进程</span><a href="#3-3-2-4-zhui-zong-te-ding-jin-cheng" class="header-anchor">#</a></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"> <span class="built_in">echo</span> 0 &gt; tracing_on                                 <span class="comment"># 关闭追踪器</span></span><br><span class="line"> <span class="built_in">echo</span> <span class="keyword">function</span> &gt; current_tracer                      <span class="comment"># 设置当前追踪类别</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> &gt; trace; <span class="built_in">echo</span> $$ &gt; set_ftrace_pid; <span class="built_in">echo</span> 1 &gt; tracing_on; your_command; <span class="built_in">echo</span> 0 &gt; tracing_on</span><br></pre></td></tr></table></figure>
+
+<p><code>$$</code>表示当前bash的pid,这样可以追踪任意命令。</p>
+<p>如果我们要抓执行<code>a.out</code>的trace信息，那么先要获取到<code>a.out</code>程序的pid。</p>
+<p>为什么要写成一条语句？</p>
+<p>因为<code>ftrace</code>当打开时，在没有过滤的情况下，瞬间会抓取到内核所有的函数调用，为了更准确的抓取我们执行的命令，所以需要打开<code>trace</code>，执行完命令后，马上关闭。</p>
+<h4><span id="3-3-2-5-zhui-zong-te-ding-han-shu">3.3.2.5 追踪特定函数</span><a href="#3-3-2-5-zhui-zong-te-ding-han-shu" class="header-anchor">#</a></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> 1 &gt; options/func_stack_trace</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> 0 &gt; tracing_on									<span class="comment"># 关闭追踪器</span></span><br><span class="line"><span class="built_in">cat</span> available_filter_functions | grep <span class="string">&quot;xxxxxx&quot;</span>		<span class="comment"># 搜索函数是否存在</span></span><br><span class="line"><span class="built_in">echo</span> xxxxxx &gt; set_ftrace_filter						<span class="comment"># 设定追踪的函数</span></span><br><span class="line"><span class="built_in">echo</span> <span class="keyword">function</span> &gt; current_tracer						<span class="comment"># 设置当前追踪类别</span></span><br><span class="line"><span class="built_in">echo</span> 1 &gt; options/func_stack_trace					<span class="comment"># 记录堆栈信息</span></span><br><span class="line"><span class="built_in">echo</span> &gt; trace										<span class="comment"># 清空缓存</span></span><br><span class="line"><span class="built_in">echo</span> 1 &gt; tracing_on</span><br></pre></td></tr></table></figure>
+
+<p>查看结果：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># cat trace</span></span><br><span class="line"><span class="comment"># tracer: function</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># entries-in-buffer/entries-written: 2/2   #P:3</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">#                              _-----=&gt; irqs-off</span></span><br><span class="line"><span class="comment">#                             / _----=&gt; need-resched</span></span><br><span class="line"><span class="comment">#                            | / _---=&gt; hardirq/softirq</span></span><br><span class="line"><span class="comment">#                            || / _--=&gt; preempt-depth</span></span><br><span class="line"><span class="comment">#                            ||| /     delay</span></span><br><span class="line"><span class="comment">#           TASK-PID   CPU#  ||||    TIMESTAMP  FUNCTION</span></span><br><span class="line"><span class="comment">#              | |       |   ||||       |         |</span></span><br><span class="line">     kworker/1:1-59    [001] ....   168.954199: mmc_rescan &lt;-process_one_work</span><br><span class="line">     kworker/1:1-59    [001] ....   168.954248: &lt;stack trace&gt;</span><br><span class="line"> =&gt; mmc_rescan</span><br><span class="line"> =&gt; process_one_work</span><br><span class="line"> =&gt; worker_thread</span><br><span class="line"> =&gt; kthread</span><br><span class="line"> =&gt; ret_from_fork</span><br><span class="line"> =&gt; 0</span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-3-2-6-zhui-zong-te-ding-ko-mo-kuai">3.3.2.6 追踪特定ko模块</span><a href="#3-3-2-6-zhui-zong-te-ding-ko-mo-kuai" class="header-anchor">#</a></h4><p>编译ko需要加上编译参数<code>-pg</code>。否则你在<code>available_filter_functions</code>列表中，查找不到你想要的函数。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># 示例</span></span><br><span class="line">Format: :mod:&lt;module-name&gt;</span><br><span class="line">example: <span class="built_in">echo</span> :mod:ext3 &gt; set_ftrace_filter</span><br></pre></td></tr></table></figure>
+
+<p>追踪<code>ext3</code>模块内的所有函数。</p>
+<h4><span id="3-3-2-7-chong-zhi-zhui-zong">3.3.2.7 重置追踪</span><a href="#3-3-2-7-chong-zhi-zhui-zong" class="header-anchor">#</a></h4><figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="built_in">echo</span> 0 &gt; tracing_on         <span class="comment"># 关闭trace</span></span><br><span class="line"><span class="built_in">echo</span> &gt; trace                <span class="comment"># 清空当前trace记录</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-3-2-8-shi-jian-zhui-zong">3.3.2.8 事件追踪</span><a href="#3-3-2-8-shi-jian-zhui-zong" class="header-anchor">#</a></h4><p><strong>查看事件</strong>:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line">root@100ask:/sys/kernel/debug/tracing/events<span class="comment"># ls</span></span><br><span class="line">alarmtimer    exceptions    i2c          migrate         power         signal </span><br><span class="line">block         ext4          initcall     mmc             printk        skb                    </span><br><span class="line"><span class="built_in">enable</span>        hyperv        mdio         percpu</span><br><span class="line">    </span><br><span class="line">root@100ask:/sys/kernel/debug/tracing/events/sched<span class="comment"># ls</span></span><br><span class="line"><span class="built_in">enable</span>                  sched_move_numa     sched_process_free  sched_stat_runtime  sched_switch          </span><br><span class="line">filter                  sched_pi_setprio    sched_process_hang  sched_stat_sleep</span><br><span class="line">sched_kthread_stop      sched_process_exec  sched_process_wait  sched_stat_wait</span><br></pre></td></tr></table></figure>
+
+<p><strong>追踪一个&#x2F;若干事件</strong>:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment"># echo 1 &gt; events/sched/sched_wakeup/enable</span></span><br><span class="line"> ...（省略追踪过程）</span><br><span class="line"></span><br><span class="line"><span class="comment"># cat trace | head -10</span></span><br><span class="line"><span class="comment"># tracer: nop</span></span><br><span class="line"><span class="comment">#TASK-PID  CPU#  TIMESTAMP    FUNCTION</span></span><br><span class="line"><span class="comment"># || | |</span></span><br><span class="line">bash-2613 [001] 425.078164: sched_wakeup: task bash:2613 [120] success=0 [001]</span><br><span class="line">bash-2613 [001] 425.078184: sched_wakeup: task bash:2613 [120] success=0 [001]</span><br></pre></td></tr></table></figure>
+
+<p><strong>追踪所有事件</strong>:</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment"># echo 1 &gt; events/enable</span></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="comment"># cat trace | head -10</span></span><br><span class="line"><span class="comment"># tracer: nop</span></span><br><span class="line"><span class="comment">#TASK-PID     CPU#     TIMESTAMP    FUNCTION</span></span><br><span class="line"><span class="comment">#   |                    |                    |                   | </span></span><br><span class="line">cpid-1470       [001]   794.947181:         kfree: call_site=ffffffff810c996d ptr=(null)</span><br><span class="line">acpid-1470     [001] 794.947182:      sys_read -&gt; 0x1</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-3-2-n-trace-printk-han-shu-shi-yong">3.3.2.n trace_printk函数使用</span><a href="#3-3-2-n-trace-printk-han-shu-shi-yong" class="header-anchor">#</a></h4><p>内核头文件<code> include/linux/kernel.h</code> 中描述了 <code>ftrace </code>提供的工具函数的原型，这些函数包括 <code>trace_printk</code>、<code>tracing_on</code>&#x2F;<code>tracing_off</code> 等。</p>
+<h2><span id="3-4-yin-ru-yong-hu-tai-ltrace-he-strace">3.4 引入用户态ltrace和strace</span><a href="#3-4-yin-ru-yong-hu-tai-ltrace-he-strace" class="header-anchor">#</a></h2><h3><span id="3-4-1-ltrace">3.4.1 ltrace</span><a href="#3-4-1-ltrace" class="header-anchor">#</a></h3><p>跟踪进程调用<code>C库函数</code>的情况。</p>
+<p>常用的参数：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-a : 对齐具体某个列的返回值。</span><br><span class="line">-c : 计算时间和调用，并在程序退出时打印摘要。</span><br><span class="line">-d : 打印调试信息。</span><br><span class="line">-h : 打印帮助信息。</span><br><span class="line">-i : 打印指令指针，当库调用时。</span><br><span class="line">-l : 只打印某个库中的调用。</span><br><span class="line">-o, --output=file : 把输出定向到文件。</span><br><span class="line">-p : PID 附着在值为PID的进程号上进行ltrace。</span><br><span class="line">-r : 打印相对时间戳。</span><br><span class="line">-S : 显示系统调用。</span><br><span class="line">-t, -tt, -ttt : 打印绝对时间戳。</span><br><span class="line">-T : 输出每个调用过程的时间开销。</span><br><span class="line">-V, --version : 打印版本信息，然后退出。</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="type">int</span> n = <span class="number">10</span>;</span><br><span class="line">	<span class="type">int</span> *arr = (<span class="type">int</span> *)<span class="built_in">malloc</span>(n * <span class="keyword">sizeof</span>(<span class="type">int</span>));</span><br><span class="line">	<span class="keyword">if</span> (arr == <span class="literal">NULL</span>) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;failed!\r\n&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">memset</span>(arr, <span class="number">2</span>, n*<span class="keyword">sizeof</span>(<span class="type">int</span>));</span><br><span class="line">	<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;%d\t&quot;</span>, arr[i]);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>1.查看c库调用：</p>
+<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/13.png" alt="image-20240728165618548"></p>
+<p>2.查看c库调用次数：</p>
+<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/14.png" alt="image-20240728165742636"></p>
+<p>3.查看c库执行时间：</p>
+<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/15.png" alt="image-20240728165842926"></p>
+<p>4.查看系统调用情况：</p>
+<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/16.png" alt="image-20240728170027545"></p>
+<h3><span id="3-4-2-strace">3.4.2 strace</span><a href="#3-4-2-strace" class="header-anchor">#</a></h3><p>跟踪进程系统调用<code>System Call</code>使用情况。</p>
+<p>常用的参数如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">-c 统计每一系统调用的所执行的时间,次数和出错的次数等.</span><br><span class="line">-d 输出strace关于标准错误的调试信息.</span><br><span class="line">-f 跟踪由fork调用所产生的子进程.</span><br><span class="line">-ff 如果提供-o filename,则所有进程的跟踪结果输出到相应的filename.pid中,pid是各进程的进程号.</span><br><span class="line">-F 尝试跟踪vfork调用.在-f时,vfork不被跟踪.</span><br><span class="line">-h 输出简要的帮助信息.</span><br><span class="line">-i 输出系统调用的入口指针.</span><br><span class="line">-q 禁止输出关于脱离的消息.</span><br><span class="line">-r 打印出相对时间关于,,每一个系统调用.</span><br><span class="line">-t 在输出中的每一行前加上时间信息.</span><br><span class="line">-tt 在输出中的每一行前加上时间信息,微秒级.</span><br><span class="line">-ttt 微秒级输出,以秒了表示时间.</span><br><span class="line">-T 显示每一调用所耗的时间.</span><br><span class="line">-v 输出所有的系统调用.一些调用关于环境变量,状态,输入输出等调用由于使用频繁,默认不输出.</span><br><span class="line">-V 输出strace的版本信息.</span><br><span class="line">-x 以十六进制形式输出非标准字符串</span><br><span class="line">-xx 所有字符串以十六进制形式输出.</span><br><span class="line">-a column 设置返回值的输出位置.默认 为40.</span><br><span class="line">-e expr 指定一个表达式,用来控制如何跟踪.格式：[qualifier=][!]value1[,value2]...</span><br><span class="line">qualifier只能是 trace,abbrev,verbose,raw,signal,read,write其中之一.value是用来限定的符号或数字.默认的 qualifier是 trace.感叹号是否定符号.例如:-eopen等价于 -e trace=open,表示只跟踪open调用.而-etrace!=open 表示跟踪除了open以外的其他调用.有两个特殊的符号 all 和 none. 注意有些shell使用!来执行历史记录里的命令,所以要使用\\.</span><br><span class="line">-e trace=set 只跟踪指定的系统 调用.例如:-e trace=open,close,rean,write表示只跟踪这四个系统调用.默认的为set=all.</span><br><span class="line">-e signal=set 指定跟踪的系统信号.默认为all.如 signal=!SIGIO(或者signal=!io),表示不跟踪SIGIO信号.</span><br><span class="line">-e read=set 输出从指定文件中读出 的数据.例如: -e read=3,5</span><br><span class="line">-e write=set 输出写入到指定文件中的数据.</span><br><span class="line">-o filename 将strace的输出写入文件filename</span><br><span class="line">-p pid 跟踪指定的进程pid.</span><br></pre></td></tr></table></figure>
+
+<p>查看系统调用的时间：</p>
+<p><img src="/2024/07/27/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/17.png" alt="image-20240728170644866"></p>
+]]></content>
+      <tags>
+        <tag>linux内核</tag>
+        <tag>linux系统构建</tag>
       </tags>
   </entry>
 </search>
