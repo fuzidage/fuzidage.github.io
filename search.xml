@@ -12866,4 +12866,249 @@ board_xxx.c里面实现了具体单板的button_operations，当insmod这个驱�
         <tag>Linux设备驱动</tag>
       </tags>
   </entry>
+  <entry>
+    <title>Linux内核-内核链表</title>
+    <url>/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/</url>
+    <content><![CDATA[<div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-nei-he-lian-biao">1 内核链表</a><ul>
+<li><a href="#1-1-nei-he-lian-biao-jie-gou-ti">1.1 内核链表结构体</a></li>
+<li><a href="#1-2-list-chu-shi-hua">1.2 list初始化</a><ul>
+<li><a href="#1-2-1-yong-hong-chu-shi-hua-list-head">1.2.1 用宏初始化-LIST_HEAD</a></li>
+<li><a href="#1-2-2-yong-jie-kou-chu-shi-hua-init-list-head">1.2.2 用接口初始化-INIT_LIST_HEAD</a></li>
+<li><a href="#1-2-3-chu-shi-hua-wan-hou-tou-bu-jie-dian-tu-li">1.2.3 初始化完后头部节点图例</a></li>
+</ul>
+</li>
+<li><a href="#1-3-nei-he-lian-biao-cao-zuo">1.3 内核链表操作</a><ul>
+<li><a href="#1-3-1-cha-ru-jie-dian">1.3.1 插入节点</a><ul>
+<li><a href="#1-3-1-1-chuang-jian-yi-ge-jie-dian">1.3.1.1 创建一个节点</a></li>
+<li><a href="#1-3-1-2-tou-cha-jie-dian-list-add">1.3.1.2 头插节点-list_add</a><ul>
+<li><a href="#1-3-1-2-1-tou-cha-ru-de-yao-dian-zong-jie">1.3.1.2.1 头插入的要点总结</a></li>
+</ul>
+</li>
+<li><a href="#1-3-1-3-wei-cha-jie-dian-list-add-tail">1.3.1.3 尾插节点-list_add_tail</a><ul>
+<li><a href="#1-3-1-3-1-wei-cha-ru-de-yao-dian-zong-jie">1.3.1.3.1 尾插入的要点总结</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#1-3-2-shan-chu-jie-dian-list-del">1.3.2 删除节点-list_del</a></li>
+<li><a href="#1-3-3-lian-biao-shan-chu-yu-fan-chu-shi-hua-list-del-init">1.3.3 链表删除与反初始化-list_del_init</a></li>
+<li><a href="#1-3-4-lian-biao-bian-li">1.3.4 链表遍历</a><ul>
+<li><a href="#1-3-4-0-list-entry">1.3.4.0 list_entry</a></li>
+<li><a href="#1-3-4-1-list-for-each-zheng-xiang-bian-li">1.3.4.1 list_for_each(正向遍历)</a></li>
+<li><a href="#1-3-4-1-list-for-each-safe">1.3.4.1 list_for_each_safe</a></li>
+<li><a href="#1-3-4-2-list-for-each-entry">1.3.4.2 list_for_each_entry</a></li>
+<li><a href="#1-3-4-2-list-for-each-entry-safe">1.3.4.2 list_for_each_entry_safe</a></li>
+<li><a href="#1-3-4-3-list-for-each-prev-fan-xiang-bian-li">1.3.4.3 list_for_each_prev(反向遍历)</a></li>
+<li><a href="#1-3-4-3-list-for-each-prev-safe">1.3.4.3 list_for_each_prev_safe</a></li>
+<li><a href="#1-3-4-4-list-for-each-entry-reverse">1.3.4.4 list_for_each_entry_reverse</a></li>
+<li><a href="#1-3-4-4-list-for-each-entry-safe-reverse">1.3.4.4 list_for_each_entry_safe_reverse</a></li>
+<li><a href="#1-3-4-5-list-for-each-entry-continue-list-for-each-entry-from-cong-zhong-jian-mou-ge-jie-dian-kai-shi-bian-li">1.3.4.5 list_for_each_entry_continue&#x2F;list_for_each_entry_from(从中间某个节点开始遍历)</a></li>
+<li><a href="#1-3-4-5-list-for-each-entry-continue-reverse-cong-zhong-jian-mou-ge-jie-dian-kai-shi-fan-xiang-bian-li">1.3.4.5 list_for_each_entry_continue_reverse(从中间某个节点开始反向遍历)</a></li>
+</ul>
+</li>
+<li><a href="#1-3-5-pan-duan-lian-biao-shi-fou-wei-kong">1.3.5 判段链表是否为空</a><ul>
+<li><a href="#1-3-5-1-list-empty">1.3.5.1 list_empty</a></li>
+</ul>
+</li>
+<li><a href="#1-3-6-pan-duan-jie-dian-shi-fou-wei-zui-hou-yi-ge-jie-dian">1.3.6 判段节点是否为最后一个节点</a><ul>
+<li><a href="#1-3-6-1-list-is-last">1.3.6.1 list_is_last</a></li>
+</ul>
+</li>
+<li><a href="#1-3-7-huo-qu-di-yi-ge-jie-dian-de-su-zhu-jie-gou">1.3.7 获取第一个节点的宿主结构</a><ul>
+<li><a href="#1-3-7-1-list-first-entry-list-first-entry-or-null">1.3.7.1 list_first_entry&#x2F;list_first_entry_or_null</a></li>
+</ul>
+</li>
+<li><a href="#1-3-8-huo-qu-zui-hou-yi-ge-jie-dian-de-su-zhu-jie-gou">1.3.8 获取最后一个节点的宿主结构</a><ul>
+<li><a href="#1-3-8-1-list-last-entry-list-first-entry-or-null">1.3.8.1 list_last_entry&#x2F;list_first_entry_or_null</a></li>
+</ul>
+</li>
+<li><a href="#1-3-9-huo-qu-shang-yi-ge-jie-dian-de-su-zhu-jie-gou">1.3.9 获取上一个节点的宿主结构</a><ul>
+<li><a href="#1-3-9-1-list-prev-entry">1.3.9.1 list_prev_entry</a></li>
+</ul>
+</li>
+<li><a href="#1-3-10-huo-qu-xia-yi-ge-jie-dian-de-su-zhu-jie-gou">1.3.10 获取下一个节点的宿主结构</a><ul>
+<li><a href="#1-3-10-1-list-next-entry">1.3.10.1 list_next_entry</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#1-4-nei-he-lian-biao-jin-jie-cao-zuo">1.4 内核链表进阶操作</a><ul>
+<li><a href="#1-4-1-jie-dian-cong-a-lian-biao-zhuan-yi-dao-b-lian-biao">1.4.1 节点从A链表转移到B链表</a><ul>
+<li><a href="#1-4-1-1-ban-yi-dao-xin-lian-biao-tou-list-move">1.4.1.1 搬移到新链表头-list_move</a></li>
+<li><a href="#1-4-1-2-ban-yi-dao-xin-lian-biao-wei-list-move-tail">1.4.1.2 搬移到新链表尾-list_move_tail</a></li>
+</ul>
+</li>
+<li><a href="#1-4-2-lian-biao-a-he-lian-biao-b-he-bing-list-splice">1.4.2 链表A和链表B合并-list_splice</a></li>
+<li><a href="#1-4-3-jie-dian-de-ti-huan-list-replace">1.4.3 节点的替换-list_replace</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-nei-he-lian-biao-zong-jie">2 内核链表总结</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-nei-he-lian-biao">1 内核链表</span><a href="#1-nei-he-lian-biao" class="header-anchor">#</a></h1><p>内核链表本质就是一个双向循环链表：</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/1.png" alt="image-20240802211111723"></p>
+<p>链表的实现仅用一个<code>include/linux/list.h</code>实现。</p>
+<p>内核链表有别于传统链表就在节点本身不包含数据域，只包含指针域。故而可以很灵活的拓展数据结构。使用时包含在用户数据结构内部。</p>
+<h2><span id="1-1-nei-he-lian-biao-jie-gou-ti">1.1 内核链表结构体</span><a href="#1-1-nei-he-lian-biao-jie-gou-ti" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> &#123;</span></span><br><span class="line">   <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> *<span class="title">next</span>, *<span class="title">prev</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/2.png" alt="image-20240802211751734"></p>
+<p>这里把内核经典的<code>container_of</code>和<code>offsetof</code>实现也贴进来了。实际上一般使用<code>container_of</code>都用<code>include\linux\kernel.h</code></p>
+<h2><span id="1-2-list-chu-shi-hua">1.2 list初始化</span><a href="#1-2-list-chu-shi-hua" class="header-anchor">#</a></h2><h3><span id="1-2-1-yong-hong-chu-shi-hua-list-head">1.2.1 用宏初始化-LIST_HEAD</span><a href="#1-2-1-yong-hong-chu-shi-hua-list-head" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> LIST_HEAD_INIT(name) &#123; &amp;(name), &amp;(name) &#125;</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> LIST_HEAD(name) \</span></span><br><span class="line"><span class="meta">   struct list_head name = LIST_HEAD_INIT(name)</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/3.png" alt="image-20240802212312169"></p>
+<p><code>LIST_HEAD</code> 定义一个<code>list_head</code>变量,  让<code>next，和prev</code>，也就是【前驱】和【后继】指针都指向自己，作为链表头指针。</p>
+<p>例如：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">LIST_HEAD(<span class="built_in">list</span>); <span class="comment">// struct list_head list = &#123;.next = list, .prev = list&#125;;</span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="1-2-2-yong-jie-kou-chu-shi-hua-init-list-head">1.2.2 用接口初始化-INIT_LIST_HEAD</span><a href="#1-2-2-yong-jie-kou-chu-shi-hua-init-list-head" class="header-anchor">#</a></h3><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/4.png" alt="image-20240802213916603"></p>
+<p><code>INIT_LIST_HEAD</code>函数用来对一个list_head指针初始化。<code>WRITE_ONCE</code>是一种内存屏障机制，只写入一次， 防止并发产生竞态，参考<a href="https://fuzidage.github.io/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/#2-1-2-3-read-once">Linux内核-并发与同步 | Hexo (fuzidage.github.io)</a></p>
+<p><a href="https://www.cnblogs.com/fuzidage/p/18301805">linux内核下并发时同步机制 - fuzidage - 博客园 (cnblogs.com)</a></p>
+<p>因此<code>INIT_LIST_HEAD</code>等效于：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> <span class="title function_">INIT_LIST_HEAD</span><span class="params">(<span class="keyword">struct</span> list_head *<span class="built_in">list</span>)</span> &#123;</span><br><span class="line">   <span class="built_in">list</span>-&gt;next = <span class="built_in">list</span>;</span><br><span class="line">   <span class="built_in">list</span>-&gt;prev = <span class="built_in">list</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">list</span>;</span></span><br><span class="line">INIT_LIST_HEAD(&amp;<span class="built_in">list</span>);</span><br></pre></td></tr></table></figure>
+
+<h3><span id="1-2-3-chu-shi-hua-wan-hou-tou-bu-jie-dian-tu-li">1.2.3 初始化完后头部节点图例</span><a href="#1-2-3-chu-shi-hua-wan-hou-tou-bu-jie-dian-tu-li" class="header-anchor">#</a></h3><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/5.png" alt="image-20240803000855519"></p>
+<h2><span id="1-3-nei-he-lian-biao-cao-zuo">1.3 内核链表操作</span><a href="#1-3-nei-he-lian-biao-cao-zuo" class="header-anchor">#</a></h2><h3><span id="1-3-1-cha-ru-jie-dian">1.3.1 插入节点</span><a href="#1-3-1-cha-ru-jie-dian" class="header-anchor">#</a></h3><p><code>list_add</code>总是在链表的头部插入, <code>list_add_tail</code>插在链表尾部。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> __list_add(<span class="keyword">struct</span> list_head *new,</span><br><span class="line">			      <span class="keyword">struct</span> list_head *prev,</span><br><span class="line">			      <span class="keyword">struct</span> list_head *next)</span><br><span class="line">&#123;</span><br><span class="line">	next-&gt;prev = new;</span><br><span class="line">	new-&gt;next = next;</span><br><span class="line">	new-&gt;prev = prev;</span><br><span class="line">	WRITE_ONCE(prev-&gt;next, new);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> <span class="title function_">list_add</span><span class="params">(<span class="keyword">struct</span> list_head *new, <span class="keyword">struct</span> list_head *head)</span></span><br><span class="line">&#123;</span><br><span class="line">	__list_add(new, head, head-&gt;next);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> <span class="title function_">list_add_tail</span><span class="params">(<span class="keyword">struct</span> list_head *new, <span class="keyword">struct</span> list_head *head)</span></span><br><span class="line">&#123;</span><br><span class="line">	__list_add(new, head-&gt;prev, head);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/6.png" alt="image-20240802220834774"></p>
+<h4><span id="1-3-1-1-chuang-jian-yi-ge-jie-dian">1.3.1.1 创建一个节点</span><a href="#1-3-1-1-chuang-jian-yi-ge-jie-dian" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">my_data_list</span> &#123;</span></span><br><span class="line">    <span class="type">int</span> data ;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">node</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">my_data_list</span> <span class="title">first_data</span> =</span> &#123; </span><br><span class="line">    .val = <span class="number">1</span>,</span><br><span class="line">    .<span class="built_in">list</span> = LIST_HEAD_INIT(first_data.node),<span class="comment">//作为节点，其实可以不用初始化next和prev域</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/7.png" alt="image-20240803150017826"></p>
+<h4><span id="1-3-1-2-tou-cha-jie-dian-list-add">1.3.1.2 头插节点-list_add</span><a href="#1-3-1-2-tou-cha-jie-dian-list-add" class="header-anchor">#</a></h4><p><code>list_add(&amp;frist_data.node, &amp;listHead);</code></p>
+<p><code>list_add</code>总是在链表的头部插入,先看<strong>插入第一个节点</strong>:</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/8.png" alt="image-20240803001913257"></p>
+<p>插入第一个节点，就是让<code>list_head</code>的<code>next</code>和<code>prev</code>都指向第一个节点，第一个节点的<code>next</code>和<code>prev</code>也都指向了<code>list_head</code>，构成一个单元素的环。</p>
+<p><strong>再插入第二个节点</strong>：</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/9.png" alt="image-20240803002115685"></p>
+<p>结合代码讲解：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> __list_add(<span class="keyword">struct</span> list_head *new,</span><br><span class="line">			      <span class="keyword">struct</span> list_head *prev,</span><br><span class="line">			      <span class="keyword">struct</span> list_head *next)</span><br><span class="line">&#123;</span><br><span class="line">	next-&gt;prev = new;</span><br><span class="line">	new-&gt;next = next;</span><br><span class="line">	new-&gt;prev = prev;</span><br><span class="line">	WRITE_ONCE(prev-&gt;next, new);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//我们把__list_add(new, head, head-&gt;next);带入进去得：</span></span><br><span class="line">&#123;</span><br><span class="line">    head-&gt;next-&gt;prev  = new; <span class="comment">//①</span></span><br><span class="line">    new-&gt;next = head-&gt;next; <span class="comment">//②</span></span><br><span class="line">    new-&gt;prev = head;  <span class="comment">//③</span></span><br><span class="line">    head-&gt;next = new;  <span class="comment">//④</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>①让节点1的prev指向节点2。</p>
+<p>②让节点2的next指向节点1.</p>
+<p>③让节点2的prev指向头节点。</p>
+<p>④让头节点的next指向节点2。</p>
+<h5><span id="1-3-1-2-1-tou-cha-ru-de-yao-dian-zong-jie">1.3.1.2.1 头插入的要点总结</span><a href="#1-3-1-2-1-tou-cha-ru-de-yao-dian-zong-jie" class="header-anchor">#</a></h5><p><strong>总结1</strong>： head的next是指向链表中最新的节点，head的prev指向链表中最旧的节点。</p>
+<p><strong>总结2</strong>：<code>list_add</code>函数作为头插本质：</p>
+<p>​	①把链表头的next剪掉，next去指向新节点；但是得提前将旧节点的prev剪掉，旧节点prev也去指向新节点。注意为什么要先操作旧节点？因为旧节点就是<code>head-&gt;next</code>啊。</p>
+<p>​	②让新节点前驱prev指向head, 后继next指向旧节点。</p>
+<p><strong>总结3</strong>：头插遍历总是先访问到最新的元素，类似于<code>”栈stack“, ”先进后出“</code>。</p>
+<h4><span id="1-3-1-3-wei-cha-jie-dian-list-add-tail">1.3.1.3 尾插节点-list_add_tail</span><a href="#1-3-1-3-wei-cha-jie-dian-list-add-tail" class="header-anchor">#</a></h4><p><code>list_add_tail(&amp;frist_data.node, &amp;listHead);</code></p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/10.png" alt="image-20240803150107150"></p>
+<p><img src="C:/Users/robin.lee/AppData/Roaming/Typora/typora-user-images/image-20240803150405838.png" alt="image-20240803150405838"></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> __list_add(<span class="keyword">struct</span> list_head *new,</span><br><span class="line">			      <span class="keyword">struct</span> list_head *prev,</span><br><span class="line">			      <span class="keyword">struct</span> list_head *next)</span><br><span class="line">&#123;</span><br><span class="line">	next-&gt;prev = new;</span><br><span class="line">	new-&gt;next = next;</span><br><span class="line">	new-&gt;prev = prev;</span><br><span class="line">	WRITE_ONCE(prev-&gt;next, new);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//我们把__list_add(new, head-&gt;prev, head);带入进去得：</span></span><br><span class="line">&#123;</span><br><span class="line">    head-&gt;prev  = new;       <span class="comment">//①</span></span><br><span class="line">    new-&gt;next = head;        <span class="comment">//②</span></span><br><span class="line">    new-&gt;prev = head-&gt;prev;  <span class="comment">//③</span></span><br><span class="line">    head-&gt;prev-&gt;next = new;  <span class="comment">//④</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>①头节点的prev指向节点2。</p>
+<p>②让节点2的next指向头节点.</p>
+<p>③让节点2的prev指向头节点的prev。</p>
+<p>④让节点1的next指向节点2。</p>
+<h5><span id="1-3-1-3-1-wei-cha-ru-de-yao-dian-zong-jie">1.3.1.3.1 尾插入的要点总结</span><a href="#1-3-1-3-1-wei-cha-ru-de-yao-dian-zong-jie" class="header-anchor">#</a></h5><p><strong>总结1</strong>： head的next是指向链表中最旧的节点，head的prev指向链表中最新的节点。</p>
+<p><strong>总结2</strong>：<code>list_add_tail</code>函数作为尾插本质：</p>
+<p>​	①先把链表头的prev剪掉，prev去指向新节点；最后把旧节点（尾节点）的next指向新节点。这样插入的就变成了新的尾节点。</p>
+<p>​	②同时让新节点的next指向head, prev指向旧节点(尾节点)。</p>
+<p><strong>总结3</strong>：尾插遍历总是先访问到旧的元素，类似于<code>”队列FIFO“, ”先进先出“</code>。</p>
+<h3><span id="1-3-2-shan-chu-jie-dian-list-del">1.3.2 删除节点-list_del</span><a href="#1-3-2-shan-chu-jie-dian-list-del" class="header-anchor">#</a></h3><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/11.png" alt="image-20240803153026556"></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> __list_del(<span class="keyword">struct</span> list_head * prev, <span class="keyword">struct</span> list_head * next)</span><br><span class="line">&#123;</span><br><span class="line">	next-&gt;prev = prev;</span><br><span class="line">	WRITE_ONCE(prev-&gt;next, next);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> __list_del_entry(<span class="keyword">struct</span> list_head *entry)</span><br><span class="line">&#123;</span><br><span class="line">	__list_del(entry-&gt;prev, entry-&gt;next);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> <span class="title function_">list_del</span><span class="params">(<span class="keyword">struct</span> list_head *entry)</span></span><br><span class="line">&#123;</span><br><span class="line">	__list_del(entry-&gt;prev, entry-&gt;next);</span><br><span class="line">	entry-&gt;next = LIST_POISON1;</span><br><span class="line">	entry-&gt;prev = LIST_POISON2;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到<code>list_del</code>和<code>__list_del_entry</code>没有本质区别，核心都是<code>__list_del</code>。举个例子比如：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">list_del(&amp;frist_data.node);</span><br></pre></td></tr></table></figure>
+
+<p>非常好理解就不画图了，就是将下一个节点的prev指向前一个节点，同时反过来也要将前一个节点的next指向下一个节点。这个节点不就删除掉了。</p>
+<p>注意：摘掉的节点prev、next 指针分别被设为 <code>LIST_POSITION2</code>和<code>LIST_POSITION1</code>两个特殊值，这样设置是为了保证不在链表中的节点项不可访问–对<code>LIST_POSITION1</code>和<code>LIST_POSITION2</code>的访问都将引起页故障。一访问就会立马出错，这样保证了数据安全性。来看下<code>LIST_POSITION1</code>和<code>LIST_POSITION2</code>, 在<code>include\linux\poison.h</code>:</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/12.png" alt="image-20240803155146829"></p>
+<h3><span id="1-3-3-lian-biao-shan-chu-yu-fan-chu-shi-hua-list-del-init">1.3.3 链表删除与反初始化-list_del_init</span><a href="#1-3-3-lian-biao-shan-chu-yu-fan-chu-shi-hua-list-del-init" class="header-anchor">#</a></h3><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/13.png" alt="image-20240803155651544"></p>
+<p>可以看到调用了<code>__list_del_entry</code>摘除自己这个节点，同时<code>INIT_LIST_HEAD</code>用接口初始化自己这个节点。</p>
+<h3><span id="1-3-4-lian-biao-bian-li">1.3.4 链表遍历</span><a href="#1-3-4-lian-biao-bian-li" class="header-anchor">#</a></h3><h4><span id="1-3-4-0-list-entry">1.3.4.0 list_entry</span><a href="#1-3-4-0-list-entry" class="header-anchor">#</a></h4><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/14.png" alt="image-20240803162517683"></p>
+<p>遍历的关键就是这个<code>list_entry</code> 宏。它等效于<code>container_of</code>, 实现原理参考前面的讲解：</p>
+<p> <a href="https://fuzidage.github.io/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/#2-2-container-of-gen-ju-jie-gou-ti-cheng-yuan-zhao-dao-gai-jie-gou-ti">union和bit_field巧妙进行寄存器位操作 | Hexo (fuzidage.github.io)</a></p>
+<p><a href="https://www.cnblogs.com/fuzidage/p/14691578.html">union和bit field巧妙进行寄存器位操作 - fuzidage - 博客园 (cnblogs.com)</a></p>
+<h4><span id="1-3-4-1-list-for-each-zheng-xiang-bian-li">1.3.4.1 list_for_each(正向遍历)</span><a href="#1-3-4-1-list-for-each-zheng-xiang-bian-li" class="header-anchor">#</a></h4><p>作用：传入头节点，去遍历里面的node</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/15.png" alt="image-20240803162024761"></p>
+<p>从<code>head-&gt;next</code>开始，也就是从第一个节点开始往后遍历，直到最后一个节点，这时pos就等于head了，循环结束。</p>
+<h4><span id="1-3-4-1-list-for-each-safe">1.3.4.1 list_for_each_safe</span><a href="#1-3-4-1-list-for-each-safe" class="header-anchor">#</a></h4><p>下面这个<code>list_for_each_safe</code>， 多了一个tmp变量而已，提前用n去试探下一节点,安全情况下才赋给pos.</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/16.png" alt="image-20240803205706719"></p>
+<h4><span id="1-3-4-2-list-for-each-entry">1.3.4.2 list_for_each_entry</span><a href="#1-3-4-2-list-for-each-entry" class="header-anchor">#</a></h4><p>作用：传入头节点，去遍历里面的node所对应的外层宿主结构体。举个例子比较好理解：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">xxx_dev</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">job_list</span>;</span></span><br><span class="line">    <span class="type">char</span> name[<span class="number">64</span>];</span><br><span class="line">    <span class="type">int</span> irq;</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">xxx_job</span> &#123;</span></span><br><span class="line">	<span class="type">atomic_t</span> job_state;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">node</span>;</span><span class="comment">//add to xxx_dev job_list</span></span><br><span class="line">	<span class="type">atomic_t</span> job_id;</span><br><span class="line">    ...</span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">xxx_dev</span> <span class="title">dev</span>;</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">xxx_job</span> <span class="title">job</span>;</span></span><br><span class="line"></span><br><span class="line">list_add_tail(&amp;job-&gt;node, &amp;dev-&gt;job_list);</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">xxx_job</span> *<span class="title">job_tmp</span>;</span></span><br><span class="line">list_for_each_entry(job_tmp, &amp;dev-&gt;job_list, node) &#123;</span><br><span class="line">    <span class="comment">//从链表中取出job_tmp，do someting</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>首先定义一个链表<code>job_list</code>藏在<code>xxx_dev</code>里面，然后链表的节点宿主是<code>xxx_job</code>。</p>
+<p><code>list_add_tail</code>将<code>xxx_job</code>的<code>node</code>即可加入<code>xxx_dev</code>的<code>job_list</code>。</p>
+<p><code>list_for_each_entry</code>即可根据<code>xxx_job</code>的<code>node</code>成员取出宿主结构。</p>
+<p>来分析一下<code>list_for_each_entry</code>函数：</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/17.png" alt="image-20240803172745331"></p>
+<p><code>list_for_each_entry(job_tmp, &amp;dev-&gt;job_list, node)</code>那么首先进入for循环:</p>
+<p>①代入<code>list_first_entry(&amp;dev-&gt;job_list, typeof(*job_tmp), node)</code></p>
+<p>继续代入：看到了熟悉的<code>list_entry(&amp;dev-&gt;job_list-&gt;next, typeof(*job_tmp), node)</code>，是不是就是对应第一个节点的宿主结构<code>xxx_job</code>地址。</p>
+<p>那么pos(也就是<code>job_tmp</code>)就指向了第一个节点的宿主结构。</p>
+<p>②判断node是否达到head（也就是看有没有遍历到最后一个节点）</p>
+<p>③此时pos已经是第一个节点的宿主结构，继续代入<code>list_next_entry(第一个节点的宿主结构, node)</code>，看到了熟悉的<code>list_entry(第一个节点的宿主结构-&gt;member-&gt;next, typeof(*job_tmp), node)</code>,这不就是下一个节点的宿主结构嘛，赋值给pos。</p>
+<h4><span id="1-3-4-2-list-for-each-entry-safe">1.3.4.2 list_for_each_entry_safe</span><a href="#1-3-4-2-list-for-each-entry-safe" class="header-anchor">#</a></h4><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/18.png" alt="image-20240803174314958"></p>
+<p>和前面的<code>list_for_each_entry</code>作用完全一样，可以看到实现也是基本一致。多了一个tmp变量而已，提前用n去试探下一节点,安全情况下才赋给pos.</p>
+<h4><span id="1-3-4-3-list-for-each-prev-fan-xiang-bian-li">1.3.4.3 list_for_each_prev(反向遍历)</span><a href="#1-3-4-3-list-for-each-prev-fan-xiang-bian-li" class="header-anchor">#</a></h4><p>作用：传入头节点，反向去遍历里面的node</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/19.png" alt="image-20240803174910449"></p>
+<p>没什么好说的，和<code>list_for_each</code>相反方向遍历。</p>
+<h4><span id="1-3-4-3-list-for-each-prev-safe">1.3.4.3 list_for_each_prev_safe</span><a href="#1-3-4-3-list-for-each-prev-safe" class="header-anchor">#</a></h4><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/20.png" alt="image-20240803210018006"></p>
+<h4><span id="1-3-4-4-list-for-each-entry-reverse">1.3.4.4 list_for_each_entry_reverse</span><a href="#1-3-4-4-list-for-each-entry-reverse" class="header-anchor">#</a></h4><p>作用：传入头节点，反向去遍历里面的node所对应的外层宿主结构体。和<code>list_for_each_entry</code>方向相反。</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/21.png" alt="image-20240803175614268"></p>
+<h4><span id="1-3-4-4-list-for-each-entry-safe-reverse">1.3.4.4 list_for_each_entry_safe_reverse</span><a href="#1-3-4-4-list-for-each-entry-safe-reverse" class="header-anchor">#</a></h4><p>和<code>list_for_each_entry_reverse</code>作用完全一样。</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/22.png" alt="image-20240803175551253"></p>
+<h4><span id="1-3-4-5-list-for-each-entry-continue-x2f-list-for-each-entry-from-cong-zhong-jian-mou-ge-jie-dian-kai-shi-bian-li">1.3.4.5 list_for_each_entry_continue&#x2F;list_for_each_entry_from(从中间某个节点开始遍历)</span><a href="#1-3-4-5-list-for-each-entry-continue-x2f-list-for-each-entry-from-cong-zhong-jian-mou-ge-jie-dian-kai-shi-bian-li" class="header-anchor">#</a></h4><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/23.png" alt="image-20240803211441312"></p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/23-1.png" alt="image-20240803212127987"></p>
+<h4><span id="1-3-4-5-list-for-each-entry-continue-reverse-cong-zhong-jian-mou-ge-jie-dian-kai-shi-fan-xiang-bian-li">1.3.4.5 list_for_each_entry_continue_reverse(从中间某个节点开始反向遍历)</span><a href="#1-3-4-5-list-for-each-entry-continue-reverse-cong-zhong-jian-mou-ge-jie-dian-kai-shi-fan-xiang-bian-li" class="header-anchor">#</a></h4><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/24.png" alt="image-20240803211726153"></p>
+<h3><span id="1-3-5-pan-duan-lian-biao-shi-fou-wei-kong">1.3.5 判段链表是否为空</span><a href="#1-3-5-pan-duan-lian-biao-shi-fou-wei-kong" class="header-anchor">#</a></h3><h4><span id="1-3-5-1-list-empty">1.3.5.1 list_empty</span><a href="#1-3-5-1-list-empty" class="header-anchor">#</a></h4><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/25.png" alt="image-20240803201525407"></p>
+<p>只要头节点的next还是自己，那就代表链表为空。</p>
+<h3><span id="1-3-6-pan-duan-jie-dian-shi-fou-wei-zui-hou-yi-ge-jie-dian">1.3.6 判段节点是否为最后一个节点</span><a href="#1-3-6-pan-duan-jie-dian-shi-fou-wei-zui-hou-yi-ge-jie-dian" class="header-anchor">#</a></h3><h4><span id="1-3-6-1-list-is-last">1.3.6.1 list_is_last</span><a href="#1-3-6-1-list-is-last" class="header-anchor">#</a></h4><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/26.png" alt="image-20240803201702932"></p>
+<p>只要传入的节点的next为头节点，那就是最后一个节点。</p>
+<h3><span id="1-3-7-huo-qu-di-yi-ge-jie-dian-de-su-zhu-jie-gou">1.3.7 获取第一个节点的宿主结构</span><a href="#1-3-7-huo-qu-di-yi-ge-jie-dian-de-su-zhu-jie-gou" class="header-anchor">#</a></h3><h4><span id="1-3-7-1-list-first-entry-x2f-list-first-entry-or-null">1.3.7.1 list_first_entry&#x2F;list_first_entry_or_null</span><a href="#1-3-7-1-list-first-entry-x2f-list-first-entry-or-null" class="header-anchor">#</a></h4><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/27.png" alt="image-20240803204338002"></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">xxx_job</span> *<span class="title">job_tmp</span>;</span></span><br><span class="line">job_tmp = list_first_entry(&amp;dev-&gt;job_list, typeof(*job_tmp), node)</span><br></pre></td></tr></table></figure>
+
+<p>前面<code>1.3.4.2 list_for_each_entry</code>小节其实已经分析过了，取出第一个节点的宿主结构指针。</p>
+<p>下面这个<code>list_first_entry_or_null</code>多了一个判空，如果空链表，则会返回null。</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/28.png" alt="image-20240803205148821"></p>
+<h3><span id="1-3-8-huo-qu-zui-hou-yi-ge-jie-dian-de-su-zhu-jie-gou">1.3.8 获取最后一个节点的宿主结构</span><a href="#1-3-8-huo-qu-zui-hou-yi-ge-jie-dian-de-su-zhu-jie-gou" class="header-anchor">#</a></h3><h4><span id="1-3-8-1-list-last-entry-x2f-list-first-entry-or-null">1.3.8.1 list_last_entry&#x2F;list_first_entry_or_null</span><a href="#1-3-8-1-list-last-entry-x2f-list-first-entry-or-null" class="header-anchor">#</a></h4><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/29.png" alt="image-20240803205532106"></p>
+<p>头节点的prev不就对应对应最后一个节点嘛。然后<code>list_entry</code>找到宿主结果。</p>
+<h3><span id="1-3-9-huo-qu-shang-yi-ge-jie-dian-de-su-zhu-jie-gou">1.3.9 获取上一个节点的宿主结构</span><a href="#1-3-9-huo-qu-shang-yi-ge-jie-dian-de-su-zhu-jie-gou" class="header-anchor">#</a></h3><h4><span id="1-3-9-1-list-prev-entry">1.3.9.1 list_prev_entry</span><a href="#1-3-9-1-list-prev-entry" class="header-anchor">#</a></h4><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/30.png" alt="image-20240803210650445"></p>
+<p>传入某个节点取prev不就是上一个节点嘛，然后<code>list_entry</code>找到宿主结果。</p>
+<h3><span id="1-3-10-huo-qu-xia-yi-ge-jie-dian-de-su-zhu-jie-gou">1.3.10 获取下一个节点的宿主结构</span><a href="#1-3-10-huo-qu-xia-yi-ge-jie-dian-de-su-zhu-jie-gou" class="header-anchor">#</a></h3><h4><span id="1-3-10-1-list-next-entry">1.3.10.1 list_next_entry</span><a href="#1-3-10-1-list-next-entry" class="header-anchor">#</a></h4><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/31.png" alt="image-20240803210742319"></p>
+<p>传入某个节点取next不就是下一个节点嘛，然后<code>list_entry</code>找到宿主结果。</p>
+<h2><span id="1-4-nei-he-lian-biao-jin-jie-cao-zuo">1.4 内核链表进阶操作</span><a href="#1-4-nei-he-lian-biao-jin-jie-cao-zuo" class="header-anchor">#</a></h2><h3><span id="1-4-1-jie-dian-cong-a-lian-biao-zhuan-yi-dao-b-lian-biao">1.4.1 节点从A链表转移到B链表</span><a href="#1-4-1-jie-dian-cong-a-lian-biao-zhuan-yi-dao-b-lian-biao" class="header-anchor">#</a></h3><h4><span id="1-4-1-1-ban-yi-dao-xin-lian-biao-tou-list-move">1.4.1.1 搬移到新链表头-list_move</span><a href="#1-4-1-1-ban-yi-dao-xin-lian-biao-tou-list-move" class="header-anchor">#</a></h4><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/32.png" alt="image-20240803212930512"></p>
+<p>可以看到就是从旧链表摘除节点，再头插到新链表。</p>
+<h4><span id="1-4-1-2-ban-yi-dao-xin-lian-biao-wei-list-move-tail">1.4.1.2 搬移到新链表尾-list_move_tail</span><a href="#1-4-1-2-ban-yi-dao-xin-lian-biao-wei-list-move-tail" class="header-anchor">#</a></h4><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/33.png" alt="image-20240803213156548"></p>
+<p>可以看到就是从旧链表摘除节点，再尾插到新链表。</p>
+<h3><span id="1-4-2-lian-biao-a-he-lian-biao-b-he-bing-list-splice">1.4.2 链表A和链表B合并-list_splice</span><a href="#1-4-2-lian-biao-a-he-lian-biao-b-he-bing-list-splice" class="header-anchor">#</a></h3><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/34.png" alt="image-20240803214326416"></p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/35.png" alt="image-20240803215126160"></p>
+<p>分析：<code>list_splice(list1, list2);</code> </p>
+<p>带入：<code>__list_splice(list1, list2, list2-&gt;next)</code>，那么：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">first = list1-&gt;next;</span><br><span class="line">last = list1-&gt;prev;</span><br><span class="line"></span><br><span class="line">list1-&gt;next = list2;</span><br><span class="line">list2-&gt;next = list1-&gt;next;</span><br><span class="line"></span><br><span class="line">list1-&gt;prev-&gt;next = list2-&gt;next;</span><br><span class="line">list2-&gt;next-&gt;prev = list1-&gt;prev;</span><br></pre></td></tr></table></figure>
+
+<p>最后最好是将还要list1进行反初始化，这样list1才彻底和各个节点断链，比如<code>list_splice_init</code>函数：</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/36.png" alt="image-20240803221224876"></p>
+<h3><span id="1-4-3-jie-dian-de-ti-huan-list-replace">1.4.3 节点的替换-list_replace</span><a href="#1-4-3-jie-dian-de-ti-huan-list-replace" class="header-anchor">#</a></h3><p><code>list_replace</code>：将新的节点替换到旧的节点上。</p>
+<p><code>list_replace_init</code>：将新的节点替换到旧的节点上。同时将旧的节点的prev和next指向自己，反初始化。</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/37.png" alt="image-20240803213753644"></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> <span class="title function_">list_replace</span><span class="params">(<span class="keyword">struct</span> list_head *old,</span></span><br><span class="line"><span class="params">				<span class="keyword">struct</span> list_head *new)</span> &#123;</span><br><span class="line">    new-&gt;next = old-&gt;next;<span class="comment">//①</span></span><br><span class="line">    new-&gt;next-&gt;prev = new;<span class="comment">//②</span></span><br><span class="line">    new-&gt;prev = old-&gt;prev;<span class="comment">//③</span></span><br><span class="line">    new-&gt;prev-&gt;next = new;<span class="comment">//④</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/38.png" alt="image-20240803223442214"></p>
+<p>可以看到虽然替换成功了，但是old还是有指向关系，我们再对old进行<code>INIT_LIST_HEAD(old);</code>断掉old的指向关系，也就是对应<code>list_replace_init</code>函数：</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/38-1.png" alt="image-20240803223615205"></p>
+<p>old断链后图像那么最后就会变成：</p>
+<p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/39.png" alt="image-20240803223811690"></p>
+<h1><span id="2-nei-he-lian-biao-zong-jie">2 内核链表总结</span><a href="#2-nei-he-lian-biao-zong-jie" class="header-anchor">#</a></h1><p><img src="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/40.png" alt="img"></p>
+]]></content>
+      <tags>
+        <tag>linux内核</tag>
+        <tag>数据结构</tag>
+      </tags>
+  </entry>
 </search>
