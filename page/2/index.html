@@ -69,6 +69,248 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Linux内核-kmalloc与vmalloc及CMA内存" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/" class="article-date">
+  <time class="dt-published" datetime="2024-07-21T06:45:55.000Z" itemprop="datePublished">2024-07-21</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/">Linux内核-kmalloc与vmalloc及CMA内存</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-kmalloc-vmalloc-qu-bie">1 kmalloc&#x2F;vmalloc区别</a><ul>
+<li><a href="#1-1-kmalloc-han-shu-yuan-xing">1.1 kmalloc函数原型：</a><ul>
+<li><a href="#1-1-1-gpf-flags-han-yi">1.1.1 gpf flags含义</a></li>
+</ul>
+</li>
+<li><a href="#1-2-vmalloc-han-shu-yuan-xing">1.2 vmalloc函数原型：</a></li>
+<li><a href="#1-3-nei-cun-shi-fang">1.3 内存释放</a></li>
+</ul>
+</li>
+<li><a href="#2-kmalloc-vmalloc-nei-cun-fen-pei-yuan-li">2 kmalloc&#x2F;vmalloc内存分配原理</a></li>
+<li><a href="#3-cma-jie-shao">3 CMA介绍</a><ul>
+<li><a href="#3-0-yin-ru-linux-nei-he-buddy-xi-tong">3.0 引入Linux内核Buddy系统</a></li>
+<li><a href="#3-1-cma-gai-shu">3.1 CMA概述</a></li>
+<li><a href="#3-2-cma-nei-he-shi-neng">3.2 CMA内核使能</a></li>
+<li><a href="#3-3-cma-de-ding-yi">3.3 CMA的定义</a></li>
+<li><a href="#3-5-cma-nei-cun-yuan-li-he-liu-cheng">3.5 CMA内存原理和流程</a><ul>
+<li><a href="#3-5-1-cma-diao-yong-ceng-ci-kuang-jia">3.5.1 CMA调用层次框架</a></li>
+<li><a href="#3-5-2-cma-jie-gou-ti">3.5.2 CMA结构体</a></li>
+<li><a href="#3-5-3-cma-qu-yu-chu-shi-hua">3.5.3 CMA区域初始化</a><ul>
+<li><a href="#3-5-3-0-zheng-ge-memory-chu-shi-hua">3.5.3.0 整个memory初始化</a></li>
+<li><a href="#3-5-3-1-dts-miao-shu-zhong-cma-nei-cun-de-chu-shi-hua">3.5.3.1 dts描述中cma内存的初始化</a><ul>
+<li><a href="#3-5-3-1-1-quan-ju-cma-nei-cun-chu-shi-hua-rmem-cma-setup">3.5.3.1.1 全局cma内存初始化rmem_cma_setup</a><ul>
+<li><a href="#3-5-3-1-1-1-cma-init-reserved-mem">3.5.3.1.1.1 cma_init_reserved_mem</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-5-3-2-dts-mei-you-miao-shu-cma-nei-cun-de-chu-shi-hua">3.5.3.2 dts没有描述cma内存的初始化</a></li>
+</ul>
+</li>
+<li><a href="#3-5-4-cma-qu-yu-nei-cun-ying-she">3.5.4 CMA 区域内存映射</a><ul>
+<li><a href="#3-5-4-1-dma-contiguous-remap-jian-li-cma-area-de-ye-biao-ying-she">3.5.4.1 dma_contiguous_remap-建立cma area的页表映射</a></li>
+</ul>
+</li>
+<li><a href="#3-5-5-cma-init-reserved-areas-ji-huo-cma-area-nei-cun">3.5.5 cma_init_reserved_areas-激活cma area内存</a><ul>
+<li><a href="#3-5-5-1-cma-activate-area">3.5.5.1 cma_activate_area</a><ul>
+<li><a href="#3-5-5-1-1-init-cma-reserved-pageblock">3.5.5.1.1 init_cma_reserved_pageblock</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#4-cma-nei-cun-shi-yong">4 CMA内存使用</a><ul>
+<li><a href="#4-1-dma-alloc-from-contiguous">4.1 dma_alloc_from_contiguous</a></li>
+<li><a href="#4-2-dma-release-from-contiguous">4.2 dma_release_from_contiguous</a></li>
+<li><a href="#4-3-cma-alloc">4.3 cma_alloc</a></li>
+<li><a href="#4-4-cma-release">4.4 cma_release</a></li>
+</ul>
+</li>
+<li><a href="#5-tong-guo-procfs-cha-kan-cma-area">5 通过procfs查看cma area</a><ul>
+<li><a href="#5-1-huo-de-ram-di-zhi-fan-wei">5.1 获得ram地址范围</a></li>
+<li><a href="#5-2-huo-de-reserved-memory-fan-wei">5.2 获得reserved-memory范围</a></li>
+</ul>
+</li>
+<li><a href="#6-dts-de-reserved-memory-nei-rong-jie-xi">6 dts的reserved-memory内容解析</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-kmalloc-x2f-vmalloc-qu-bie">1 kmalloc&#x2F;vmalloc区别</span><a href="#1-kmalloc-x2f-vmalloc-qu-bie" class="header-anchor">#</a></h1><table>
+<thead>
+<tr>
+<th>函数</th>
+<th>位置</th>
+<th>特性</th>
+<th>大小限制</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>kmalloc</td>
+<td>物理内存映射区域</td>
+<td>物理地址虚拟地址均连续</td>
+<td>不能超过128K</td>
+</tr>
+<tr>
+<td>kzalloc</td>
+<td>物理内存映射区域</td>
+<td>物理地址虚拟地址均连续</td>
+<td>不能超过128K</td>
+</tr>
+<tr>
+<td>vmalloc</td>
+<td>虚拟内存映射区域</td>
+<td>虚拟地址连续，物理地址不一定连续</td>
+<td>无限制</td>
+</tr>
+<tr>
+<td>vzalloc</td>
+<td>虚拟内存映射区域</td>
+<td>虚拟地址连续，物理地址不一定连续</td>
+<td>无限制</td>
+</tr>
+</tbody></table>
+<p>kzalloc只是相当于附加了 <strong>__GFP_ZERO</strong> 标志。所以它除了申请内核内存外，还会对申请到的内存内容清零。<br>同理，vzalloc也是一样，会对申请内存内容清零。<br><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/1.png" alt="image"></p>
+<h2><span id="1-1-kmalloc-han-shu-yuan-xing">1.1 kmalloc函数原型：</span><a href="#1-1-kmalloc-han-shu-yuan-xing" class="header-anchor">#</a></h2><p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/2.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> __always_inline <span class="type">void</span> *<span class="title function_">kmalloc</span><span class="params">(<span class="type">size_t</span> size, <span class="type">gfp_t</span> flags)</span>；</span><br></pre></td></tr></table></figure>
+
+<h3><span id="1-1-1-gpf-flags-han-yi">1.1.1 gpf flags含义</span><a href="#1-1-1-gpf-flags-han-yi" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">|– 在进程上下文，可以睡眠　　　　　GFP_KERNEL</span><br><span class="line"> |– 在进程上下文，不可以睡眠，如： GFP_ATOMIC</span><br><span class="line"> |　　|– 中断处理程序　　　　　　　GFP_ATOMIC</span><br><span class="line"> |　　|– 软中断　　　　　　　　　　GFP_ATOMIC</span><br><span class="line"> |　　|– Tasklet　　　　　　　　　GFP_ATOMIC</span><br><span class="line"> |– 用于DMA的内存，可以睡眠　　　GFP_DMA | GFP_KERNEL</span><br><span class="line"> |– 用于DMA的内存，不可以睡眠　　GFP_DMA |GFP_ATOMIC</span><br></pre></td></tr></table></figure>
+<p>如果进程上下文允许睡眠情况下尽量用<code>GFP_KERNEL</code>， 如果进程上下文禁止休眠的话（如中断，taskletd等）必须用<code>GFP_ATOMIC</code></p>
+<h2><span id="1-2-vmalloc-han-shu-yuan-xing">1.2 vmalloc函数原型：</span><a href="#1-2-vmalloc-han-shu-yuan-xing" class="header-anchor">#</a></h2><p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/3.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="type">void</span> *<span class="title function_">vmalloc</span><span class="params">(<span class="type">unsigned</span> <span class="type">long</span> size)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>注意：vmalloc和vfree可以睡眠，因此中断上下文禁止使用。</p>
+<h2><span id="1-3-nei-cun-shi-fang">1.3 内存释放</span><a href="#1-3-nei-cun-shi-fang" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">kfree</span><span class="params">(<span class="type">const</span> <span class="type">void</span> *)</span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="type">void</span> <span class="title function_">vfree</span><span class="params">(<span class="type">const</span> <span class="type">void</span> *addr)</span>;</span><br></pre></td></tr></table></figure>
+<h1><span id="2-kmalloc-x2f-vmalloc-nei-cun-fen-pei-yuan-li">2 kmalloc&#x2F;vmalloc内存分配原理</span><a href="#2-kmalloc-x2f-vmalloc-nei-cun-fen-pei-yuan-li" class="header-anchor">#</a></h1><p>slab机制，等后面学习完后介绍。</p>
+<h1><span id="3-cma-jie-shao">3 CMA介绍</span><a href="#3-cma-jie-shao" class="header-anchor">#</a></h1><h2><span id="3-0-yin-ru-linux-nei-he-buddy-xi-tong">3.0 引入Linux内核Buddy系统</span><a href="#3-0-yin-ru-linux-nei-he-buddy-xi-tong" class="header-anchor">#</a></h2><p>Linux伙伴系统<code>(Buddy)</code>使用 Page 粒度来管理内存，每个页面大小为4K。伙伴系统按照空闲内存块的长度，把内存挂载到不同长度的 <code>free_list</code>链表中。<code>free_list </code>的单位是以 (<code>2^order个Page</code>) 来递增的，即 <code>1 page、2 page、… 2^n</code>，通常情况下最大 order 为10 对应的空闲内存大小为 4M bytes。我们使用伙伴系统来申请连续的物理页面最大的页面最大小4M bytes。</p>
+<p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/4.png" alt="图片"></p>
+<p>当系统内存碎片化严重的时候，也很难分配到高order的页面，这时就引入了CMA概念，接着往下看。</p>
+<h2><span id="3-1-cma-gai-shu">3.1 CMA概述</span><a href="#3-1-cma-gai-shu" class="header-anchor">#</a></h2><p>连续内存分配器（<code>Contiguous Memory Allocator</code>），简称CMA。在系统长时间运行后，内存可能碎片化，很难找到连续的物理页，CMA很好的避免了这个问题。<br>举个例子：<br>手机上1300万像素的摄像头，一个像素占用3字节，拍摄一张照片需要大约37MB内存。在系统长时间运行后，内存可能碎片化，很难找到连续的物理页，页分配器（kmalloc）和块分配器(vmalloc)很可能无法分配这么大的连续内存块。</p>
+<p>方案1：<br>最开始的一种解决方案是为设备保留一块大的内存区域，比如为摄像头驱动预留一块大内存，通过ioremap来映射后作为私有内存使用，缺点是：当设备驱动不使用的时候（大多数时间手机摄像头是空闲的），内核的其他模块不能使用这块内存。<br>方案2：<br>连续内存分配器CMA很好的解决了这个问题，保留一块大的内存区域，当设备驱动不使用的时候，内核的其他模块可以使用。一般我们把这块区域定义为<code>reserved-memory</code>。<br><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/5.png" alt="image"></p>
+<h2><span id="3-2-cma-nei-he-shi-neng">3.2 CMA内核使能</span><a href="#3-2-cma-nei-he-shi-neng" class="header-anchor">#</a></h2><p>编译内核时需要开启以下配置宏：<br>（1）配置宏CONFIG_CMA，启用连续内存分配器。<br>（2）配置宏CONFIG_CMA_AREAS，指定CMA区域的最大数量，默认值是7。<br>（3）配置宏CONFIG_DMA_CMA，启用允许设备驱动分配内存的连续内存分配器</p>
+<h2><span id="3-3-cma-de-ding-yi">3.3 CMA的定义</span><a href="#3-3-cma-de-ding-yi" class="header-anchor">#</a></h2><p>CMA每个区域实际上就是一个<code>reserved memory</code>。CMA分两种:</p>
+<ol>
+<li>通用的CMA区域，该区域是给整个系统分配使用的;如下面的<code>&quot;linux,cma&quot;</code></li>
+<li>专用的CMA区域，这种是专门为单个模块定义的。如下面的<code>&quot;ion”</code></li>
+</ol>
+<p>dts中CMA属性：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> reusable:表示当前的内存区域除了被dma使用之外，还可以被内存管理(buddy)子系统reuse。</span><br><span class="line"><span class="number">2.</span> no-<span class="built_in">map</span>:表示是否需要创建页表映射，对于通用的内存，必须要创建映射才可以使用，共享CMA是可以作为通用内存进行分配使用的，因此必须要创建页表映射。</span><br><span class="line"><span class="number">3.</span> 对于共享的CMA区域，需要配置上linux,cma-<span class="keyword">default</span>属性，标志着它是共享的CMA。</span><br><span class="line"><span class="number">4.</span> alignment：对齐参数，保留内存的起始地址需要向该参数对齐</span><br><span class="line"><span class="number">5.</span> alloc-ranges：指定可以用来申请动态保留内存的区间</span><br></pre></td></tr></table></figure>
+
+<p>下面定义了3段区域CMA:<br>1.全局CMA区域，节点名称是<code>“linux,cma”</code>，大小是2GB，8K对齐。配置上<code>linux,cma-default</code>属性,reusable属性。<br>2.私有CMA区域，节点名字<code>“de_mem0” “de_mem1”</code>，128M给GPU 2D engine使用，私有无需建立页表映射。<br>3.私有CMA区域，节点名字<code>“ion”</code>，给video pipeline使用，私有无需建立页表映射。<br>​	2de模块中定义memory-region属性，并且把对应dts定义的cma节点de_reserved0，de_reserved1传递给该模块。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">reserved-memory &#123;</span><br><span class="line">        <span class="meta">#address-cells = <span class="string">&lt;0x2&gt;</span>;</span></span><br><span class="line">        <span class="meta">#size-cells = <span class="string">&lt;0x2&gt;</span>;</span></span><br><span class="line">        ranges;</span><br><span class="line">        cma_reserved: linux,cma &#123;</span><br><span class="line">                compatible = <span class="string">&quot;shared-dma-pool&quot;</span>;</span><br><span class="line">                reusable;<span class="comment">//表示 cma 内存可被 buddy 系统使用</span></span><br><span class="line">                size = &lt;<span class="number">0x0</span> <span class="number">0x80000000</span>&gt;; <span class="comment">// 2GB</span></span><br><span class="line">                alignment = &lt;<span class="number">0x0</span> <span class="number">0x2000</span>&gt;; <span class="comment">// 8KB</span></span><br><span class="line">                linux,cma-<span class="keyword">default</span>;</span><br><span class="line">        &#125;;</span><br><span class="line">        de_reserved0: de_mem0 &#123;</span><br><span class="line">                        reg = &lt;<span class="number">0x1</span> <span class="number">0x10000000</span> <span class="number">0x0</span> <span class="number">0x8000000</span>&gt;; <span class="comment">// 128M, for 2de</span></span><br><span class="line">                        no-<span class="built_in">map</span>;</span><br><span class="line">        &#125;;</span><br><span class="line">        de_reserved1: de_mem1 &#123;</span><br><span class="line">                        reg = &lt;<span class="number">0x1</span> <span class="number">0x18000000</span> <span class="number">0x0</span> <span class="number">0x8000000</span>&gt;; <span class="comment">// 128M, for 2de</span></span><br><span class="line">                        no-<span class="built_in">map</span>;</span><br><span class="line">        &#125;;</span><br><span class="line">        ion_reserved: ion &#123;</span><br><span class="line">                compatible = <span class="string">&quot;ion-region&quot;</span>;</span><br><span class="line">                size = &lt;<span class="number">0x0</span> <span class="number">0x04000000</span>&gt;; <span class="comment">// 64MB</span></span><br><span class="line">        &#125;;</span><br><span class="line">        vo_2de0 &#123;</span><br><span class="line">                compatible = <span class="string">&quot;sophgo,vg-lite0&quot;</span>;</span><br><span class="line">                memory-region = &lt;&amp;de_reserved0&gt;;</span><br><span class="line">                interrupt-parent = &lt;&amp;gic&gt;;</span><br><span class="line">                interrupts = &lt;GIC_SPI <span class="number">27</span> IRQ_TYPE_LEVEL_HIGH&gt;;</span><br><span class="line">                interrupt-names = <span class="string">&quot;vo_2de0&quot;</span>;</span><br><span class="line">        &#125;;</span><br><span class="line">        vo_2de1 &#123;</span><br><span class="line">                compatible = <span class="string">&quot;sophgo,vg-lite1&quot;</span>;</span><br><span class="line">                memory-region = &lt;&amp;de_reserved1&gt;;</span><br><span class="line">                interrupt-parent = &lt;&amp;gic&gt;;</span><br><span class="line">                interrupts = &lt;GIC_SPI <span class="number">28</span> IRQ_TYPE_LEVEL_HIGH&gt;;</span><br><span class="line">                interrupt-names = <span class="string">&quot;vo_2de1&quot;</span>;</span><br><span class="line">        &#125;;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-5-cma-nei-cun-yuan-li-he-liu-cheng">3.5 CMA内存原理和流程</span><a href="#3-5-cma-nei-cun-yuan-li-he-liu-cheng" class="header-anchor">#</a></h2><p>设备驱动程序不能直接使用连续内存分配器，而是调用DMA映射框架来使用连续内存分配器CMA。</p>
+<h3><span id="3-5-1-cma-diao-yong-ceng-ci-kuang-jia">3.5.1 CMA调用层次框架</span><a href="#3-5-1-cma-diao-yong-ceng-ci-kuang-jia" class="header-anchor">#</a></h3><p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/6.png" alt="image"></p>
+<ol>
+<li>最底层为<code>页分配器（以后分析）</code>。</li>
+<li>cma_alloc用来从CMA区域分配页，cma_release用来释放从CMA区域分配的页。</li>
+<li>第3层为DMA映射框架专用的连续内存分配器，简称DMA专用连续内存分配器，提供的接口<code>dma_alloc_from_contiguous</code>用来从CMA区域分配页，接口<code>dma_release_from_contiguous</code>用来释放从CMA区域分配的页。</li>
+<li>第4层就是DMA通用映射框架，供驱动程序调用<code>dma_alloc_coherent</code>和<code>dma_alloc_noncoherent</code>用来分配内存，接口<code>dma_free_coherent</code>和<code>dma_free_noncoherent</code>用来释放内存。</li>
+</ol>
+<h3><span id="3-5-2-cma-jie-gou-ti">3.5.2 CMA结构体</span><a href="#3-5-2-cma-jie-gou-ti" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">mm/cma.h</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">cma</span> &#123;</span></span><br><span class="line">	 <span class="type">unsigned</span> <span class="type">long</span>    base_pfn; <span class="comment">//该CMA区域的起始页帧号</span></span><br><span class="line">	 <span class="type">unsigned</span> <span class="type">long</span>    count; <span class="comment">//该cma区域的页数</span></span><br><span class="line">	 <span class="type">unsigned</span> <span class="type">long</span>    *bitmap; <span class="comment">//位图，每个位描述对应的页的分配状态，0表示空闲，1表示已分配</span></span><br><span class="line">	 <span class="type">unsigned</span> <span class="type">int</span> order_per_bit;<span class="comment">//位图中的每个位描述的物理页的阶数，目前取值为0，表示每个位描述一页</span></span><br><span class="line">	 <span class="class"><span class="keyword">struct</span> <span class="title">mutex</span>     <span class="title">lock</span>;</span></span><br><span class="line">	 <span class="type">const</span> <span class="type">char</span> *name;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">mm/cma.c</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">cma</span> <span class="title">cma_areas</span>[<span class="title">MAX_CMA_AREAS</span>];</span><span class="comment">//定义多个CMA区域。</span></span><br><span class="line"><span class="type">unsigned</span> cma_area_count;<span class="comment">//表示实际使用的cma区域数量</span></span><br></pre></td></tr></table></figure>
+
+<p>cma模块使用bitmap来管理其内存的分配，0表示free，1表示已经分配。</p>
+<p>重点解释<code>order_per_bit</code>:如果<code>order_per_bit</code>等于0，表示按照一个一个page来分配和释放，如果<code>order_per_bit</code>等于1，表示按照2个page组成的block来分配和释放，以此类推。</p>
+<p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/7.png" alt="image-20240721215512066"></p>
+<p>上图<code>cma_area[0]的.order_per_bit = 1</code>,对应2个page，起始页帧号为0x2000, 0x400个页数，对应size为<code>0x400 *2* 2K = 4M</code></p>
+<p>刚好对应4M。</p>
+<h3><span id="3-5-3-cma-qu-yu-chu-shi-hua">3.5.3 CMA区域初始化</span><a href="#3-5-3-cma-qu-yu-chu-shi-hua" class="header-anchor">#</a></h3><h4><span id="3-5-3-0-zheng-ge-memory-chu-shi-hua">3.5.3.0 整个memory初始化</span><a href="#3-5-3-0-zheng-ge-memory-chu-shi-hua" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">start_kernel</span><br><span class="line">    ------&gt;setup_arch</span><br><span class="line">        ------&gt;setup_machine_fdt</span><br><span class="line">            ------&gt;early_init_dt_scan_nodes</span><br><span class="line">                ------&gt;of_scan_flat_dt</span><br><span class="line">                    ------&gt;early_init_dt_scan_memory</span><br><span class="line">                        ------&gt;early_init_dt_add_memory_arch</span><br><span class="line">                            ------&gt;memblock_add</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/8.png" alt="image-20240721223712191"></p>
+<h4><span id="3-5-3-1-dts-miao-shu-zhong-cma-nei-cun-de-chu-shi-hua">3.5.3.1 dts描述中cma内存的初始化</span><a href="#3-5-3-1-dts-miao-shu-zhong-cma-nei-cun-de-chu-shi-hua" class="header-anchor">#</a></h4><p>linux内核首先需要解析dtb中节点<code>“memory”</code>，把内存块添加到<code>memblock</code>的memory类型，memory类型保存内存块的物理地址范围，reserved类型保存保留内存块的物理地址范围，CMA区域就属于保留内存块。<br><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/9.png" alt="image"><br>创建CMA区域的执行流程如下所示：<br><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/10.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">start_kernel</span><br><span class="line">    ------&gt;setup_arch</span><br><span class="line">        ------&gt;arm_memblock_init</span><br><span class="line">            ------&gt;early_init_fdt_scan_reserved_mem</span><br><span class="line">                ------&gt;of_scan_flat_dt</span><br><span class="line">                     ------&gt; __fdt_scan_reserved_mem</span><br><span class="line">                        ------&gt; fdt_init_reserved_mem</span><br><span class="line">                            ------&gt; memblock_add</span><br></pre></td></tr></table></figure>
+
+<p>linux内核启动时，当调用到<code>__reserved_mem_init_node</code>时会调用所有使用<code>RESERVEDMEM_OF_DECLARE</code>声明的CMA区域。</p>
+<p><code>__reserved_mem_init_node</code>会遍历<code>__reservedmem_of_table section</code>中的内容，检查到dts中有compatible匹配（CMA这里为“shared-dma-pool”）就进一步执行对应的<code>initfn</code>。通过<code>RESERVEDMEM_OF_DECLARE</code>定义的都会被链接到<code>__reservedmem_of_table</code>这个section段中，最终会调到使用<code>RESERVEDMEM_OF_DECLAR</code>E定义的函数:</p>
+<p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/11.png" alt="image-20240721190202046"></p>
+<p>其中全局CMA区域的初始化函数是<code>rmem_cma_setup</code>：</p>
+<h5><span id="3-5-3-1-1-quan-ju-cma-nei-cun-chu-shi-hua-rmem-cma-setup">3.5.3.1.1 全局cma内存初始化rmem_cma_setup</span><a href="#3-5-3-1-1-quan-ju-cma-nei-cun-chu-shi-hua-rmem-cma-setup" class="header-anchor">#</a></h5><p><code>rmem_cma_setup</code>的作用就是将<code>reserved-memory</code>添加到cma子系统：</p>
+<p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/12.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">rmem_cma_setup</span><br><span class="line">    |------&gt;cma_init_reserved_mem       <span class="comment">// 将reserved-memory 添加到cma_areas数组中</span></span><br><span class="line">    |------&gt;dma_contiguous_early_fixup<span class="comment">// dma remap</span></span><br><span class="line">    |------&gt;dma_contiguous_set_default<span class="comment">// set_default cma area</span></span><br></pre></td></tr></table></figure>
+
+<h6><span id="3-5-3-1-1-1-cma-init-reserved-mem">3.5.3.1.1.1 cma_init_reserved_mem</span><a href="#3-5-3-1-1-1-cma-init-reserved-mem" class="header-anchor">#</a></h6><p>来看调用的cma_init_reserved_mem：<br><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/13.png" alt="image"><br>从数组<code>cma_areas</code>分配一个数组项，保存CMA区域的起始页帧号和页数。dts指定了属性<code>“linux,cma-default”</code>，那么这个CMA区域是默认的CMA区域，最后设置全局变量<code>dma_contiguous_default_area</code>指向这个CMA区域(默认全局CMA区域)<br>红色圈出了该cma区域的dts描述和dts是不是完全吻合。</p>
+<h4><span id="3-5-3-2-dts-mei-you-miao-shu-cma-nei-cun-de-chu-shi-hua">3.5.3.2 dts没有描述cma内存的初始化</span><a href="#3-5-3-2-dts-mei-you-miao-shu-cma-nei-cun-de-chu-shi-hua" class="header-anchor">#</a></h4><p>如果内核参数或配置宏配置全局CMA区域，cma初始化则流程如下所示：<br><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/14.png" alt="image"><br><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/15.png" alt="image"><br><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/16.png" alt="image"></p>
+<h3><span id="3-5-4-cma-qu-yu-nei-cun-ying-she">3.5.4 CMA 区域内存映射</span><a href="#3-5-4-cma-qu-yu-nei-cun-ying-she" class="header-anchor">#</a></h3><p>CMA 区域创建初始化完后还不能直接使用，需要单独进行页表映射。前面：</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17995165">linux内核-3.Linux 内核启动流程 - fuzidage - 博客园 (cnblogs.com)</a> <code>2.1.1.1.1 start_kernel</code></p>
+<p><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/#2-1-1-1-1-start-kernel">Linux内核启动流程 | Hexo (fuzidage.github.io)</a></p>
+<p>小结有介绍start_kernel启动流程。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">start_kernel</span><br><span class="line">    ------&gt;setup_arch</span><br><span class="line">        ------&gt;paging_init<span class="comment">//建立页表映射，包括非保留内存和保留内存。</span></span><br><span class="line">            ------&gt;dma_contiguous_remap</span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-5-4-1-dma-contiguous-remap-jian-li-cma-area-de-ye-biao-ying-she">3.5.4.1 dma_contiguous_remap-建立cma area的页表映射</span><a href="#3-5-4-1-dma-contiguous-remap-jian-li-cma-area-de-ye-biao-ying-she" class="header-anchor">#</a></h4><p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/17.png" alt="image-20240721230004292"></p>
+<p><code>prepare_page_table</code>负责普通内存的页表映射。<code>dma_contiguous_remap</code>建立<code>cma area</code>的页表映射:</p>
+<p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/18.png" alt="image-20240721231037582"></p>
+<h3><span id="3-5-5-cma-init-reserved-areas-ji-huo-cma-area-nei-cun">3.5.5 cma_init_reserved_areas-激活cma area内存</span><a href="#3-5-5-cma-init-reserved-areas-ji-huo-cma-area-nei-cun" class="header-anchor">#</a></h3><p><code>cma_activate_area</code>函数用于将 CMA 区域内的预留页全部释放添加到 Buddy 管理器内，然后激活 CMA 区域供系统使用。</p>
+<p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/19.png" alt="image-20240721174230275"></p>
+<h4><span id="3-5-5-1-cma-activate-area">3.5.5.1 cma_activate_area</span><a href="#3-5-5-1-cma-activate-area" class="header-anchor">#</a></h4><p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/20.png" alt="image-20240721232741149"></p>
+<h5><span id="3-5-5-1-1-init-cma-reserved-pageblock">3.5.5.1.1 init_cma_reserved_pageblock</span><a href="#3-5-5-1-1-init-cma-reserved-pageblock" class="header-anchor">#</a></h5><p>cma默认是从<code>reserved memory</code>中分配的，通常情况这块内存是直接分配并预留不做任何使用，无形之中造成了浪费。所以在不用的时候放入伙伴系统，作为普通内存使用。</p>
+<h1><span id="4-cma-nei-cun-shi-yong">4 CMA内存使用</span><a href="#4-cma-nei-cun-shi-yong" class="header-anchor">#</a></h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">page</span>   *<span class="title">page</span> =</span> <span class="literal">NULL</span>;</span><br><span class="line">page = cma_alloc(dev_get_cma_area(dev)，mem_size, <span class="number">0</span>, GFP_KERNEL);</span><br></pre></td></tr></table></figure>
+
+<p><code>dev_get_cma_area</code>可以获取对应的cma handler，如果获取不到，比如对应模块中并未定义memory-region，那么就会返回共享的<code>cma handler</code>，还记的上面的<code> linux,cma-default</code>属性吗，共享cma区域会被作为缺省cma来使用。</p>
+<h2><span id="4-1-dma-alloc-from-contiguous">4.1 dma_alloc_from_contiguous</span><a href="#4-1-dma-alloc-from-contiguous" class="header-anchor">#</a></h2><h2><span id="4-2-dma-release-from-contiguous">4.2 dma_release_from_contiguous</span><a href="#4-2-dma-release-from-contiguous" class="header-anchor">#</a></h2><p>不过一般内核模块要使用CMA内存时，使用的接口依然是dma的接口：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="type">void</span> *<span class="title function_">dma_alloc_coherent</span><span class="params">(<span class="keyword">struct</span> device *dev, <span class="type">size_t</span> size, <span class="type">dma_addr_t</span> *dma_handle, <span class="type">gfp_t</span> flag)</span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="type">void</span> <span class="title function_">dma_free_coherent</span><span class="params">(<span class="keyword">struct</span> device *dev, <span class="type">size_t</span> size, <span class="type">void</span> *cpu_addr, <span class="type">dma_addr_t</span> dma_handle)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>最终也会进入<code>dma_alloc_from_contiguous</code>调用<code>cma_alloc</code>分配内存。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> page *<span class="title function_">dma_alloc_from_contiguous</span><span class="params">(<span class="keyword">struct</span> device *dev, <span class="type">size_t</span> count,</span></span><br><span class="line"><span class="params">	<span class="type">unsigned</span> <span class="type">int</span> align, <span class="type">bool</span> no_warn)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">if</span> (align &gt; CONFIG_CMA_ALIGNMENT)</span><br><span class="line">		align = CONFIG_CMA_ALIGNMENT;</span><br><span class="line">	<span class="keyword">return</span> cma_alloc(dev_get_cma_area(dev), count, align, no_warn);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">bool</span> <span class="title function_">dma_release_from_contiguous</span><span class="params">(<span class="keyword">struct</span> device *dev, <span class="keyword">struct</span> page *pages,</span></span><br><span class="line"><span class="params">	 <span class="type">int</span> count)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> cma_release(dev_get_cma_area(dev), pages, count);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * cma_alloc() - allocate pages from contiguous area</span></span><br><span class="line"><span class="comment"> * @cma:   Contiguous memory region for which the allocation is performed.</span></span><br><span class="line"><span class="comment"> * @count: Requested number of pages.</span></span><br><span class="line"><span class="comment"> * @align: Requested alignment of pages (in PAGE_SIZE order).</span></span><br><span class="line"><span class="comment"> * @no_warn: Avoid printing message about failed allocation</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * This function allocates part of contiguous memory on specific</span></span><br><span class="line"><span class="comment"> * contiguous memory area.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">struct</span> page *<span class="title function_">cma_alloc</span><span class="params">(<span class="keyword">struct</span> cma *cma, <span class="type">size_t</span> count, <span class="type">unsigned</span> <span class="type">int</span> align,</span></span><br><span class="line"><span class="params">			   <span class="type">bool</span> no_warn)</span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="type">void</span> *<span class="title function_">dma_alloc_coherent</span><span class="params">(<span class="keyword">struct</span> device *dev, <span class="type">size_t</span> size, <span class="type">dma_addr_t</span> *dma_handle, <span class="type">gfp_t</span> flag)</span>;</span><br><span class="line"><span class="keyword">extern</span> <span class="type">void</span> <span class="title function_">dma_free_coherent</span><span class="params">(<span class="keyword">struct</span> device *dev, <span class="type">size_t</span> size, <span class="type">void</span> *cpu_addr, <span class="type">dma_addr_t</span> dma_handle)</span>;</span><br><span class="line"><span class="keyword">struct</span> page *<span class="title function_">dma_alloc_from_contiguous</span><span class="params">(<span class="keyword">struct</span> device *dev, <span class="type">size_t</span> count,</span></span><br><span class="line"><span class="params">	<span class="type">unsigned</span> <span class="type">int</span> align, <span class="type">bool</span> no_warn)</span>;</span><br><span class="line"><span class="type">bool</span> <span class="title function_">dma_release_from_contiguous</span><span class="params">(<span class="keyword">struct</span> device *dev, <span class="keyword">struct</span> page *pages,</span></span><br><span class="line"><span class="params">	 <span class="type">int</span> count)</span>;</span><br></pre></td></tr></table></figure>
+<h2><span id="4-3-cma-alloc">4.3 cma_alloc</span><a href="#4-3-cma-alloc" class="header-anchor">#</a></h2><p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/21.png" alt="图片"></p>
+<p>从指定的CMA 区域上分配count个连续的页面，按照align对齐。</p>
+<h2><span id="4-4-cma-release">4.4 cma_release</span><a href="#4-4-cma-release" class="header-anchor">#</a></h2><p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/22.png" alt="图片"></p>
+<p>释放已经分配count个连续的页面。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * cma_release() - release allocated pages</span></span><br><span class="line"><span class="comment"> * @cma:   Contiguous memory region for which the allocation is performed.</span></span><br><span class="line"><span class="comment"> * @pages: Allocated pages.</span></span><br><span class="line"><span class="comment"> * @count: Number of allocated pages.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * This function releases memory allocated by cma_alloc().</span></span><br><span class="line"><span class="comment"> * It returns false when provided pages do not belong to contiguous area and</span></span><br><span class="line"><span class="comment"> * true otherwise.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">bool</span> <span class="title function_">cma_release</span><span class="params">(<span class="keyword">struct</span> cma *cma, <span class="type">const</span> <span class="keyword">struct</span> page *pages, <span class="type">unsigned</span> <span class="type">int</span> count)</span>；</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/23.png" alt="image-20240721213654864"></p>
+<h1><span id="5-tong-guo-procfs-cha-kan-cma-area">5 通过procfs查看cma area</span><a href="#5-tong-guo-procfs-cha-kan-cma-area" class="header-anchor">#</a></h1><h2><span id="5-1-huo-de-ram-di-zhi-fan-wei">5.1 获得ram地址范围</span><a href="#5-1-huo-de-ram-di-zhi-fan-wei" class="header-anchor">#</a></h2><p>第一个比较重要的是获得系统物理内存的范围：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cat</span> /proc/iomem </span><br><span class="line">10000000-17ffffff : System RAM</span><br><span class="line">  10008000-107fffff : Kernel code</span><br><span class="line">  10900000-10960677 : Kernel data</span><br><span class="line">40002000-4000201f : serial</span><br><span class="line">4000a000-4000a01f : codec@4000a000</span><br><span class="line">40010000-40011fff : i2c0@40010000</span><br><span class="line">40014000-4001401f : serial</span><br><span class="line">40016000-4001601f : serial</span><br><span class="line">40020000-40021fff : i2c2@40020000</span><br><span class="line">4003a000-4003a01f : wdt0@4003a000</span><br><span class="line">40056000-40056fff : video0@40056000</span><br><span class="line">4005a000-4005bfff : dma0@4005a000</span><br><span class="line">40064000-40064fff : video1@40064000</span><br><span class="line">40068000-40069fff : dma1@40068000</span><br><span class="line">4006a000-4006a1ff : lsacc2d@4006a000</span><br><span class="line">40080000-40081fff : clock@40080000</span><br><span class="line">40082000-40082027 : msgunit@40082000</span><br><span class="line">400a0000-400a00ff : mmc0@400a0000</span><br><span class="line">400aa000-400aa1ff : gauss@400aa000</span><br></pre></td></tr></table></figure>
+
+<p>到 <strong>“System RAM”</strong>, 其代表系统物理内存的起始物理地址和终止物理地址。</p>
+<h2><span id="5-2-huo-de-reserved-memory-fan-wei">5.2 获得reserved-memory范围</span><a href="#5-2-huo-de-reserved-memory-fan-wei" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cat</span> /sys/kernel/debug/memblock/reserved </span><br><span class="line">   0: 0x10004000..0x10007fff</span><br><span class="line">   1: 0x10100000..0x10960677</span><br><span class="line">   2: 0x12000000..0x127fffff</span><br><span class="line">   3: 0x1579b000..0x157a1fff</span><br><span class="line">   4: 0x17ea1cc0..0x17eb9fc3</span><br><span class="line">   5: 0x17eba000..0x17ee0fff</span><br><span class="line">   6: 0x17ee3180..0x17ee347f</span><br><span class="line">   7: 0x17ee34b0..0x17ffefff</span><br><span class="line">   8: 0x17fff100..0x17fff177</span><br><span class="line">   9: 0x17fff180..0x17fff1c4</span><br><span class="line">  10: 0x17fff200..0x17fff23b</span><br><span class="line">  11: 0x17fff240..0x17fff3c3</span><br><span class="line">  12: 0x17fff400..0x17fff5c4</span><br><span class="line">  13: 0x17fff600..0x17fff677</span><br><span class="line">  14: 0x17fff680..0x17fff68b</span><br><span class="line">  15: 0x17fff6c0..0x17fff6cb</span><br><span class="line">......</span><br></pre></td></tr></table></figure>
+
+<p>通过这个命令可以知道系统已预留的内存信息，这些已预留的内存信息不可使用。</p>
+<h1><span id="6-dts-de-reserved-memory-nei-rong-jie-xi">6 dts的reserved-memory内容解析</span><a href="#6-dts-de-reserved-memory-nei-rong-jie-xi" class="header-anchor">#</a></h1><p>通常使用memory-region将设备和reserved memory 关联起，cvifb 通过 memory-region 关联到 fb_reserved 这块 reserved memory 上面.<br><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/24.png" alt="image"><br><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/25.png" alt="image"><br>通过<code>cvifb</code>节点的<code>memory-region</code>属性找到<code>reserved-memory</code>，<code>of_reserved_mem_lookup</code>根据关联的<code>reserved-momory</code>节点找到预留内存地址.<br><img src="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/26.png" alt="image"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/" data-id="clyylnk8f00037wuf4hpeb8og" data-title="Linux内核-kmalloc与vmalloc及CMA内存" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">linux内存管理</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Linux内核-并发与同步" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/" class="article-date">
@@ -2608,218 +2850,6 @@ test has been built!
 
 
   
-    <article id="post-uboot-启动流程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" class="article-date">
-  <time class="dt-published" datetime="2024-06-23T07:42:55.000Z" itemprop="datePublished">2024-06-23</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">uboot-启动流程</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-reset-han-shu">1 reset 函数</a><ul>
-<li><a href="#1-1-chu-shi-hua-yi-chang-xiang-liang-biao">1.1 初始化异常向量表</a></li>
-<li><a href="#1-2-save-boot-params-ret">1.2 save_boot_params_ret</a><ul>
-<li><a href="#1-2-1-guan-zhong-duan-jin-ru-svc-mo-shi">1.2.1 关中断，进入SVC模式</a></li>
-<li><a href="#1-2-2-cp15-pei-zhi-she-zhi-zhong-duan-xiang-liang-biao-pian-yi-vbar">1.2.2 cp15配置，设置中断向量表偏移VBAR</a></li>
-<li><a href="#1-2-3-cp15-pei-zhi-guan-mmu-icache">1.2.3 cp15配置，关<code>MMU，ICACHE</code></a></li>
-</ul>
-</li>
-<li><a href="#1-3-lowlevel-init-dui-sram-nei-cun-bu-ju">1.3 lowlevel_init对sram内存布局</a></li>
-<li><a href="#1-4-s-init-han-shu">1.4 s_init函数</a></li>
-</ul>
-</li>
-<li><a href="#2-main-han-shu">2 <code>_main</code>函数</a><ul>
-<li><a href="#2-1-sram-zhong-zhi-ding-sp">2.1 sram中指定SP</a></li>
-<li><a href="#2-2-board-init-f-alloc-reserve-zhi-ding-malloc-gd-zhi-zhen">2.2 board_init_f_alloc_reserve（指定<code>malloc/gd</code>指针）</a></li>
-<li><a href="#2-3-board-init-f-init-reserve-chu-shi-hua-gd-gd-nei-cun-qing-0">2.3 <code>board_init_f_init_reserve</code>（<code>初始化gd，gd内存清0</code>）</a></li>
-<li><a href="#2-4-board-init-f-wai-she-chu-shi-hua-he-dram-hua-fen">2.4 board_init_f(外设初始化和DRAM划分)</a></li>
-<li><a href="#2-5-relocate-code-dai-ma-chong-ding-wei">2.5 relocate_code(代码重定位)</a><ul>
-<li><a href="#2-5-1-chong-ding-wei-hou-de-lr-she-zhi">2.5.1 重定位后的LR设置</a></li>
-<li><a href="#2-5-2-dai-ma-duan-chong-ding-wei">2.5.2 代码段重定位</a></li>
-<li><a href="#2-5-3-rel-dyn-duan-chong-ding-wei">2.5.3 <code>rel.dyn</code>段重定位</a></li>
-</ul>
-</li>
-<li><a href="#2-6-relocate-vectors-xiang-liang-biao-chong-ding-wei">2.6 relocate_vectors(向量表重定位)</a></li>
-<li><a href="#2-7-board-init-r">2.7 board_init_r</a><ul>
-<li><a href="#2-7-1-wai-she-chu-shi-hua">2.7.1 外设初始化</a></li>
-<li><a href="#2-7-2-run-main-loop-han-shu">2.7.2 run_main_loop 函数</a><ul>
-<li><a href="#2-7-2-1-uboot-version-huan-jing-bian-liang-she-zhi">2.7.2.1 Uboot version环境变量设置</a></li>
-<li><a href="#2-7-2-2-bootdelay-he-bootcmd-huo-qu">2.7.2.2 bootdelay和bootcmd获取</a></li>
-<li><a href="#2-7-2-3-autoboot-command-zhi-xing-bootcmd">2.7.2.3 autoboot_command(执行bootcmd)</a><ul>
-<li><a href="#2-7-2-3-1-bootdelay-dao-ji-shi">2.7.2.3.1 bootdelay倒计时</a></li>
-</ul>
-</li>
-<li><a href="#2-7-2-4-cli-loop-uboot-ming-ling-xing">2.7.2.4 cli_loop(uboot命令行)</a><ul>
-<li><a href="#2-7-2-4-1-cmd-process-han-shu-fen-xi">2.7.2.4.1 cmd_process 函数分析</a></li>
-<li><a href="#2-7-2-4-2-uboot-ming-ling-ding-yi-dhcp-wei-li">2.7.2.4.2 uboot命令定义(dhcp为例)</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-
-
-<p>下面以<code>u-boot 2016</code>为例，一行一行分析<code>armv7</code>架构cpu的uboot启动流程，用到的soc是<code>imx6ull</code>为例。总体流程如下：分为2部分：<br>①arch级初始化(架构)<br>②板级初始化<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/1.png" alt="image"></p>
-<h1><span id="1-reset-han-shu">1 reset 函数</span><a href="#1-reset-han-shu" class="header-anchor">#</a></h1><h2><span id="1-1-chu-shi-hua-yi-chang-xiang-liang-biao">1.1 初始化异常向量表</span><a href="#1-1-chu-shi-hua-yi-chang-xiang-liang-biao" class="header-anchor">#</a></h2><p>我们知道启动入口是<code>arch/arm/lib/vectors.S</code>文件中的<code>_start</code>：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/2.png" alt="image"><br>从函数入口<code>_start</code>可以看到，入口的指令存放的就是中断向量表，<code>0地址偏移存放reset</code>, <code>0x4地址存放_undefined_instruction</code>，<code>0x8地址存放_software_interrupt...</code><br>CPU上电最开始进入<code>_start</code>,进而进入<code>reset</code>函数，该函数定义在<code>arch/arm/cpu/armv7/start.S </code>里面。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/3.png" alt="image"><br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/4.png" alt="image"><br>函数调用关系如下：<code>reset-&gt;save_boot_params-&gt;save_boot_params_ret</code>。</p>
-<h2><span id="1-2-save-boot-params-ret">1.2 save_boot_params_ret</span><a href="#1-2-save-boot-params-ret" class="header-anchor">#</a></h2><h3><span id="1-2-1-guan-zhong-duan-jin-ru-svc-mo-shi">1.2.1 关中断，进入SVC模式</span><a href="#1-2-1-guan-zhong-duan-jin-ru-svc-mo-shi" class="header-anchor">#</a></h3><p><code>save_boot_params_ret </code>函数代码如下：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/5.png" alt="image"><br>该函数功能如注释所写主要是关闭<code>IRQ和FIQ</code>, 进入<code>SVC</code>模式，都是控制<code>cpsr</code>寄存器。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//第一行读取 cpsr寄存器</span></span><br><span class="line"><span class="comment">//第二行对r0和0x1a进行与运算，目的是取出cpu模式。</span></span><br><span class="line"><span class="comment">//第三行如果 r1 和 0X1A 不相等，也就是 CPU 不处于 Hyp 模式的话就将 r0 寄存器的低5位清零，清除模式位</span></span><br><span class="line"><span class="comment">//第4行如果处理器不处于 Hyp 模式的话就将 r0 的寄存器的值与 0x13 进行或运算， 0x13=0b10011，也就是设置处理器进入 SVC 模式、</span></span><br><span class="line"><span class="comment">//第5行与 0xC0或运算，那么 r0 寄存器此时的值就是 0xD3，cpsr 的 I 为和 F 位分别控制 IRQ 和 FIQ 这两个中断的开关，设置为 1 就关闭了 FIQ 和 IRQ。</span></span><br><span class="line"><span class="comment">//第6行r0写入cpsr</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/6.png" alt="image"><br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/7.png" alt="image"></p>
-<h3><span id="1-2-2-cp15-pei-zhi-she-zhi-zhong-duan-xiang-liang-biao-pian-yi-vbar">1.2.2 cp15配置，设置中断向量表偏移VBAR</span><a href="#1-2-2-cp15-pei-zhi-she-zhi-zhong-duan-xiang-liang-biao-pian-yi-vbar" class="header-anchor">#</a></h3><p><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/8.png" alt="image"><br>这里一般2个宏都没有定义，进入，这段作用是设置中断向量表偏移<code>VBAR</code>。<br>这里是把<code>CP15 SCTLR Register</code>读出来，<code>bic</code>是位清0，<code>CR_V </code>在 <code>arch/arm/include/asm/system.h </code>中定义了：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">define <span class="title function_">CR_V</span> <span class="params">(<span class="number">1</span> &lt;&lt; <span class="number">13</span>)</span> <span class="comment">/* Vectors relocated to 0xffff0000 */</span></span><br></pre></td></tr></table></figure>
-<p>那么就是把<code>CP15 SCTLR Register</code>读出来,对<code>bit13清0</code>，再写进去<code>SCTLR Register</code>。</p>
-<p>如下图是<code>SCTLR 寄存器</code>：<code>bit13 为 V 位</code>，此位是<code>向量表控制位</code>，当为 0 的时候向量表基地址 为 <code>0X00000000</code>，软件可以重定位向量表。为 1 的时候向量表基地址为<code> 0XFFFF0000</code>，软件不能 重定位向量表。<br>这里将 V 清零，目的就是为了接下来的向量表重定位。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/9.png" alt="image"><br>最后将<code>_start</code>给到<code>r0, r0写入到 CP15 的 c12 寄存器中</code>，也就是<code>VBAR</code>寄存器，完成中断向量表偏移的设定。<br>中断向量表的初始定义在<code>_start</code>入口位置，<code>0x87800000 </code>就是向量表的起始地址。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/10.png" alt="image"></p>
-<h3><span id="1-2-3-cp15-pei-zhi-guan-mmu-icache">1.2.3 cp15配置，关<code>MMU，ICACHE</code></span><a href="#1-2-3-cp15-pei-zhi-guan-mmu-icache" class="header-anchor">#</a></h3><p><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/11.png" alt="image"><br><code>bl cpu_init_cp15</code>一看就是初始化协处理器寄存器<code>CP15</code>, 比如关闭<code>MMU, ICACHE</code>等。<code>cpu_init_cp15</code>函数如下：都是一些<code>CP15</code>协寄存器操作指令，就不再一一解释。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/12.png" alt="image"><br><strong>总结</strong>：<code>save_boot_params_ret</code>做的事情：<br>    ①初始化中断向量表<br>    ②关<code>FIQ,IRQ</code><br>    ③进入<code>SVC</code>模式<br>    ④设置中断向量表偏移<code>VBAR</code><br>    ⑤初始化<code>CP15</code>,关<code>MMU,ICACHE</code>等。</p>
-<h2><span id="1-3-lowlevel-init-dui-sram-nei-cun-bu-ju">1.3 lowlevel_init对sram内存布局</span><a href="#1-3-lowlevel-init-dui-sram-nei-cun-bu-ju" class="header-anchor">#</a></h2><p>初始化<code>CP15</code>,关<code>MMU,ICACHE</code>后，会继续执行进入<code>cpu_init_crit</code>：<code>cpu_init_crit</code>也是直接跳到<code>lowlevel_init</code>函数。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/13.png" alt="image"><br><code>lowlevel_init </code>在文件<code>arch/arm/cpu/armv7/lowlevel_init.S</code>中定义：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/14.png" alt="image"><br>前面2行定义<code>sp </code>指向 <code>CONFIG_SYS_INIT_SP_ADDR</code>设置<code>SP</code>指针，<code>CONFIG_SYS_INIT_SP_ADDR </code>在 <code>include/configs/mx6ullevk.h</code><br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/15.png" alt="image"><br><code>IRAM_BASE_ADDR </code>和<code>IRAM_SIZE</code>在 文 件<code>arch/arm/include/asm/arch-mx6/imx-regs.h</code>中有定义，imx6ull这颗芯片内部有一个sram叫做<code>ocram</code>,基地址就是<code>0x00900000</code>，size为<code>128k(0x20000)</code>。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/16.png" alt="image"><br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/17.png" alt="image"><br>再来看<code>GENERATED_GBL_DATA_SIZE</code>的值：该定义是编译生成的<code>include/generated/generic-asm-offsets.h</code>中：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/18.png" alt="image"><br>这里提一句，<code>GENERATED_GBL_DATA_SIZE </code>的含义为<code> (sizeof(struct global_data) + 15) &amp; ~15</code>，该结构体后面会讲到。<br>综上所述，<code>CONFIG_SYS_INIT_SP_ADDR </code>值如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CONFIG_SYS_INIT_SP_OFFSET = <span class="number">0x00020000</span> – <span class="number">256</span> = <span class="number">0x1FF00</span></span><br><span class="line">CONFIG_SYS_INIT_SP_ADDR = <span class="number">0x00900000</span> + <span class="number">0X1FF00</span> = <span class="number">0X0091FF00</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/19.png" alt="image"><br>从图可知：<br>内部<code>sram</code>的地址范围：<code>0x00900000~0x0091ffff (128k)</code><br><code>SP</code>指向：<code>0x0091ff00</code><br>继续分析汇编代码，<code>sp</code>又继续减了一个<code>GD_SIZE</code>,然后8字节对齐，赋值给<code>r9</code>。<br><code>GD_SIZE</code> 同样在 <code>generic-asm-offsets.h </code>中定义了，大小为 248。最后<code>SP</code>指针位置就定义好了，将<code>ip,lr</code>入栈，进入函数<code>s_init</code>函数，<code>s_init</code>函数返回后，<code>ip和lr</code>出栈，并将<code>lr赋给pc</code>。最终内存指向如下：<code>SP指向：0x0091fe08</code>。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/20.png" alt="image"><br>总结：<code>lowlevel_init</code>函数就是在内部<code>sram下设置SP</code>指针，来为c语言的运行配置环境。</p>
-<h2><span id="1-4-s-init-han-shu">1.4 s_init函数</span><a href="#1-4-s-init-han-shu" class="header-anchor">#</a></h2><p><code>s_init </code>函数定义在文件<code> arch/arm/cpu/armv7/mx6/soc.c</code>。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/21.png" alt="image"><br>由于我们的<code>cpu是mx6ull</code>,那么满足最开始的<code>if</code>判断，那么<code>s_init</code>函数直接返回，什么也没做。<br>总结<code>_reset</code>过程:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">s_init返回了，lowlevel_init也返回了，cpu_init_crit也返回了，回到 save_boot_params_ret。</span><br></pre></td></tr></table></figure>
-<p>总结下整个系统上电的reset过程：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/22.png" alt="image"></p>
-<h1><span id="2-main-han-shu">2 <code>_main</code>函数</span><a href="#2-main-han-shu" class="header-anchor">#</a></h1><p><code>_main </code>函数定义在文件<code>arch/arm/lib/crt0.S</code>中：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/23.png" alt="image"></p>
-<h2><span id="2-1-sram-zhong-zhi-ding-sp">2.1 sram中指定SP</span><a href="#2-1-sram-zhong-zhi-ding-sp" class="header-anchor">#</a></h2><p>如注释写的，第<code>76行</code>，初始化c语言运行环境，<code>SP设置到CONFIG_SYS_INIT_SP_ADDR，也就是0x0091ff00</code>。第<code>83行</code>，8字节对齐。</p>
-<h2><span id="2-2-board-init-f-alloc-reserve-zhi-ding-malloc-gd-zhi-zhen">2.2 board_init_f_alloc_reserve（指定<code>malloc/gd</code>指针）</span><a href="#2-2-board-init-f-alloc-reserve-zhi-ding-malloc-gd-zhi-zhen" class="header-anchor">#</a></h2><p>第<code> 86 行</code>，调用数<code> board_init_f_alloc_reserve，r0</code>作为形参传给该函数。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/24.png" alt="image"><br>该函数主要是留出早期的<code>malloc</code>内存区域和 <code>gd </code>内存区域，其中<code>CONFIG_SYS_MALLOC_F_LEN=0X400</code>( 在 文 件 <code>include/generated/autoconf.h </code>中定义， <code>CONFIG_SYS_MALLOC_F</code>也同样定义成1) ，<code> sizeof(struct global_data)=248</code>(<code>GD_SIZE </code>值)。<code>rounddown</code>是一个向下对齐的函数。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/25.png" alt="image"><br>因此最终的内存分布如下图：最终<code>top=0X0091FA00</code>。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/26.png" alt="image"><br>回到<code>87行</code>，<code>r0</code>存储了函数的返回值，进入<code>89行</code>，把<code>top的值继续存到r9</code>。记住<code>r9</code>寄存器，对uboot很重要，它是记录了全局变量<code>gd</code>的地址。<br>在文件<code>arch/arm/include/asm/global_data.h</code>中有定义：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/27.png" alt="image"><br>可以看到<code>gd</code>是一个全局的指针变量，<code>gd_t</code>结构体类型，在<code>include/asm-generic/global_data.h</code>里面有定义：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/28.png" alt="image"><br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/29.png" alt="image"></p>
-<h2><span id="2-3-board-init-f-init-reserve-chu-shi-hua-gd-gd-nei-cun-qing-0">2.3 <code>board_init_f_init_reserve</code>（<code>初始化gd，gd内存清0</code>）</span><a href="#2-3-board-init-f-init-reserve-chu-shi-hua-gd-gd-nei-cun-qing-0" class="header-anchor">#</a></h2><p>回到<code>_main</code>函数继续执行<code>board_init_f_init_reserve</code>，在文件<code>common/init/board_init.c</code>中有定义：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/30.png" alt="image"><br>此函数用于初始化<code> gd</code>，其实就是清零处理。再设置了 <code>gd-&gt;malloc_base</code> 为<code> gd 基地址+gd 大小=0X0091FA00+248=0X0091FAF8</code>，在做 16 字节对齐，最 终<code> gd-&gt;malloc_base=0X0091FB00</code>，这个也就是<code>early malloc</code>的起始地址。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/31.png" alt="image"></p>
-<h2><span id="2-4-board-init-f-wai-she-chu-shi-hua-he-dram-hua-fen">2.4 board_init_f(外设初始化和DRAM划分)</span><a href="#2-4-board-init-f-wai-she-chu-shi-hua-he-dram-hua-fen" class="header-anchor">#</a></h2><p>此函数定义在文件<code> common/board_f.c</code>，该函数非常重要，主要功能如下：<br>①、初始化一系列外设，比如串口、定时器，或者打印一些消息等。<br>②、初始化 <code>gd </code>的各个成员变量，uboot 会将自己重定位到 DRAM 最后面的地址区域，也就是将自己拷贝到 DRAM 最后面的内存区域中。这么做的目的是给 Linux 腾出空间，防止 Linux kernel 覆盖掉 uboot，将 DRAM 前面的区域完整的空出来。在拷贝之前肯定要给 uboot 各部分 分配好内存位置和大小，比如<code> gd</code> 应该存放到哪个位置，malloc 内存池应该存放到哪个位置等等。这些信息都保存在<code>gd</code>的成员变量中，因此要对<code>gd</code>的这些成员变量做初始化。最终形成一个完整的内存“分配图”，在后面重定位 uboot 的时候就会用到这个内存“分配图”。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/32.png" alt="image"><br>所有外设模块初始化详见<code>initcall_run_list</code>函数：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/33.png" alt="image"><br><code>init_sequence_f </code>也是定义在文件<code>common/board_f.c</code>中，<code>init_sequence_f </code>的内容比较长，简要概括如下：实际list里面函数更多。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/34.png" alt="image"></p>
-<ol>
-<li><code>setup_mon_len </code>函数设置 <code>gd </code>的<code> mon_len</code> 成员变量，此处为<code>__bss_end -_start</code>，也就 是整个代码的长度。<code>0X878A8E74-0x87800000=0XA8E74</code>，这个就是代码长度。</li>
-<li><code>initf_malloc </code>函数初始化<code>gd</code>中跟 malloc 有关的成员变量，比如 <code>malloc_limit</code>，此函 数会设置 <code>gd-&gt;malloc_limit = CONFIG_SYS_MALLOC_F_LEN=0X400</code>。<code>malloc_limit </code>表示 malloc 内存池大小。</li>
-<li><code>initf_console_record</code> ，如果定义了宏<code>CONFIG_CONSOLE_RECORD</code>和 宏 <code>CONFIG_SYS_MALLOC_F_LEN </code>的话此函数就会调用函数 <code>console_record_init</code>，但是 IMX6ULL 的 uboot 没有定义宏<code> CONFIG_CONSOLE_RECORD</code>，所以此函数直接返回 0。</li>
-<li><code>arch_cpu_init</code></li>
-<li><code>initf_dm </code>函数，驱动模型的一些初始化。</li>
-<li><code>arch_cpu_init_dm </code>函数未实现</li>
-<li><code>board_early_init_f </code>函数，板子相关的早期的一些初始化设置，I.MX6ULL 用来初始 化串口的 IOMUX 配置</li>
-<li><code>timer_init</code>，初始化定时器</li>
-<li><code>board_postclk_init</code>，对于 I.MX6ULL 来说是设置 VDDSOC 电压</li>
-<li><code>env_init </code>函数是和环境变量有关的，设置<code>gd</code>的成员变量 env_addr&#96;，也就是环境变量的保存地址。</li>
-<li><code>init_baud_rate </code>函数用于初始化波特率，根据环境变量<code>baudrate</code>来初始化 <code>gd-&gt;baudrate</code>。</li>
-<li><code>serial_init</code>，初始化串口。</li>
-<li><code>console_init_f</code>初始化控制台。</li>
-<li><code>display_options</code>，通过串口输出一些信息：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/35.png" alt="image"></li>
-<li><code>display_text_info</code>，打印一些文本信息，如果开启 UBOOT 的 <code>DEBUG </code>功能的话就 会输出<code> text_base、bss_start、bss_end</code>，形式如下：<br><code>debug(&quot;U-Boot code: %08lX -&gt; %08lX BSS: -&gt; %08lX\n&quot;,text_base, bss_start, bss_end)；</code><br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/36.png" alt="image"></li>
-<li><code>print_cpuinfo </code>函数用于打印 CPU 信息。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/37.png" alt="image"></li>
-<li><code>show_board_info </code>函数用于打印板子信息。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/38.png" alt="image"></li>
-<li><code>INIT_FUNC_WATCHDOG_INIT, INIT_FUNC_WATCHDOG_RESET</code>表示初始化，复位看门狗。对于 I.MX6ULL 来说是空函数。</li>
-<li><code>init_func_i2c </code>函数用于初始化 I2C。<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/39.png" alt="image"></li>
-<li><code>announce_dram_init,dram_init</code>初始化DDR,其实只是设置<code>gd-&gt;ram_size</code>,I.MX6ULL 开发板 EMMC 版本核心板来说就是 512MB。</li>
-<li><code>post_init_f</code>，此函数用来完成一些测试，初始化<code> gd-&gt;post_init_f_time</code>。</li>
-<li><code>setup_dest_addr</code>,设置目的地址。主要设置<code>gd-&gt;ram_size，gd-&gt;ram_top，gd-&gt;relocaddr </code>这三个的值。修改 uboot 代码，直接将这些值通过串口打印出来，比如这里我们修改文件<code>common/board_f.c的setup_dest_addr</code>函数：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/40.png" alt="image"><br>烧录运行打印出来如下：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/41.png" alt="image"><br>可以看出：<br><code>gd-&gt;ram_size = 0X20000000 //ram 大小为 0X20000000=512MB</code><br><code>gd-&gt;ram_top = 0XA0000000 //ram 最高地址为 0X80000000+0X20000000=0XA0000000</code><br><code>gd-&gt;relocaddr = 0XA0000000 //重定位后最高地址为 0XA0000000</code></li>
-<li><code>reserve_round_4k</code>， 对 <code>gd-&gt;relocaddr </code>做 4KB 对齐，因为<code> gd-&gt;relocaddr=0XA0000000</code>，已经是 4K 对齐了，所以调整后不变。</li>
-<li><code>reserve_mmu</code>，留出 MMU 的 TLB 表的位置，分配 MMU 的 TLB 表内存以后会 对<code>gd-&gt;relocaddr</code>做 64K 字节对齐。完成以后 <code>gd-&gt;arch.tlb_size、gd-&gt;arch.tlb_addr 和 gd-&gt;relocaddr</code>如下图：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/42.png" alt="image"><br>可以看出：<br><code>gd-&gt;arch.tlb_size= 0X4000 //MMU 的 TLB 表大小</code><br><code>gd-&gt;arch.tlb_addr=0X9FFF0000 //MMU 的 TLB 表起始地址，64KB 对齐以后</code><br><code>gd-&gt;relocaddr=0X9FFF0000 //relocaddr 地址</code></li>
-<li><code>reserve_trace </code>函数，留出跟踪调试的内存。</li>
-<li><code>reserve_uboot</code>，留出重定位后的 uboot 所占用的内存区域，uboot 所占用大小由<code>gd-&gt;mon_len</code>所指定，留出 uboot 的空间以后还要对<code>gd-&gt;relocaddr</code>做 4K 字节对齐，并且重新设 置 <code>gd-&gt;start_addr_sp</code>：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/43.png" alt="image"><br>可以看出, <code>relocaddr</code>一直再减：<br><code>gd-&gt;mon_len = 0XA8EF4</code><br><code>gd-&gt;start_addr_sp = 0X9FF47000//0X9FFF0000 -0XA8EF4=9FF4710C,4k再对齐一下就是0X9FF47000</code><br><code>gd-&gt;relocaddr = 0X9FF47000</code></li>
-<li><code>reserve_malloc</code>，留出 malloc 区域，调整 <code>gd-&gt;start_addr_sp </code>位置。malloc 区域由宏<code>TOTAL_MALLOC_LEN</code>定义：<br><code>#define TOTAL_MALLOC_LEN (CONFIG_SYS_MALLOC_LEN + CONFIG_ENV_SIZE)</code><br><code>mx6ull_alientek_emmc.h </code>文件中定义宏 <code>CONFIG_SYS_MALLOC_LEN 为16MB=0X1000000</code>， 宏 <code>CONFIG_ENV_SIZE=8KB=0X2000</code>，因此 <code>TOTAL_MALLOC_LEN=0X1002000</code>。调整以后<code>gd-&gt;start_addr_sp</code>如下图：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/44.png" alt="image"><br>可以看出：<br><code>TOTAL_MALLOC_LEN=0X1002000</code><br><code>gd-&gt;start_addr_sp=0X9EF45000 //0X9FF47000-16MB-8KB=0X9EF45000</code></li>
-<li><code>reserve_board</code>， 预留<code>bd 内存</code>，<code>bd </code>是结构体<code> bd_t，bd_t 大小为 80 字节</code>:<br><code>gd-&gt;start_addr_sp=0X9EF44FB0//0X9EF45000 -80</code><br><code>gd-&gt;bd=0X9EF44FB0</code></li>
-<li><code>setup_machine</code>，设置机器 ID，linux 启动的时候会和这个机器 ID 匹配，如果匹 配的话 linux 就会启动正常。以前老版本的 uboot 和 linux 使用的，新版本使用设备树了，因此此函数无效。</li>
-<li><code>reserve_global_data</code>，保留出<code> gd</code>，<code>gd_t 结构体大小为 248B</code>：<br><code>gd-&gt;start_addr_sp=0X9EF44EB8 //0X9EF44FB0-248=0X9EF44EB8</code><br><code>gd-&gt;new_gd=0X9EF44EB8</code></li>
-<li><code>reserve_fdt</code>，留出设备树相关的内存。</li>
-<li><code>reserve_arch </code>是个空函数。</li>
-<li><code>reserve_stacks</code>，留出栈空间，先对 <code>gd-&gt;start_addr_sp </code>减去 16，然后做 16 字节对齐。如果使能 IRQ 的话还要留出 IRQ 相应的内存，具体工作是由<code>arch/arm/lib/stack.c </code>文件中的 函数<code>arch_reserve_stacks</code>完成。这里uboot启动没有enable IRQ,因此不会留出 IRQ 相应的内存：<br><code>gd-&gt;start_addr_sp=0X9EF44E90</code></li>
-<li><code>setup_dram_config</code>，设置 <code>dram bank</code>信息,后面会传递给 linux 内核，告诉 linux DRAM 的起始地址和大小:<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/45.png" alt="image"></li>
-<li><code>show_dram_config</code>，打印<code>dram</code>信息:<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/46.png" alt="image"></li>
-<li><code>display_new_sp</code>，显示新的<code>sp</code>位置，也就是<code> gd-&gt;start_addr_sp</code>，要开启宏 <code>DEBUG</code>才能看到:<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/47.png" alt="image"></li>
-<li><code>reloc_fdt</code>，数用于重定位<code> fdt</code>，没有用到。</li>
-<li><code>setup_reloc</code>，设置 <code>gd </code>的其他一些成员变量，供后面重定位的时候使用，并且将以 前的 <code>gd </code>拷贝到 <code>gd-&gt;new_gd </code>处。需要使能 <code>DEBUG </code>才能看到相应的信息输出:<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/48.png" alt="image"><br>可以看出，uboot 重定位后的偏移为<code> 0X18747000</code>，重定位后的新地址为<code> 0X9FF4700</code>，新的<code> gd</code> 首地址为 <code>0X9EF44EB8</code>，最终的<code>sp</code>为<code> 0X9EF44E90</code>。<br>至此，<code>board_init_f </code>函数就执行完成了，最终的内存分配如下：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/49.png" alt="image"></li>
-</ol>
-<h2><span id="2-5-relocate-code-dai-ma-chong-ding-wei">2.5 relocate_code(代码重定位)</span><a href="#2-5-relocate-code-dai-ma-chong-ding-wei" class="header-anchor">#</a></h2><p>既然dram划分好了，那么就开始需要对代码重定位了。</p>
-<h3><span id="2-5-1-chong-ding-wei-hou-de-lr-she-zhi">2.5.1 重定位后的LR设置</span><a href="#2-5-1-chong-ding-wei-hou-de-lr-she-zhi" class="header-anchor">#</a></h3><p><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/50.png" alt="image"><br>回到<code>_main</code>第 103 行，获取<code>gd-&gt;start_addr_sp</code>的值赋给<code> sp</code>， <code>board_init_f</code> 中会初始化<code>gd</code>的所有成员进行内存预留，其中<br><code>gd-&gt;start_addr_sp=0X9EF44E90</code><br>所以这里<code>sp=0X9EF44E90</code>。<br>第 109 行，<code>sp</code> 做 8 字节对齐。<br>第 111 行，获取<code>gd-&gt;bd</code>的地址赋给 <code>r9</code>，之前<code>r9</code>存放的是老的<code> gd</code>，<code>GD_BD=0</code>来自<code>include\generated\generic-asm-offsets.h</code>，<code>bd</code>就是<code>gd</code>结构体的首个成员，因此<code>offset是0</code>:<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/51.png" alt="image"><br>那么新<code>gd</code>地址（<code>board_init_f</code>时确定了<code>gd-&gt;bd</code>的地址为<code>0X9EF44FB0</code>)也是它。<br>第 112 行，<code>r9</code>再减一个<code>GD_SIZE</code>,得到<code>gd-&gt;new_gd</code>,也就是<code>0X9EF44EB8</code>:<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/52.png" alt="image"><br><strong>重点来了：</strong><br>第 114 行，设置<code>lr</code>寄存器为<code> here</code>，这样后面执行其他函数返回的时候就返回到了第 122 行 的<code>here</code>位置处(比如执行完<code>relocate_code</code>就直接返回到<code>here</code>)。<br>后面第115行~116行用来让lr指向重定位后的<code>here</code>位置。<br>第 115，读取<code>gd-&gt;reloc_off</code>的值复制给<code>r0</code>寄存器，<code>GD_RELOC_OFF=64</code>:<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/53.png" alt="image"><br>第 116 行，lr 寄存器的值加上<code>r0</code>寄存器的值，重新赋值给<code>lr</code>寄存器。 此时<code>lr </code>就存放了重定位后的<code>here</code>位置，因为重定位完就去重定位后的DDR去执行了，无需返回sram了。</p>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/12038514.html">s3c2440裸机-代码重定位(1.重定位的引入,为什么要代码重定位) - fuzidage - 博客园 (cnblogs.com)</a><br><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/12043586.html">s3c2440裸机-代码重定位（2.编程实现代码重定位） - fuzidage - 博客园 (cnblogs.com)</a></p>
-<p><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/">s3c2440裸机编程-代码重定位和清bss | Hexo (fuzidage.github.io)</a></p>
-<p>关键词：<strong>位置无关码、相对跳转指令，相对寻址</strong></p>
-<p>第 120 行，读取<code>gd-&gt;relocaddr</code>的值赋给 <code>r0 </code>寄存器，此时<code>r0</code>寄存器就保存着 uboot 要拷贝的目的地址，我们打印出来为<code>0X9FF47000</code>。<code>r0</code>作为形参给<code>relocate_code</code>函数。</p>
-<h3><span id="2-5-2-dai-ma-duan-chong-ding-wei">2.5.2 代码段重定位</span><a href="#2-5-2-dai-ma-duan-chong-ding-wei" class="header-anchor">#</a></h3><p>重定位的具体实现在<code>arch/arm/lib/relocate.S</code>:<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/54.png" alt="image"><br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/55.png" alt="image"></p>
-<ol>
-<li>80-83行是设置重定位<code>r4</code>偏移量，源拷贝地址，判断是否要拷贝。<code>u-boot.map</code>获取符号的地址：</li>
-</ol>
-<table>
-<thead>
-<tr>
-<th><code>__image_copy_start</code></th>
-<th>0x87800000</th>
-<th>uboot拷贝的首地址</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>__image_copy_end</code></td>
-<td>0x8785dd54</td>
-<td>uboot拷贝的结束地址</td>
-</tr>
-</tbody></table>
-<p>如果<code>r4等于0</code>（也就是目标地址<code>r0</code>就是<code>uboot.map</code>中的地址），那么无需拷贝，跳转到<code>relocate_done</code>即可。<br>2. 85-89是循环拷贝，多寄存器加载存储指令<code>LDMIA，STMIA</code>。</p>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17703733.html">arm汇编和cpu运行模式 - fuzidage - 博客园 (cnblogs.com)</a><br><a target="_blank" rel="noopener" href="https://fuzidage.github.io/tags/arm%E6%B1%87%E7%BC%96/">Tag: arm汇编 | Hexo (fuzidage.github.io)</a> </p>
-<p>88行判断是否拷贝结束，<code>r1</code>会每次加4，当<code>r1</code>等于<code>r2</code>表示拷贝完成了，否则继续执行<code>copy_loop</code>。</p>
-<h3><span id="2-5-3-rel-dyn-duan-chong-ding-wei">2.5.3 <code>rel.dyn</code>段重定位</span><a href="#2-5-3-rel-dyn-duan-chong-ding-wei" class="header-anchor">#</a></h3><p>编译uboot使用<code>-pie选项</code>以后会生成一个<code>.rel.dyn 段</code>，需要对这个段进行重定位和拷贝：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/56.png" alt="image"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">94-97行，从.rel.dyn 段开始，每次读取两个 4 字节的数据存放到 r0 和 r1 寄存器中，r0 存放低 4 字节的数据，也就是 Label 地址；r1 存放高 4 字节的数据，也就是 Label 标志。</span><br><span class="line">第 98 行，取 r1 的低 8 位。</span><br><span class="line">第 99 行，判断 r1 中的值是否等于 23(0X17)。</span><br><span class="line">第 100 行，如果 r1 不等于 23 的话就说明不是描述 Label 的，执行函数 fixnext，否则的话继续执行下面的代码。</span><br><span class="line">103-104行，r0 保存着 Label 值，r4 保存着重定位的偏移量，r0+r4 就得到了重定位后的Label 值。</span><br><span class="line">105-106行，重定位后的变量地址写入到重定位后的 Label 中。</span><br><span class="line">第 108 行，比较 r2 和 r3，查看.rel.dyn 段重定位是否完成。</span><br><span class="line">第 109 行，如果 r2 和 r3 不相等，说明.rel.dyn 重定位还未完成，因此跳到 fixloop 继续重定位.rel.dyn 段。</span><br></pre></td></tr></table></figure>
-
-<h2><span id="2-6-relocate-vectors-xiang-liang-biao-chong-ding-wei">2.6 relocate_vectors(向量表重定位)</span><a href="#2-6-relocate-vectors-xiang-liang-biao-chong-ding-wei" class="header-anchor">#</a></h2><p><code>relocate.S </code>中同时也定义了中断向量表的重定位:<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/57.png" alt="image"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">第 <span class="number">29</span> 行，如果定义了 CONFIG_CPU_V7M 的话就执行第 <span class="number">30</span>~<span class="number">36</span> 行的代码，对于 I.MX6ULL 来说不是ARMv7-M,不执行。</span><br><span class="line">由于在.config 里面定义了 CONFIG_HAS_VBAR，因此执行下面的代码。</span><br><span class="line"><span class="number">43</span> 行，r0=gd-&gt;relocaddr，重定位后 uboot 的首地址，也就是向量表地址，因为异常向量表就在uboot代码段最开始的地方。</span><br><span class="line"><span class="number">44</span>行，CP15 的 VBAR寄存器写入r0。这样重定位后的向量表就设置好了。</span><br></pre></td></tr></table></figure>
-
-<h2><span id="2-7-board-init-r">2.7 board_init_r</span><a href="#2-7-board-init-r" class="header-anchor">#</a></h2><h3><span id="2-7-1-wai-she-chu-shi-hua">2.7.1 外设初始化</span><a href="#2-7-1-wai-she-chu-shi-hua" class="header-anchor">#</a></h3><p>前面<code>board_init_f</code>初始化了芯片级外设（<code>uart,Timer,console</code>等）并且进行了DRAM划分，为代码重定位做准备。接下来<code>board_init_r</code>进行板级的外设初始化。<br><code>init_sequence_r </code>定义在文件<code> common/board_r.c</code>，负责初始化各个硬件外设，比如<code>flash,网卡，i2c，sdio</code>等等：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/58.png" alt="image"></p>
-<p><strong><code>initr_trace</code></strong> 函数，如果定义了宏<code>CONFIG_TRACE</code>的话就会调用函数<code> trace_init</code>， 初始化和调试跟踪有关的内容。<br><strong><code>initr_reloc</code></strong> 函数用于设置<code> gd-&gt;flags</code>，标记重定位完成。<br><strong><code>initr_caches</code></strong> 函数用于初始化 cache，使能 cache。<br><strong><code>initr_reloc_global_data</code></strong> 函数，初始化重定位后<code>gd</code>的一些成员变量。<br><strong><code>initr_barrier</code></strong> 函数，I.MX6ULL 未用到。<br><strong><code>initr_malloc</code></strong> 函数，初始化 malloc。<br><strong><code>initr_console_record</code></strong> 函数，初始化控制台相关的内容，I.MX6ULL 未用到，空函数。<br><strong><code>bootstage_relocate</code></strong> 函数，启动状态重定位。<br><strong><code>initr_bootstage</code></strong> 函数，初始化<code>bootstage</code>什么的。<br><strong><code>board_init</code></strong> 函数，板级初始化，包括<code>FEC、USB 和 QSPI </code>等。 这里执行的是 <code>mx6ull_alientek_emmc.c </code>文件中的 <code>board_init </code>函数。<br><strong><code>stdio_init_tables</code></strong> 函数，<code>stdio </code>相关初始化。<br><strong><code>initr_serial</code></strong> 函数，初始化串口。<br><strong><code>power_init_board</code></strong> 函数，初始化电源芯片，正点原子的 I.MX6ULL 开发板没有用到。<br><strong><code>initr_flash</code></strong> 函数，对于 I.MX6ULL 而言，没有定义宏 <code>CONFIG_SYS_NO_FLASH </code>的话函数<code>initr_flash</code>才有效。但是 <code>mx6_common.h </code>中定义了宏 <code>CONFIG_SYS_NO_FLASH</code>，所以 此函数无效。<br><strong><code>initr_nand</code></strong> 函数，初始化 NAND，如果使用 NAND 版本核心板的话就会初始化 NAND。<br><strong><code>initr_mmc</code></strong> 函数，初始化 EMMC，如果使用 EMMC 版本核心板的话就会初始化 EMMC：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/59.png" alt="image"><br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/60.png" alt="image"><br><strong><code>initr_env</code></strong> 函数，初始化环境变量。<br><strong><code>initr_secondary_cpu</code></strong> 函数，初始化其他 CPU 核，I.MX6ULL 只有一个核，因此此函数没用。<br><strong><code>stdio_add_devices</code></strong> 函数，各种输入输出设备的初始化，如 LCD driver，I.MX6ULL 使用 <code>drv_video_init </code>函数初始化 LCD：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/61.png" alt="image"><br><strong><code>initr_jumptable</code></strong> 函数，初始化跳转表。<br><strong><code>console_init_r</code></strong> 函数 ， 控制台初始化， 初始化完成以后此函数会调用<code>stdio_print_current_devices</code>函数来打印出当前的控制台设备：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/62.png" alt="image"><br><strong><code>interrupt_init</code></strong> 函数，初始化中断。<br><strong><code>initr_enable_interrupts</code></strong> 函数，使能中断。<br><strong><code>initr_ethaddr</code></strong> 函数，初始化网络地址，也就是获取 MAC 地址。读取环境变量 <code>ethaddr</code>的值。<br><strong><code>board_late_init</code></strong> 函数，板子后续初始化，此函数定义在文件<code>mx6ull_alientek_emmc.c</code>中，如果环境变量存储在 EMMC 或者 SD 卡中的话此函数会调用 <code>board_late_mmc_env_init </code>函数 初始化 <code>EMMC/SD</code>。会切换到正在时候用的 emmc 设备，如下图所示：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/63.png" alt="image"><br><code>cmd</code>构造成<code>mmc dev 1</code>,切换到正在使用的 EMMC 设备。因为dev0为sd卡，dev1为emmc：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/64.png" alt="image"><br><strong><code>initr_net</code></strong> 函数，初始化网络设备，调用关系<code>initr_net-&gt;eth_initialize-&gt;board_eth_init()</code>。<br>最后**<code>run_main_loop</code>**，主循环，处理命令。</p>
-<h3><span id="2-7-2-run-main-loop-han-shu">2.7.2 run_main_loop 函数</span><a href="#2-7-2-run-main-loop-han-shu" class="header-anchor">#</a></h3><h4><span id="2-7-2-1-uboot-version-huan-jing-bian-liang-she-zhi">2.7.2.1 Uboot version环境变量设置</span><a href="#2-7-2-1-uboot-version-huan-jing-bian-liang-she-zhi" class="header-anchor">#</a></h4><p><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/65.png" alt="image"><br>第 48 行，调用 <code>bootstage_mark_name </code>函数，打印出启动进度。<br>第 57 行，如果定义了宏 <code>CONFIG_VERSION_VARIABLE</code>,设置版本号环境变量，<code>cmd/version.c </code>中定义了<code>version_string</code>字符串，<code>version.h</code>定义了<code>U_BOOT_VERSION_STRING</code>：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/66.png" alt="image"><br><code>U_BOOT_VERSION </code>定义在文件<code>include/generated/version_autogenerated.h</code>中：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/67.png" alt="image"><br>比如我的板子uboot命令行输入<code>version</code>打印版本信息：打印uboot版本，编译日期时间，<code>CONFIG_IDENT_STRING</code>为板子<code>identity</code>信息，我这里是<code>cvitek_athena2</code>，如下图：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/68.png" alt="image"><br>最后打印出<code>toolchain</code>信息是因为编译生成<code>version_autogenerated.h</code>，输入<code>version</code>命令打印如下<code>do_version</code>函数：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/69.png" alt="image"><br>Uboot中的命令都是调用<code>cmd_process</code>函数来解析执行。（会面有具体分析<code>cmd_process</code>)</p>
-<h4><span id="2-7-2-2-bootdelay-he-bootcmd-huo-qu">2.7.2.2 bootdelay和bootcmd获取</span><a href="#2-7-2-2-bootdelay-he-bootcmd-huo-qu" class="header-anchor">#</a></h4><p>第 60 行，<code>cli_init()</code>，<code>cli</code>是一个命令行接口，一般裸机开发都喜欢移植<code>cli</code>，来注册各种命令参数。<br>第 62 行，<code>run_preboot_environment_command()</code>获取系统环境变量<code>preboot</code>的值，我们没有定义该环境变量。<br>第 68 行,<code>bootdelay_process()</code>设置倒计时全局变量。我的板子<code>bootdelay</code>环境变量是1，<code>.config</code>也配置的1。<br>该函数是获取<code>bootcmd</code>环境变量，返回<code>bootcmd</code>环境变量，如下图：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/70.png" alt="image"></p>
-<h4><span id="2-7-2-3-autoboot-command-zhi-xing-bootcmd">2.7.2.3 autoboot_command(执行bootcmd)</span><a href="#2-7-2-3-autoboot-command-zhi-xing-bootcmd" class="header-anchor">#</a></h4><p><code>main_loop</code>的第72行，自动执行<code>bootcmd</code>。当然我们在命令行输入<code>run bootcmd</code>也会执行<code>bootcmd</code>里面指令，如下图：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/71.png" alt="image"><br><code>autoboot_command</code>函数定义在<code>common/autoboot.c</code>：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/72.png" alt="image"><br>我这里<code>stored_bootdelay</code>全局变量等于1，<code>s</code>字符串是<code>bootcmd</code>环境变量不为空。最后<code>abortboot</code>函数的返回值也为0，因此执行<code>run_command_list</code>，执行<code>bootcmd</code>里面的命令，启动kernel rootfs。</p>
-<h5><span id="2-7-2-3-1-bootdelay-dao-ji-shi">2.7.2.3.1 bootdelay倒计时</span><a href="#2-7-2-3-1-bootdelay-dao-ji-shi" class="header-anchor">#</a></h5><p>分析<code>abortboot()</code>函数：<br><code>abortboot</code>调用<code>abortboot_normal</code>，该函数就是判断<code>bootdelay</code>倒计时内是否有按键按下，倒计时结束没有按键按下，那么执行<code>bootcmd</code>，否则uboot命令行等待用户输入,代码逻辑如下：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/73.png" alt="image"><br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/74.png" alt="image"><br>总结：有按键输入，<code>abortboot()</code>函数返回1，否则返回0, 这样<code>autoboot_command</code>才会执行<code>bootcmd</code>。</p>
-<h4><span id="2-7-2-4-cli-loop-uboot-ming-ling-xing">2.7.2.4 cli_loop(uboot命令行)</span><a href="#2-7-2-4-cli-loop-uboot-ming-ling-xing" class="header-anchor">#</a></h4><p>再来回到<code>main_loop</code>，如果倒计时结束有按键按下，<code>abortboot</code>返回1，那么<code>autoboot_command</code>函数什么都不干直接返回，执行<code>cli_loop()</code>：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/75.png" alt="image"><br><code>cli_loop</code> 函数是 uboot 的命令行处理函数，我们在 uboot 中输入各种命令，就是<code>cli_loop </code>来处理的，此函数定义在文件 <code>common/cli.c</code>:<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/76.png" alt="image"><br>这里我们有定义<code>CONFIG_SYS_HUSH_PARSER</code>，因此执行<code>parse_file_outer-&gt;parse_stream_outer</code>，<code>common/cli_hush.c</code>定义了该函数：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/77.png" alt="image"><br>该函数调用<code>parse_stream </code>进行命令解析。然后调用<code>run_list </code>函数来执行解析出来的命令。</p>
-<h5><span id="2-7-2-4-1-cmd-process-han-shu-fen-xi">2.7.2.4.1 cmd_process 函数分析</span><a href="#2-7-2-4-1-cmd-process-han-shu-fen-xi" class="header-anchor">#</a></h5><p>当命令行有用户输入命令，并且解析到匹配的uboot命令，执行<code>run_list-&gt;run_list_real-&gt;run_pipe_real-&gt;cmd_process</code>。<br>前面提到Uboot中的命令都是调用<code>cmd_process</code>函数来解析执行，如<code>version</code>命令：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/78.png" alt="image"><br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/79.png" alt="image"><br>①先调用<code>find_cmd</code>，返回<code>cmd_tbl_t</code>指针：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/80.png" alt="image"><br>传入的<code>cmd </code>字符串就是所查找的命令名字，uboot 中的命令表其实就是<code>cmd_tbl_t</code>结构体数组。<br><code>ll_entry_start </code>得到数组的第一个元素，也就是命令表起始地址。通过函数<code>ll_entry_count</code>得到数组长度，也就是命令表的长度。<br><code>find_cmd_tbl</code> 在命令表中找到所需的命令，每个命令都有一个<code> name 成员</code>，如下图根据字符串名字去匹配对应的命令：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/81.png" alt="image"><br>②调用<code>cmd_call</code>，执行<code>cmd_tbl_t </code>结构里面对应的处理函数：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/82.png" alt="image"></p>
-<h5><span id="2-7-2-4-2-uboot-ming-ling-ding-yi-dhcp-wei-li">2.7.2.4.2 uboot命令定义(dhcp为例)</span><a href="#2-7-2-4-2-uboot-ming-ling-ding-yi-dhcp-wei-li" class="header-anchor">#</a></h5><p>uboot 使用宏 <code>U_BOOT_CMD </code>来定义命令，宏<code> U_BOOT_CMD</code> 定义在 <code>include/command.h</code>:<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/83.png" alt="image"><br>①**<code>ll_entry_declar</code>**<br>定义在文件<code> include/linker_lists.h</code>:<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/84.png" alt="image"><br><code>_type</code> 为<code> cmd_tbl_t</code>，因此<code>ll_entry_declare</code>就是定义了一个<code>cmd_tbl_t</code>变量，这里用到了 C 语 言中的<code>##</code>连接符。其中的<code>##_list</code>表示用<code>_list </code>的值来替换，<code>##_name</code>就是用<code>_name </code>的值来替换。<br>比如<code>dhcp</code>命令代入进去：</p>
-<p><code>ll_entry_declare(cmd_tbl_t, dhcp, cmd)展开后</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">cmd_tbl_t</span> _u_boot_list_2_#<span class="meta">#cmd##_2_##dhcp __aligned(4)		\</span></span><br><span class="line"><span class="meta">	__attribute__((unused,section(<span class="string">&quot;.u_boot_list_2_cmd_2_dhcp)))</span></span></span><br></pre></td></tr></table></figure>
-
-<p>②**<code>U_BOOT_CMD_MKENT_COMPLETE</code>**<br><code># </code>表示将<code> _name</code> 传 递 过 来 的 值 字 符 串 化。<br>继续以<code>dhcp</code>命令代入：<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/85.png" alt="image"></p>
-<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">U_BOOT_CMD_MKENT_COMPLETE(dhcp, <span class="number">3</span>, <span class="number">1</span>, do_dhcp, \</span><br><span class="line"> <span class="string">&quot;boot image via network using DHCP/TFTP protocol&quot;</span>, \</span><br><span class="line"><span class="string">&quot;[loadAddress] [[hostIPaddr:]bootfilename]&quot;</span>, \</span><br><span class="line">NULL);</span><br></pre></td></tr></table></figure>
-<p>继续代入：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123; <span class="string">&quot;dhcp&quot;</span>, <span class="number">3</span>, <span class="number">1</span>, do_dhcp, \</span><br><span class="line"> <span class="string">&quot;boot image via network using DHCP/TFTP protocol&quot;</span>, \</span><br><span class="line"> <span class="string">&quot;[loadAddress] [[hostIPaddr:]bootfilename]&quot;</span>,\ </span><br><span class="line"><span class="literal">NULL</span> &#125;</span><br></pre></td></tr></table></figure>
-
-<p>最后宏<code> U_BOOT_CMD</code>对<code>dhcp</code>命令展开如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">cmd_tbl_t</span> _u_boot_list_2_cmd_2_dhcp __aligned(<span class="number">4</span>) \</span><br><span class="line">__attribute__((unused,section(.u_boot_list_2_cmd_2_dhcp))) = \</span><br><span class="line">&#123; <span class="string">&quot;dhcp&quot;</span>, <span class="number">3</span>, <span class="number">1</span>, do_dhcp, \</span><br><span class="line"><span class="string">&quot;boot image via network using DHCP/TFTP protocol&quot;</span>, \</span><br><span class="line"><span class="string">&quot;[loadAddress] [[hostIPaddr:]bootfilename]&quot;</span>,\</span><br><span class="line"><span class="literal">NULL</span> &#125;</span><br></pre></td></tr></table></figure>
-<p>可以看到就是定义了一个<code>cmd_tbl_t</code>结构体变量，对它进行初始化。这个变量名为<code>_u_boot_list_2_cmd_2_dhcp</code>，此变量 4 字节对齐。<br>使 用 <code>__attribute__ </code>关 键 字 设 置 变 量<code>_u_boot_list_2_cmd_2_dhcp</code>存 储 在<code>.u_boot_list_2_cmd_2_dhcp </code>段中。<code>u-boot.lds </code>链接脚本中有一个名为<code>.u_boot_list</code>的段专门存放uboot命令表:<br><img src="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/86.png" alt="image"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" data-id="clyylnk8s00297wufht3xe2ux" data-title="uboot-启动流程" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -2848,7 +2878,7 @@ test has been built!
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 16px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 19px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 16px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 14px;">通信协议</a>
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 16.36px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 19.09px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17.27px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15.45px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.18px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.82px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14.55px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.91px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 11.82px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.73px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17.27px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.64px;">通信协议</a>
     </div>
   </div>
 
@@ -2870,6 +2900,10 @@ test has been built!
       <ul>
         
           <li>
+            <a href="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-8-%E5%86%85%E6%A0%B8%E5%AE%9A%E6%97%B6%E5%99%A8/">字符设备驱动-8-内核定时器</a>
+          </li>
+        
+          <li>
             <a href="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/">字符设备驱动-7-异步通知</a>
           </li>
         
@@ -2883,10 +2917,6 @@ test has been built!
         
           <li>
             <a href="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-5-%E8%AE%BE%E5%A4%87%E6%A0%91%E5%87%BD%E6%95%B0/">字符设备驱动-5-设备树函数</a>
-          </li>
-        
-          <li>
-            <a href="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/">字符设备驱动-4-设备树</a>
           </li>
         
       </ul>
