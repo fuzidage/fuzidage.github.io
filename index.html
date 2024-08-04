@@ -69,6 +69,146 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-字符设备驱动-7-异步通知" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/" class="article-date">
+  <time class="dt-published" datetime="2024-08-04T05:33:59.000Z" itemprop="datePublished">2024-08-04</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/">字符设备驱动-7-异步通知</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-yi-bu-tong-zhi-gai-shu">1.异步通知概述</a><ul>
+<li><a href="#1-1-sigaction-han-shu">1.1 sigaction函数</a></li>
+<li><a href="#1-2-signal-han-shu">1.2 signal函数</a><ul>
+<li><a href="#1-2-1-shi-li-1">1.2.1 示例1</a></li>
+<li><a href="#1-2-2-shi-li-2">1.2.2 示例2</a></li>
+<li><a href="#1-1-3-shi-li-3">1.1.3 示例3</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-yi-bu-tong-zhi-de-shi-xian-yuan-li-liu-cheng">2 异步通知的实现原理流程</a><ul>
+<li><a href="#2-1-yi-bu-tong-zhi-de-xin-hao-liu-cheng">2.1. 异步通知的信号流程</a></li>
+</ul>
+</li>
+<li><a href="#3-qu-dong-dai-ma-bian-xie">3.驱动代码编写</a><ul>
+<li><a href="#3-1-kai-qi-async">3.1 开启async</a></li>
+<li><a href="#3-2-fa-sigio-xin-hao">3.2 发SIGIO信号</a></li>
+</ul>
+</li>
+<li><a href="#4-ying-yong-bian-xie">4.应用编写</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-yi-bu-tong-zhi-gai-shu">1.异步通知概述</span><a href="#1-yi-bu-tong-zhi-gai-shu" class="header-anchor">#</a></h1><p>前面讲到<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17080773.html">APP 读取按键方式</a>里面包含4种方式：1.查询方式，2.休眠唤醒，3，poll机制的休眠唤醒，4.异步通知<br><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-3-GPIO%E9%A9%B1%E5%8A%A8KEY%E7%A4%BA%E4%BE%8B/#1-app-du-qu-an-jian-fang-shi">字符设备驱动-3-GPIO驱动KEY示例 | Hexo (fuzidage.github.io)</a><br>什么是异步通知？<br>你去买奶茶：<br>◼ 你在旁边等着，眼睛盯着店员，生怕别人插队，他一做好你就知道：你是主动等待他做好，这叫 “同步”。<br>◼ 你付钱后就去玩手机了，店员做好后他会打电话告诉你：你是被动获得结果，这叫“异步”。<br>同理，还是以<code>gpio_key</code>的例子，app想要判断按键是否有按下，无需去查询或者休眠，只需要注册<code>SIGIO信号</code>给driver, 当按键按下，driver中会自己主动通知app，给app发送<code>SIGIO信号</code>，app上层收到<code>信号SIGIO</code>会执行事先注册的<code>信号处理函数</code>。</p>
+<p>异步通知使用信号来实现。在 Linux 内核源文件 <code>include\uapi\asmgeneric\signal.h</code> 中:<br><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/1.png" alt="image"></p>
+<h2><span id="1-1-sigaction-han-shu">1.1 sigaction函数</span><a href="#1-1-sigaction-han-shu" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">第一个参数为信号的值， 可以是除SIGKILL及SIGSTOP外的任何一个特定有效的信号。</span><br><span class="line">第二个参数是指向结构体sigaction的一个实例的指针， 在结构体sigaction的实例中， </span><br><span class="line">    指定了对特定信号的处理函数， 若为空， 则进程会以缺省方式对信号处理；</span><br><span class="line">第三个参数oldact指向的对象用来保存原来对相应信号的处理函数， 可指定oldact为<span class="literal">NULL</span>。</span><br><span class="line">    如果把第二、 第三个参数都设为<span class="literal">NULL</span>， 那么该函数可用于检查信号的有效性。</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">sigaction</span><span class="params">(<span class="type">int</span> signum,<span class="type">const</span> <span class="keyword">struct</span> sigaction *act,<span class="keyword">struct</span> sigaction *oldact)</span>);</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sigaction</span> &#123;</span></span><br><span class="line">	<span class="type">void</span> (*sa_handler)(<span class="type">int</span>);</span><br><span class="line">	<span class="type">void</span> (*sa_sigaction)(<span class="type">int</span>, <span class="type">siginfo_t</span> *, <span class="type">void</span> *);</span><br><span class="line">	<span class="type">sigset_t</span> sa_mask;</span><br><span class="line">	<span class="type">int</span> sa_flags;</span><br><span class="line">	<span class="type">void</span> (*sa_restorer)(<span class="type">void</span>);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">sa_flags：用来设置信号处理的其他相关操作，下列的数值可用：</span></span><br><span class="line"><span class="comment">        1.SA RESETHAND：当调用信号处理函数时，将信号的处理函数重置为缺省值；</span></span><br><span class="line"><span class="comment">        2.SIG DFLSA RESTART：如果信号中断了进程的某个系统调用，</span></span><br><span class="line"><span class="comment">        	则系统自动启动该系统调用；</span></span><br><span class="line"><span class="comment">        3.SA NODEFER：当信号处理函数运行时，内核将阻塞该给定信号。</span></span><br><span class="line"><span class="comment">        	但是如果设置了 SA NODEFER标记， 那么在该信号处理函数运行*/</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> _SAMPLE_PLAT_SYS_HandleSig(<span class="type">int</span> nSignal, <span class="type">siginfo_t</span> *si, <span class="type">void</span> *arg) &#123;</span><br><span class="line">        _SAMPLE_PLAT_ERR_Exit();</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sigaction</span> <span class="title">sa</span>;</span></span><br><span class="line"><span class="built_in">memset</span>(&amp;sa, <span class="number">0</span>, <span class="keyword">sizeof</span>(<span class="keyword">struct</span> sigaction));</span><br><span class="line">sigemptyset(&amp;sa.sa_mask);</span><br><span class="line">sa.sa_sigaction = _SAMPLE_PLAT_SYS_HandleSig;</span><br><span class="line">sa.sa_flags = SA_SIGINFO|SA_RESETHAND;  <span class="comment">// Reset signal handler to</span></span><br><span class="line"><span class="comment">//system default after signal triggered</span></span><br><span class="line">sigaction(SIGINT, &amp;sa, <span class="literal">NULL</span>);</span><br><span class="line">sigaction(SIGTERM, &amp;sa, <span class="literal">NULL</span>);</span><br></pre></td></tr></table></figure>
+<h2><span id="1-2-signal-han-shu">1.2 signal函数</span><a href="#1-2-signal-han-shu" class="header-anchor">#</a></h2><h3><span id="1-2-1-shi-li-1">1.2.1 示例1</span><a href="#1-2-1-shi-li-1" class="header-anchor">#</a></h3><p>按下<code>“Ctrl+C”</code>将向其发出<code>SIGINT</code>信号， 正在运行kill的进程将向其发出<code>SIGTERM</code>信号， 以下代码的进程可捕获这两个信号并输出信号值：</p>
+<details>
+<summary>点击查看代码</summary>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">sigterm_handler</span><span class="params">(<span class="type">int</span> signo)</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Have caught sig N.O. %d\n&quot;</span>,signo);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">        signal(SIGINT,sigterm_handler);</span><br><span class="line">        signal(SIGTERM,sigterm_handler);</span><br><span class="line">        <span class="keyword">while</span>(<span class="number">1</span>);</span><br><span class="line">        return0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</details>
+
+<p>可以看到对应<code>SIGINT</code><br><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/2.png" alt="image"><br>输入<code>kill [pid]</code><br><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/3.png" alt="image"><br>可以看到对应<code>SIGTERM</code>信号<br><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/4.png" alt="image"></p>
+<h3><span id="1-2-2-shi-li-2">1.2.2 示例2</span><a href="#1-2-2-shi-li-2" class="header-anchor">#</a></h3><p>通过<code>signal(SIGIO, input_handler);</code> 对标准输入文件描述符<code>STDIN_FILENO</code>启动信号机制.用户输入后， 应用程序将接收到<code>SIGIO</code>信号， 其处理函数<code>input_handler()</code>将被调用.</p>
+<details>
+<summary>点击查看代码</summary>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">input_handler</span><span class="params">(<span class="type">int</span> num)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">char</span> data[MAX_LEN];</span><br><span class="line">	<span class="type">int</span> len;</span><br><span class="line">	<span class="comment">/* 读取并输出STDIN_FILENO上的输入 */</span></span><br><span class="line">	len = read(STDIN_FILENO, &amp;data, MAX_LEN);</span><br><span class="line">	data[len] = <span class="number">0</span>;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;input available:%s\n&quot;</span>, data);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> oflags;</span><br><span class="line">	<span class="comment">/* 启动信号驱动机制 */</span></span><br><span class="line">	<span class="comment">/*为SIGIO信号安装input_handler()作为处理函数*/</span></span><br><span class="line">	signal(SIGIO, input_handler);</span><br><span class="line">	<span class="comment">/*设置本进程为STDIN_FILENO文件的拥有者，</span></span><br><span class="line"><span class="comment">	没有这一步，内核不会知道应该将信号发给哪个进程*/</span></span><br><span class="line">	fcntl(STDIN_FILENO, F_SETOWN, getpid());</span><br><span class="line">	<span class="comment">/*而为了启用异步通知机制， 还需对设备设置FASYNC标志，下面两行行代码可实现此目的。 */</span></span><br><span class="line">	oflags = fcntl(STDIN_FILENO, F_GETFL);</span><br><span class="line">	fcntl(STDIN_FILENO, F_SETFL, oflags | FASYNC);</span><br><span class="line">	<span class="keyword">while</span>(<span class="number">1</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</details>
+
+<p><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/5.png" alt="image"></p>
+<h3><span id="1-1-3-shi-li-3">1.1.3 示例3</span><a href="#1-1-3-shi-li-3" class="header-anchor">#</a></h3><p>手动对app进程发送<code>SIGIO</code>信号</p>
+<details>
+<summary>点击查看代码</summary>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">my_sig_func</span><span class="params">(<span class="type">int</span> signo)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;get a signal : %d\n&quot;</span>, signo);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">    signal(SIGIO, my_sig_func);</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;Hello, world %d!\n&quot;</span>, i++);</span><br><span class="line">        sleep(<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</details>
+
+<p>发送<code>SIGIO</code>信号给进程，也就是<code>kill -29 [pid]</code><br><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/6.png" alt="image"><br><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/7.png" alt="image"></p>
+<h1><span id="2-yi-bu-tong-zhi-de-shi-xian-yuan-li-liu-cheng">2 异步通知的实现原理流程</span><a href="#2-yi-bu-tong-zhi-de-shi-xian-yuan-li-liu-cheng" class="header-anchor">#</a></h1><p>驱动程序怎么通知 APP：发信号，这只有 3 个字，却可以引发很多问题：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> 谁发：驱动程序发</span><br><span class="line"><span class="number">2.</span> 发什么：信号</span><br><span class="line"><span class="number">3.</span> 发什么信号：SIGIO</span><br><span class="line"><span class="number">4.</span> 怎么发：内核里提供有函数</span><br><span class="line"><span class="number">5.</span> 发给谁：APP，APP 要把自己告诉驱动</span><br><span class="line"><span class="number">6.</span> APP 收到后做什么：执行信号处理函数</span><br><span class="line"><span class="number">7.</span> 信号处理函数和信号，之间怎么挂钩：APP 注册信号处理函数</span><br></pre></td></tr></table></figure>
+<p>Linux系统中也有很多信号，内核源文件<code>include\uapi\asmgeneric\signal.h</code>中，有很多信号的宏定义：<br><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/8.png" alt="image"><br>就APP而言，你想处理 <code>SIGIO </code>信息，那么需要提供信号处理函数，并且要跟<code>SIGIO </code>挂钩。这可以通过一个 signal 函数来 “给某个信号注册处理函数”，用法如下：<br><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/9.png" alt="image"><br>APP 还要做什么事？想想这几个问题：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">a) 内核里有那么多驱动，你想让哪一个驱动给你发 SIGIO 信号？APP 要打开驱动程序的设备节点。</span><br><span class="line">b) 驱动程序怎么知道要发信号给你而不是别人？APP 要把自己的进程 ID 告诉驱动程序。</span><br><span class="line">c) APP 有时候想收到信号，有时候又不想收到信号应该可以把 APP 的意愿告诉驱动。</span><br></pre></td></tr></table></figure>
+<p>驱动程序要做什么？发信号。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">a) APP 设置进程 ID 时，驱动程序要记录下进程 ID；</span><br><span class="line">b) APP 还要使能驱动程序的异步通知功能，驱动中有对应的函数：APP 打开驱动程序时，</span><br><span class="line">    内核会创建对应的 file 结构体，file 中有 f_flags；</span><br><span class="line">c) FASYNC 位:</span><br><span class="line">flags 中有一个 FASYNC 位，它被设置为 <span class="number">1</span> 时表示使能异步通知功能。</span><br><span class="line">    当 f_flags 中的 FASYNC 位发生变化时，驱动程序的 fasync 函数被调用;</span><br><span class="line">d) 发生中断时，有数据时，驱动程序调用内核辅助函数发信号。这个辅助函数名为 kill_fasync.</span><br></pre></td></tr></table></figure>
+
+
+<h2><span id="2-1-yi-bu-tong-zhi-de-xin-hao-liu-cheng">2.1. 异步通知的信号流程</span><a href="#2-1-yi-bu-tong-zhi-de-xin-hao-liu-cheng" class="header-anchor">#</a></h2><p><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/10.png" alt="image"><br>① APP open，在drv中调用<code>drv_open</code>，进行注册按键中断服务函数<code>gpio_key_irq</code>;<br>② APP 给<code>SIGIO</code>信号注册<code>信号处理函数func</code>, 以后 APP 收到 <code>SIGIO</code>信号时，这个函数会被自动调用;<br>③ APP 调用<code>fcntl</code>, 把PID(进程 ID)告诉驱动程序，这个调用不涉及驱动程序，只是在内核的文件系统层次<code>sys_cntl</code>,记录 PID在<code>filp</code>中（<code>sys_call</code>会建立<code>filp</code>结构)；<br>④ APP 调用<code>fcntl</code>, 读取驱动程序文件 Flag；<br>⑤ 设置 Flag 里面的<code>FASYNC</code>位为 1：当 <code>FASYNC</code> 位发生变化时，会导致驱动程序的<code>fasync</code>被调用；<br>⑥⑦ 调 用<code> faync_helper</code> ， 它 会 根 据<code>FAYSNC</code>的值决定是否设置<code>button_async-&gt;fa_file = 驱动文件filp</code>：<br>驱动文件<code>filp</code>结构体里面含有之前设置的 PID。<br>⑧ APP 可以做其他事；<br>⑨⑩ 按下按键，发生中断，驱动程序的中断服务程序被调用，里面调用<code>kill_fasync</code> 发信号；<br>⑪⑫⑬ APP 收到信号后，它的信号处理函数被自动调用，可以在里面调用read 函数读取按键。</p>
+<h1><span id="3-qu-dong-dai-ma-bian-xie">3.驱动代码编写</span><a href="#3-qu-dong-dai-ma-bian-xie" class="header-anchor">#</a></h1><p>先修改<code>Linux-4.9.88/arch/arm/boot/dts/100ask_imx6ull-14x14.dts</code>建立dts节点，<code>“100ask，gpio_key”</code>和<code>platform drvier</code>中保持一致。这里将<code>goio-keys</code> <code>disabled</code>掉是为了drv去匹配新添加的这个节点。<br><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/11.png" alt="image"></p>
+<p>使用异步通知时，驱动程序的核心有2个：<br>① 提供对应的<code>drv_fasync</code>函数；<br>② 并在合适的时机发信号。</p>
+<h2><span id="3-1-kai-qi-async">3.1 开启async</span><a href="#3-1-kai-qi-async" class="header-anchor">#</a></h2><p><code>drv_fasync</code> 函数很简单，调用 <strong><code>fasync_helper</code></strong> 函数就可以，如下：<br><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/12.png" alt="image"><br><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/13.png" alt="image"><br><code>fasync_helper</code> 函 数 会 分 配 、 构 造 一 个 <code>fasync_struct</code> 结构体<code>button_async</code>：<br>⚫ 驱动文件的 flag 被设置为 <code>FAYNC 时</code>：<br><code>button_async-&gt;fa_file = filp; // filp 表示驱动程序文件，里面含有之前设置的 PID</code><br>⚫ 驱动文件被设置为非<code>FASYNC</code> 时：<br><code>button_async-&gt;fa_file = NULL;</code><br>以后想发送信号时，使用 <code>button_async</code> 作为参数就可以，它里面 “可能” 含有 PID。</p>
+<h2><span id="3-2-fa-sigio-xin-hao">3.2 发SIGIO信号</span><a href="#3-2-fa-sigio-xin-hao" class="header-anchor">#</a></h2><p>什么时候发信号呢？在本例中，在 GPIO 中断服务程序中发信号。<br>怎么发信号呢？代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">kill_fasync(&amp;button_async, SIGIO, POLL_IN);</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/14.png" alt="image"><br>第 1 个参数：<code>button_async-&gt;fa_file</code> 非空时，可以从中得到 PID，表示发给哪一个 APP；<br>第 2 个参数表示发什么信号：<code>SIGIO</code>；<br>第 3 个参数表示为什么发信号：<code>POLL_IN</code>，有数据可以读了。(APP 用不到这个参数)</p>
+<details>
+<summary>点击查看完整驱动代码</summary>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/poll.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/fs.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/miscdevice.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/major.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/mutex.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/proc_fs.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/seq_file.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/device.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/tty.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/kmod.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/gfp.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/gpio/consumer.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/platform_device.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/of_gpio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/of_irq.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/interrupt.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/irq.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/slab.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/fcntl.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">gpio_key</span>&#123;</span></span><br><span class="line">	<span class="type">int</span> gpio;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">gpio_desc</span> *<span class="title">gpiod</span>;</span></span><br><span class="line">	<span class="type">int</span> flag;</span><br><span class="line">	<span class="type">int</span> irq;</span><br><span class="line">&#125; ;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">gpio_key</span> *<span class="title">gpio_keys_100ask</span>;</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> major = <span class="number">0</span>;</span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="keyword">class</span> *<span class="title">gpio_key_class</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 环形缓冲区 */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> BUF_LEN 128</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> g_keys[BUF_LEN];</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> r, w;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">fasync_struct</span> *<span class="title">button_fasync</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NEXT_POS(x) ((x+1) % BUF_LEN)</span></span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">is_key_buf_empty</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> (r == w);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">is_key_buf_full</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> (r == NEXT_POS(w));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">put_key</span><span class="params">(<span class="type">int</span> key)</span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (!is_key_buf_full())&#123;</span><br><span class="line">		g_keys[w] = key;</span><br><span class="line">		w = NEXT_POS(w);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">get_key</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">	<span class="type">int</span> key = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">if</span> (!is_key_buf_empty())&#123;</span><br><span class="line">		key = g_keys[r];</span><br><span class="line">		r = NEXT_POS(r);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> key;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="title function_">DECLARE_WAIT_QUEUE_HEAD</span><span class="params">(gpio_key_wait)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">ssize_t</span> <span class="title function_">gpio_key_drv_read</span> <span class="params">(<span class="keyword">struct</span> file *file, <span class="type">char</span> __user *buf, </span></span><br><span class="line"><span class="params">                                  <span class="type">size_t</span> size, <span class="type">loff_t</span> *offset)</span>&#123;</span><br><span class="line">	<span class="type">int</span> err;</span><br><span class="line">	<span class="type">int</span> key;</span><br><span class="line">	</span><br><span class="line">	wait_event_interruptible(gpio_key_wait, !is_key_buf_empty());</span><br><span class="line">	key = get_key();</span><br><span class="line">	err = copy_to_user(buf, &amp;key, <span class="number">4</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">4</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> <span class="title function_">gpio_key_drv_poll</span><span class="params">(<span class="keyword">struct</span> file *fp, poll_table * wait)</span>&#123;</span><br><span class="line">	poll_wait(fp, &amp;gpio_key_wait, wait);</span><br><span class="line">	<span class="keyword">return</span> is_key_buf_empty() ? <span class="number">0</span> : POLLIN | POLLRDNORM;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">gpio_key_drv_fasync</span><span class="params">(<span class="type">int</span> fd, <span class="keyword">struct</span> file *file, <span class="type">int</span> on)</span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (fasync_helper(fd, file, on, &amp;button_fasync) &gt;= <span class="number">0</span>)</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">else</span></span><br><span class="line">		<span class="keyword">return</span> -EIO;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> <span class="title">gpio_key_drv</span> =</span> &#123;</span><br><span class="line">	.owner	 = THIS_MODULE,</span><br><span class="line">	.read    = gpio_key_drv_read,</span><br><span class="line">	.poll    = gpio_key_drv_poll,</span><br><span class="line">	.fasync  = gpio_key_drv_fasync,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">irqreturn_t</span> <span class="title function_">gpio_key_isr</span><span class="params">(<span class="type">int</span> irq, <span class="type">void</span> *dev_id)</span>&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">gpio_key</span> *<span class="title">gpio_key</span> =</span> dev_id;</span><br><span class="line">	<span class="type">int</span> val;</span><br><span class="line">	<span class="type">int</span> key;</span><br><span class="line">	</span><br><span class="line">	val = gpiod_get_value(gpio_key-&gt;gpiod);</span><br><span class="line">	</span><br><span class="line">	printk(<span class="string">&quot;key %d %d\n&quot;</span>, gpio_key-&gt;gpio, val);</span><br><span class="line">	key = (gpio_key-&gt;gpio &lt;&lt; <span class="number">8</span>) | val;</span><br><span class="line">	put_key(key);</span><br><span class="line">	wake_up_interruptible(&amp;gpio_key_wait);</span><br><span class="line">	kill_fasync(&amp;button_fasync, SIGIO, POLL_IN);</span><br><span class="line">	<span class="keyword">return</span> IRQ_HANDLED;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">gpio_key_probe</span><span class="params">(<span class="keyword">struct</span> platform_device *pdev)</span>&#123;</span><br><span class="line">	<span class="type">int</span> err;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">device_node</span> *<span class="title">node</span> =</span> pdev-&gt;dev.of_node;</span><br><span class="line">	<span class="type">int</span> count;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	<span class="class"><span class="keyword">enum</span> <span class="title">of_gpio_flags</span> <span class="title">flag</span>;</span></span><br><span class="line"></span><br><span class="line">	count = of_gpio_count(node);</span><br><span class="line">	<span class="keyword">if</span> (!count)&#123;</span><br><span class="line">		printk(<span class="string">&quot;%s %s line %d, there isn&#x27;t any gpio available\n&quot;</span></span><br><span class="line">               , __FILE__, __FUNCTION__, __LINE__);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	gpio_keys_100ask = kzalloc(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> gpio_key) * count, GFP_KERNEL);</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; count; i++)&#123;</span><br><span class="line">		gpio_keys_100ask[i].gpio = of_get_gpio_flags(node, i, &amp;flag);</span><br><span class="line">		<span class="keyword">if</span> (gpio_keys_100ask[i].gpio &lt; <span class="number">0</span>)&#123;</span><br><span class="line">			printk(<span class="string">&quot;%s %s line %d, of_get_gpio_flags fail\n&quot;</span></span><br><span class="line">                   , __FILE__, __FUNCTION__, __LINE__);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		gpio_keys_100ask[i].gpiod = gpio_to_desc(gpio_keys_100ask[i].gpio);</span><br><span class="line">		gpio_keys_100ask[i].flag = flag &amp; OF_GPIO_ACTIVE_LOW;</span><br><span class="line">		gpio_keys_100ask[i].irq  = gpio_to_irq(gpio_keys_100ask[i].gpio);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; count; i++)&#123;</span><br><span class="line">		err = request_irq(gpio_keys_100ask[i].irq, gpio_key_isr</span><br><span class="line">                          , IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING</span><br><span class="line">                          ,<span class="string">&quot;100ask_gpio_key&quot;</span></span><br><span class="line">                          ,&amp;gpio_keys_100ask[i]);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	major = register_chrdev(<span class="number">0</span>, <span class="string">&quot;100ask_gpio_key&quot;</span>, &amp;gpio_key_drv);</span><br><span class="line"></span><br><span class="line">	gpio_key_class = class_create(THIS_MODULE, <span class="string">&quot;100ask_gpio_key_class&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (IS_ERR(gpio_key_class)) &#123;</span><br><span class="line">		printk(<span class="string">&quot;%s %s line %d\n&quot;</span>, __FILE__, __FUNCTION__, __LINE__);</span><br><span class="line">		unregister_chrdev(major, <span class="string">&quot;100ask_gpio_key&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> PTR_ERR(gpio_key_class);</span><br><span class="line">	&#125;</span><br><span class="line">	device_create(gpio_key_class, <span class="literal">NULL</span></span><br><span class="line">                  , MKDEV(major, <span class="number">0</span>)</span><br><span class="line">                  , <span class="literal">NULL</span></span><br><span class="line">                  , <span class="string">&quot;100ask_gpio_key&quot;</span>); <span class="comment">/* /dev/100ask_gpio_key */</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">gpio_key_remove</span><span class="params">(<span class="keyword">struct</span> platform_device *pdev)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">device_node</span> *<span class="title">node</span> =</span> pdev-&gt;dev.of_node;</span><br><span class="line">	<span class="type">int</span> count;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	device_destroy(gpio_key_class, MKDEV(major, <span class="number">0</span>));</span><br><span class="line">	class_destroy(gpio_key_class);</span><br><span class="line">	unregister_chrdev(major, <span class="string">&quot;100ask_gpio_key&quot;</span>);</span><br><span class="line">	count = of_gpio_count(node);</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; count; i++)&#123;</span><br><span class="line">		free_irq(gpio_keys_100ask[i].irq, &amp;gpio_keys_100ask[i]);</span><br><span class="line">	&#125;</span><br><span class="line">	kfree(gpio_keys_100ask);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">of_device_id</span> <span class="title">ask100_keys</span>[] =</span> &#123;</span><br><span class="line">    &#123; .compatible = <span class="string">&quot;100ask,gpio_key&quot;</span> &#125;,</span><br><span class="line">    &#123; &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">platform_driver</span> <span class="title">gpio_keys_driver</span> =</span> &#123;</span><br><span class="line">    .probe      = gpio_key_probe,</span><br><span class="line">    .remove     = gpio_key_remove,</span><br><span class="line">    .driver     = &#123;</span><br><span class="line">        .name   = <span class="string">&quot;100ask_gpio_key&quot;</span>,</span><br><span class="line">        .of_match_table = ask100_keys,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">gpio_key_init</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> platform_driver_register(&amp;gpio_keys_driver); </span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> __exit <span class="title function_">gpio_key_exit</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">    platform_driver_unregister(&amp;gpio_keys_driver);</span><br><span class="line">&#125;</span><br><span class="line">module_init(gpio_key_init);</span><br><span class="line">module_exit(gpio_key_exit);</span><br><span class="line">MODULE_LICENSE(<span class="string">&quot;GPL&quot;</span>);</span><br></pre></td></tr></table></figure>
+</details>
+
+<h1><span id="4-ying-yong-bian-xie">4.应用编写</span><a href="#4-ying-yong-bian-xie" class="header-anchor">#</a></h1><p>应用程序要做的事情有这几件：</p>
+<ol>
+<li><p>编写信号处理函数：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">sig_func</span><span class="params">(<span class="type">int</span> sig)</span> &#123;</span><br><span class="line">	<span class="type">int</span> val;</span><br><span class="line">	read(fd, &amp;val, <span class="number">4</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;get button : 0x%x\n&quot;</span>, val);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>注册信号处理函数：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">signal(SIGIO, sig_func);</span><br></pre></td></tr></table></figure></li>
+<li><p>打开驱动：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fd = open(argv[<span class="number">1</span>], O_RDWR);<span class="comment">//./aout /dev/100ask_gpio_key</span></span><br></pre></td></tr></table></figure></li>
+<li><p>把进程 ID 告诉驱动：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fcntl(fd, F_SETOWN, getpid());</span><br></pre></td></tr></table></figure>
+<p> 使能驱动的 FASYNC 功能：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">flags = fcntl(fd, F_GETFL);</span><br><span class="line">fcntl(fd, F_SETFL, flags | FASYNC);</span><br></pre></td></tr></table></figure></li>
+</ol>
+<details>
+<summary>点击查看代码</summary>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;poll.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;signal.h&gt;</span></span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> fd;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">sig_func</span><span class="params">(<span class="type">int</span> sig)</span>&#123;</span><br><span class="line">	<span class="type">int</span> val;</span><br><span class="line">	read(fd, &amp;val, <span class="number">4</span>);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;get button : 0x%x\n&quot;</span>, val);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * ./button_test /dev/100ask_button0</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span>&#123;</span><br><span class="line">	<span class="type">int</span> val;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">pollfd</span> <span class="title">fds</span>[1];</span></span><br><span class="line">	<span class="type">int</span> timeout_ms = <span class="number">5000</span>;</span><br><span class="line">	<span class="type">int</span> ret;</span><br><span class="line">	<span class="type">int</span>	flags;</span><br><span class="line">	<span class="keyword">if</span> (argc != <span class="number">2</span>) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Usage: %s &lt;dev&gt;\n&quot;</span>, argv[<span class="number">0</span>]);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	signal(SIGIO, sig_func);</span><br><span class="line">	fd = open(argv[<span class="number">1</span>], O_RDWR);</span><br><span class="line">	<span class="keyword">if</span> (fd == <span class="number">-1</span>)&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;can not open file %s\n&quot;</span>, argv[<span class="number">1</span>]);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	fcntl(fd, F_SETOWN, getpid());</span><br><span class="line">	flags = fcntl(fd, F_GETFL);</span><br><span class="line">	fcntl(fd, F_SETFL, flags | FASYNC);</span><br><span class="line">	<span class="keyword">while</span> (<span class="number">1</span>)&#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;www.100ask.net \n&quot;</span>);</span><br><span class="line">		sleep(<span class="number">2</span>);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	close(fd);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</details>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/" data-id="clzf6gi8f00005suf3csghjjj" data-title="字符设备驱动-7-异步通知" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-字符设备驱动-6-poll底层驱动机制" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/07/30/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-6-poll%E5%BA%95%E5%B1%82%E9%A9%B1%E5%8A%A8%E6%9C%BA%E5%88%B6/" class="article-date">
@@ -2334,641 +2474,6 @@ board_xxx.c里面实现了具体单板的button_operations，当insmod这个驱�
 
 
   
-    <article id="post-Linux内核-并发与同步" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/" class="article-date">
-  <time class="dt-published" datetime="2024-07-20T13:04:31.000Z" itemprop="datePublished">2024-07-20</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/">Linux内核-并发与同步</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-bing-fa-chang-jing">1 并发场景</a></li>
-<li><a href="#2-bing-fa-jie-jue-fang-an">2 并发解决方案</a><ul>
-<li><a href="#2-1-nei-cun-ping-zhang">2.1 内存屏障</a><ul>
-<li><a href="#2-1-1-bian-yi-qi-zhi-ling-chong-pai-compiler-instruction-reordering">2.1.1 编译器指令重排（Compiler Instruction Reordering)</a></li>
-<li><a href="#2-1-2-nei-cun-ping-zhang-api">2.1.2 内存屏障API</a><ul>
-<li><a href="#2-1-2-1-barrier">2.1.2.1 barrier</a></li>
-<li><a href="#2-1-2-2-cpu-relax">2.1.2.2 cpu_relax</a></li>
-<li><a href="#2-1-2-3-read-once">2.1.2.3 READ_ONCE()</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#2-2-yuan-zi-cao-zuo">2.2 原子操作</a><ul>
-<li><a href="#2-2-0-lin-jie-qu-de-yuan-zi-cao-zuo-yin-ru">2.2.0 临界区的原子操作引入</a></li>
-<li><a href="#2-2-1-zheng-shu-yuan-zi-cao-zuo-api">2.2.1 整数原子操作API</a></li>
-<li><a href="#2-2-2-wei-yuan-zi-cao-zuo-api">2.2.2 位原子操作API</a></li>
-</ul>
-</li>
-<li><a href="#2-3-zi-xuan-suo">2.3 自旋锁</a><ul>
-<li><a href="#2-3-1-zi-xuan-suo-api">2.3.1 自旋锁API</a><ul>
-<li><a href="#2-3-1-1-zi-xuan-suo-he-zhong-duan-xiang-guan">2.3.1.1 自旋锁和中断相关</a></li>
-</ul>
-</li>
-<li><a href="#2-3-2-du-xie-zi-xuan-suo">2.3.2 读写自旋锁</a></li>
-<li><a href="#2-3-3-shun-xu-suo">2.3.3 顺序锁</a></li>
-</ul>
-</li>
-<li><a href="#2-4-xin-hao-liang">2.4 信号量</a><ul>
-<li><a href="#2-4-1-xin-hao-liang-api">2.4.1 信号量 API</a></li>
-</ul>
-</li>
-<li><a href="#2-5-hu-chi-suo">2.5 互斥锁</a><ul>
-<li><a href="#2-5-1-hu-chi-suo-api">2.5.1 互斥锁API</a></li>
-</ul>
-</li>
-<li><a href="#2-6-smp-jia-gou-xia-percpu-bian-liang-ji-zhi">2.6 SMP 架构下percpu变量机制</a><ul>
-<li><a href="#2-6-0-percpu-bian-liang-de-cun-chu-ge-shi">2.6.0 percpu 变量的存储格式</a></li>
-<li><a href="#2-6-1-percpu-bian-liang-shi-yong-chang-jing">2.6.1 percpu变量使用场景</a></li>
-<li><a href="#2-6-2-percpu-bian-liang-de-ding-yi">2.6.2 percpu 变量的定义</a></li>
-<li><a href="#2-6-3-percpu-bian-liang-de-du-xie">2.6.3 percpu 变量的读写</a></li>
-<li><a href="#2-6-4-percpu-bian-liang-shi-xian-yuan-li">2.6.4 percpu 变量实现原理</a><ul>
-<li><a href="#2-6-4-1-get-cpu-var-shi-xian">2.6.4.1 get_cpu_var实现</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#3-linux-nei-he-xia-bu-tong-tong-bu-ji-zhi-de-gua-yong-chang-jing">3 linux内核下不同同步机制的适用场景</a></li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-bing-fa-chang-jing">1 并发场景</span><a href="#1-bing-fa-chang-jing" class="header-anchor">#</a></h1><p>Linux 系统并发产生的原因很复杂，总结一下有下面几个主要原 因：</p>
-<ol>
-<li>多线程并发访问，Linux 是多任务(线程)的系统，所以多线程访问是最基本的原因。</li>
-<li>抢占式并发访问，从 2.6 版本内核开始，Linux 内核支持抢占，也就是说调度程序可以 在任意时刻抢占正在运行的线程，从而运行其他的线程。 </li>
-<li>中断程序并发访问，这个无需多说，学过 STM32 的同学应该知道，硬件中断的权利可 是很大的。</li>
-<li>SMP(多核)核间并发访问，现在 ARM 架构的多核 SOC 很常见，多核 CPU 存在核间并 发访问。</li>
-</ol>
-<h1><span id="2-bing-fa-jie-jue-fang-an">2 并发解决方案</span><a href="#2-bing-fa-jie-jue-fang-an" class="header-anchor">#</a></h1><h2><span id="2-1-nei-cun-ping-zhang">2.1 内存屏障</span><a href="#2-1-nei-cun-ping-zhang" class="header-anchor">#</a></h2><h3><span id="2-1-1-bian-yi-qi-zhi-ling-chong-pai-compiler-instruction-reordering">2.1.1 编译器指令重排（Compiler Instruction Reordering)</span><a href="#2-1-1-bian-yi-qi-zhi-ling-chong-pai-compiler-instruction-reordering" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a, b;</span><br><span class="line"> </span><br><span class="line"><span class="type">void</span> <span class="title function_">foo</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">    a = b + <span class="number">1</span>;</span><br><span class="line">    b = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;foo&gt;:</span><br><span class="line">    ...</span><br><span class="line">    ldr w0, [x0]       <span class="comment">//load b to w0</span></span><br><span class="line">    add w1, w0, #<span class="number">0x1</span></span><br><span class="line">    ...</span><br><span class="line">    str w1, [x0]       <span class="comment">//a = b + 1</span></span><br><span class="line">    ...</span><br><span class="line">    str wzr, [x0]      <span class="comment">//b = 0</span></span><br></pre></td></tr></table></figure>
-
-<p>我们把编译优化打开到-O2，再次反汇编：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&lt;foo&gt;:</span><br><span class="line">    ...</span><br><span class="line">    ldr w2, [x0]       <span class="comment">//load b to w2</span></span><br><span class="line">    str wzr, [x0]      <span class="comment">//b = 0</span></span><br><span class="line">    add w0, w2, #<span class="number">0x1</span></span><br><span class="line">    str w0, [x1]       <span class="comment">//a = b + 1</span></span><br></pre></td></tr></table></figure>
-
-<p>可以看到编译器 ”自作聪明“， b被提前赋值了。因此要使用内存屏障。</p>
-<h3><span id="2-1-2-nei-cun-ping-zhang-api">2.1.2 内存屏障API</span><a href="#2-1-2-nei-cun-ping-zhang-api" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">barrier();</span><br><span class="line">cpu_relax();</span><br><span class="line">READ_ONCE(val);</span><br></pre></td></tr></table></figure>
-
-<h4><span id="2-1-2-1-barrier">2.1.2.1 barrier</span><a href="#2-1-2-1-barrier" class="header-anchor">#</a></h4><p>前面用-O2选项顺序会被错误的排列。加入<code>barrier();//插入内存屏障</code>，再次反汇编可以看到OK符合我们的逻辑了。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> a, b;</span><br><span class="line"> </span><br><span class="line"><span class="type">void</span> <span class="title function_">foo</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">    a = b + <span class="number">1</span>;</span><br><span class="line"> 	barrier();<span class="comment">//插入内存屏障</span></span><br><span class="line">	b = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//反汇编如下：</span></span><br><span class="line">&lt;foo&gt;:</span><br><span class="line">    ...</span><br><span class="line">    ldr w2, [x0]       <span class="comment">//load b to w2</span></span><br><span class="line">    add w2, w2, #<span class="number">0x1</span></span><br><span class="line">    str w2, [x1]       <span class="comment">//a = a + 1</span></span><br><span class="line">    str wzr, [x0]      <span class="comment">//b = 0</span></span><br><span class="line">    ...</span><br></pre></td></tr></table></figure>
-
-<h4><span id="2-1-2-2-cpu-relax">2.1.2.2 cpu_relax</span><a href="#2-1-2-2-cpu-relax" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> run = <span class="number">1</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">foo</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="keyword">while</span> (run)</span><br><span class="line">        ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>run 是个全局变量，foo() 在一个进程中执行，一直循环。我们期望的结果是 foo() 一直等到其他进程修改 run 的值为 0 才退出循环。反汇编看看：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0000000000000748</span> &lt;foo&gt;:</span><br><span class="line"><span class="number">748</span>: <span class="number">90000080</span> adrp x0, <span class="number">10000</span></span><br><span class="line"><span class="number">74</span>c: f947e800 ldr x0, [x0, #<span class="number">4048</span>]</span><br><span class="line"><span class="number">750</span>: b9400000 ldr w0, [x0]            <span class="comment">//load run to w0</span></span><br><span class="line"><span class="number">754</span>: d503201f nop</span><br><span class="line"><span class="number">758</span>: <span class="number">35000000</span> cbnz w0, <span class="number">758</span> &lt;foo+<span class="number">0x10</span>&gt; <span class="comment">//if (w0) while (1);</span></span><br><span class="line"><span class="number">75</span>c: d65f03c0 ret</span><br></pre></td></tr></table></figure>
-
-<p>但实际上编译器帮我们优化成了等效下面的样子：这样永远也不会退出。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> run = <span class="number">1</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">foo</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="type">int</span> reg = run;</span><br><span class="line"> </span><br><span class="line">    <span class="keyword">if</span> (reg)</span><br><span class="line">        <span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">            ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>因此加上内存屏障如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> run = <span class="number">1</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">foo</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="keyword">while</span> (run)</span><br><span class="line">        cpu_relax();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4><span id="2-1-2-3-read-once">2.1.2.3 READ_ONCE()</span><a href="#2-1-2-3-read-once" class="header-anchor">#</a></h4><p>也可用这种方式作为内存屏障。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> run = <span class="number">1</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">foo</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">while</span> (READ_ONCE(run)) <span class="comment">/* similar to while (*(volatile int *)&amp;run) */</span></span><br><span class="line">        ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2><span id="2-2-yuan-zi-cao-zuo">2.2 原子操作</span><a href="#2-2-yuan-zi-cao-zuo" class="header-anchor">#</a></h2><h3><span id="2-2-0-lin-jie-qu-de-yuan-zi-cao-zuo-yin-ru">2.2.0 临界区的原子操作引入</span><a href="#2-2-0-lin-jie-qu-de-yuan-zi-cao-zuo-yin-ru" class="header-anchor">#</a></h3><p>所谓的临界区就是共享数据段，如全局变量，对于临界区必须保证一次只有一个线程访问，也就是要保证临 界区是原子访问的。我们都知道，原子是化学反应不可再分的基本微粒，这里的原子访问就表示这一个访问是一个步骤，不能再进行拆分。</p>
-<p>示例1：</p>
-<p><code>a=3;</code></p>
-<p>假设变量 a 的地址为 0X3000000，“a&#x3D;3”这一行 C 语言可能会被编译为如下所示的汇编代码:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ldr r0, =<span class="number">0X30000000</span> <span class="comment">/* 变量 a 地址 */</span></span><br><span class="line"><span class="number">2</span> ldr r1, = <span class="number">3</span> <span class="comment">/* 要写入的值 */</span></span><br><span class="line"><span class="number">3</span> str r1, [r0] <span class="comment">/* 将 3 写入到 a 变量中 */</span></span><br></pre></td></tr></table></figure>
-
-<p>如果多线程同时执行这条语句。我们期望的执行顺序：</p>
-<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/1.png" alt="image"></p>
-<p>实际执行顺序可能是：</p>
-<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/2.png" alt="image"></p>
-<p>线程 A 最终将变量 a 设置为了 20，而并不是要求的 10线程 B 没有问题，是期望的a设置成了20，这就是并发竞态。我们希望三条汇编指令一次性执行完，不被打断和拆解，这就是原子操作。</p>
-<h2><span id></span><a href="#" class="header-anchor">#</a></h2><h3><span id="2-2-1-zheng-shu-yuan-zi-cao-zuo-api">2.2.1 整数原子操作API</span><a href="#2-2-1-zheng-shu-yuan-zi-cao-zuo-api" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">	<span class="type">int</span> counter;</span><br><span class="line">&#125; <span class="type">atomic_t</span>;</span><br><span class="line"><span class="type">atomic_t</span> b = ATOMIC_INIT(<span class="number">0</span>); <span class="comment">//定义原子变量 b 并赋初值为 0</span></span><br><span class="line"><span class="type">atomic_set</span>(&amp;b, <span class="number">10</span>); <span class="comment">/* 设置 b=10 */</span></span><br><span class="line"><span class="type">atomic_read</span>(&amp;b); <span class="comment">/* 读取 b 的值，肯定是 10 */</span></span><br><span class="line"><span class="type">atomic_inc</span>(&amp;b); <span class="comment">/* b 的值加 1，v=11 */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line"> 	<span class="type">long</span> <span class="type">long</span> counter;</span><br><span class="line">&#125; <span class="type">atomic64_t</span>;</span><br><span class="line"><span class="type">atomic64_t</span> c = ATOMIC64_INIT(<span class="number">0</span>); <span class="comment">//定义64位系统原子变量 c 并赋初值为 0</span></span><br><span class="line"><span class="comment">//注意：如果使用的是64 位的 SOC，那么建议使用 64 位的原子操作函数。Cortex-A7 (armv7)是 32 位的架构，Cortex-A53（armv8）64位架构。</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>函数</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>ATOMIC_INIT(int i)</td>
-<td>定义原子变量的时候对其初始化。</td>
-</tr>
-<tr>
-<td>int atomic_read(atomic_t *v)</td>
-<td>读取 v 的值，并且返回。</td>
-</tr>
-<tr>
-<td>void atomic_set(atomic_t *v, int i)</td>
-<td>向 v 写入 i 值。</td>
-</tr>
-<tr>
-<td>void atomic_add(int i, atomic_t *v)</td>
-<td>给 v 加上 i 值。</td>
-</tr>
-<tr>
-<td>void atomic_sub(int i, atomic_t *v)</td>
-<td>从 v 减去 i 值。</td>
-</tr>
-<tr>
-<td>void atomic_inc(atomic_t *v)</td>
-<td>给 v 加 1，也就是自增。</td>
-</tr>
-<tr>
-<td>void atomic_dec(atomic_t *v)</td>
-<td>从 v 减 1，也就是自减</td>
-</tr>
-<tr>
-<td>int atomic_dec_return(atomic_t *v)</td>
-<td>从 v 减 1，并且返回 v 的值。</td>
-</tr>
-<tr>
-<td>int atomic_inc_return(atomic_t *v)</td>
-<td>给 v 加 1，并且返回 v 的值。</td>
-</tr>
-<tr>
-<td>atomic_add_return(int i, atomic_t *v)</td>
-<td>给 v 加 i，并且返回 v 的值。</td>
-</tr>
-<tr>
-<td>atomic_sub_return(int i, atomic_t *v)</td>
-<td>给 v 减 i，并且返回 v 的值。</td>
-</tr>
-<tr>
-<td>int atomic_sub_and_test(int i, atomic_t *v)</td>
-<td>从 v 减 i，如果结果为 0 就返回真，否则返回假</td>
-</tr>
-<tr>
-<td>int atomic_dec_and_test(atomic_t *v)</td>
-<td>从 v 减 1，如果结果为 0 就返回真，否则返回假</td>
-</tr>
-<tr>
-<td>int atomic_inc_and_test(atomic_t *v)</td>
-<td>给 v 加 1，如果结果为 0 就返回真，否则返回假</td>
-</tr>
-<tr>
-<td>int atomic_add_negative(int i, atomic_t *v)</td>
-<td>给 v 加 i，如果结果为负就返回真，否则返回假</td>
-</tr>
-<tr>
-<td>atomic_cmpxchg(atomic_t *ptr, int old, int new)</td>
-<td>比较old和原子变量ptr中的值，如果相等，那么就把new值赋给原子变量。返回旧的原子变量ptr中的值</td>
-</tr>
-</tbody></table>
-<p>例：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">led_open</span><span class="params">(<span class="keyword">struct</span> inode *inode, <span class="keyword">struct</span> file *filp)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">if</span> (!atomic_dec_and_test(&amp;gpioled.lock)) &#123;</span><br><span class="line">		<span class="type">atomic_inc</span>(&amp;gpioled.lock);<span class="comment">/* 小于 0 的话就加 1,使其原子变量等于 0 */</span></span><br><span class="line">		<span class="keyword">return</span> -EBUSY; <span class="comment">/* LED 被使用，返回忙 */</span></span><br><span class="line">    &#125;</span><br><span class="line">    filp-&gt;private_data = &amp;gpioled;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">led_release</span><span class="params">(<span class="keyword">struct</span> inode *inode, <span class="keyword">struct</span> file *filp)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">gpioled_dev</span> *<span class="title">dev</span> =</span> filp-&gt;private_data;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 关闭驱动文件的时候释放原子变量 */</span></span><br><span class="line">	<span class="type">atomic_inc</span>(&amp;dev-&gt;lock);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">led_init</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="comment">/* 初始化原子变量 */</span></span><br><span class="line">	<span class="type">atomic_set</span>(&amp;gpioled.lock, <span class="number">1</span>); <span class="comment">/* 原子变量初始值为 1 */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>该例子用来实现一次只能允许一个应用访问 LED 灯，不能多个进程同时操作LED。第一个用户程序进行open,成功此时原子值counter&#x3D;0，第二个用户程序进行open就会fail, 直到第一个用户程序close, counter会进行加一，此时第二个程序才可以open成功。</p>
-<h3><span id="2-2-2-wei-yuan-zi-cao-zuo-api">2.2.2 位原子操作API</span><a href="#2-2-2-wei-yuan-zi-cao-zuo-api" class="header-anchor">#</a></h3><p>原 子位操作不像原子整形变量那样有个 atomic_t 的数据结构，原子位操作是直接对内存进行操作：</p>
-<table>
-<thead>
-<tr>
-<th>函数</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>void set_bit(int nr, void *p)</td>
-<td>将 p 地址的第 nr 位置 1。</td>
-</tr>
-<tr>
-<td>void clear_bit(int nr,void *p)</td>
-<td>将 p 地址的第 nr 位清零。</td>
-</tr>
-<tr>
-<td>void change_bit(int nr, void *p)</td>
-<td>将 p 地址的第 nr 位进行翻转。</td>
-</tr>
-<tr>
-<td>int test_bit(int nr, void *p)</td>
-<td>获取 p 地址的第 nr 位的值。</td>
-</tr>
-<tr>
-<td>int test_and_set_bit(int nr, void *p)</td>
-<td>将 p 地址的第 nr 位置 1，并且返回 nr 位原来的值。</td>
-</tr>
-<tr>
-<td>int test_and_clear_bit(int nr, void *p)</td>
-<td>将 p 地址的第 nr 位清零，并且返回 nr 位原来的值。</td>
-</tr>
-<tr>
-<td>int test_and_change_bit(int nr, void *p)</td>
-<td>将 p 地址的第 nr 位翻转，并且返回 nr 位原来的值。</td>
-</tr>
-</tbody></table>
-<h2><span id="2-3-zi-xuan-suo">2.3 自旋锁</span><a href="#2-3-zi-xuan-suo" class="header-anchor">#</a></h2><p>原子操作只能对整形变量或者位进行保护，但是，在实际的使用环境中怎么可能只有整形 变量或位这么简单的临界区。</p>
-<p>自旋锁的定义：</p>
-<p>对于自旋锁而言，如果自旋锁 正在被线程 A 持有，线程 B 想要获取自旋锁，那么线程 B 就会处于忙循环-旋转-等待状态，线 程 B 不会进入休眠状态或者说去做其他的处理，而是会一直傻傻的在那里“转圈圈”的等待锁 可用。比如现在有个公用电话亭，一次肯定只能进去一个人打电话，现在电话亭里面有人正在 打电话，相当于获得了自旋锁。此时你到了电话亭门口，因为里面有人，所以你不能进去打电 话，相当于没有获取自旋锁，这个时候你肯定是站在原地等待，你可能因为无聊的等待而转圈 圈消遣时光，反正就是哪里也不能去，要一直等到里面的人打完电话出来。终于，里面的人打 完电话出来了，相当于释放了自旋锁，这个时候你就可以使用电话亭打电话了，相当于获取到 了自旋锁。</p>
-<p> 自旋锁的“自旋”也就是“原地打转”的意思，“原地打转”的目的是为了等待自旋锁可以 用，可以访问共享资源。把自旋锁比作一个变量 a，变量 a&#x3D;1 的时候表示共享资源可用，当 a&#x3D;0 的时候表示共享资源不可用。现在线程 A 要访问共享资源，发现 a&#x3D;0(自旋锁被其他线程持有)， 那么线程 A 就会不断的查询 a 的值，直到 a&#x3D;1。可</p>
-<p><code>缺点：获取自旋锁会原地等待，会浪费处理器时间，降低系统性能，所以自旋锁 的持有时间不能太长。如果临界区比较大，运行时间比较长的话要选择信号量和互斥体。</code></p>
-<p><code>适用范围：适用于短时期的轻量级加锁。</code></p>
-<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/3.png" alt="image"></p>
-<h3><span id="2-3-1-zi-xuan-suo-api">2.3.1 自旋锁API</span><a href="#2-3-1-zi-xuan-suo-api" class="header-anchor">#</a></h3><table>
-<thead>
-<tr>
-<th>函数</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>DEFINE_SPINLOCK(spinlock_t lock)</td>
-<td>定义并初始化一个自选变量。</td>
-</tr>
-<tr>
-<td>int spin_lock_init(spinlock_t *lock)</td>
-<td>初始化自旋锁。</td>
-</tr>
-<tr>
-<td>void spin_lock(spinlock_t *lock)</td>
-<td>获取指定的自旋锁，也叫做加锁。</td>
-</tr>
-<tr>
-<td>void spin_unlock(spinlock_t *lock)</td>
-<td>释放指定的自旋锁。</td>
-</tr>
-<tr>
-<td>int spin_trylock(spinlock_t *lock)</td>
-<td>尝试获取指定的自旋锁，如果没有获取到就返回 0</td>
-</tr>
-<tr>
-<td>int spin_is_locked(spinlock_t *lock)</td>
-<td>检查指定的自旋锁是否被获取，如果没有被获取就返回非 0，否则返回 0。</td>
-</tr>
-</tbody></table>
-<p>被自旋锁保护的临界区一定不能调用任何能够引起睡眠和阻塞的 API 函数，否则的话会可能会导致死锁现象（不能带锁休眠）。因为自旋锁会禁止抢占，也就说当线程 A 得到锁以后会暂时禁止内核抢占，那既然禁止内核抢占自己又休眠了，粗俗的形容就是“占着茅坑不拉屎”，自己休眠了又没有释放锁就导致死锁。</p>
-<h4><span id="2-3-1-1-zi-xuan-suo-he-zhong-duan-xiang-guan">2.3.1.1 自旋锁和中断相关</span><a href="#2-3-1-1-zi-xuan-suo-he-zhong-duan-xiang-guan" class="header-anchor">#</a></h4><p>中断里面访问临界资源，也是可以使用自旋锁的，但是在获取锁之前一定要先禁止本地中断。</p>
-<table>
-<thead>
-<tr>
-<th>函数</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>void spin_lock_irq(spinlock_t *lock)</td>
-<td>禁止本地中断，并获取自旋锁。</td>
-</tr>
-<tr>
-<td>void spin_unlock_irq(spinlock_t *lock)</td>
-<td>激活本地中断，并释放自旋锁。</td>
-</tr>
-<tr>
-<td>void spin_lock_irqsave(spinlock_t *lock,unsigned long flags)</td>
-<td>保存中断状态，禁止本地中断，并获取自旋锁。</td>
-</tr>
-<tr>
-<td>void spin_unlock_irqrestore(spinlock_t*lock, unsigned long flags)</td>
-<td>将中断状态恢复到以前的状态，并且激活本地中断，释放自旋锁</td>
-</tr>
-</tbody></table>
-<p>如下图就是没有禁止本地中断导致死锁的例子：</p>
-<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/4.png" alt="image"></p>
-<p>线程 A 先运行，并且获取到了 lock 这个锁，当线程 A 运行 <code>functionA </code>函 数的时候中断发生了，中断抢走了 CPU 使用权。右边的中断服务函数也要获取 lock 这个锁， 但是这个锁被线程 A 占有着，中断就会一直自旋，等待锁有效。但是在中断服务函数执行完之前，线程 A 是不可能执行的，线程 A 说“你先放手”，中断说“你先放手”，场面就这么僵持着， 死锁发生！</p>
-<p>使用<code> spin_lock_irq/spin_unlock_irq</code> 的时候需要用户能够确定加锁之前的中断状态，但实际上我们是很难确定某个时刻的中断状态，因此不推荐使用<code> spin_lock_irq/spin_unlock_irq</code>。建议使用 <code>spin_lock_irqsave/spin_unlock_irqrestore</code>，因为这一组函数会保存中断状态，在释放锁的时候会恢复中断状态。一般在线程中使用<code> spin_lock_irqsave/ spin_unlock_irqrestore</code>，在中断中使用<code> spin_lock/spin_unlock</code>，例如下面：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">DEFINE_SPINLOCK(lock);</span><br><span class="line"><span class="comment">/* 线程 A */</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">functionA</span> <span class="params">()</span>&#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> flags; <span class="comment">/* 中断状态 */</span></span><br><span class="line">	spin_lock_irqsave(&amp;lock, flags); <span class="comment">/* 获取锁 */</span></span><br><span class="line">	<span class="comment">/* 临界区 */</span></span><br><span class="line">	spin_unlock_irqrestore(&amp;lock, flags); <span class="comment">/* 释放锁 */</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"> <span class="comment">/* 中断服务函数 */</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">irq</span><span class="params">()</span> &#123;</span><br><span class="line">	spin_lock(&amp;lock); <span class="comment">/* 获取锁 */</span></span><br><span class="line">	<span class="comment">/* 临界区 */</span></span><br><span class="line">	spin_unlock(&amp;lock); <span class="comment">/* 释放锁 */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>有人说为什么中断服务程序不去使用<code>spin_lock_irqsave</code>呢？ 难道不需要去禁止中断吗？</p>
-<p>因为GIC中断总入口已经帮我们做了禁止中断。调用了<code>local_irq_disable()</code>,详见<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17517136.html">设备驱动-10.中断子系统-1异常中断引入 - fuzidage - 博客园 (cnblogs.com)</a></p>
-<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/5.png" alt="image"></p>
-<p>如果下半部(BH)也会竞争共享资源，要在下半部里面使用自旋锁:</p>
-<table>
-<thead>
-<tr>
-<th>函数</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>void spin_lock_bh(spinlock_t *lock)</td>
-<td>关闭下半部，并获取自旋锁</td>
-</tr>
-<tr>
-<td>void spin_unlock_bh(spinlock_t *lock)</td>
-<td>打开下半部，并释放自旋锁</td>
-</tr>
-</tbody></table>
-<h3><span id="2-3-2-du-xie-zi-xuan-suo">2.3.2 读写自旋锁</span><a href="#2-3-2-du-xie-zi-xuan-suo" class="header-anchor">#</a></h3><p>读写自旋锁为读和写操作提供了不同的锁，一次只能允许一个写操作，也就是只能一个线程持有写锁，而且不能进行读操作。但是当没有写操作的时候允许一个或多个线程持有读锁， 可以进行并发的读操作。Linux 内核使用 rwlock_t 结构体表示读写锁，结构体定义如下(删除了 条件编译)：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line"> 	<span class="type">arch_rwlock_t</span> raw_lock;</span><br><span class="line">&#125; <span class="type">rwlock_t</span>;</span><br></pre></td></tr></table></figure>
-
-<p>使用场景：</p>
-<p>现在有个学生信息表，此表存放着学生的年龄、家庭住址、班级等信息，此表可以随时被 修改和读取，那么必须要对其进行保护，如果我们现在使用自旋锁对其进行 保护。每次只能一个读操作或者写操作，但是，实际上此表是可以并发读取的。只需要保证在 修改此表的时候没人读取，或者在其他人读取此表的时候没有人修改此表就行了。也就是此表 的读和写不能同时进行，但是可以多人并发的读取此表。像这样，当某个数据结构符合读&#x2F;写或 生产者&#x2F;消费者模型的时候就可以使用读写自旋锁。</p>
-<table>
-<thead>
-<tr>
-<th>函数</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>DEFINE_RWLOCK(rwlock_t lock)</td>
-<td>定义并初始化读写锁</td>
-</tr>
-<tr>
-<td>void rwlock_init(rwlock_t *lock)</td>
-<td>初始化读写锁。</td>
-</tr>
-<tr>
-<td>读操作</td>
-<td></td>
-</tr>
-<tr>
-<td>void read_lock(rwlock_t *lock)</td>
-<td>获取读锁。</td>
-</tr>
-<tr>
-<td>void read_unlock(rwlock_t *lock)</td>
-<td>释放读锁。</td>
-</tr>
-<tr>
-<td>void read_lock_irq(rwlock_t *lock)</td>
-<td>禁止本地中断，并且获取读锁。</td>
-</tr>
-<tr>
-<td>void read_unlock_irq(rwlock_t *lock)</td>
-<td>打开本地中断，并且释放读锁。</td>
-</tr>
-<tr>
-<td>void read_lock_irqsave(rwlock_t *lock, unsigned long flags)</td>
-<td>保存中断状态，禁止本地中断，并获取读锁。</td>
-</tr>
-<tr>
-<td>void read_unlock_irqrestore(rwlock_t *lock,unsigned long flags)</td>
-<td>将中断状态恢复到以前的状态，并且激活本地中断，释放读锁。</td>
-</tr>
-<tr>
-<td>void read_lock_bh(rwlock_t *lock)</td>
-<td>关闭下半部，并获取读锁。</td>
-</tr>
-<tr>
-<td>void read_unlock_bh(rwlock_t *lock)</td>
-<td>打开下半部，并释放读锁。</td>
-</tr>
-<tr>
-<td>写操作</td>
-<td></td>
-</tr>
-<tr>
-<td>void write_lock(rwlock_t *lock)</td>
-<td>获取写锁。</td>
-</tr>
-<tr>
-<td>void write_unlock(rwlock_t *lock)</td>
-<td>释放写锁。</td>
-</tr>
-<tr>
-<td>void write_lock_irq(rwlock_t *lock)</td>
-<td>禁止本地中断，并且获取写锁。</td>
-</tr>
-<tr>
-<td>void write_unlock_irq(rwlock_t *lock)</td>
-<td>打开本地中断，并且释放写锁。</td>
-</tr>
-<tr>
-<td>void write_lock_irqsave(rwlock_t *lock,unsigned long flags)</td>
-<td>保存中断状态，禁止本地中断，并获取写锁</td>
-</tr>
-<tr>
-<td>void write_unlock_irqrestore(rwlock_t *lock,unsigned long flags)</td>
-<td>将中断状态恢复到以前的状态，并且激活本地中断，释放读锁。</td>
-</tr>
-<tr>
-<td>void write_lock_bh(rwlock_t *lock)</td>
-<td>关闭下半部，并获取读锁。</td>
-</tr>
-<tr>
-<td>void write_unlock_bh(rwlock_t *lock)</td>
-<td>打开下半部，并释放读锁。</td>
-</tr>
-</tbody></table>
-<h3><span id="2-3-3-shun-xu-suo">2.3.3 顺序锁</span><a href="#2-3-3-shun-xu-suo" class="header-anchor">#</a></h3><p>顺序锁在读写锁的基础上衍生而来的，使用读写锁的时候读操作和写操作不能同时进行。使用顺序锁的话可以允许在写的时候进行读操作，也就是实现同时读写，但是不允许同时进行并发的写操作。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line"> 		<span class="class"><span class="keyword">struct</span> <span class="title">seqcount</span> <span class="title">seqcount</span>;</span></span><br><span class="line"> 		<span class="type">spinlock_t</span> lock;</span><br><span class="line">&#125; <span class="type">seqlock_t</span>;</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>函数</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>DEFINE_SEQLOCK(seqlock_t sl)</td>
-<td>定义并初始化顺序锁</td>
-</tr>
-<tr>
-<td>void seqlock_ini seqlock_t *sl)</td>
-<td>初始化顺序锁。</td>
-</tr>
-<tr>
-<td>void write_seqlock(seqlock_t *sl)</td>
-<td>获取写顺序锁。</td>
-</tr>
-<tr>
-<td>void write_sequnlock(seqlock_t *sl)</td>
-<td>释放写顺序锁。</td>
-</tr>
-<tr>
-<td>void write_seqlock_irq(seqlock_t *sl)</td>
-<td>禁止本地中断，并且获取写顺序锁</td>
-</tr>
-<tr>
-<td>void write_sequnlock_irq(seqlock_t *sl)</td>
-<td>打开本地中断，并且释放写顺序锁。</td>
-</tr>
-<tr>
-<td>void write_seqlock_irqsave(seqlock_t *sl,unsigned long flags)</td>
-<td>保存中断状态，禁止本地中断，并获取写顺序锁。</td>
-</tr>
-<tr>
-<td>void write_sequnlock_irqrestore(seqlock_t *sl,unsigned long flags)</td>
-<td>将中断状态恢复到以前的状态，并且激活本地中断，释放写顺序锁。</td>
-</tr>
-<tr>
-<td>void write_seqlock_bh(seqlock_t *sl)</td>
-<td>关闭下半部，并获取写读锁。</td>
-</tr>
-<tr>
-<td>void write_sequnlock_bh(seqlock_t *sl)</td>
-<td>打开下半部，并释放写读锁。</td>
-</tr>
-<tr>
-<td>unsigned read_seqbegin(const seqlock_t *sl)</td>
-<td>读单元访问共享资源的时候调用此函数，此函数会返回顺序锁的顺序号。</td>
-</tr>
-<tr>
-<td>unsigned read_seqretry(const seqlock_t *sl,unsigned start)</td>
-<td>读结束以后调用此函数检查在读的过程中有没有对资源进行写操作，如果有的话就要重读</td>
-</tr>
-</tbody></table>
-<h2><span id="2-4-xin-hao-liang">2.4 信号量</span><a href="#2-4-xin-hao-liang" class="header-anchor">#</a></h2><p>相比于自旋锁，信号量可以使线程进入休眠状态，比如 A 与 B、C 合租了一套房子，这个 房子只有一个厕所，一次只能一个人使用。某一天早上 A 去上厕所了，过了一会 B 也想用厕 所，因为 A 在厕所里面，所以 B 只能等到 A 用来了才能进去。B 要么就一直在厕所门口等着， 等 A 出来，这个时候就相当于自旋锁。B 也可以告诉 A，让 A 出来以后通知他一下，然后 B 继 续回房间睡觉，这个时候相当于信号量。可以看出，使用信号量会提高处理器的使用效率，毕 竟不用一直傻乎乎的在那里“自旋”等待。但是，信号量的开销要比自旋锁大，因为信号量使 线程进入休眠状态以后会切换线程，切换线程就会有开销。</p>
-<p>信号量的特点： </p>
-<p><code>适用于那些占用资源比较久的场合，如线程同步。</code></p>
-<p><code>因此信号量等待不能用于中断中，因为中断不能休眠。</code></p>
-<h3><span id="2-4-1-xin-hao-liang-api">2.4.1 信号量 API</span><a href="#2-4-1-xin-hao-liang-api" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">semaphore</span> &#123;</span></span><br><span class="line">	 <span class="type">raw_spinlock_t</span> lock;</span><br><span class="line">	 <span class="type">unsigned</span> <span class="type">int</span> count;</span><br><span class="line">	 <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">wait_list</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-
-
-<table>
-<thead>
-<tr>
-<th>函数</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>DEFINE_SEAMPHORE(name)</td>
-<td>定义一个信号量，并且设置信号量的值为 1。</td>
-</tr>
-<tr>
-<td>void sema_init(struct semaphore *sem, int val)</td>
-<td>初始化信号量 sem，设置信号量值为 val。</td>
-</tr>
-<tr>
-<td>void down(struct semaphore *sem)</td>
-<td>获取信号量，因为会导致休眠，因此不能在中断中使用。</td>
-</tr>
-<tr>
-<td>int down_trylock(struct semaphore *sem);</td>
-<td>尝试获取信号量，如果能获取到信号量就获取，并且返回 0。如果不能就返回非 0，并且不会进入休眠。</td>
-</tr>
-<tr>
-<td>int down_interruptible(struct semaphore *sem)</td>
-<td>获取信号量，和 down 类似，只是使用 down 进入休眠状态的线程不能被信号打断。而使用此函数进入休眠以后是可以被信号打断的。</td>
-</tr>
-<tr>
-<td>void up(struct semaphore *sem)</td>
-<td>释放信号量</td>
-</tr>
-</tbody></table>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">semaphore</span> <span class="title">sem</span>;</span> <span class="comment">/* 定义信号量 */</span></span><br><span class="line">sema_init(&amp;sem, <span class="number">1</span>); <span class="comment">/* 初始化信号量 */</span></span><br><span class="line">threadA()&#123;</span><br><span class="line">    down(&amp;sem); <span class="comment">/* 申请信号量 */</span></span><br><span class="line">&#125;</span><br><span class="line">theadB()&#123;</span><br><span class="line">    up(&amp;sem); <span class="comment">/* 释放信号量 */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2><span id="2-5-hu-chi-suo">2.5 互斥锁</span><a href="#2-5-hu-chi-suo" class="header-anchor">#</a></h2><p>将信号量的值设置为 1 就可以使用信号量进行互斥访问了，虽然可以通过信号量实现互斥，但是 Linux 提供了一个比信号量更专业的机制来进行互斥，它就是互斥体—mutex。互斥访问表示一次只有一个线程可以访问共享资源，不能递归申请互斥锁。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">mutex</span> &#123;</span></span><br><span class="line">	 <span class="comment">/* 1: unlocked, 0: locked, negative: locked, possible waiters */</span></span><br><span class="line"> 	<span class="type">atomic_t</span> count;</span><br><span class="line">	 <span class="type">spinlock_t</span> wait_lock;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-
-<p>使用 mutex 的时候要注意如下几点：</p>
-<p><code>1. mutex 可以导致休眠，因此不能在中断中使用 mutex，中断中只能使用自旋锁。</code> </p>
-<p><code>2. 和信号量一样，mutex 保护的临界区可以调用引起阻塞的 API 函数。</code></p>
-<p><code> 3. 因为一次只有一个线程可以持有 mutex，因此，必须由 mutex 的持有者释放 mutex。并且 mutex 不能递归上锁和解锁。</code></p>
-<h3><span id="2-5-1-hu-chi-suo-api">2.5.1 互斥锁API</span><a href="#2-5-1-hu-chi-suo-api" class="header-anchor">#</a></h3><table>
-<thead>
-<tr>
-<th>函数</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>DEFINE_MUTEX(name)</td>
-<td>定义并初始化一个 mutex 变量。</td>
-</tr>
-<tr>
-<td>void mutex_init(mutex *lock)</td>
-<td>初始化 mutex。</td>
-</tr>
-<tr>
-<td>void mutex_lock(struct mutex *lock)</td>
-<td>获取 mutex，也就是给 mutex 上锁。如果获取不到就进休眠。</td>
-</tr>
-<tr>
-<td>void mutex_unlock(struct mutex *lock)</td>
-<td>释放 mutex，也就给 mutex 解锁。</td>
-</tr>
-<tr>
-<td>int mutex_trylock(struct mutex *lock)</td>
-<td>尝试获取 mutex，如果成功就返回 1，如果失败就返回 0。</td>
-</tr>
-<tr>
-<td>int mutex_is_locked(struct mutex *lock)</td>
-<td>判断 mutex 是否被获取，如果是的话就返回1，否则返回 0。</td>
-</tr>
-<tr>
-<td>int mutex_lock_interruptible(struct mutex *lock)</td>
-<td>使用此函数获取信号量失败进入休眠以后可以被信号打断</td>
-</tr>
-</tbody></table>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">mutex</span> <span class="title">lock</span>;</span> <span class="comment">/* 定义一个互斥体 */</span></span><br><span class="line">mutex_init(&amp;lock); <span class="comment">/* 初始化互斥体 */</span></span><br><span class="line">mutex_lock(&amp;lock); <span class="comment">/* 上锁 */</span></span><br><span class="line"><span class="comment">/* 临界区 */</span></span><br><span class="line">mutex_unlock(&amp;lock); <span class="comment">/* 解锁 */</span></span><br></pre></td></tr></table></figure>
-
-<h2><span id="2-6-smp-jia-gou-xia-percpu-bian-liang-ji-zhi">2.6 SMP 架构下percpu变量机制</span><a href="#2-6-smp-jia-gou-xia-percpu-bian-liang-ji-zhi" class="header-anchor">#</a></h2><p>随着 SMP(对称多处理器架构) 的发展，程序确实是在并发执行，也为数据同步带来了更大的挑战。</p>
-<p>在 SMP 架构中，每个 CPU 都拥有自己的高速缓存，通常，L1 cache 是 CPU 独占的，每个 CPU 都有一份，它的速度自然是最快的，而 L2 cache 通常是所有 CPU 共享的高速缓存，当 CPU 载入一个全局数据时，会逐级地查看高速缓存，如果没有在缓存中命中，就从内存中载入，并加入到各级 cache 中，当下次需要读取这个值时，直接读取 cache 。</p>
-<p>假如进程在 CPU0 上操作一个共享变量，在某个时刻进程被调度到 CPU1 上执行时，CPU0 和 CPU1 上的 共享变量值就不同。</p>
-<p><strong>percpu机制</strong>：为了避免多个 CPU 对全局数据的竞争而导致的性能损失，<strong>percpu 直接为每个 CPU 生成一份独有的数据备份，每个数据备份占用独立的内存</strong>，CPU 不应该修改不属于自己的这部分数据，这样就避免了多 CPU 对全局数据的竞争问题。</p>
-<h3><span id="2-6-0-percpu-bian-liang-de-cun-chu-ge-shi">2.6.0 percpu 变量的存储格式</span><a href="#2-6-0-percpu-bian-liang-de-cun-chu-ge-shi" class="header-anchor">#</a></h3><p>对于普通的变量而言，变量的加载地址就是程序中使用的该变量的地址，可以使用取址符获取变量地址。</p>
-<p><strong>percpu 变量</strong>：percpu 变量的加载地址是不允许访问的，取而代之的是对于 n 核的 SMP 架构系统，内核将会为每一个 CPU 另行开辟一片内存，将该 percpu 变量复制 n 份分别放在每个 CPU 独有的内存区中。</p>
-<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/6.png" alt="image"></p>
-<p>也就是说，为 percpu 分配内存的时候，原始的变量 var 与 percpu 变量内存偏移值 offset 被保存了下来，每个 CPU 对应的 percpu 变量地址为 <code>(&amp;var + offset)</code>，当然真实情况要比这个复杂，将在后文中讲解。</p>
-<h3><span id="2-6-1-percpu-bian-liang-shi-yong-chang-jing">2.6.1 percpu变量使用场景</span><a href="#2-6-1-percpu-bian-liang-shi-yong-chang-jing" class="header-anchor">#</a></h3><ol>
-<li>计数器和统计信息：如果你有计数器或者统计信息需要在每个CPU上独立维护，那么<code>percpu</code>变量将会非常有用。</li>
-<li>异步任务处理：通过<code>percpu</code>变量来维护异步任务的上下文信息。</li>
-</ol>
-<h3><span id="2-6-2-percpu-bian-liang-de-ding-yi">2.6.2 percpu 变量的定义</span><a href="#2-6-2-percpu-bian-liang-de-ding-yi" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">DEFINE_PER_CPU(type, name);<span class="comment">//静态定义一个 percpu变量，type 是变量类型，name 是变量名</span></span><br><span class="line"></span><br><span class="line">type __percpu *ptr <span class="title function_">alloc_percpu</span><span class="params">(type)</span>;<span class="comment">//动态分配一个percpu变量ptr,这只是一个原始数据，真正被使用的数据被 copy 成 n(n=CPU数量) 份分别保存在每个 CPU 独占的地址空间中，在访问 percpu 变量时就是对每个副本进行访问。</span></span><br></pre></td></tr></table></figure>
-
-<h3><span id="2-6-3-percpu-bian-liang-de-du-xie">2.6.3 percpu 变量的读写</span><a href="#2-6-3-percpu-bian-liang-de-du-xie" class="header-anchor">#</a></h3><p><strong>静态定义的读写</strong>：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">DEFINE_PER_CPU(<span class="type">int</span>, val)=<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 获取当前CPU的percpu变量的值</span></span><br><span class="line"><span class="type">int</span> value = per_cpu(val, smp_processor_id());</span><br><span class="line"><span class="comment">// 遍历所有CPU，并打印percpu变量的值</span></span><br><span class="line">for_each_possible_cpu(cpu) &#123;</span><br><span class="line">    value = per_cpu(val, cpu);</span><br><span class="line">    printk(KERN_INFO <span class="string">&quot;my_percpu_var on CPU%d is %d\n&quot;</span>, cpu, value);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/*put_cpu_var 和 get_cpu_var 是成对出现的,因为这段期间内静止内核抢占，</span></span><br><span class="line"><span class="comment"> *它们之间的代码不宜执行太长时间。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="type">int</span> *pint = &amp;get_cpu_var(val);<span class="comment">//获取当前 CPU 的 percpu 变量的地址进行操作</span></span><br><span class="line">*pint++;</span><br><span class="line">put_cpu_var(val);</span><br></pre></td></tr></table></figure>
-
-<p>为什么在调用 <code>get_cpu_var </code>时，第一步是禁止内核抢占呢?</p>
-<p>想想这样一个场景，进程 A 在 CPU0 上执行，读取了 percpu 变量到寄存器中，这时候进程被高优先级进程抢占，继续执行的时候可能被转移到 CPU1 上执行，这时候在 CPU1 执行的代码操作的仍旧是 CPU0 上的 percpu 变量，这显然是错误的。</p>
-<p><strong>动态定义的读写</strong>：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> *pint = alloc_percpu(<span class="type">int</span>);</span><br><span class="line">...</span><br><span class="line"><span class="type">int</span> *p = per_cpu_ptr(pint,raw_smp_processor_id());<span class="comment">//与静态变量的操作接口不一样，这个接口允许指定 CPU ，不再是只能获取当前 CPU 的值</span></span><br><span class="line">(*p)++;</span><br></pre></td></tr></table></figure>
-
-<p><code>raw_smp_processor_id() </code>函数返回<code>当前 CPU num</code>，这个示例也就是操作当前 CPU 的 percpu 变量，这个接口<strong>并不需要禁止内核抢占</strong>，因为不管进程被切换到哪个 CPU 上执行，它所操作的都是第二个参数提供的 CPU。</p>
-<h3><span id="2-6-4-percpu-bian-liang-shi-xian-yuan-li">2.6.4 percpu 变量实现原理</span><a href="#2-6-4-percpu-bian-liang-shi-xian-yuan-li" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> DEFINE_PER_CPU(type, name)                  \</span></span><br><span class="line"><span class="meta">    DEFINE_PER_CPU_SECTION(type, name, <span class="string">&quot;&quot;</span>)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DEFINE_PER_CPU_SECTION(type, name, sec)             \</span></span><br><span class="line"><span class="meta">    __PCPU_ATTRS(sec) PER_CPU_DEF_ATTRIBUTES            \</span></span><br><span class="line"><span class="meta">    __typeof__(type) name</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __PCPU_ATTRS(sec)                       \</span></span><br><span class="line"><span class="meta">    __percpu __attribute__((section(PER_CPU_BASE_SECTION sec))) \</span></span><br><span class="line"><span class="meta">    PER_CPU_ATTRIBUTES</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_SMP</span></span><br><span class="line">    <span class="meta">#<span class="keyword">define</span> PER_CPU_BASE_SECTION <span class="string">&quot;.data..percpu&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">    <span class="meta">#<span class="keyword">define</span> PER_CPU_BASE_SECTION <span class="string">&quot;.data&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
-
-<p>展开：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_SMP</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> DEFINE_PER_CPU(type, name)                  \</span></span><br><span class="line"><span class="meta">    __percpu __attribute__((section(<span class="string">&quot;.data..percpu&quot;</span>))) type name;  \ </span></span><br><span class="line"><span class="meta">#<span class="keyword">else</span>   \</span></span><br><span class="line"><span class="meta">    __percpu __attribute__((section(<span class="string">&quot;.data&quot;</span>))) type name; \</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>在 SMP 架构下，被定义的 percpu 变量在编译后放在<code> .data..percpu</code> 这个 section 中;</li>
-<li>在单核系统中， percpu 变量被放在<code>.data</code>也就是数据段中;</li>
-</ol>
-<h4><span id="2-6-4-1-get-cpu-var-shi-xian">2.6.4.1 get_cpu_var实现</span><a href="#2-6-4-1-get-cpu-var-shi-xian" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> get_cpu_var(var)                    \</span></span><br><span class="line"><span class="meta">(*(&#123;                                        \</span></span><br><span class="line"><span class="meta">    preempt_disable();                      \</span></span><br><span class="line"><span class="meta">    this_cpu_ptr(&amp;var);                     \</span></span><br><span class="line"><span class="meta">&#125;))</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> this_cpu_ptr(ptr) raw_cpu_ptr(ptr)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> raw_cpu_ptr(ptr)                        \</span></span><br><span class="line"><span class="meta">(&#123;                                              \</span></span><br><span class="line"><span class="meta">    __verify_pcpu_ptr(ptr);                     \</span></span><br><span class="line"><span class="meta">    arch_raw_cpu_ptr(ptr);                      \</span></span><br><span class="line"><span class="meta">&#125;)</span></span><br></pre></td></tr></table></figure>
-
-<p>首先，<code>preempt_disable </code>禁用内核抢占，然后使用 <code>this_cpu_ptr </code>接口获取当前 cpu 上对应的 var 变量地址。</p>
-<p>对<code>get_cpu_var</code>展开：可以看到就能准确获取当前cpu的val地址。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> get_cpu_var(var)                    \</span></span><br><span class="line"><span class="meta">(*(&#123;                                        \</span></span><br><span class="line"><span class="meta">    preempt_disable();                      \</span></span><br><span class="line"><span class="meta">    &amp;var + __per_cpu_offset[raw_smp_processor_id()]  \</span></span><br><span class="line"><span class="meta">&#125;))</span></span><br></pre></td></tr></table></figure>
-
-<p>使用完变量之后记得调用 <code>put_cpu_var</code> 以使能内核抢占功能，恢复系统状态。</p>
-<h1><span id="3-linux-nei-he-xia-bu-tong-tong-bu-ji-zhi-de-gua-yong-chang-jing">3 linux内核下不同同步机制的适用场景</span><a href="#3-linux-nei-he-xia-bu-tong-tong-bu-ji-zhi-de-gua-yong-chang-jing" class="header-anchor">#</a></h1><ol>
-<li>原子操作：主要用于进行原子性的读写操作，适用于计数器等场景。</li>
-<li>自旋锁：用于短时间内锁定互斥资源，适用于锁持有时间短的场景。</li>
-<li>读写锁：用于提供读模式和写模式下的锁操作，适用于读多写少的场景。</li>
-<li>MUTEX：类似自旋锁，但是可以导致调用线程睡眠，适用于锁持有时间较长的场景。(允许休眠)</li>
-<li>信号量：用于实现互斥和同步，适用于保护临界区和控制访问频率。但是可以导致调用线程睡眠，适用于锁持有时间较长的场景。（允许休眠）</li>
-</ol>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/" data-id="clyylnk8h000a7wufe9802gxg" data-title="Linux内核-并发与同步" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -2997,7 +2502,7 @@ board_xxx.c里面实现了具体单板的button_operations，当insmod这个驱�
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 15px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 19px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 16px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 14px;">通信协议</a>
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 16px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 19px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 16px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 14px;">通信协议</a>
     </div>
   </div>
 
@@ -3006,7 +2511,7 @@ board_xxx.c里面实现了具体单板的button_operations，当insmod这个驱�
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">July 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">August 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">July 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
     </div>
   </div>
 
@@ -3017,6 +2522,10 @@ board_xxx.c里面实现了具体单板的button_operations，当insmod这个驱�
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/">字符设备驱动-7-异步通知</a>
+          </li>
         
           <li>
             <a href="/2024/07/30/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-6-poll%E5%BA%95%E5%B1%82%E9%A9%B1%E5%8A%A8%E6%9C%BA%E5%88%B6/">字符设备驱动-6-poll底层驱动机制</a>
@@ -3032,10 +2541,6 @@ board_xxx.c里面实现了具体单板的button_operations，当insmod这个驱�
         
           <li>
             <a href="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/">字符设备驱动-4-设备树</a>
-          </li>
-        
-          <li>
-            <a href="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-3-GPIO%E9%A9%B1%E5%8A%A8KEY%E7%A4%BA%E4%BE%8B/">字符设备驱动-3-GPIO驱动KEY示例</a>
           </li>
         
       </ul>
