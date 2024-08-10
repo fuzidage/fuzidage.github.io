@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>字符设备驱动-9-中断子系统-中断设备树表述与解析 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 中断在设备树中的表述 1.1 中断控制器 1.2 设备树中断相关属性 1.2.1 interrupt-controller 1.2.2 interrupt-cells 1.2.3 interrupt-parent 1.2.4 interrupts   1.3 dts中获取中断 1.3.1 对于 platform_device 1.3.1.1 platform_get_resource">
+<meta property="og:type" content="article">
+<meta property="og:title" content="字符设备驱动-9-中断子系统-中断设备树表述与解析">
+<meta property="og:url" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 中断在设备树中的表述 1.1 中断控制器 1.2 设备树中断相关属性 1.2.1 interrupt-controller 1.2.2 interrupt-cells 1.2.3 interrupt-parent 1.2.4 interrupts   1.3 dts中获取中断 1.3.1 对于 platform_device 1.3.1.1 platform_get_resource">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/1.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/2.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/3.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/4.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/5.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/6.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/7.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/8.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/9.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/10.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/11.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/12.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/13.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/14.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/15.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/16.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/17.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/18.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/19.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/20.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/21.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/22.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/23.png">
+<meta property="og:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/24.png">
+<meta property="article:published_time" content="2024-08-10T11:30:34.000Z">
+<meta property="article:modified_time" content="2024-08-10T12:31:31.594Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="中断体系">
+<meta property="article:tag" content="Linux设备驱动">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-字符设备驱动-9-中断子系统-中断设备树表述与解析" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/" class="article-date">
+  <time class="dt-published" datetime="2024-08-10T11:30:34.000Z" itemprop="datePublished">2024-08-10</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      字符设备驱动-9-中断子系统-中断设备树表述与解析
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-zhong-duan-zai-she-bei-shu-zhong-de-biao-shu">1 中断在设备树中的表述</a><ul>
+<li><a href="#1-1-zhong-duan-kong-zhi-qi">1.1 中断控制器</a></li>
+<li><a href="#1-2-she-bei-shu-zhong-duan-xiang-guan-shu-xing">1.2 设备树中断相关属性</a><ul>
+<li><a href="#1-2-1-interrupt-controller">1.2.1 interrupt-controller</a></li>
+<li><a href="#1-2-2-interrupt-cells">1.2.2 interrupt-cells</a></li>
+<li><a href="#1-2-3-interrupt-parent">1.2.3 interrupt-parent</a></li>
+<li><a href="#1-2-4-interrupts">1.2.4 interrupts</a></li>
+</ul>
+</li>
+<li><a href="#1-3-dts-zhong-huo-qu-zhong-duan">1.3 dts中获取中断</a><ul>
+<li><a href="#1-3-1-dui-yu-platform-device">1.3.1 对于 platform_device</a><ul>
+<li><a href="#1-3-1-1-platform-get-resource">1.3.1.1 platform_get_resource</a></li>
+</ul>
+</li>
+<li><a href="#1-3-2-dui-yu-i2c-she-bei-spi-she-bei">1.3.2 对于 I2C 设备、SPI 设备</a><ul>
+<li><a href="#1-3-2-1-diao-yong-of-irq-get-huo-de-zhong-duan-hao">1.3.2.1 调用 of_irq_get 获得中断号</a></li>
+</ul>
+</li>
+<li><a href="#1-3-3-dui-yu-gpio">1.3.3 对于 GPIO</a><ul>
+<li><a href="#1-3-3-1-gpio-to-irq-huo-gpiod-to-irq">1.3.3.1 gpio_to_irq或 gpiod_to_irq</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-bian-xie-yi-ge-an-jian-zhong-duan">2 编写一个按键中断</a><ul>
+<li><a href="#2-1-an-jian-dts-pei-zhi">2.1 按键dts配置</a><ul>
+<li><a href="#2-1-1-tian-jia-2-ge-an-jian-de-iomux-pei-zhi">2.1.1 添加2个按键的iomux配置</a></li>
+<li><a href="#2-1-2-ding-yi-an-jian-dts-miao-shu">2.1.2 定义按键dts描述</a></li>
+</ul>
+</li>
+<li><a href="#2-2-qu-dong-dai-ma">2.2 驱动代码</a><ul>
+<li><a href="#2-2-1-qu-dong-dai-ma-fen-xi">2.2.1 驱动代码分析</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-zhong-duan-zai-she-bei-shu-zhong-de-biao-shu">1 中断在设备树中的表述</span><a href="#1-zhong-duan-zai-she-bei-shu-zhong-de-biao-shu" class="header-anchor">#</a></h1><h2><span id="1-1-zhong-duan-kong-zhi-qi">1.1 中断控制器</span><a href="#1-1-zhong-duan-kong-zhi-qi" class="header-anchor">#</a></h2><p>如图：GPIO1 连接到 GIC，GPIO2 连接到 GIC，所以 GPIO1 的父亲是 GIC，GPIO2的父亲是 GIC。假设 GPIO1 有 32 个中断源，但是它把其中的 16 个汇聚起来向 GIC 发出一个中断，把另外 16 个汇聚起来向 GIC 发出另一个中断。这就意味着 GPIO1 会用到 GIC 的两个中断，会涉及 GIC 里的 2 个 <code>hwirq</code><br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/1.png" alt="image"></p>
+<h2><span id="1-2-she-bei-shu-zhong-duan-xiang-guan-shu-xing">1.2 设备树中断相关属性</span><a href="#1-2-she-bei-shu-zhong-duan-xiang-guan-shu-xing" class="header-anchor">#</a></h2><p>设备树中，中断控制器节点中必须有一个属性：</p>
+<h3><span id="1-2-1-interrupt-controller">1.2.1 interrupt-controller</span><a href="#1-2-1-interrupt-controller" class="header-anchor">#</a></h3><p>表明它是 <code>“中断控制器”</code>。<br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/2.png" alt="image"></p>
+<h3><span id="1-2-2-interrupt-cells">1.2.2 interrupt-cells</span><a href="#1-2-2-interrupt-cells" class="header-anchor">#</a></h3><p>⚫ <code>#interrupt-cells=&lt;1&gt;</code><br>    别的节点要使用这个中断控制器时，只需要一个 cell 来表明使用 “哪一个中断”</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">vic: intc@<span class="number">10140000</span> &#123;</span><br><span class="line">compatible = <span class="string">&quot;arm,versatile-vic&quot;</span>;</span><br><span class="line">interrupt-controller;</span><br><span class="line"><span class="meta">#interrupt-cells = <span class="string">&lt;1&gt;</span>;</span></span><br><span class="line">reg = &lt;<span class="number">0x10140000</span> <span class="number">0x1000</span>&gt;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>⚫ <code>#interrupt-cells=&lt;2&gt;</code><br>别的节点要使用这个中断控制器时，需要一个 cell 来表明使用 “哪一个中断”；还需要另一个 cell 来描述中断，一般是表明触发类型：<br>    第 2 个 cell 的 bits[3:0] 用来表示中断触发类型(<code>trigger type and level flags</code>)：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span> = low-to-high edge triggered，上升沿触发</span><br><span class="line"><span class="number">2</span> = high-to-low edge triggered，下降沿触发</span><br><span class="line"><span class="number">4</span> = active high level-sensitive，高电平触发</span><br><span class="line"><span class="number">8</span> = active low level-sensitive，低电平触发</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">gpio2: gpio@<span class="number">020</span>a0000 &#123;</span><br><span class="line">	compatible = <span class="string">&quot;fsl,imx6q-gpio&quot;</span>, <span class="string">&quot;fsl,imx35-gpio&quot;</span>;</span><br><span class="line">	reg = &lt;<span class="number">0x020a0000</span> <span class="number">0x4000</span>&gt;;</span><br><span class="line">	interrupts = &lt;<span class="number">0</span> <span class="number">68</span> <span class="number">4</span>&gt;,</span><br><span class="line">		  &lt;<span class="number">0</span> <span class="number">69</span> <span class="number">4</span>&gt;;</span><br><span class="line">	gpio-controller;</span><br><span class="line">	<span class="meta">#gpio-cells = <span class="string">&lt;2&gt;</span>;</span></span><br><span class="line">	interrupt-controller;</span><br><span class="line">	<span class="meta">#interrupt-cells = <span class="string">&lt;2&gt;</span>;</span></span><br><span class="line">   &#125;;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="1-2-3-interrupt-parent">1.2.3 interrupt-parent</span><a href="#1-2-3-interrupt-parent" class="header-anchor">#</a></h3><p>你要用哪一个中断控制器里的中断？<br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/3.png" alt="image"></p>
+<h3><span id="1-2-4-interrupts">1.2.4 interrupts</span><a href="#1-2-4-interrupts" class="header-anchor">#</a></h3><p>你要用哪一个中断？<br><code>Interrupts</code> 里要用几个 cell，由<code>interrupt-parent</code>对应的中断控制器决定。在中断控制器里有<code>“#interrupt-cells”</code>属性，它指明了要用几个 cell来描述中断。比如下图表示用到gpio中断控制器的160号中断，上升沿触发。<br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/4.png" alt="image"></p>
+<h2><span id="1-3-dts-zhong-huo-qu-zhong-duan">1.3 dts中获取中断</span><a href="#1-3-dts-zhong-huo-qu-zhong-duan" class="header-anchor">#</a></h2><h3><span id="1-3-1-dui-yu-platform-device">1.3.1 对于 platform_device</span><a href="#1-3-1-dui-yu-platform-device" class="header-anchor">#</a></h3><h4><span id="1-3-1-1-platform-get-resource">1.3.1.1 platform_get_resource</span><a href="#1-3-1-1-platform-get-resource" class="header-anchor">#</a></h4><p>当平台设备和平台驱动match上后，一个节点能被转换为 <code>platform_device</code>，调用<code>platform_get_resource</code>可获取节点资源信息。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">extern</span> <span class="keyword">struct</span> resource *<span class="title function_">platform_get_resource</span><span class="params">(<span class="keyword">struct</span> platform_device *,<span class="type">unsigned</span> <span class="type">int</span>, <span class="type">unsigned</span> <span class="type">int</span>)</span>;</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/5.png" alt="image"><br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/6.png" alt="image"><br>如果需要获取中断信息，传入<code>IORESOURCE_IRQ</code>。</p>
+<h3><span id="1-3-2-dui-yu-i2c-she-bei-spi-she-bei">1.3.2 对于 I2C 设备、SPI 设备</span><a href="#1-3-2-dui-yu-i2c-she-bei-spi-she-bei" class="header-anchor">#</a></h3><p>I2C 总线驱动在处理设备树里的 I2C 子节点时，Linux总线会自动处理其中的中断信息。一个 I2C 设备会被转换为一个 <code>i2c_client</code>结构体，中断号会保存在 i2c_client 的 irq 成员里，代码如下(<code>drivers/i2c/i2c-core.c</code>)，probe函数里面<strong>of_irq_get</strong>函数会根据dts中的i2c节点获取中断资源。<br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/7.png" alt="image"></p>
+<p><strong>GIC_SPI</strong>表示中断类型为共享中断。<br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/8.png" alt="image"><br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/9.png" alt="image"><br>SPI总线同理，一个 SPI 设备会被转换为一个<code>spi_device</code>结构体，中断号会保存在 <code>spi_device</code> 的 irq 成员里，代码如下(<code>drivers/spi/spi.c</code>)：<br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/10.png" alt="image"></p>
+<h4><span id="1-3-2-1-diao-yong-of-irq-get-huo-de-zhong-duan-hao">1.3.2.1 调用 of_irq_get 获得中断号</span><a href="#1-3-2-1-diao-yong-of-irq-get-huo-de-zhong-duan-hao" class="header-anchor">#</a></h4><p>如果我们没用<code>platform device</code>架构写字符设备驱动，也可以直接调用<code>of_irq_get</code>获取。<br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/11.png" alt="image"></p>
+<h3><span id="1-3-3-dui-yu-gpio">1.3.3 对于 GPIO</span><a href="#1-3-3-dui-yu-gpio" class="header-anchor">#</a></h3><h4><span id="1-3-3-1-gpio-to-irq-huo-gpiod-to-irq">1.3.3.1 gpio_to_irq或 gpiod_to_irq</span><a href="#1-3-3-1-gpio-to-irq-huo-gpiod-to-irq" class="header-anchor">#</a></h4><p>参考：<code>drivers/input/keyboard/gpio_keys.c</code>， api路径<code>linux_5.10\include\linux\of_gpio.h</code><br>可以使用 <code>gpio_to_irq</code> 或 <code>gpiod_to_irq </code>获得中断号。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">button-&gt;gpio = of_get_gpio_flags(pp, <span class="number">0</span>, &amp;flags);</span><br><span class="line">bdata-&gt;gpiod = gpio_to_desc(button-&gt;gpio);</span><br><span class="line"><span class="comment">//再去使用 gpiod_to_irq 获得中断号：</span></span><br><span class="line">irq = gpiod_to_irq(bdata-&gt;gpiod)；</span><br></pre></td></tr></table></figure>
+
+<h1><span id="2-bian-xie-yi-ge-an-jian-zhong-duan">2 编写一个按键中断</span><a href="#2-bian-xie-yi-ge-an-jian-zhong-duan" class="header-anchor">#</a></h1><h2><span id="2-1-an-jian-dts-pei-zhi">2.1 按键dts配置</span><a href="#2-1-an-jian-dts-pei-zhi" class="header-anchor">#</a></h2><p>linux内核自带的<code>input sub system</code>本身就包含了gpio按键驱动，驱动程序 <code>drivers/input/keyboard/gpio_keys.c</code> 就可以，然后你需要做<br>的只是修改设备树指定引脚及键值。<br>为了简化我们直接写一个例子：强化熟悉对gpio中断的使用。</p>
+<p>我们确定好用<code>gpio5_1</code>,  <code>gpio4_14</code>这2个按键来展开实验：定义好dts节点,这里定义<code>gpio_keys_100ask</code>，内核有函数自动把gpio num转成irq。在其他地方dts中(<code>imx6ull.dts</code>中)会描述好gpio5,gpio4节点信息，里面会有</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#gpio-cells = <span class="string">&lt;2&gt;</span>;</span></span><br></pre></td></tr></table></figure>
+<p>因此，这里表示引用gpio5的第0个引脚，gpio4的第14个引脚，节点如下，需要把原来的节点<code>gpio-keys</code> disable掉，添加下面的<code>gpio_keys_100ask</code>。进入内核目录 <code>make dtbs</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">gpio_keys_100ask &#123;</span><br><span class="line">	compatible = <span class="string">&quot;100ask,gpio_key&quot;</span>;</span><br><span class="line">	gpios = &lt;&amp;gpio5 <span class="number">1</span> GPIO_ACTIVE_HIGH</span><br><span class="line">	&amp;gpio4 <span class="number">14</span> GPIO_ACTIVE_HIGH&gt;;</span><br><span class="line">	pinctrl-names = <span class="string">&quot;default&quot;</span>;</span><br><span class="line">	pinctrl<span class="number">-0</span> = &lt;&amp;key1_pinctrl &amp;key2_pinctrl&gt;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/12.png" alt="image"></p>
+<p>设备树中并没有对这2个引脚进行<code>pinctrl</code>配置，也就是<code>iomux</code>配置，那为什么这2个引脚还能工作，是因为这个个引脚默认就是gpio状态，不用进行<code>iomux</code>切换。<br>为了保险起见，按照标准流程还需要对其添加<code>pinctrl</code>信息。</p>
+<h3><span id="2-1-1-tian-jia-2-ge-an-jian-de-iomux-pei-zhi">2.1.1 添加2个按键的iomux配置</span><a href="#2-1-1-tian-jia-2-ge-an-jian-de-iomux-pei-zhi" class="header-anchor">#</a></h3><p>imx6ull工具有制作好<code>pinctrl</code>如何配置:<br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/13.png" alt="image"><br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/14.png" alt="image"></p>
+<p>填入到对应的子节点下面：gpio5的iomux配置放在<code>iomuxc_snvs</code>节点下，gpio4的配置放在<code>iomuxc</code>下。<br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/15.png" alt="image"><br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/16.png" alt="image"></p>
+<h3><span id="2-1-2-ding-yi-an-jian-dts-miao-shu">2.1.2 定义按键dts描述</span><a href="#2-1-2-ding-yi-an-jian-dts-miao-shu" class="header-anchor">#</a></h3><p>再到定义的<code>gpio_keys_100ask</code>引用这2个<code>pinctrl</code>信息 <code>key1_100ask</code>和 <code>key2_100ask</code>。这里pinctrl只有一个default状态，<code>pinctrl-0</code>表示该默认状态，因此最终<code>gpio5_1</code>,  <code>gpio4_14</code>就被<code>iomux</code>成了gpio状态。<br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/17.png" alt="image"></p>
+<h2><span id="2-2-qu-dong-dai-ma">2.2 驱动代码</span><a href="#2-2-qu-dong-dai-ma" class="header-anchor">#</a></h2><details>
+<summary>驱动代码如下</summary>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/fs.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/miscdevice.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/major.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/mutex.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/proc_fs.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/seq_file.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/device.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/tty.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/kmod.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/gfp.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/gpio/consumer.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/platform_device.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/of_gpio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/of_irq.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/interrupt.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/irq.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/slab.h&gt;</span></span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">gpio_key</span>&#123;</span></span><br><span class="line">	<span class="type">int</span> gpio;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">gpio_desc</span> *<span class="title">gpiod</span>;</span></span><br><span class="line">	<span class="type">int</span> flag;</span><br><span class="line">	<span class="type">int</span> irq;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">gpio_key</span> *<span class="title">gpio_keys_100ask</span>;</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> major = <span class="number">0</span>;</span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="keyword">class</span> *<span class="title">gpio_key_class</span>;</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> g_key = <span class="number">0</span>;</span><br><span class="line"><span class="type">static</span> <span class="title function_">DECLARE_WAIT_QUEUE_HEAD</span><span class="params">(gpio_key_wait)</span>;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">ssize_t</span> <span class="title function_">gpio_key_drv_read</span> <span class="params">(<span class="keyword">struct</span> file *file, <span class="type">char</span> __user *buf, <span class="type">size_t</span> size, <span class="type">loff_t</span> *offset)</span> &#123;</span><br><span class="line">	<span class="type">int</span> err;</span><br><span class="line">	wait_event_interruptible(gpio_key_wait, g_key);</span><br><span class="line">	err = copy_to_user(buf, &amp;g_key, <span class="number">4</span>);</span><br><span class="line">	g_key = <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">4</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> <span class="title">gpio_key_drv</span> =</span> &#123;</span><br><span class="line">	.owner	 = THIS_MODULE,</span><br><span class="line">	.read    = gpio_key_drv_read,</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">irqreturn_t</span> <span class="title function_">gpio_key_isr</span><span class="params">(<span class="type">int</span> irq, <span class="type">void</span> *dev_id)</span>&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">gpio_key</span> *<span class="title">gpio_key</span> =</span> dev_id;</span><br><span class="line">	<span class="type">int</span> val;</span><br><span class="line">	val = gpiod_get_value(gpio_key-&gt;gpiod);</span><br><span class="line">	printk(<span class="string">&quot;key %d %d\n&quot;</span>, gpio_key-&gt;gpio, val);</span><br><span class="line">	g_key = (gpio_key-&gt;gpio &lt;&lt; <span class="number">8</span>) | val;</span><br><span class="line">	wake_up_interruptible(&amp;gpio_key_wait);</span><br><span class="line">	<span class="keyword">return</span> IRQ_HANDLED;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 1. 从platform_device获得GPIO</span></span><br><span class="line"><span class="comment"> * 2. gpio=&gt;irq</span></span><br><span class="line"><span class="comment"> * 3. request_irq</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">gpio_key_probe</span><span class="params">(<span class="keyword">struct</span> platform_device *pdev)</span>&#123;</span><br><span class="line">	<span class="type">int</span> err;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">device_node</span> *<span class="title">node</span> =</span> pdev-&gt;dev.of_node;</span><br><span class="line">	<span class="type">int</span> count;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line">	<span class="class"><span class="keyword">enum</span> <span class="title">of_gpio_flags</span> <span class="title">flag</span>;</span></span><br><span class="line"></span><br><span class="line">	count = of_gpio_count(node);</span><br><span class="line">	<span class="keyword">if</span> (!count) </span><br><span class="line">		printk(<span class="string">&quot;%s %s line %d, there isn&#x27;t any gpio available\n&quot;</span>, __FILE__, __FUNCTION__, __LINE__);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	gpio_keys_100ask = kzalloc(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> gpio_key) * count, GFP_KERNEL);</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; count; i++) </span><br><span class="line">		gpio_keys_100ask[i].gpio = of_get_gpio_flags(node, i, &amp;flag);</span><br><span class="line">		<span class="keyword">if</span> (gpio_keys_100ask[i].gpio &lt; <span class="number">0</span>) &#123;</span><br><span class="line">			printk(<span class="string">&quot;%s %s line %d, of_get_gpio_flags fail\n&quot;</span>, __FILE__, __FUNCTION__, __LINE__);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		gpio_keys_100ask[i].gpiod = gpio_to_desc(gpio_keys_100ask[i].gpio);</span><br><span class="line">		gpio_keys_100ask[i].flag = flag &amp; OF_GPIO_ACTIVE_LOW;</span><br><span class="line">		gpio_keys_100ask[i].irq  = gpio_to_irq(gpio_keys_100ask[i].gpio);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">		err = request_irq(gpio_keys_100ask[i].irq, gpio_key_isr, IRQF_TRIGGER_RISING | IRQF_TRIGGER_FALLING</span><br><span class="line">                          , <span class="string">&quot;100ask_gpio_key&quot;</span>, &amp;gpio_keys_100ask[i]);</span><br><span class="line">	&#125;</span><br><span class="line">	major = register_chrdev(<span class="number">0</span>, <span class="string">&quot;100ask_gpio_key&quot;</span>, &amp;gpio_key_drv);  <span class="comment">/* /dev/100ask_gpio_key */</span></span><br><span class="line">	gpio_key_class = class_create(THIS_MODULE, <span class="string">&quot;100ask_gpio_key_class&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (IS_ERR(gpio_key_class)) &#123;</span><br><span class="line">		printk(<span class="string">&quot;%s %s line %d\n&quot;</span>, __FILE__, __FUNCTION__, __LINE__);</span><br><span class="line">		unregister_chrdev(major, <span class="string">&quot;100ask_gpio_key&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> PTR_ERR(gpio_key_class);</span><br><span class="line">	&#125;</span><br><span class="line">	device_create(gpio_key_class, <span class="literal">NULL</span>, MKDEV(major, <span class="number">0</span>), <span class="literal">NULL</span>, <span class="string">&quot;100ask_gpio_key&quot;</span>); <span class="comment">/* /dev/100ask_gpio_key */</span>        </span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">gpio_key_remove</span><span class="params">(<span class="keyword">struct</span> platform_device *pdev)</span>&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">device_node</span> *<span class="title">node</span> =</span> pdev-&gt;dev.of_node;</span><br><span class="line">	<span class="type">int</span> count;</span><br><span class="line">	<span class="type">int</span> i;</span><br><span class="line"></span><br><span class="line">	device_destroy(gpio_key_class, MKDEV(major, <span class="number">0</span>));</span><br><span class="line">	class_destroy(gpio_key_class);</span><br><span class="line">	unregister_chrdev(major, <span class="string">&quot;100ask_gpio_key&quot;</span>);</span><br><span class="line">	count = of_gpio_count(node);</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; count; i++)&#123;</span><br><span class="line">		free_irq(gpio_keys_100ask[i].irq, &amp;gpio_keys_100ask[i]);</span><br><span class="line">	&#125;</span><br><span class="line">	kfree(gpio_keys_100ask);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">of_device_id</span> <span class="title">ask100_keys</span>[] =</span> &#123;</span><br><span class="line">    &#123; .compatible = <span class="string">&quot;100ask,gpio_key&quot;</span> &#125;,</span><br><span class="line">    &#123; &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">platform_driver</span> <span class="title">gpio_keys_driver</span> =</span> &#123;</span><br><span class="line">    .probe      = gpio_key_probe,</span><br><span class="line">    .remove     = gpio_key_remove,</span><br><span class="line">    .driver     = &#123;</span><br><span class="line">        .name   = <span class="string">&quot;100ask_gpio_key&quot;</span>,</span><br><span class="line">        .of_match_table = ask100_keys,</span><br><span class="line">    &#125;,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">gpio_key_init</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">    <span class="keyword">return</span> platform_driver_register(&amp;gpio_keys_driver); </span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> __exit <span class="title function_">gpio_key_exit</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">    platform_driver_unregister(&amp;gpio_keys_driver);</span><br><span class="line">&#125;</span><br><span class="line">module_init(gpio_key_init);</span><br><span class="line">module_exit(gpio_key_exit);</span><br><span class="line">MODULE_LICENSE(<span class="string">&quot;GPL&quot;</span>);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+</details>
+
+<h3><span id="2-2-1-qu-dong-dai-ma-fen-xi">2.2.1 驱动代码分析</span><a href="#2-2-1-qu-dong-dai-ma-fen-xi" class="header-anchor">#</a></h3><p><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/18.png" alt="image"></p>
+<p>定义<code>gpio_key</code><br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/19.png" alt="image"><br>通过<code>.compatible = &quot;100ask,gpio_key&quot;</code>匹配<code>plateform_device</code>和<code>platform_driver</code>, 当<code>insmod ko</code>时probe函数被调用。<br><code>struct device_node *node = pdev-&gt;dev.of_node;//可以从platform_device获取到device_node</code>。</p>
+<p><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/20.png" alt="image"><br><code>of_gpio_count</code>可以根据设备树节点获取到gpio的数量。</p>
+<p><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/21.png" alt="image"><br><code>of_get_gpio_flags</code>可以根据设备树节点获取到<code>gpio</code>编号和<code>gpio flags</code></p>
+<p><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/22.png" alt="image"><br>获取gpio描述子和gpio中断号:</p>
+<p><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/23.png" alt="image"><br>注册中断服务程序<code>gpio_key_isr</code>，当按键按下会触发gpio中断，执行<code>gpio_key_isr</code><br><img src="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/24.png" alt="image"><br>中断服务程序就简单的打印按键的电平状态:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">irqreturn_t</span> <span class="title function_">gpio_key_isr</span><span class="params">(<span class="type">int</span> irq, <span class="type">void</span> *dev_id)</span>&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">gpio_key</span> *<span class="title">gpio_key</span> =</span> dev_id;</span><br><span class="line">	<span class="type">int</span> val;</span><br><span class="line">	val = gpiod_get_value(gpio_key-&gt;gpiod);</span><br><span class="line">	printk(<span class="string">&quot;key %d %d\n&quot;</span>, gpio_key-&gt;gpio, val);</span><br><span class="line">	<span class="keyword">return</span> IRQ_HANDLED;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/" data-id="clzo3e4u80000a8ufgd1lgzhf" data-title="字符设备驱动-9-中断子系统-中断设备树表述与解析" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E4%B8%8B%E5%8D%8A%E9%83%A8-tasklet/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          字符设备驱动-9-中断子系统-中断下半部-tasklet
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E7%BB%93%E6%9E%84%E4%BD%93/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">字符设备驱动-9-中断子系统-中断结构体</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">linux内存管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 18.18px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 19.09px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17.27px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 16.36px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.18px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.82px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15.45px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 14.55px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.91px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 11.82px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.73px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17.27px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.64px;">通信协议</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">August 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">July 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E4%B8%8B%E5%8D%8A%E9%83%A8-tasklet/">字符设备驱动-9-中断子系统-中断下半部-tasklet</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/">字符设备驱动-9-中断子系统-中断设备树表述与解析</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E7%BB%93%E6%9E%84%E4%BD%93/">字符设备驱动-9-中断子系统-中断结构体</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/">字符设备驱动-9-中断子系统-GICv2架构解析</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/">字符设备驱动-9-中断子系统-中断引入</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

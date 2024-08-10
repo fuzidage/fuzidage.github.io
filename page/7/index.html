@@ -69,6 +69,758 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-mipi-csi硬件篇" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/" class="article-date">
+  <time class="dt-published" datetime="2024-04-02T06:28:07.000Z" itemprop="datePublished">2024-04-02</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/">mipi-csi硬件篇</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-mipi-csi-ying-jian">1 mipi-csi硬件</a><ul>
+<li><a href="#1-1-mipi-csi-gai-nian">1.1 mipi-csi概念</a></li>
+<li><a href="#1-2-mipi-vs-dvp">1.2 MIPI vs DVP</a></li>
+<li><a href="#1-3-csi-gui-ge">1.3 CSI规格</a></li>
+<li><a href="#1-4-csi-jie-kou-lei-xing">1.4 CSI接口類型</a></li>
+<li><a href="#1-5-csi-ying-jian-yin-jiao-ji-jie-xian">1.5 CSI 硬件引脚及接线</a><ul>
+<li><a href="#1-5-1-mipi-sensor-yin-jiao-miao-shu">1.5.1 mipi sensor引脚描述:</a></li>
+<li><a href="#1-5-2-dian-lu-tu-xian-lu-jie-gou">1.5.2 电路图线路结构</a></li>
+</ul>
+</li>
+<li><a href="#1-6-chai-fen-xin-hao-jie-shao">1.6 差分信号介绍</a></li>
+<li><a href="#1-7-mipi-sensor-de-power-on-shi-xu">1.7 MIPI sensor的 power on时序</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+# 1 mipi-csi硬件
+
+<h2><span id="1-1-mipi-csi-gai-nian">1.1 mipi-csi概念</span><a href="#1-1-mipi-csi-gai-nian" class="header-anchor">#</a></h2><p><strong>DSI （Display serial interface）</strong>定义了一个位于处理器和显示模组之间的高速串行接口,对应MIPI-TX.<br><strong>CSI(Camera Serial Interface）</strong>定义了一个位于处理器和摄像模组之间的高速串行接口,也就是接下来要讲的MIPI-RX。</p>
+<p>MIPI Rx (Mobile Industry Processor Interface Receiver) 模塊主要功能為接收由 CMOS sensor 所傳送的視頻數據， 支持 MIPI D-PHY、 sub-LVDS (Low-Voltage Differential Signal)、 HiSPi (High-Speed Serial Pixel Interface) 等不同的串行視頻信號輸入， 並將其處理轉化為內部視頻時序，傳遞給下一級的視頻處理模塊 (ISP)。MIPI Rx 模塊中可細分為 PHY 和 Controller 兩部分，其中 PHY 模塊集成了模擬和數字兩個部分，主要將串行信號轉換為並行信號，而 Controller 模塊則負責解碼不同的視頻數據格式，傳送給後端的視頻處理模塊 (ISP)。功能框圖及在系統中的位置如下图所示:</p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/1.png" alt="img"></p>
+<h2><span id="1-2-mipi-vs-dvp">1.2 MIPI vs DVP</span><a href="#1-2-mipi-vs-dvp" class="header-anchor">#</a></h2><p><strong>DVP:</strong></p>
+<p>并口传输数据需要帧同步信号（Vsync）、行同步信号（Hsync）和八条数据线，共十根数据线, DVP 接口在信号完整性方面受限制，速率也受限制。</p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/2.png" alt="img"></p>
+<p><strong>MIPI:</strong></p>
+<p>MIPI 传输只需要帧同步信号（Vsync）、行同步信号（Hsync）、mipi 时钟（mipi_clk）、mipi 数据（mipi_data）和像素时钟（PCLK）5 根数据线。对比MIPI 接口比 DVP 的接口信号线少，由于是低压差分信号，产生的干扰小，抗干扰能力也强。</p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/3.png" alt="img"></p>
+<h2><span id="1-3-csi-gui-ge">1.3 CSI规格</span><a href="#1-3-csi-gui-ge" class="header-anchor">#</a></h2><p>可同時支持 2 路 sensor 輸入（2组D-PHY， 每组5对差分线（1C4D））</p>
+<p>• sensor 0 最大支持 4K2K @60fps HDR or @30fps 線性輸入</p>
+<p>• sensor 1 最大支持 3M(2304x1296) @60fps HDR or linear 輸入</p>
+<p>• 單路最多支持 4-Lane MIPI D-PHY 接口，最大支持 2.5Gbps&#x2F;Lane</p>
+<p>• 單路最多支持 4-Lane sub-LVDS&#x2F; HiSPi 接口，最大支持 1.5Gbps&#x2F;Lane</p>
+<p>• 支持 RAW8&#x2F; RAW10&#x2F; RAW12 數據類型的解析</p>
+<p>• 支持 YUV422 8-bit&#x2F; YUV422 10-bit 數據類型的解析</p>
+<p>• 最多支持 2 幀 WDR，支持多種 WDR 時序</p>
+<p>• 支持 sub-LVDS&#x2F; HiSPi 模式像素&#x2F;同步碼大小端配置</p>
+<p>• 支持 Lane 數和 Lane 順序可配置</p>
+<p>MIPI Rx 的帶寬有兩部分限制： PHY 的接口數據率和內部處理速度。</p>
+<p>輸入接口最大支持 2.5Gbps&#x2F;Lane，內部處理速度最大為 600M*1pixels&#x2F;s（MAC clk）</p>
+<h2><span id="1-4-csi-jie-kou-lei-xing">1.4 CSI接口類型</span><a href="#1-4-csi-jie-kou-lei-xing" class="header-anchor">#</a></h2><table>
+<thead>
+<tr>
+<th>Common modevoltage</th>
+<th>Differential modevoltage</th>
+<th>Maximum clockfrequency</th>
+<th>Maximum datarate per lane</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>MIPI DPHY</strong> 200mV</td>
+<td>200mV</td>
+<td>1.25GHz</td>
+<td>2.5Gbps</td>
+</tr>
+<tr>
+<td>Sub-LVDS 900mV</td>
+<td>150mV</td>
+<td>750MHz</td>
+<td>1.5Gbps</td>
+</tr>
+<tr>
+<td>HiSPi(HiVCM) 900mV</td>
+<td>280mV</td>
+<td>750MHz</td>
+<td>1.5Gbps</td>
+</tr>
+<tr>
+<td>HiSPi(SLVDS) 200mV</td>
+<td>200mV</td>
+<td>750MHz</td>
+<td>1.5Gbps</td>
+</tr>
+</tbody></table>
+<h2><span id="1-5-csi-ying-jian-yin-jiao-ji-jie-xian">1.5 CSI 硬件引脚及接线</span><a href="#1-5-csi-ying-jian-yin-jiao-ji-jie-xian" class="header-anchor">#</a></h2><p>常用的电脑摄像头是USB接口, 主流的智能手机摄像头是MIPI接口, 下面讲解常用的智能手机 camera MIPI接口。</p>
+<p>MIPI CSI一般会有1对I2C通信引脚，1对MIPI差分时钟引脚和1~4对MIPI差分数据信号引脚, 也就是1CD4(1 clk lane &amp; 4 data lane)。</p>
+<h3><span id="1-5-1-mipi-sensor-yin-jiao-miao-shu">1.5.1 mipi sensor引脚描述:</span><a href="#1-5-1-mipi-sensor-yin-jiao-miao-shu" class="header-anchor">#</a></h3><table>
+<thead>
+<tr>
+<th>信号名</th>
+<th>引脚类型</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DOVDD</td>
+<td>电源</td>
+<td>1.8V IO 电源</td>
+</tr>
+<tr>
+<td>DVDD</td>
+<td>电源</td>
+<td>1.2V 数字电源</td>
+</tr>
+<tr>
+<td>AVDD</td>
+<td>电源</td>
+<td>2.8V 模拟电源</td>
+</tr>
+<tr>
+<td>SCL</td>
+<td>输入</td>
+<td>I2C 时钟线</td>
+</tr>
+<tr>
+<td>SDA</td>
+<td>输入&#x2F;输出</td>
+<td>I2C 数据线(open drain)</td>
+</tr>
+<tr>
+<td>SID0</td>
+<td>输入</td>
+<td>I2C Device ID 的选择 0 (内置下拉电阻，默认Device ID 是 7’h30)</td>
+</tr>
+<tr>
+<td>SID1</td>
+<td>输入</td>
+<td>I2C Device ID 的选择 1 (内置下拉电阻，默认Device ID 是 7’h30)</td>
+</tr>
+<tr>
+<td>XSHUTDN （RST）</td>
+<td>输入</td>
+<td>复位信号输入(内置上拉电阻，低电位有效)</td>
+</tr>
+<tr>
+<td>EXTCLK</td>
+<td>输入</td>
+<td>时钟输入</td>
+</tr>
+<tr>
+<td>PWDNB</td>
+<td>输入</td>
+<td>Power Down 信号输入(内置上拉电阻， 低电位有效)</td>
+</tr>
+<tr>
+<td>D&lt;3&gt;(MD3P)</td>
+<td>输出</td>
+<td>DVP 输出 bit[3]&#x2F;MIPI 数据 3 正极信号</td>
+</tr>
+<tr>
+<td>D&lt;5&gt;(MD1P)</td>
+<td>输出</td>
+<td>DVP 输出 bit[5]&#x2F;MIPI 数据 1 正极信号</td>
+</tr>
+<tr>
+<td>D&lt;7&gt;(MCP)</td>
+<td>输出</td>
+<td>DVP 输出 bit[7]&#x2F;MIPI 时钟正极信号</td>
+</tr>
+<tr>
+<td>D&lt;8&gt;(MD0P)</td>
+<td>输出</td>
+<td>DVP 输出 bit[8]&#x2F;MIPI 数据 0 正极信号</td>
+</tr>
+<tr>
+<td>D&lt;10&gt;(MD2P)</td>
+<td>输出</td>
+<td>DVP 输出 bit[10]&#x2F;MIPI 数据 2 正极信号</td>
+</tr>
+<tr>
+<td>D&lt;4&gt;(MD3N)</td>
+<td>输出</td>
+<td>DVP 输出 bit[4]&#x2F;MIPI 数据 3 负极信号</td>
+</tr>
+<tr>
+<td>D&lt;6&gt;(MD1N)</td>
+<td>输出</td>
+<td>DVP 输出 bit[6]&#x2F;MIPI 数据 1 负极信号</td>
+</tr>
+<tr>
+<td>PCLK(MCN)</td>
+<td>输出</td>
+<td>DVP 输出时钟&#x2F;MIPI 时钟负极信号</td>
+</tr>
+<tr>
+<td>D&lt;9&gt;(MD0N)</td>
+<td>输出</td>
+<td>DVP 输出 bit[9]&#x2F;MIPI 数据 0 负极信号</td>
+</tr>
+<tr>
+<td>D&lt;11&gt;(MD2N)</td>
+<td>输出</td>
+<td>DVP 输出 bit[11]&#x2F;MIPI 数据 2 负极信号</td>
+</tr>
+</tbody></table>
+<h3><span id="1-5-2-dian-lu-tu-xian-lu-jie-gou">1.5.2 电路图线路结构</span><a href="#1-5-2-dian-lu-tu-xian-lu-jie-gou" class="header-anchor">#</a></h3><p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/4.png" alt="img"></p>
+<p>一般mipi接口的sensor支持4 lane，2 lane，1 lane等数据传输方式。上图硬件上的连接了1组clk lane, 4组data lane。这幅图只连接了i2c和lane总线，还有EXTCLK ，PWDN, RST, VDD等引脚的连线需要外部soc去提供。这里就需要驱动人员会看原理图，知道lane id和pn swap的接线。clk lane, data lane等。</p>
+<h2><span id="1-6-chai-fen-xin-hao-jie-shao">1.6 差分信号介绍</span><a href="#1-6-chai-fen-xin-hao-jie-shao" class="header-anchor">#</a></h2><p>我们用一个方法对差分信号做一下比喻，差分信号就好比是跷跷板上的两个人，当一个人被跷上去的时候，另一个人被跷下来了 - 但是他们的平均位置是不变的。继续跷跷板的类推，正值可以表示左边的人比右边的人高，而负值表示右边的人比左边的人高。0 表示两个人都是同一水平。</p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/5.png" alt="img"></p>
+<p>下图，应用到电学上，这两个跷跷板用一对标识为V+和V-的导线来表示。当V+ &gt; V-时，信号定义成正极信号，V+ &lt; V-时，信号定义成负极信号。 差分对的平均电压设置成 2.5V。</p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/6.png" alt="img"></p>
+<h2><span id="1-7-mipi-sensor-de-power-on-shi-xu">1.7 MIPI sensor的 power on时序</span><a href="#1-7-mipi-sensor-de-power-on-shi-xu" class="header-anchor">#</a></h2><p><strong>Sony imx334：</strong></p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/7.png" alt="img"></p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/8.png" alt="img"></p>
+<p><strong>SC4210：</strong></p>
+<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/9.png" alt="img"></p>
+<p>这里列举了sony imx334和格科微gc2093, sc4210的上电时序，现在市面上大部分的mipi接口sensor都可以让VDD，PWDN, RST，EXTCLK讯号同时发出，然后过一段时间后就可以进行I2c通信了。</p>
+<p>在HW交接到SW后，要确保最基本的power on时序是ok的，最好是用示波器对VDD，PWDN, RST，EXTCLK，I2c等波形进行测量无误后再porting到SW手上。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/" data-id="clyylnk8o001c7wufdl5v8wdz" data-title="mipi-csi硬件篇" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Vim配置成类似source-insight的IDE" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/" class="article-date">
+  <time class="dt-published" datetime="2024-04-01T10:05:19.000Z" itemprop="datePublished">2024-04-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/">Vim配置成类似source-insight的IDE</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#qian-yan">前言</a><ul>
+<li><a href="#ji-ben-an-zhuang">基本安装</a></li>
+</ul>
+</li>
+<li><a href="#1-ctags-taglist-an-zhuang-pei-zhi">1 ctags + taglist安装配置</a><ul>
+<li><a href="#1-1-ctag-zuo-yong">1.1 ctag作用</a></li>
+<li><a href="#1-2-an-zhuang-ctags">1.2 安装ctags</a></li>
+<li><a href="#1-3-an-zhuang-taglist">1.3 安装taglist</a></li>
+<li><a href="#1-4-chuang-jian-tags-wen-jian">1.4 创建tags文件</a><ul>
+<li><a href="#1-4-1-pei-zhi-xuan-xiang">1.4.1配置选项</a></li>
+</ul>
+</li>
+<li><a href="#1-5-pei-zhi-vimrc">1.5 配置.vimrc</a></li>
+</ul>
+</li>
+<li><a href="#2-ctags-taglist-shi-yong">2 ctags + taglist使用</a><ul>
+<li><a href="#2-1-ctags-shi-yong">2.1 ctags使用</a><ul>
+<li><a href="#2-1-1-ctrl-ke-yi-jin-xing-han-shu-tiao-zhuan">2.1.1 <code>ctrl + ]</code>可以进行函数跳转</a></li>
+<li><a href="#2-1-2-ctrl-t-ke-yi-fan-hui-tiao-zhuan-zhi-qian-wei-zhi">2.1.2 <code>ctrl + T</code>可以返回跳转之前位置</a></li>
+<li><a href="#2-1-3-jia-zai-tags">2.1.3 加载tags</a></li>
+<li><a href="#2-1-4-zi-dong-jia-zai-tags">2.1.4 自动加载tags</a></li>
+<li><a href="#2-1-5-ts-lie-chu-suo-you-pi-pei-de-biao-qian">2.1.5 ts 列出所有匹配的标签</a></li>
+<li><a href="#2-1-5-ctrl-w-fen-ge-dang-qian-chuang-kou">2.1.5 <code>Ctrl + W + ]</code>分割当前窗口</a></li>
+<li><a href="#2-1-6-vi-t-tag-zhao-dao-ming-wei-tag-de-bian-liang-de-ding-yi-chu">2.1.6 vi –t tag 找到名为 tag 的变量的定义处</a></li>
+</ul>
+</li>
+<li><a href="#2-2-taglist-shi-yong">2.2 taglist使用</a><ul>
+<li><a href="#2-2-1-f2-jian-da-kai-guan-bi-taglist">2.2.1 F2键打开关闭Taglist</a></li>
+<li><a href="#2-2-2-ctrl-w-w-jian-taglist-he-vim-chuang-kou-guang-biao-qie-huan">2.2.2 ctrl w w键taglist和vim窗口光标切换</a></li>
+<li><a href="#2-2-3-hui-che-jian-taglist-tiao-zhuan-dao-ju-ti-wei-zhi">2.2.3 回车键taglist跳转到具体位置</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-nerdtree-cha-jian">3 NERDTree插件</a><ul>
+<li><a href="#3-1-an-zhuang-pei-zhi-nerdtree">3.1 安装配置NERDTree</a><ul>
+<li><a href="#3-1-1-an-zhuang">3.1.1 安装</a></li>
+<li><a href="#3-1-2-pei-zhi">3.1.2 配置</a></li>
+</ul>
+</li>
+<li><a href="#3-2-shi-yong-nerdtree">3.2 使用NERDTree</a><ul>
+<li><a href="#3-2-1-f8-jian-kai-qi-guan-bi-you-tu-wen-jian-lie-biao">3.2.1 F8键开启关闭右图文件列表</a></li>
+<li><a href="#3-2-2-ctrl-w-w-jian-nerdtree-he-vim-chuang-kou-guang-biao-qie-huan">3.2.2 ctrl w w键NERDTree和vim窗口光标切换</a></li>
+<li><a href="#3-2-3-hui-che-jian-nerdtree-tiao-zhuan-dao-ju-ti-wei-zhi">3.2.3 回车键NERDTree跳转到具体位置</a></li>
+<li><a href="#3-2-3-fan-hui-shang-yi-ceng-mu-lu">3.2.3 返回上一层目录</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#4-srcexpl-cha-jian-gong-neng-ji-le-xian-bu-jie-shao">4 SrcExpl插件（功能鸡肋先不介绍）</a><ul>
+<li><a href="#4-1-srcexp-an-zhuang-pei-zhi">4.1 SrcExp安装配置</a></li>
+<li><a href="#4-2-srcexpl-shi-yong">4.2 SrcExpl使用</a><ul>
+<li><a href="#4-2-1-f12-qi-dong-he-jin-yong-srcexpl">4.2.1 F12启动和禁用SrcExpl</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#5-youcompleteme-dai-ma-bu-qi-cha-jian">5 YouCompleteMe代码补齐插件</a><ul>
+<li><a href="#5-1-an-zhuang-pei-zhi">5.1 安装配置</a></li>
+<li><a href="#5-2-youcompleteme-shi-yong">5.2 YouCompleteMe使用</a></li>
+</ul>
+</li>
+<li><a href="#6-cscope-cha-jian">6 cscope插件</a><ul>
+<li><a href="#6-1-an-zhuang">6.1 安装</a></li>
+<li><a href="#6-2-pei-zhi-chan-sheng-cscope-out">6.2 配置产生cscope.out</a></li>
+<li><a href="#6-3-pei-zhi-vimrc">6.3 配置.vimrc</a></li>
+<li><a href="#6-5-shi-yong">6.5 使用</a><ul>
+<li><a href="#6-5-1-jian-li-shu-ju-ku-lian-jie">6.5.1 建立数据库连接</a></li>
+<li><a href="#6-5-2-cha-xun-shu-ju-ku-lian-jie">6.5.2 查询数据库连接</a></li>
+<li><a href="#6-5-3-cha-kan-yin-yong-diao-yong-wei-zhi">6.5.3 查看引用调用位置</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#7-source-insight-kuo-zhan">7 source insight扩展</a><ul>
+<li><a href="#7-1-jiang-kernel-gong-cheng-jing-que-kuai-su-dao-ru-dao-sourceinsight">7.1 将kernel工程精确快速导入到sourceinsight</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="qian-yan">前言</span><a href="#qian-yan" class="header-anchor">#</a></h1><h2><span id="ji-ben-an-zhuang">基本安装</span><a href="#ji-ben-an-zhuang" class="header-anchor">#</a></h2><pre><code>sudo apt-get install vim vim-scripts vim-doc
+</code></pre>
+<p>vim-scripts是vim的一些基本插件，包括语法高亮的支持、缩进等等。<br>整体配置好后效果如下：<br><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/1.png" alt="image"></p>
+<h1><span id="1-ctags-taglist-an-zhuang-pei-zhi">1 ctags + taglist安装配置</span><a href="#1-ctags-taglist-an-zhuang-pei-zhi" class="header-anchor">#</a></h1><h2><span id="1-1-ctag-zuo-yong">1.1 ctag作用</span><a href="#1-1-ctag-zuo-yong" class="header-anchor">#</a></h2><p>ctags 最先是用来生成C代码的tags文件，后来扩展成可以生成各类语言的tags, 有些语言也有专有的tags生成工具（比如java的jtags, python的 ptags)，因此ctag用来进行vim阅读源码时进行函数，变量的快速定位跳转。</p>
+<h2><span id="1-2-an-zhuang-ctags">1.2 安装ctags</span><a href="#1-2-an-zhuang-ctags" class="header-anchor">#</a></h2><pre><code>sudo apt-get install ctags
+</code></pre>
+<h2><span id="1-3-an-zhuang-taglist">1.3 安装taglist</span><a href="#1-3-an-zhuang-taglist" class="header-anchor">#</a></h2><p>taglist_46.zip压缩包：解压到~&#x2F;.vim目录下即可。<br><a target="_blank" rel="noopener" href="https://www.vim.org/scripts/script.php?script_id=273">https://www.vim.org/scripts/script.php?script_id=273</a></p>
+<pre><code>mkdir ~/.vim
+cd ~/.vim
+unzip taglist_46.zip
+</code></pre>
+<h2><span id="1-4-chuang-jian-tags-wen-jian">1.4 创建tags文件</span><a href="#1-4-chuang-jian-tags-wen-jian" class="header-anchor">#</a></h2><p><code>$ctags -R --c++-kinds=+p+l+x+c+d+e+f+g+m+n+s+t+u+v --fields=+liaS --extra=+q</code><br>如果为了简单，也可以只进行：<br><code>$ctags -R *</code><br>不过，这种成员变量没有包含在里面。所以可能有些对象的成员时无法跳转。</p>
+<h3><span id="1-4-1-pei-zhi-xuan-xiang">1.4.1配置选项</span><a href="#1-4-1-pei-zhi-xuan-xiang" class="header-anchor">#</a></h3><pre><code>  $ ctags -R　　　　　　　　　　　　　  #递归的为当前目录及子目录下的所有代码文件生成tags文件 (推荐使用此命令)
+  $ ctags filename.c filename1.c file.h 　#为当前目录某些源码生成tags文件
+  $ ctags *.c *.h　　　　　　　　　　　   #为当前目录所有.c, .h源码生成tags文件
+
+  为了使得字段补全有效，在生成tags时需要一些额外的参数，推荐的c++参数主要是：ctags -R --c++-kinds=+px --fields=+iaS --extra=+q
+  其中：
+    选项c++-kinds 用于指定C++语言的 tags记录类型,  --c-kinds用于指定c语言的，  通用格式是  --&#123;language&#125;-kinds
+    选项 fileds 用于指定每条标记的扩展字段域
+    extra 选项用于增加额外的条目:   f表示为每个文件增加一个条目，  q为每个类增加一个条目
+</code></pre>
+<h2><span id="1-5-pei-zhi-vimrc">1.5 配置.vimrc</span><a href="#1-5-pei-zhi-vimrc" class="header-anchor">#</a></h2><pre><code>&quot;--------------display-----------------
+set nu                          &quot;行号
+syntax on                       &quot;语法高亮
+set ruler                       &quot;显示当前行和列
+set showcmd                     &quot;显示部分命令
+set showmode            &quot;最后一行显示当前模式
+&quot;set match                      &quot;显示括号匹配
+&quot;--------------display-----------------
+
+&quot;---------------input------------------
+set smartindent         &quot;自动缩进
+set expandtab           &quot;将tab转化为空格
+set smarttab            &quot;插入tab使用shiftwidth
+set shiftwidth=4        &quot;缩进列数为4
+&quot;---------------input------------------
+
+&quot;---------------search-----------------
+set hlsearch            &quot;搜索结果高亮显示
+&quot;set inccase                    &quot;预览搜索结果
+set ignorecase          &quot;不区分大小写
+set smartcase           &quot;当有大写字母时区分大小写
+&quot;---------------search-----------------
+
+&quot;---------------encoding----------------
+set encoding=utf-8              &quot;设置编码格式
+set fileencodings=utf-8,gb18030,gbk,gb2312,big5
+set termencoding=utf-8
+
+
+&quot;--------------ctags----------------
+set tags=tags;
+set autochdir        &quot;通用方式，如果没有找到tags文件，或者没有找到对应的目标，就到父目录中查找，一直向上递归。
+&quot;--------------ctags----------------
+
+
+&quot;--------------taglist----------------
+let Tlist_Use_Left_Window=1             &quot;vim左侧窗口显示Taglist
+let Tlist_Exit_OnlyWindow=1             &quot;Taglist是最后一个窗口是退出vim
+let Tlist_WinWidth=60           &quot;设置Taglist窗口宽度为60
+nmap &lt;F2&gt; :Tlist&lt;CR&gt;                    &quot;设置快捷键&lt;F2&gt;打开Taglist
+&quot;--------------taglist----------------
+</code></pre>
+<h1><span id="2-ctags-taglist-shi-yong">2 ctags + taglist使用</span><a href="#2-ctags-taglist-shi-yong" class="header-anchor">#</a></h1><h2><span id="2-1-ctags-shi-yong">2.1 ctags使用</span><a href="#2-1-ctags-shi-yong" class="header-anchor">#</a></h2><pre><code>book@100ask:~/ftp/openedv/uboot-2016$ vi drivers/usb/gadget/f_fastboot.c
+</code></pre>
+<p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/2.png" alt="image"></p>
+<h3><span id="2-1-1-ctrl-ke-yi-jin-xing-han-shu-tiao-zhuan">2.1.1 <code>ctrl + ]</code>可以进行函数跳转</span><a href="#2-1-1-ctrl-ke-yi-jin-xing-han-shu-tiao-zhuan" class="header-anchor">#</a></h3><p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/3.png" alt="image"></p>
+<h3><span id="2-1-2-ctrl-t-ke-yi-fan-hui-tiao-zhuan-zhi-qian-wei-zhi">2.1.2 <code>ctrl + T</code>可以返回跳转之前位置</span><a href="#2-1-2-ctrl-t-ke-yi-fan-hui-tiao-zhuan-zhi-qian-wei-zhi" class="header-anchor">#</a></h3><p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/4.png" alt="image"></p>
+<h3><span id="2-1-3-jia-zai-tags">2.1.3 加载tags</span><a href="#2-1-3-jia-zai-tags" class="header-anchor">#</a></h3><p>默认从创建tags的目录去启动vim打开文件会自动加载当前目录的tags文件，因此可以直接跳转：<br>如我是从uboot根目录建立的tags文件，然后：</p>
+<pre><code>book@100ask:~/ftp/openedv/uboot-2016$ vi drivers/usb/gadget/f_fastboot.c
+</code></pre>
+<p>这样自动加载tags文件，能够进行跳转。<br>如果进入其他目录：可以看到就无法打开tags文件。</p>
+<pre><code>book@100ask:~/ftp/openedv/uboot-2016$ cd  drivers/usb/gadget/
+book@100ask:~/ftp/openedv/uboot-2016/drivers/usb/gadget$ vi f_fastboot.c
+</code></pre>
+<p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/5.png" alt="image"></p>
+<p>vim进入命令模式输入：</p>
+<pre><code>:set tags+=&#39;/home/book/ftp/openedv/uboot-2016/tags
+</code></pre>
+<p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/6.png" alt="image"><br>此时就可以正常跳转了。</p>
+<h3><span id="2-1-4-zi-dong-jia-zai-tags">2.1.4 自动加载tags</span><a href="#2-1-4-zi-dong-jia-zai-tags" class="header-anchor">#</a></h3><p>在~&#x2F;.vimrc文件中添加下面两行：</p>
+<pre><code>set tags=tags;
+set autochdir
+</code></pre>
+<p>通用方式，如果没有找到tags文件，或者没有找到对应的目标，就到父目录中查找，一直向上递归。<br>这样就可以在不用在tags根路径去使用vim了。如：</p>
+<pre><code>book@100ask:~/ftp/openedv/uboot-2016/drivers/usb/gadget$ vi f_fastboot.c
+</code></pre>
+<p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/7.png" alt="image"></p>
+<h3><span id="2-1-5-ts-lie-chu-suo-you-pi-pei-de-biao-qian">2.1.5 ts 列出所有匹配的标签</span><a href="#2-1-5-ts-lie-chu-suo-you-pi-pei-de-biao-qian" class="header-anchor">#</a></h3><p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/8.png" alt="image"><br>可以看到有2处地方匹配，一个是cmd&#x2F;bootm.c，一个是include&#x2F;command.h<br><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/9.png" alt="image"></p>
+<h3><span id="2-1-5-ctrl-w-fen-ge-dang-qian-chuang-kou">2.1.5 <code>Ctrl + W + ]</code>分割当前窗口</span><a href="#2-1-5-ctrl-w-fen-ge-dang-qian-chuang-kou" class="header-anchor">#</a></h3><p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/10.png" alt="image"><br>输入:q退出分割窗口。</p>
+<h3><span id="2-1-6-vi-t-tag-zhao-dao-ming-wei-tag-de-bian-liang-de-ding-yi-chu">2.1.6 vi –t tag 找到名为 tag 的变量的定义处</span><a href="#2-1-6-vi-t-tag-zhao-dao-ming-wei-tag-de-bian-liang-de-ding-yi-chu" class="header-anchor">#</a></h3><p>例如stitch_event_handler_th函数位于当前tags目录中的stitch&#x2F;common&#x2F;stitch.c的第1212行。只需确保在tags中的子目录中任意位置输入：</p>
+<p><code>robin.lee@WORKSTATION5:/robin.lee/zip/A2/osdrv/interdrv/v2/dwa$ vi -t stitch_event_handler_th</code><br><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/11.png" alt="image"></p>
+<h2><span id="2-2-taglist-shi-yong">2.2 taglist使用</span><a href="#2-2-taglist-shi-yong" class="header-anchor">#</a></h2><h3><span id="2-2-1-f2-jian-da-kai-guan-bi-taglist">2.2.1 F2键打开关闭Taglist</span><a href="#2-2-1-f2-jian-da-kai-guan-bi-taglist" class="header-anchor">#</a></h3><p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/12.png" alt="image"></p>
+<h3><span id="2-2-2-ctrl-w-w-jian-taglist-he-vim-chuang-kou-guang-biao-qie-huan">2.2.2 ctrl w w键taglist和vim窗口光标切换</span><a href="#2-2-2-ctrl-w-w-jian-taglist-he-vim-chuang-kou-guang-biao-qie-huan" class="header-anchor">#</a></h3><p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/13.png" alt="image"></p>
+<p>例如光标位置处于vim窗口的第1211行，按下ctrl w w键（w按2次），光标会跳到左边taglist窗口。按上下左右方向键可以查找宏定义，符号，函数等。再次按ctrl w w又会跳到vim的窗口。</p>
+<h3><span id="2-2-3-hui-che-jian-taglist-tiao-zhuan-dao-ju-ti-wei-zhi">2.2.3 回车键taglist跳转到具体位置</span><a href="#2-2-3-hui-che-jian-taglist-tiao-zhuan-dao-ju-ti-wei-zhi" class="header-anchor">#</a></h3><p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/14.png" alt="image"><br>比如现在光标位于taglist界面的stitch_src_qbuf位置，按下回车会跳转到函数定义的具体位置：<br><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/15.png" alt="image"></p>
+<h1><span id="3-nerdtree-cha-jian">3 NERDTree插件</span><a href="#3-nerdtree-cha-jian" class="header-anchor">#</a></h1><p>NERDTree是Vim界面显示树形目录的文件管理器插件，可在vim操作界面进行文件打开、目录浏览操作。</p>
+<h2><span id="3-1-an-zhuang-pei-zhi-nerdtree">3.1 安装配置NERDTree</span><a href="#3-1-an-zhuang-pei-zhi-nerdtree" class="header-anchor">#</a></h2><h3><span id="3-1-1-an-zhuang">3.1.1 安装</span><a href="#3-1-1-an-zhuang" class="header-anchor">#</a></h3><p><a target="_blank" rel="noopener" href="https://www.vim.org/scripts/script.php?script_id=1658">https://www.vim.org/scripts/script.php?script_id=1658</a><br>下载后放到~&#x2F;.vim目录，解压即可完成安装。</p>
+<h3><span id="3-1-2-pei-zhi">3.1.2 配置</span><a href="#3-1-2-pei-zhi" class="header-anchor">#</a></h3><p><code>vi ~/.vimrc</code><br>添加如下配置：</p>
+<pre><code>&quot;--------------NERDTree---------------
+let NERDTreeWinPos=&#39;right&#39;		&quot;设置窗口在右侧
+nmap &lt;F8&gt; :NERDTree&lt;CR&gt;			&quot;设置快捷键F8打开
+let NERDTreeWinSize=40		 	&quot;窗口大小为40
+&quot;--------------NERDTree---------------
+</code></pre>
+<h2><span id="3-2-shi-yong-nerdtree">3.2 使用NERDTree</span><a href="#3-2-shi-yong-nerdtree" class="header-anchor">#</a></h2><h3><span id="3-2-1-f8-jian-kai-qi-guan-bi-you-tu-wen-jian-lie-biao">3.2.1 F8键开启关闭右图文件列表</span><a href="#3-2-1-f8-jian-kai-qi-guan-bi-you-tu-wen-jian-lie-biao" class="header-anchor">#</a></h3><p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/16.png" alt="image"></p>
+<h3><span id="3-2-2-ctrl-w-w-jian-nerdtree-he-vim-chuang-kou-guang-biao-qie-huan">3.2.2 ctrl w w键NERDTree和vim窗口光标切换</span><a href="#3-2-2-ctrl-w-w-jian-nerdtree-he-vim-chuang-kou-guang-biao-qie-huan" class="header-anchor">#</a></h3><p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/17.png" alt="image"><br>光标原本再右边窗口，输入ctrl w w(w按2次)切换到左边vim窗口。</p>
+<h3><span id="3-2-3-hui-che-jian-nerdtree-tiao-zhuan-dao-ju-ti-wei-zhi">3.2.3 回车键NERDTree跳转到具体位置</span><a href="#3-2-3-hui-che-jian-nerdtree-tiao-zhuan-dao-ju-ti-wei-zhi" class="header-anchor">#</a></h3><p>同理，和taglist一样，也是光标移动到具体文件后回车即可跳转到具体文件。方向键上下移动选择具体文件。跳转到stitch_ctx.h：<br><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/18.png" alt="image"></p>
+<h3><span id="3-2-3-fan-hui-shang-yi-ceng-mu-lu">3.2.3 返回上一层目录</span><a href="#3-2-3-fan-hui-shang-yi-ceng-mu-lu" class="header-anchor">#</a></h3><p>选择‘up a dir’，按回车：<br><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/19.png" alt="image"><br>返回上一层目录的结果如下：<br><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/20.png" alt="image"></p>
+<h1><span id="4-srcexpl-cha-jian-gong-neng-ji-le-xian-bu-jie-shao">4 SrcExpl插件（功能鸡肋先不介绍）</span><a href="#4-srcexpl-cha-jian-gong-neng-ji-le-xian-bu-jie-shao" class="header-anchor">#</a></h1><p>SrcExpl（源资源管理器）是一个源代码资源管理器，通过显示函数或类型定义来显示当前选定的关键字或在单独的窗口中声明。该插件旨在重新创建上下文 IDE 中可用的窗口。</p>
+<p>结合“Taglist”和“NERD tree”效果更佳。</p>
+<h2><span id="4-1-srcexp-an-zhuang-pei-zhi">4.1 SrcExp安装配置</span><a href="#4-1-srcexp-an-zhuang-pei-zhi" class="header-anchor">#</a></h2><p>安装：<br><a target="_blank" rel="noopener" href="https://github.com/wenlongche/SrcExpl">https://github.com/wenlongche/SrcExpl</a><br><a target="_blank" rel="noopener" href="https://www.vim.org/scripts/script.php?script_id=2179">https://www.vim.org/scripts/script.php?script_id=2179</a><br>下载后放入<del>&#x2F;.vim进行解压即可。<br>配置：<br>打开</del>&#x2F;.vimrc,添加如下配置：</p>
+<pre><code>&quot; // The switch of the Source Explorer
+nmap &lt;F12&gt; :SrcExplToggle&lt;CR&gt;
+
+&quot; // Set the height of Source Explorer window
+let g:SrcExpl_winHeight = 16
+
+&quot; // Set 100 ms for refreshing the Source Explorer
+let g:SrcExpl_refreshTime = 500
+
+&quot; // Set &quot;Enter&quot; key to jump into the exact definition context
+let g:SrcExpl_jumpKey = &quot;&lt;ENTER&gt;&quot;
+
+&quot; // Set &quot;Space&quot; key for back from the definition context
+let g:SrcExpl_gobackKey = &quot;&lt;SPACE&gt;&quot;
+
+&quot; // In order to avoid conflicts, the Source Explorer should know what plugins except
+&quot; // itself are using buffers. And you need add their buffer names into below list
+&quot; // according to the command &quot;:buffers!&quot;
+let g:SrcExpl_pluginList = [
+        \ &quot;__Tag_List__&quot;,
+        \ &quot;_NERD_tree_&quot;,
+        \ &quot;Source_Explorer&quot;
+    \ ]
+
+&quot; // The color schemes used by Source Explorer. There are five color schemes
+&quot; // supported for now - Red, Cyan, Green, Yellow and Magenta. Source Explorer
+&quot; // will pick up one of them randomly when initialization.
+let g:SrcExpl_colorSchemeList = [
+        \ &quot;Red&quot;,
+        \ &quot;Cyan&quot;,
+        \ &quot;Green&quot;,
+        \ &quot;Yellow&quot;,
+        \ &quot;Magenta&quot;
+    \ ]
+
+&quot; // Enable/Disable the local definition searching, and note that this is not
+&quot; // guaranteed to work, the Source Explorer doesn&#39;t check the syntax for now.
+&quot; // It only searches for a match with the keyword according to command &#39;gd&#39;
+let g:SrcExpl_searchLocalDef = 1
+
+&quot; // Workaround for Vim bug @https://goo.gl/TLPK4K as any plugins using autocmd for
+&quot; // BufReadPre might have conflicts with Source Explorer. e.g. YCM, Syntastic etc.
+let g:SrcExpl_nestedAutoCmd = 1
+
+&quot; // Do not let the Source Explorer update the tags file when opening
+let g:SrcExpl_isUpdateTags = 0
+
+&quot; // Use &#39;Exuberant Ctags&#39; with &#39;--sort=foldcase -R .&#39; or &#39;-L cscope.files&#39; to
+&quot; // create/update the tags file
+let g:SrcExpl_updateTagsCmd = &quot;ctags --sort=foldcase -R .&quot;
+
+&quot; // Set &quot;&lt;F12&gt;&quot; key for updating the tags file artificially
+let g:SrcExpl_updateTagsKey = &quot;&lt;F12&gt;&quot;
+
+&quot; // Set &quot;&lt;F3&gt;&quot; key for displaying the previous definition in the jump list
+let g:SrcExpl_prevDefKey = &quot;&lt;F3&gt;&quot;
+
+&quot; // Set &quot;&lt;F4&gt;&quot; key for displaying the next definition in the jump list
+let g:SrcExpl_nextDefKey = &quot;&lt;F4&gt;&quot;
+</code></pre>
+<h2><span id="4-2-srcexpl-shi-yong">4.2 SrcExpl使用</span><a href="#4-2-srcexpl-shi-yong" class="header-anchor">#</a></h2><h3><span id="4-2-1-f12-qi-dong-he-jin-yong-srcexpl">4.2.1 F12启动和禁用SrcExpl</span><a href="#4-2-1-f12-qi-dong-he-jin-yong-srcexpl" class="header-anchor">#</a></h3><h1><span id="5-youcompleteme-dai-ma-bu-qi-cha-jian">5 YouCompleteMe代码补齐插件</span><a href="#5-youcompleteme-dai-ma-bu-qi-cha-jian" class="header-anchor">#</a></h1><h2><span id="5-1-an-zhuang-pei-zhi">5.1 安装配置</span><a href="#5-1-an-zhuang-pei-zhi" class="header-anchor">#</a></h2><p>先安装编译依赖工具：</p>
+<pre><code>sudo apt install build-essential cmake python-dev python3-dev clang
+</code></pre>
+<p>下载YouCompleteMe源码：</p>
+<pre><code>git clone https://github.com/Valloric/YouCompleteMe.git ~/.vim/bundle/
+cd .vim/bundle/YouCompleteMe
+git submodule update --init --recursive
+</code></pre>
+<p>编译安装 YouCompleteMe:</p>
+<pre><code>./install.py --clang-completer
+</code></pre>
+<p>安装好后打印如下：<br><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/21.png" alt="image"></p>
+<h2><span id="5-2-youcompleteme-shi-yong">5.2 YouCompleteMe使用</span><a href="#5-2-youcompleteme-shi-yong" class="header-anchor">#</a></h2><p>.vimrc添加配置：</p>
+<pre><code>let g:ycm_global_ycm_extra_conf = &#39;~/.vim/bundle/YouCompleteMe/third_party/ycmd/cpp/ycm/.ycm_extra_conf.py&#39;
+set runtimepath+=~/.vim/bundle/YouCompleteMe
+autocmd InsertLeave * if pumvisible() == 0|pclose|endif
+inoremap &lt;expr&gt; &lt;CR&gt; pumvisible() ? &quot;\&lt;C-y&gt;&quot; : &quot;\&lt;CR&gt;&quot;
+imap &lt;silent&gt;&lt;leader&gt;&lt;TAB&gt; &lt;Plug&gt;(coc-complete)
+vmap &lt;silent&gt;&lt;leader&gt;&lt;TAB&gt; &lt;Plug&gt;(coc-complete)
+nmap &lt;silent&gt;&lt;leader&gt;&lt;TAB&gt; &lt;Plug&gt;(coc-complete)
+</code></pre>
+<p>vim版本比较低达不到插件YCM的要求从而报错【YouCompleteMe unavailable: requires Vim 8.1.2269+.】，这样也好解决，从github上重新下最新版本的vim即可。命令如下所示：</p>
+<pre><code>cd /usr/local/share
+sudo git clone https://github.com/vim/vim.git
+cd vim/src
+sudo ./configure --with-features=huge \
+--enable-multibyte \
+--enable-rubyinterp=yes \
+--enable-pythoninterp=yes \
+--enable-python3interp=yes \
+--prefix=/usr/local/vim82
+</code></pre>
+<p>之后make和make install一下，命令如下所示：</p>
+<pre><code>sudo make
+sudo make install
+</code></pre>
+<p>在&#x2F;usr&#x2F;bin目录下建立符号链接，命令如下所示：</p>
+<pre><code>sudo ln -s /usr/local/vim82/bin/vim /usr/bin/vim82
+sudo ln -s /usr/local/vim82/bin/vim /usr/bin/vim
+sudo ln -s /usr/local/vim82/bin/vim /usr/bin/vi
+</code></pre>
+<p>补齐效果如下：<br><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/22.png" alt="image"><br>输入vim –version信息可以看vim版本号，现已经v9.1,默认应该是8.1的。<br><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/23.png" alt="image"></p>
+<p>vim配色方案：<br><a target="_blank" rel="noopener" href="https://github.com/flazz/vim-colorschemes">https://github.com/flazz/vim-colorschemes</a><br>设置函数高亮：</p>
+<pre><code>vi /usr/share/vim/vim91/syntax/c.vim
+
+&quot;highlight Functions
+syn match cFunctions &quot;\&lt;[a-zA-Z_][a-zA-Z_0-9]*\&gt;[^()]*)(&quot;me=e-2
+syn match cFunctions &quot;\&lt;[a-zA-Z_][a-zA-Z_0-9]*\&gt;\s*(&quot;me=e-1
+hi cFunctions gui=NONE cterm=bold  ctermfg=40
+</code></pre>
+<h1><span id="6-cscope-cha-jian">6 cscope插件</span><a href="#6-cscope-cha-jian" class="header-anchor">#</a></h1><h2><span id="6-1-an-zhuang">6.1 安装</span><a href="#6-1-an-zhuang" class="header-anchor">#</a></h2><pre><code>sudo apt-get install cscope
+</code></pre>
+<h2><span id="6-2-pei-zhi-chan-sheng-cscope-out">6.2 配置产生cscope.out</span><a href="#6-2-pei-zhi-chan-sheng-cscope-out" class="header-anchor">#</a></h2><pre><code>cscope -Rbqk
+
+-R: 在生成索引文件时，搜索子目录树中的代码
+-b: 只生成索引文件，不进入cscope的界面
+-q: 生成cscope.in.out和cscope.po.out文件，加快cscope的索引速度
+-k: 在生成索引文件时，不搜索/usr/include目录
+-i: 如果保存文件列表的文件名不是cscope.files时，需要加此选项告诉cscope到哪儿去找源文件列表。可以使用”–“，表示由标准输入获得文件列表。
+</code></pre>
+<p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/24.png" alt="image"></p>
+<h2><span id="6-3-pei-zhi-vimrc">6.3 配置.vimrc</span><a href="#6-3-pei-zhi-vimrc" class="header-anchor">#</a></h2><pre><code>&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
+&quot; cscope setting
+&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;
+if has(&quot;cscope&quot;)
+  set csprg=/usr/bin/cscope
+  set csto=1
+  set cst
+  set nocsverb
+  &quot; add any database in current directory
+  if filereadable(&quot;cscope.out&quot;)
+      cs add cscope.out
+  endif
+  set csverb
+endif
+
+nmap &lt;C-@&gt;s :cs find s &lt;C-R&gt;=expand(&quot;&lt;cword&gt;&quot;)&lt;CR&gt;&lt;CR&gt;
+nmap &lt;C-@&gt;g :cs find g &lt;C-R&gt;=expand(&quot;&lt;cword&gt;&quot;)&lt;CR&gt;&lt;CR&gt;
+nmap &lt;C-@&gt;c :cs find c &lt;C-R&gt;=expand(&quot;&lt;cword&gt;&quot;)&lt;CR&gt;&lt;CR&gt;
+nmap &lt;C-@&gt;t :cs find t &lt;C-R&gt;=expand(&quot;&lt;cword&gt;&quot;)&lt;CR&gt;&lt;CR&gt;
+nmap &lt;C-@&gt;e :cs find e &lt;C-R&gt;=expand(&quot;&lt;cword&gt;&quot;)&lt;CR&gt;&lt;CR&gt;
+nmap &lt;C-@&gt;f :cs find f &lt;C-R&gt;=expand(&quot;&lt;cfile&gt;&quot;)&lt;CR&gt;&lt;CR&gt;
+nmap &lt;C-@&gt;i :cs find i ^&lt;C-R&gt;=expand(&quot;&lt;cfile&gt;&quot;)&lt;CR&gt;$&lt;CR&gt;
+nmap &lt;C-@&gt;d :cs find d &lt;C-R&gt;=expand(&quot;&lt;cword&gt;&quot;)&lt;CR&gt;&lt;CR&gt;
+
+set cscopequickfix=s-,c-,d-,i-,t-,e-
+</code></pre>
+<h2><span id="6-5-shi-yong">6.5 使用</span><a href="#6-5-shi-yong" class="header-anchor">#</a></h2><h3><span id="6-5-1-jian-li-shu-ju-ku-lian-jie">6.5.1 建立数据库连接</span><a href="#6-5-1-jian-li-shu-ju-ku-lian-jie" class="header-anchor">#</a></h3><pre><code>:cs add ./cscope.out
+</code></pre>
+<h3><span id="6-5-2-cha-xun-shu-ju-ku-lian-jie">6.5.2 查询数据库连接</span><a href="#6-5-2-cha-xun-shu-ju-ku-lian-jie" class="header-anchor">#</a></h3><pre><code>:cs show
+</code></pre>
+<p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/25.png" alt="image"></p>
+<h3><span id="6-5-3-cha-kan-yin-yong-diao-yong-wei-zhi">6.5.3 查看引用调用位置</span><a href="#6-5-3-cha-kan-yin-yong-diao-yong-wei-zhi" class="header-anchor">#</a></h3><pre><code>:cs f s symbol #查看symbol和引用的地方, 如:cs find s IDLE_TIMEOUT_MS
+</code></pre>
+<p><img src="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/26.png" alt="image"></p>
+<h1><span id="7-source-insight-kuo-zhan">7 source insight扩展</span><a href="#7-source-insight-kuo-zhan" class="header-anchor">#</a></h1><h2><span id="7-1-jiang-kernel-gong-cheng-jing-que-kuai-su-dao-ru-dao-sourceinsight">7.1 将kernel工程精确快速导入到sourceinsight</span><a href="#7-1-jiang-kernel-gong-cheng-jing-que-kuai-su-dao-ru-dao-sourceinsight" class="header-anchor">#</a></h2><p><a target="_blank" rel="noopener" href="https://github.com/tonyho/Generate_Kernel_Uboot_Project_forIDE">https://github.com/tonyho/Generate_Kernel_Uboot_Project_forIDE</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/" data-id="clyylnk8j000i7wuf5u2bbyvx" data-title="Vim配置成类似source-insight的IDE" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-Windows10搭建NFS服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/" class="article-date">
+  <time class="dt-published" datetime="2024-03-31T13:10:00.000Z" itemprop="datePublished">2024-03-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/">Windows10搭建NFS服务</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-xia-zai-hanewin-nfs-server-for-windows">1 下载haneWIN NFS Server for Windows</a></li>
+<li><a href="#2-an-zhuang-bing-qie-zhi-xing-hanewin-nfs-server">2 安装并且执行 haneWIN NFS Server</a><ul>
+<li><a href="#2-1-xiu-gai-pei-zhi-wen-jian">2.1 修改配置文件</a></li>
+<li><a href="#2-2-bao-cun-pei-zhi">2.2 保存配置</a></li>
+</ul>
+</li>
+<li><a href="#3-rang-nfs-fu-wu-tong-guo-fang-huo-qiang">3 让NFS服务通过防火墙</a></li>
+<li><a href="#4-kai-fa-ban-ke-fu-duan-gua-zai-ce-shi">4 开发板客服端挂载测试</a></li>
+<li><a href="#4-1-gua-zai-gong-xiang-mu-lu-dao-kai-fa-ban">4.1 挂载共享目录到开发板</a></li>
+<li><a href="#4-2-tian-jia-ke-xie-ke-zhi-xing-quan-xian">4.2 添加可写可执行权限</a></li>
+<li><a href="#5-nfs-pei-zhi-wen-jian">5 nfs配置文件</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-xia-zai-hanewin-nfs-server-for-windows">1 下载haneWIN NFS Server for Windows</span><a href="#1-xia-zai-hanewin-nfs-server-for-windows" class="header-anchor">#</a></h1><p>链接如下：<br><a target="_blank" rel="noopener" href="https://www.hanewin.net/nfs-e.htm">https://www.hanewin.net/nfs-e.htm</a><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/1.png" alt="image"></p>
+<h1><span id="2-an-zhuang-bing-qie-zhi-xing-hanewin-nfs-server">2 安装并且执行 haneWIN NFS Server</span><a href="#2-an-zhuang-bing-qie-zhi-xing-hanewin-nfs-server" class="header-anchor">#</a></h1><p>安装完后，打开hanWin如下：进入Edit-&gt;Preferences<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/2.png" alt="image"></p>
+<p>进入Exports-&gt;Edit exports file<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/3.png" alt="image"></p>
+<h2><span id="2-1-xiu-gai-pei-zhi-wen-jian">2.1 修改配置文件</span><a href="#2-1-xiu-gai-pei-zhi-wen-jian" class="header-anchor">#</a></h2><p><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/4.png" alt="image"><br>添加一行配置如下：<br><code>D:\ldc_res -name:nfs *(rw,sync,no_root_squash)</code><br>表示把D盘ldc_res目录当成nfs共享目录，-name:nfs表示客户端挂载时使用nfs表示D:\ldc_res路径<br><code>mount -t nfs -o nolock 192.168.0.100:/nfs /mnt/sd</code></p>
+<h2><span id="2-2-bao-cun-pei-zhi">2.2 保存配置</span><a href="#2-2-bao-cun-pei-zhi" class="header-anchor">#</a></h2><p>勾选如下2个选项：仅对授权用户可见，通过nfs将导出添加到文件夹的上下文菜单<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/5.png" alt="image"></p>
+<h1><span id="3-rang-nfs-fu-wu-tong-guo-fang-huo-qiang">3  让NFS服务通过防火墙</span><a href="#3-rang-nfs-fu-wu-tong-guo-fang-huo-qiang" class="header-anchor">#</a></h1><p>方法1：打开电脑防火墙设置，将专用网络和公用网络的防火墙禁用。<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/6.png" alt="image"><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/7.png" alt="image"></p>
+<p>方法2：设置防火墙入栈连接规则<br>查看haneWIN NFS server的端口映射：<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/8.png" alt="image"><br>可以看到haneWIN使用的端口如下：</p>
+<pre><code>TCP：111, 1058, 2049
+UDP：111, 1058, 2049
+</code></pre>
+<p>进入windows防火墙高级设置，设置入栈规则-&gt;新建规则：</p>
+<pre><code>规则类型选端口，
+协议选TCP, 规则应用于特定本地端口，输入刚才查看的映射端口号：111，1058， 2049
+操作选允许连接
+配置文件将域，专用，公用网络全部勾选
+最后设置好名称和描述
+</code></pre>
+<p><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/9.png" alt="image"><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/10.png" alt="image"><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/11.png" alt="image"><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/12.png" alt="image"><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/13.png" alt="image"><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/14.png" alt="image"></p>
+<h1><span id="4-kai-fa-ban-ke-fu-duan-gua-zai-ce-shi">4 开发板客服端挂载测试</span><a href="#4-kai-fa-ban-ke-fu-duan-gua-zai-ce-shi" class="header-anchor">#</a></h1><p><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/15.png" alt="image"></p>
+<p>设置板端IP地址：<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/16.png" alt="image"><br>先确保windows和板端能ping通<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/17.png" alt="image"></p>
+<h1><span id="4-1-gua-zai-gong-xiang-mu-lu-dao-kai-fa-ban">4.1 挂载共享目录到开发板</span><a href="#4-1-gua-zai-gong-xiang-mu-lu-dao-kai-fa-ban" class="header-anchor">#</a></h1><p><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/18.png" alt="image"></p>
+<p><code>mount -t nfs -o nolock 192.168.0.100:/nfs /mnt/sd</code><br>可以看到已经挂载上了，并且能访问挂载目录的文件</p>
+<h1><span id="4-2-tian-jia-ke-xie-ke-zhi-xing-quan-xian">4.2 添加可写可执行权限</span><a href="#4-2-tian-jia-ke-xie-ke-zhi-xing-quan-xian" class="header-anchor">#</a></h1><p>挂载上后发现没有可写权限，<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/19.png" alt="image"></p>
+<p>修改配置exports选项，添加-maproot:0 -public<br><code>D:\ldc_res -name:nfs -maproot:0 -public *(rw,sync,no_root_squash)</code><br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/20.png" alt="image"></p>
+<p>可以可写可执行了：<br><img src="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/21.png" alt="image"></p>
+<h1><span id="5-nfs-pei-zhi-wen-jian">5 nfs配置文件</span><a href="#5-nfs-pei-zhi-wen-jian" class="header-anchor">#</a></h1><pre><code>#
+# exports example
+#
+# please read doc for a list of all options
+# drive letters should be in upper case, because file-id returns upper case
+#   by default (option setting) they are mapped to lower case for clients
+# Option -range restricts access to specified address range
+#   a list of addresses restricts to these clients only
+# Option -readonly prohibits create/write/delete
+# Option -name:&lt;x&gt; makes folder for clients avalailable as /&lt;x&gt;
+# Option -maproot:&lt;uid&gt; maps unix root to specified &lt;uid&gt;
+#   without it uid root -&gt; uid NOBODY
+# Option -alldirs allows clients to mount folder or any subfolder
+# Use UNC path specification for access to remote drive
+# Hidden volumes without a drive letter can be mounted by volume GUID
+#
+C:\ftp -range 192.168.1.1 192.168.1.10
+C:\video -readonly 192.168.1.1 192.168.1.4 192.18.1.23
+C:\server -alldirs -name:server -maproot:0 -range 192.168.1.1 192.168.1.30
+\\router\FRITZ.NAS\SanDisk-U3CruzerMicro-00 -name:fritz
+\\?\Volume&#123;6afa3aa3-1b38-11e6-a140-0000fbaa0005&#125;\ -name:drive1
+D:\ldc_res -name:nfs -public -maproot:0 *(rw,sync,no_root_squash)
+E:\ -name:nfs_udisk -public -maproot:0 *(rw,sync,no_root_squash)
+</code></pre>
+<p>挂载：<br><code>mount -t nfs -o nolock 192.168.0.100:/nfs_udisk /mnt/</code></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/" data-id="clyylnk8k000m7wufgx2udoue" data-title="Windows10搭建NFS服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-virtualbox配置实现PC-虚拟机-开发板互ping" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/03/30/virtualbox%E9%85%8D%E7%BD%AE%E5%AE%9E%E7%8E%B0PC-%E8%99%9A%E6%8B%9F%E6%9C%BA-%E5%BC%80%E5%8F%91%E6%9D%BF%E4%BA%92ping/" class="article-date">
@@ -586,7 +1338,7 @@ sudo /etc/init.d/vsftpd restart
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 17px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 19px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 16px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 14px;">通信协议</a>
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 18.18px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 19.09px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17.27px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 16.36px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.18px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.82px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15.45px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 14.55px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.91px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 11.82px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.73px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17.27px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.64px;">通信协议</a>
     </div>
   </div>
 
@@ -608,23 +1360,23 @@ sudo /etc/init.d/vsftpd restart
       <ul>
         
           <li>
+            <a href="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E4%B8%8B%E5%8D%8A%E9%83%A8-tasklet/">字符设备驱动-9-中断子系统-中断下半部-tasklet</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/">字符设备驱动-9-中断子系统-中断设备树表述与解析</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E7%BB%93%E6%9E%84%E4%BD%93/">字符设备驱动-9-中断子系统-中断结构体</a>
+          </li>
+        
+          <li>
             <a href="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/">字符设备驱动-9-中断子系统-GICv2架构解析</a>
           </li>
         
           <li>
             <a href="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/">字符设备驱动-9-中断子系统-中断引入</a>
-          </li>
-        
-          <li>
-            <a href="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-8-%E5%86%85%E6%A0%B8%E5%AE%9A%E6%97%B6%E5%99%A8/">字符设备驱动-8-内核定时器</a>
-          </li>
-        
-          <li>
-            <a href="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/">字符设备驱动-7-异步通知</a>
-          </li>
-        
-          <li>
-            <a href="/2024/07/30/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-6-poll%E5%BA%95%E5%B1%82%E9%A9%B1%E5%8A%A8%E6%9C%BA%E5%88%B6/">字符设备驱动-6-poll底层驱动机制</a>
           </li>
         
       </ul>

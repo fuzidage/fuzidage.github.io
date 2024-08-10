@@ -6,12 +6,12 @@
   
   <title>字符设备驱动-9-中断子系统-中断引入 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="1 中断与异常种类 2 中断的处理流程 2.1 异常向量表 2.1.1 中断向量表偏移(vector base)   2.2 GIC概述 2.3 保护现场，恢复现场的核心：栈 2.3.1 ARM 处理器程序运行的过程 2.3.2 入栈保护现场&#x2F;出栈恢复现场   2.4 硬件中断、软件中断 2.4.1 硬中断 2.4.2 软中断 2.4.3 硬件中断和软件区别   2.5 中断处">
+  <meta name="description" content="1 中断与异常种类 2 中断的处理流程 2.1 异常向量表 2.1.1 中断向量表偏移(vector base)   2.2 GIC概述 2.3 保护现场，恢复现场的核心：栈 2.3.1 ARM 处理器程序运行的过程 2.3.2 入栈保护现场&#x2F;出栈恢复现场   2.4 硬件中断、软件中断 2.4.1 硬中断 2.4.2 软中断 2.4.2.1 软中断的类型 2.4.2.2 软件">
 <meta property="og:type" content="article">
 <meta property="og:title" content="字符设备驱动-9-中断子系统-中断引入">
 <meta property="og:url" content="http://example.com/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="1 中断与异常种类 2 中断的处理流程 2.1 异常向量表 2.1.1 中断向量表偏移(vector base)   2.2 GIC概述 2.3 保护现场，恢复现场的核心：栈 2.3.1 ARM 处理器程序运行的过程 2.3.2 入栈保护现场&#x2F;出栈恢复现场   2.4 硬件中断、软件中断 2.4.1 硬中断 2.4.2 软中断 2.4.3 硬件中断和软件区别   2.5 中断处">
+<meta property="og:description" content="1 中断与异常种类 2 中断的处理流程 2.1 异常向量表 2.1.1 中断向量表偏移(vector base)   2.2 GIC概述 2.3 保护现场，恢复现场的核心：栈 2.3.1 ARM 处理器程序运行的过程 2.3.2 入栈保护现场&#x2F;出栈恢复现场   2.4 硬件中断、软件中断 2.4.1 硬中断 2.4.2 软中断 2.4.2.1 软中断的类型 2.4.2.2 软件">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://example.com/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/1.png">
 <meta property="og:image" content="http://example.com/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/2.png">
@@ -24,6 +24,8 @@
 <meta property="og:image" content="http://example.com/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/9.png">
 <meta property="og:image" content="http://example.com/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/10.png">
 <meta property="og:image" content="http://example.com/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/11.png">
+<meta property="og:image" content="http://example.com/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/11-1.png">
+<meta property="og:image" content="http://example.com/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/11-2.png">
 <meta property="og:image" content="http://example.com/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/12.png">
 <meta property="og:image" content="http://example.com/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/13.png">
 <meta property="og:image" content="http://example.com/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/14.png">
@@ -36,8 +38,9 @@
 <meta property="og:image" content="http://example.com/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/21.png">
 <meta property="og:image" content="http://example.com/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/22.png">
 <meta property="article:published_time" content="2024-08-05T15:50:47.000Z">
-<meta property="article:modified_time" content="2024-08-05T16:33:49.261Z">
+<meta property="article:modified_time" content="2024-08-10T15:22:25.716Z">
 <meta property="article:author" content="John Doe">
+<meta property="article:tag" content="中断体系">
 <meta property="article:tag" content="Linux设备驱动">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://example.com/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/1.png">
@@ -136,8 +139,17 @@
 </li>
 <li><a href="#2-4-ying-jian-zhong-duan-ruan-jian-zhong-duan">2.4 硬件中断、软件中断</a><ul>
 <li><a href="#2-4-1-ying-zhong-duan">2.4.1 硬中断</a></li>
-<li><a href="#2-4-2-ruan-zhong-duan">2.4.2 软中断</a></li>
-<li><a href="#2-4-3-ying-jian-zhong-duan-he-ruan-jian-qu-bie">2.4.3 硬件中断和软件区别</a></li>
+<li><a href="#2-4-2-ruan-zhong-duan">2.4.2 软中断</a><ul>
+<li><a href="#2-4-2-1-ruan-zhong-duan-de-lei-xing">2.4.2.1 软中断的类型</a></li>
+<li><a href="#2-4-2-2-ruan-jian-zhong-duan-de-api-shi-yong">2.4.2.2 软件中断的API使用</a><ul>
+<li><a href="#2-4-2-2-1-zhu-ce-ruan-zhong-duan-open-softirq">2.4.2.2.1 注册软中断-open_softirq</a></li>
+<li><a href="#2-4-2-2-2-shi-neng-ruan-zhong-duan-raise-softirq">2.4.2.2.2 使能软中断-raise_softirq</a></li>
+<li><a href="#2-4-2-2-3-zhi-xing-ruan-zhong-duan-do-softirq">2.4.2.2.3 执行软中断-do_softirq</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-4-3-ying-jian-zhong-duan-he-ruan-zhong-duan-qu-bie">2.4.3 硬件中断和软中断区别</a></li>
 </ul>
 </li>
 <li><a href="#2-5-zhong-duan-chu-li-yuan-ze">2.5 中断处理原则</a><ul>
@@ -268,33 +280,48 @@ e) 中断处理完毕，要继续运行进程 A 之前，恢复这些值
 <h2><span id="2-4-ying-jian-zhong-duan-ruan-jian-zhong-duan">2.4 硬件中断、软件中断</span><a href="#2-4-ying-jian-zhong-duan-ruan-jian-zhong-duan" class="header-anchor">#</a></h2><h3><span id="2-4-1-ying-zhong-duan">2.4.1 硬中断</span><a href="#2-4-1-ying-zhong-duan" class="header-anchor">#</a></h3><p>硬件产生的中断，称之为<code>“硬件中断”</code>(<code>hard irq</code>)。每个硬件中断都有对应的处理函数，比如按键中断、网卡中断，定时器中断的处理函数肯定不一样。<br>为方便理解，可以先认为对硬件中断的处理是用数组来实现的，数组里存放的是函数指针：一个中断号对应一个中断服务函数<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/7.png" alt="image"></p>
 <h3><span id="2-4-2-ruan-zhong-duan">2.4.2 软中断</span><a href="#2-4-2-ruan-zhong-duan" class="header-anchor">#</a></h3><p>相对的，还可以人为地制造中断：软件中断(<code>soft irq</code>)，如下图所示：<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/8.png" alt="image"></p>
 <ol>
-<li><p>软件中断何时生产？<br> 由软件决定，对于 X 号软件中断，只需要把它的 flag 设置为 1 就表示发生了该中断。</p>
-</li>
-<li><p>软件中断何时处理？<br> 软件中断嘛，并不是那么十万火急，有空再处理它好了,因此一般软件中断是硬件中断处理完后，顺便来处理软件中断。</p>
-</li>
-<li><p>有哪些软件中断？<br> 查内核源码<code> include/linux/interrupt.h</code><br> <img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/9.png" alt="image"><br> 怎么设置使用软中断，比如<code>tasklet </code>（后面会讲中断上半部分， 和中断下半部分）就是使用软件中断实现的。还有上一节<a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-8-%E5%86%85%E6%A0%B8%E5%AE%9A%E6%97%B6%E5%99%A8/">字符设备驱动-8-内核定时器</a>   <a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17473292.html">字符设备驱动-9.内核定时器</a>也是利用软中断实现的。</p>
-</li>
+<li>软件中断何时生产？<br> 由软件决定，对于 X 号软件中断，只需要把它的 flag 设置为 1 就表示发生了该中断。</li>
+<li>软件中断何时处理？<br> 软件中断嘛，并不是那么十万火急，有空再处理它好了,因此一般软件中断是硬件中断处理完后，顺便来处理软件中断。</li>
+<li>有哪些软件中断？</li>
 </ol>
-<p>  3.1 设置软件中断的处理函数：<br>  <img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/10.png" alt="image"><br>  <img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/11.png" alt="image"><br>  最核心的函数是 <code>raise_softirq</code>，简单地理解就是设置<code> softirq_veq[nr]</code>的标记位，设置后表示使能该软中断号。</p>
-<h3><span id="2-4-3-ying-jian-zhong-duan-he-ruan-jian-qu-bie">2.4.3 硬件中断和软件区别</span><a href="#2-4-3-ying-jian-zhong-duan-he-ruan-jian-qu-bie" class="header-anchor">#</a></h3><p><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/12.png" alt="image"></p>
+<h4><span id="2-4-2-1-ruan-zhong-duan-de-lei-xing">2.4.2.1 软中断的类型</span><a href="#2-4-2-1-ruan-zhong-duan-de-lei-xing" class="header-anchor">#</a></h4><p>查内核源码<code> include/linux/interrupt.h</code><br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/9.png" alt="image"><br>怎么设置使用软中断，比如<code>tasklet </code>（后面会讲中断上半部分， 和中断下半部分）就是使用软件中断实现的。还有<a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-8-%E5%86%85%E6%A0%B8%E5%AE%9A%E6%97%B6%E5%99%A8/">字符设备驱动-8-内核定时器</a>   <a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17473292.html">字符设备驱动-9.内核定时器</a>也是利用软中断实现的。</p>
+<p>总结使用软中断的类型有:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">优先级为<span class="number">0</span>，HI_SOFTIRQ，高优先级的tasklet</span><br><span class="line">优先级为<span class="number">1</span>，定时器软中断</span><br><span class="line">发送网络数据包的软中断</span><br><span class="line">接受网络数据包的软中断</span><br><span class="line">块设备的软中断</span><br><span class="line">优先级为<span class="number">0</span>，tasklet，低优先级的tasklet</span><br><span class="line">进程调度和负载均衡</span><br><span class="line">高进度定时器</span><br><span class="line">RCU</span><br></pre></td></tr></table></figure>
+
+<h4><span id="2-4-2-2-ruan-jian-zhong-duan-de-api-shi-yong">2.4.2.2 软件中断的API使用</span><a href="#2-4-2-2-ruan-jian-zhong-duan-de-api-shi-yong" class="header-anchor">#</a></h4><h5><span id="2-4-2-2-1-zhu-ce-ruan-zhong-duan-open-softirq">2.4.2.2.1 注册软中断-open_softirq</span><a href="#2-4-2-2-1-zhu-ce-ruan-zhong-duan-open-softirq" class="header-anchor">#</a></h5><p>  <img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/10.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">open_softirq</span><span class="params">(<span class="type">int</span> nr, <span class="type">void</span> (*action)(<span class="keyword">struct</span> softirq_action *))</span>&#123;</span><br><span class="line">	softirq_vec[nr].action = action;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>例如网络发包对应类型为<code>NET_TX_SOFTIRQ</code>的处理函数<code>net_tx_action</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// net/core/dev.c</span></span><br><span class="line">open_softirq(NET_TX_SOFTIRQ, net_tx_action);</span><br><span class="line">open_softirq(NET_RX_SOFTIRQ, net_rx_action);</span><br></pre></td></tr></table></figure>
+
+<h5><span id="2-4-2-2-2-shi-neng-ruan-zhong-duan-raise-softirq">2.4.2.2.2 使能软中断-raise_softirq</span><a href="#2-4-2-2-2-shi-neng-ruan-zhong-duan-raise-softirq" class="header-anchor">#</a></h5><p>  <img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/11.png" alt="image"><br>  最核心的函数是 <code>raise_softirq</code>，简单地理解就是设置<code> softirq_veq[nr]</code>的标记位，设置后表示使能该软中断号。</p>
+<h5><span id="2-4-2-2-3-zhi-xing-ruan-zhong-duan-do-softirq">2.4.2.2.3 执行软中断-do_softirq</span><a href="#2-4-2-2-3-zhi-xing-ruan-zhong-duan-do-softirq" class="header-anchor">#</a></h5><p>每个 CPU 上会初始化一个 <code>ksoftirqd</code> 内核线程，负责处理各种类型的 <code>softirq </code>中断事件:</p>
+<p><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/11-1.png" alt="image-20240810221847189"></p>
+<p>当注册软中断使能后，<code>ksoftirqd</code> 线程，执行<code>pending</code>的软中断。<code>ksoftirqd</code> 里面会进一步调用到 <code>__do_softirq</code>。</p>
+<p><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/11-2.png" alt="image-20240810223529233"></p>
+<p>可以看到软中断执行，硬件中断是使能的。遍历使能的<code>softlrq</code>,执行对应的<code>action</code>函数。</p>
+<h3><span id="2-4-3-ying-jian-zhong-duan-he-ruan-zhong-duan-qu-bie">2.4.3 硬件中断和软中断区别</span><a href="#2-4-3-ying-jian-zhong-duan-he-ruan-zhong-duan-qu-bie" class="header-anchor">#</a></h3><p><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/12.png" alt="image"></p>
 <ol>
 <li>硬件中断包含gpio，网卡，外围电路IP等等，<code>tick</code>（产生一次tick系统滴答中断，<code>jiffies加1</code>）</li>
 <li>软件中断包含<code>TIMER</code> 表示定时中断、RCU 表示 RCU 锁中断、<code>SCHED </code>表示内核调度中断</li>
 </ol>
 <p><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/13.png" alt="image"></p>
 <p><strong>区别：</strong><br>上半部直接处理硬件请求，也就是硬中断，主要是负责耗时短的工作，特点是快速执行；<br>下半部是由内核触发，也就说软中断，主要是负责上半部未完成的工作，通常都是耗时比较长的事情，特点是延迟执行<br>硬中断（上半部）是会打断 CPU 正在执行的任务，然后立即执行中断处理程序，而软中断（下半部）是以内核线程的方式执行</p>
-<p><code>cat /proc/softirqs</code>可以看软件中断信息<br><code>cat /proc/interrupts</code>可以看硬件中断</p>
+<p><code>cat /proc/softirqs</code>可以看软件中断信息</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">cat</span> /proc/softirqs</span><br><span class="line">                  CPU0     CPU1  ...    CPU46    CPU47</span><br><span class="line">          HI:        2        0  ...        0        1</span><br><span class="line">       TIMER:   443727   467971  ...   313696   270110</span><br><span class="line">      NET_TX:    57919    65998  ...    42287    54840</span><br><span class="line">      NET_RX:    28728  5262341  ...    81106    55244</span><br><span class="line">       BLOCK:      261     1564  ...   268986   463918</span><br><span class="line">    IRQ_POLL:        0        0  ...        0        0</span><br><span class="line">     TASKLET:       98      207  ...      129      122</span><br><span class="line">       SCHED:  1854427  1124268  ...  5154804  5332269</span><br><span class="line">     HRTIMER:    12224    68926  ...    25497    24272</span><br><span class="line">         RCU:  1469356   972856  ...  5961737  5917455</span><br></pre></td></tr></table></figure>
+
+<p><code>cat /proc/interrupts</code>可以看硬件中断</p>
 <h2><span id="2-5-zhong-duan-chu-li-yuan-ze">2.5 中断处理原则</span><a href="#2-5-zhong-duan-chu-li-yuan-ze" class="header-anchor">#</a></h2><h3><span id="2-5-1-yuan-ze-1-bu-neng-qian-tao">2.5.1 原则 1:不能嵌套</span><a href="#2-5-1-yuan-ze-1-bu-neng-qian-tao" class="header-anchor">#</a></h3><p>中断 A 正在处理的过程中，假设又发生了中断 B，那么在栈里要保存 A 的现场，然后处理 B。在处理 B 的过程中又发生了中断 C，那么在栈里要保存 B 的现场，然后处理C。<br>如果中断嵌套突然暴发，那么栈将越来越大，栈终将耗尽。<br>为了防止这种情况发生，也是为了简单化中断的处理，在 Linux 系统上规定中断无法嵌套：即当前中断 A 没处理完之前，不会响应另一个中断 B(即使它的优先级更高)。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">local_irq_disable();</span><br></pre></td></tr></table></figure>
 <h3><span id="2-5-2-yuan-ze-2-yue-kuai-yue-hao">2.5.2 原则 2:越快越好</span><a href="#2-5-2-yuan-ze-2-yue-kuai-yue-hao" class="header-anchor">#</a></h3><p>在单核心芯片系统中，假设中断处理很慢，那应用程序在这段时间内就无法执行：系统显得很迟顿。</p>
 <h3><span id="2-5-3-yuan-ze-3-hao-shi-jiu-de-zhong-duan-cao-zuo-qie-fen-wei-zhong-duan-shang-ban-bu-xia-ban-bu">2.5.3 原则 3:耗时久的中断操作切分为中断上半部、下半部</span><a href="#2-5-3-yuan-ze-3-hao-shi-jiu-de-zhong-duan-cao-zuo-qie-fen-wei-zhong-duan-shang-ban-bu-xia-ban-bu" class="header-anchor">#</a></h3><p>当处理某个中断要做的事情就是很多，没办法加快。比如对于按键中断，我们需要等待几十毫秒消除机械抖动。难道要在<code>irq_handler</code> 中等待吗？对于计算机来说，这可是一个段很长的时间。又比如图像处理中，当一个硬件IP处理完成一张图像的操作，那么对这张图像的后处理操作难道要放在中断服务中来操作嘛，显然这个耗时是非常久的。<br>那么中断操作切分为中断上半部、下半部。上半部分关中断，清中断执行关键紧急的事情，下半部分去处理耗时久的事情，如下图：<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/14.png" alt="image"><br>中断下半部的实现有很多种方法： ①<code>tasklet</code>(小任务)、②<code>work queue</code>(工作队列)， ③<code>threaded irq</code>等。</p>
 <h3><span id="2-5-4-yuan-ze-4-shang-ban-bu-he-xia-ban-bu-jun-bu-neng-xiu-mian">2.5.4 原则 4:上半部和下半部均不能休眠</span><a href="#2-5-4-yuan-ze-4-shang-ban-bu-he-xia-ban-bu-jun-bu-neng-xiu-mian" class="header-anchor">#</a></h3><p>中断上半部、下半部的执行过程中，不能休眠：中断休眠的话，以后谁来调度进程啊？</p>
 <h2><span id="2-6-zhong-duan-xia-ban-bu-chu-li-fang-fa">2.6 中断下半部处理方法</span><a href="#2-6-zhong-duan-xia-ban-bu-chu-li-fang-fa" class="header-anchor">#</a></h2><h3><span id="2-6-1-xiao-ren-wu-tasklet">2.6.1 小任务tasklet</span><a href="#2-6-1-xiao-ren-wu-tasklet" class="header-anchor">#</a></h3><p><code>tasklet</code> 是使用软中断来实现的：<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/15.png" alt="image"><br><strong>中断上半部和下半部的处理流程：</strong><br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/16.png" alt="image"><br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/17.png" alt="image"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> 中断源产生中断，执行irq_enter(), 最开始preempt_count=<span class="number">0</span>，preempt_count++后为<span class="number">1</span>, generic_handle_irq中会找到该中断源对应的中断服务程序</span><br><span class="line"><span class="number">2.</span> 执行irq函数，执行中断上半部，（注意执行上半部分时是无法被中断的，调用了local_irq_disable()）</span><br><span class="line"><span class="number">3.</span> irq_exit(),preempt_count-- 后为<span class="number">0</span>，</span><br><span class="line"><span class="number">4.</span> 判断preempt_count是否等于<span class="number">0</span>，此时等于<span class="number">0</span>，也就是执行下半部分，也叫做软中断流程</span><br><span class="line"><span class="number">5.</span> 下半部过程中会对preempt_count++，开始软件中断</span><br><span class="line"><span class="number">6.</span> 由于是软件中断，开总中断，允许其他的硬件中断响应local_irq_enable();</span><br><span class="line"><span class="number">7.</span> 根据软中断号找到服务函数，执行所谓的中断下半部分（可以进行耗时的一些操作，因为有使能中断）</span><br><span class="line"><span class="number">8.</span> 下半部分执行完后，local_irq_disable()</span><br><span class="line"><span class="number">9.</span> preempt_count--，preempt_count又回到<span class="number">0</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> 中断源产生中断，执行irq_enter(), 最开始preempt_count=<span class="number">0</span>，preempt_count++后为<span class="number">1</span>, </span><br><span class="line">	generic_handle_irq中会找到该中断源对应的中断服务程序</span><br><span class="line"><span class="number">2.</span> 执行irq函数，执行中断上半部，（注意执行上半部分时是无法被中断的，调用了local_irq_disable()）</span><br><span class="line"><span class="number">3.</span> irq_exit(),preempt_count-- 后为<span class="number">0</span>，</span><br><span class="line"><span class="number">4.</span> 判断preempt_count是否等于<span class="number">0</span>，此时等于<span class="number">0</span>，也就是执行下半部分，也叫做软中断流程</span><br><span class="line"><span class="number">5.</span> 下半部过程中会对preempt_count++，开始软件中断</span><br><span class="line"><span class="number">6.</span> 由于是软件中断，开总中断，允许其他的硬件中断响应local_irq_enable();</span><br><span class="line"><span class="number">7.</span> 根据软中断号找到服务函数，执行所谓的中断下半部分（可以进行耗时的一些操作，因为有使能中断）</span><br><span class="line"><span class="number">8.</span> 下半部分执行完后，local_irq_disable()</span><br><span class="line"><span class="number">9.</span> preempt_count--，preempt_count又回到<span class="number">0</span></span><br></pre></td></tr></table></figure>
 
 <p>上半部中断（硬件中断）有<code>local_irq_disable()</code>，中断是不允许被另一个中断打断的。而下半部（软件中断）时中断是开的，它可以被其他中断打断<code>local_irq_enable()</code>。</p>
 <p>那么软中断（下半部）A还没有执行到<code>⑨preempt_count--</code>，当被其他中断B打断时，又执行<code>①preempt_count++</code>，等于2，又进入了下一个硬件中断B流程。当下一个硬件中断B流程执行完后，<code>preempt_count--</code>，等于1，此时不会进入软总断流程直接结束，然后恢复A中断的下半部，继续执行完A中断下半部分的代码。<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/18.png" alt="image"><br>那这样B的下半部怎么执行呢？难道不要了吗？注意：<code>步骤7</code>中的中断下半部处理过程中，它处理的是所有中断的下半部分，处理完A的下半部后会继续处理B中断的下半部。所以，多个中断的下半部，是汇集在一起处理的。<br>总结：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">1.中断的处理可以分为上半部，下半部</span><br><span class="line">2.中断上半部，用来处理紧急的事，它是在关中断的状态下执行的</span><br><span class="line">3.中断下半部，用来处理耗时的、不那么紧急的事，它是在开中断的状态下执行的. 中断下半部执行时，有可能会被其他硬件中断打断</span><br><span class="line">4.中断上半部、下半部的执行过程中，不能休眠</span><br></pre></td></tr></table></figure>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">1.中断的处理可以分为上半部，下半部</span><br><span class="line">2.中断上半部，用来处理紧急的事，它是在关中断的状态下执行的</span><br><span class="line">3.中断下半部，用来处理耗时的、不那么紧急的事，它是在开中断的状态下执行的.</span><br><span class="line">   	中断下半部执行时，有可能会被其他硬件中断打断</span><br><span class="line">4.中断上半部、下半部的执行过程中，不能休眠</span><br></pre></td></tr></table></figure>
 <h3><span id="2-6-2-gong-zuo-dui-lie-workqueue">2.6.2 工作队列workqueue</span><a href="#2-6-2-gong-zuo-dui-lie-workqueue" class="header-anchor">#</a></h3><p>如果下半部要做的事情太多，那么<code>tasklet</code>就有点不太符合需求了，我们希望建立一个线程来专门执行中断后处理，用内核线程来做：在中断上半部唤醒内核线程。<br>在linux操作系统中，有一个内核线程**<code>kworker</code>** 线程，是系统帮我们创建的。内核中有很多这样的线程：<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/19.png" alt="image"><br><code>kworker</code> 线程要去<code>“工作队列”(work queue)</code>上取出一个一个<code>“工作”(work)</code>，来执行它里面的函数。</p>
 <p>1.创建 <code>work</code><br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/20.png" alt="image"></p>
 <p>2.要执行这个函数时，把<code> work</code> 提交给 <code>work queue </code>就可以了<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/21.png" alt="image"><br>上述函数会把 <code>work</code> 提供给**<code>系统默认的 work queue：system_wq</code>**，它是一个队列。<code>schedule_work</code> 函数不仅仅是把 <code>work </code>放入队列，还会把<code>kworker </code>线程唤醒。</p>
@@ -310,7 +337,7 @@ e) 中断处理完毕，要继续运行进程 A 之前，恢复这些值
       
       
       
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li></ul>
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li></ul>
 
     </footer>
   </div>
@@ -360,7 +387,7 @@ e) 中断处理完毕，要继续运行进程 A 之前，恢复这些值
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 17px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 19px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 16px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 14px;">通信协议</a>
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 18.18px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 19.09px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17.27px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 16.36px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.18px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.82px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15.45px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 14.55px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.91px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 11.82px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.73px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17.27px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.64px;">通信协议</a>
     </div>
   </div>
 
@@ -382,23 +409,23 @@ e) 中断处理完毕，要继续运行进程 A 之前，恢复这些值
       <ul>
         
           <li>
+            <a href="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E4%B8%8B%E5%8D%8A%E9%83%A8-tasklet/">字符设备驱动-9-中断子系统-中断下半部-tasklet</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E8%AE%BE%E5%A4%87%E6%A0%91%E8%A1%A8%E8%BF%B0%E4%B8%8E%E8%A7%A3%E6%9E%90/">字符设备驱动-9-中断子系统-中断设备树表述与解析</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/10/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E7%BB%93%E6%9E%84%E4%BD%93/">字符设备驱动-9-中断子系统-中断结构体</a>
+          </li>
+        
+          <li>
             <a href="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/">字符设备驱动-9-中断子系统-GICv2架构解析</a>
           </li>
         
           <li>
             <a href="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/">字符设备驱动-9-中断子系统-中断引入</a>
-          </li>
-        
-          <li>
-            <a href="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-8-%E5%86%85%E6%A0%B8%E5%AE%9A%E6%97%B6%E5%99%A8/">字符设备驱动-8-内核定时器</a>
-          </li>
-        
-          <li>
-            <a href="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-7-%E5%BC%82%E6%AD%A5%E9%80%9A%E7%9F%A5/">字符设备驱动-7-异步通知</a>
-          </li>
-        
-          <li>
-            <a href="/2024/07/30/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-6-poll%E5%BA%95%E5%B1%82%E9%A9%B1%E5%8A%A8%E6%9C%BA%E5%88%B6/">字符设备驱动-6-poll底层驱动机制</a>
           </li>
         
       </ul>
