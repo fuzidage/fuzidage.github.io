@@ -8309,6 +8309,7 @@ DIV:用分频器进行分频
 </ul>
 </li>
 <li><a href="#5-fu-lu-bi-te-yu-shi-liu-jin-zhi-zhuan-huan-kuai-cha-biao">5 附录：比特与十六进制转换快查表</a></li>
+<li><a href="#6-mkimage-gong-ju">6 mkimage工具</a></li>
 </ul>
 <!-- tocstop -->
 
@@ -8380,6 +8381,67 @@ DIV:用分频器进行分频
 <h2><span id="4-2-wang-luo-qi-dong-linux">4.2 网络启动 Linux</span><a href="#4-2-wang-luo-qi-dong-linux" class="header-anchor">#</a></h2><p>调试过程中由于我们不断更改kernel, 那么如果每次都烧录进emmc，从emmc启动就很繁琐，直接从网络启动。<br>先将<code>zImage</code>和<code>dtb</code>文件放在tftp共享目录下，通过<code>nfs 或者 tftp</code>从 Ubuntu 中下载<code>zImage</code>和设备树文件：</p>
 <p><code>setenv bootargs &#39;console=ttymxc0,115200 root=/dev/mmcblk1p2 rootwait rw&#39;</code><br><code>setenv bootcmd &#39;tftp 80800000 zImage; tftp 83000000 imx6ull-alientek-emmc.dtb; bootz 80800000 - 83000000&#39;</code><br><code>saveenv</code><br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/23.png" alt="image"><br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/24.png" alt="image"></p>
 <h1><span id="5-fu-lu-bi-te-yu-shi-liu-jin-zhi-zhuan-huan-kuai-cha-biao">5 附录：比特与十六进制转换快查表</span><a href="#5-fu-lu-bi-te-yu-shi-liu-jin-zhi-zhuan-huan-kuai-cha-biao" class="header-anchor">#</a></h1><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * include/linux/sizes.h</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * This program is free software; you can redistribute it and/or modify</span></span><br><span class="line"><span class="comment"> * it under the terms of the GNU General Public License version 2 as</span></span><br><span class="line"><span class="comment"> * published by the Free Software Foundation.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> __LINUX_SIZES_H__</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __LINUX_SIZES_H__</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1				0x00000001</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2				0x00000002</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_4				0x00000004</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_8				0x00000008</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_16				0x00000010</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_32				0x00000020</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_64				0x00000040</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_128				0x00000080</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_256				0x00000100</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_512				0x00000200</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1K				0x00000400</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2K				0x00000800</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_4K				0x00001000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_8K				0x00002000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_16K				0x00004000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_32K				0x00008000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_64K				0x00010000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_128K				0x00020000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_256K				0x00040000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_512K				0x00080000</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1M				0x00100000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2M				0x00200000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_4M				0x00400000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_8M				0x00800000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_16M				0x01000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_32M				0x02000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_64M				0x04000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_128M				0x08000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_256M				0x10000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_512M				0x20000000</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1G				0x40000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2G				0x80000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">/* __LINUX_SIZES_H__ */</span></span></span><br></pre></td></tr></table></figure>
+
+<h1><span id="6-mkimage-gong-ju">6 mkimage工具</span><a href="#6-mkimage-gong-ju" class="header-anchor">#</a></h1><p>用来制作不压缩或者压缩的多种可启动映象文件。比如内核启动镜像(给zImage镜像添加64字节的头信息成uImage)，再比如<code>rootfs.img</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">Usage: ./mkimage -l image</span><br><span class="line">          -l ==&gt; list image header information</span><br><span class="line">       ./mkimage [-x] -A arch -O os -T type -C comp -a addr -e ep -n name -d data_file[:data_file...] image</span><br><span class="line">          -A ==&gt; set architecture to &#x27;arch&#x27; </span><br><span class="line">          -O ==&gt; set operating system to &#x27;os&#x27;</span><br><span class="line">          -T ==&gt; set image type to &#x27;type&#x27;</span><br><span class="line">          -C ==&gt; set compression type &#x27;comp&#x27;</span><br><span class="line">          -a ==&gt; set load address to &#x27;addr&#x27; (hex)</span><br><span class="line">          -e ==&gt; set entry point to &#x27;ep&#x27; (hex)</span><br><span class="line">          -n ==&gt; set image name to &#x27;name&#x27;</span><br><span class="line">          -d ==&gt; use image data from &#x27;datafile&#x27;</span><br><span class="line">          -x ==&gt; set XIP (execute in place)</span><br><span class="line">       ./mkimage [-D dtc_options] -f fit-image.its fit-image</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-A</td>
+<td>指定CPU的架构，比如：arm或者x86</td>
+</tr>
+<tr>
+<td>-O</td>
+<td>指定操作系统的类型，比如：linux</td>
+</tr>
+<tr>
+<td>-T</td>
+<td>指定镜像的类型，比如：standalone、kernel、ramdisk、multi、firmware、script、filesystem</td>
+</tr>
+<tr>
+<td>-C</td>
+<td>指定压缩的方式，比如：none 不压缩、gzip 用gzip的压缩方式、bzip2 用bzip2的压缩方式</td>
+</tr>
+<tr>
+<td>-a</td>
+<td>指定镜像在内存中的加载地址</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>指定镜像运行的入口点地址</td>
+</tr>
+<tr>
+<td>-n</td>
+<td>指定镜像的名字</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>指定制作镜像的源文件</td>
+</tr>
+<tr>
+<td>-x</td>
+<td>镜像是否可以片上执行</td>
+</tr>
+</tbody></table>
+<p><code>mkimage</code>命令举例如下：</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#mkimage -n &quot;My Kernel&quot; -A arm -O linux -T kernel -C gzip –a 0x8000 –e 0x8000 -d kernel.gz kernel.img</span></span><br></pre></td></tr></table></figure>
+<p>以上命令将压缩了的内核二进制文件<code>kernel.gz</code>转换成u-boot能够辨认的二进制文件<code>kernel.img</code>，并指定<code>kernel.img</code>的名字为<code>“My Kernel”</code>，处理器体系架构为arm，操作系统类型为linux，程序类型为操作系统内核，程序由gzip压缩，程序的链接起始地址为0x8000，程序的入口地址为0x8000，注意这两个地址一定要是物理地址而不是对应的虚拟地址。</p>
+<figure class="highlight bash"><table><tr><td class="code"><pre><span class="line"><span class="comment">#mkimage -n &quot;My Rootfs&quot; -A arm -O linux -T ramdisk -C gzip -d ramdisk.gz ramdisk.img</span></span><br></pre></td></tr></table></figure>
+<p>以上命令将压缩了的ramdisk根文件系统二进制文件<code>ramdisk.gz</code>转换成u-boot能够辨认的二进制文件<code>ramdisk.img</code>，并指定<code>ramdisk.img</code>的名字为<code>“My Rootfs”</code>，处理器体系架构为arm，操作系统类型为linux，程序类型为ramdisk，程序由gzip压缩，不需要指定ramdisk的链接起始地址和入口地址。</p>
+<p>如果我们将<code>kernel.img</code>和<code>ramdisk.img</code>文件分别写到flash芯片的<code>0xFF000000</code>和<code>0xFF200000</code>位置，系统启动后进入u-boot命令行界面，执行以下u-boot命令：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta"># bootm 0xFF000000 0xFF200000</span></span><br></pre></td></tr></table></figure>
+<p>那么u-boot将把<code>0xFF000000</code>位置的Linux内核解压缩到RAM中的<code>0x8000</code>位置，再将<code>0xFF200000</code>位置的ramdisk文件系统映像文件刨掉u-boot头部后复制到RAM中的某个位置，然后跳转到内核的入口地址<code>0x8000</code>位置启动内核，同时把板子信息、ramdisk在RAM中的起始地址和结束地址、命令行字符串传给内核，这样Linux开始启动运行。</p>
+<p>如果没有可以片上执行的norflash:</p>
+<ol>
+<li>mkimage<br><code>mkimage -n &#39;linux-2.6.14&#39; -A arm -O linux -T kernel -C none -a 0x30008000 -e 0x30008040 -d zImage zImage.img</code></li>
+<li>tftp下载到ddr<br><code>ftp 0x30008000 zImage.img</code></li>
+<li>启动内核<br><code>bootm 0x30008000</code></li>
+</ol>
 ]]></content>
       <tags>
         <tag>linux系统构建</tag>
@@ -13343,6 +13405,1071 @@ board_xxx.c里面实现了具体单板的button_operations，当insmod这个驱�
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">ifndef</span> __ARMEB__</span></span><br><span class="line">jiffies = jiffies_64;</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">jiffies = jiffies_64 + <span class="number">4</span>;</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br></pre></td></tr></table></figure>
 <p>上述代码说明了，对于大字节序的 CPU， <code>jiffies</code> 指向<code> jiffies_64</code> 的高 4字节；对于小字节序的 CPU，<code> jiffies</code> 指向 <code>jiffies_64 </code>的低 4 字节。对<code> jiffies_64</code> 的累加操作，就是对 <code>jiffies </code>的累加操作。<br><img src="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-8-%E5%86%85%E6%A0%B8%E5%AE%9A%E6%97%B6%E5%99%A8/22.png" alt="image"></p>
 <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="keyword">extern</span> u64 __cacheline_aligned_in_smp jiffies_64; <span class="comment">//include/linux/jiffies.h</span></span><br><span class="line"><span class="keyword">extern</span> <span class="type">unsigned</span> <span class="type">long</span> <span class="keyword">volatile</span> __cacheline_aligned_in_smp __jiffy_arch_data jiffies;</span><br></pre></td></tr></table></figure>]]></content>
+      <tags>
+        <tag>Linux设备驱动</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>字符设备驱动-9-中断子系统-中断引入</title>
+    <url>/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/</url>
+    <content><![CDATA[<div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-zhong-duan-yu-yi-chang-chong-lei">1 中断与异常种类</a></li>
+<li><a href="#2-zhong-duan-de-chu-li-liu-cheng">2 中断的处理流程</a><ul>
+<li><a href="#2-1-yi-chang-xiang-liang-biao">2.1 异常向量表</a><ul>
+<li><a href="#2-1-1-zhong-duan-xiang-liang-biao-pian-yi-vector-base">2.1.1 中断向量表偏移(vector base)</a></li>
+</ul>
+</li>
+<li><a href="#2-2-gic-gai-shu">2.2 GIC概述</a></li>
+<li><a href="#2-3-bao-hu-xian-chang-hui-fu-xian-chang-de-he-xin-zhan">2.3 保护现场，恢复现场的核心：栈</a><ul>
+<li><a href="#2-3-1-arm-chu-li-qi-cheng-xu-yun-xing-de-guo-cheng">2.3.1 ARM 处理器程序运行的过程</a></li>
+<li><a href="#2-3-2-ru-zhan-bao-hu-xian-chang-chu-zhan-hui-fu-xian-chang">2.3.2 入栈保护现场&#x2F;出栈恢复现场</a></li>
+</ul>
+</li>
+<li><a href="#2-4-ying-jian-zhong-duan-ruan-jian-zhong-duan">2.4 硬件中断、软件中断</a><ul>
+<li><a href="#2-4-1-ying-zhong-duan">2.4.1 硬中断</a></li>
+<li><a href="#2-4-2-ruan-zhong-duan">2.4.2 软中断</a></li>
+<li><a href="#2-4-3-ying-jian-zhong-duan-he-ruan-jian-qu-bie">2.4.3 硬件中断和软件区别</a></li>
+</ul>
+</li>
+<li><a href="#2-5-zhong-duan-chu-li-yuan-ze">2.5 中断处理原则</a><ul>
+<li><a href="#2-5-1-yuan-ze-1-bu-neng-qian-tao">2.5.1 原则 1:不能嵌套</a></li>
+<li><a href="#2-5-2-yuan-ze-2-yue-kuai-yue-hao">2.5.2 原则 2:越快越好</a></li>
+<li><a href="#2-5-3-yuan-ze-3-hao-shi-jiu-de-zhong-duan-cao-zuo-qie-fen-wei-zhong-duan-shang-ban-bu-xia-ban-bu">2.5.3 原则 3:耗时久的中断操作切分为中断上半部、下半部</a></li>
+<li><a href="#2-5-4-yuan-ze-4-shang-ban-bu-he-xia-ban-bu-jun-bu-neng-xiu-mian">2.5.4 原则 4:上半部和下半部均不能休眠</a></li>
+</ul>
+</li>
+<li><a href="#2-6-zhong-duan-xia-ban-bu-chu-li-fang-fa">2.6 中断下半部处理方法</a><ul>
+<li><a href="#2-6-1-xiao-ren-wu-tasklet">2.6.1 小任务tasklet</a></li>
+<li><a href="#2-6-2-gong-zuo-dui-lie-workqueue">2.6.2 工作队列workqueue</a></li>
+<li><a href="#2-6-3-threaded-irq">2.6.3 threaded irq</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-zhong-duan-yu-yi-chang-chong-lei">1 中断与异常种类</span><a href="#1-zhong-duan-yu-yi-chang-chong-lei" class="header-anchor">#</a></h1><p><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/1.png" alt="image"><br>CPU 在运行的过程中，也会被各种<code>“异常”</code>打断。这些<code>“异常”</code>有：</p>
+<ol>
+<li>指令未定义</li>
+<li>Reset复位</li>
+<li>指令、数据访问有问题</li>
+<li>SWI(软中断)</li>
+<li>快中断</li>
+<li>IRQ中断</li>
+</ol>
+<p>IRQ中断只是一种（一类）异常而已。导致中断发生的情况有很多，比如：</p>
+<ol>
+<li>按键</li>
+<li>定时器</li>
+<li>ADC 转换完成</li>
+<li>UART 发送完数据、收到数据</li>
+</ol>
+<p>这些众多的<code>“中断源”</code>，汇集到<code>“中断控制器”</code>，由<code>“中断控制器”</code>选择优先级最高的中断并通知 CPU。如上图所示：</p>
+<h1><span id="2-zhong-duan-de-chu-li-liu-cheng">2 中断的处理流程</span><a href="#2-zhong-duan-de-chu-li-liu-cheng" class="header-anchor">#</a></h1><p>arm 对异常(中断)处理过程：</p>
+<ol>
+<li>初始化：<br> a) 设置<strong>中断源</strong>，让它可以产生中断<br> b) 设置<strong>中断控制器</strong>(可以屏蔽某个中断，优先级)<br> c) 设置 <strong>CPU 总开关(使能中断)</strong></li>
+<li>执行其他程序：正常程序</li>
+<li>产生中断：比如按下按键（中断源发出中断请求）—&gt;中断控制器—&gt;CPU</li>
+<li>CPU 每执行完一条指令都会检查有无中断&#x2F;异常产生</li>
+<li>CPU 发现有中断&#x2F;异常产生，开始处理。</li>
+</ol>
+<p>对于不同的异常，跳去不同的地址执行程序。这地址上，只是一条跳转指令，跳去执行某个函数(地址)，这个就是异常向量。③④⑤都是硬件做的。③是中断源来做，④⑤是cpu来做</p>
+<p>综上5个过程，软件要做的事情:<br>a) 保存现场(各种寄存器)<br>b) 处理异常(中断): 从<strong>异常向量表</strong>跳到不同的异常向量去执行，分辨中断源，再调用不同的处理函数<br>c) 恢复现场</p>
+<h2><span id="2-1-yi-chang-xiang-liang-biao">2.1 异常向量表</span><a href="#2-1-yi-chang-xiang-liang-biao" class="header-anchor">#</a></h2><p>可以参考我之前写的<a href="https://www.cnblogs.com/fuzidage/p/12066599.html" title="异常向量表">s3c2440裸机-异常中断（一. 异常、中断的原理与流程）</a> 介绍了异常向量表。<br>uboot中就有大量类似这种的异常向量表，不同系列芯片每个异常的偏移地址会有所不同。下图以s3c2440芯片为例：<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/2.png" alt="image"><br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/3.png" alt="image"></p>
+<table>
+<thead>
+<tr>
+<th>向量地址</th>
+<th>中断类型</th>
+<th>中断模式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0X00</td>
+<td>复位中断(Rest)</td>
+<td>特权模式(SVC)</td>
+</tr>
+<tr>
+<td>0X04</td>
+<td>未定义指令中断(Undefined Instruction)</td>
+<td>未定义指令中止模式(Undef)</td>
+</tr>
+<tr>
+<td>0X08</td>
+<td>软中断(Software Interrupt,SWI)</td>
+<td>特权模式(SVC)</td>
+</tr>
+<tr>
+<td>0X0C</td>
+<td>指令预取中止中断(Prefetch Abort)</td>
+<td>中止模式</td>
+</tr>
+<tr>
+<td>0X10</td>
+<td>数据访问中止中断(Data Abort)</td>
+<td>中止模式</td>
+</tr>
+<tr>
+<td>0X14</td>
+<td>未使用(Not Used)</td>
+<td>未使用</td>
+</tr>
+<tr>
+<td>0X18</td>
+<td>IRQ</td>
+<td>中断(IRQ Interrupt)</td>
+</tr>
+<tr>
+<td>0X1C</td>
+<td>FIQ</td>
+<td>中断(FIQ Interrupt)</td>
+</tr>
+</tbody></table>
+<p>这就是异常向量表，每一条指令对应一种异常。<br>发生复位时，CPU 就去 执行第 1 条指令：<code>b reset</code>。<br>发生中断时，CPU 就去执行<code>“ldr pc, _irq”</code>这条指令。这些指令存放的位置是固定的，比如对于ARM9芯片中断向量的地址是<code>0x18</code>。当发生中断时，CPU 就强制跳去执行 <code>0x18 </code>处的代码。</p>
+<h3><span id="2-1-1-zhong-duan-xiang-liang-biao-pian-yi-vector-base">2.1.1 中断向量表偏移(vector base)</span><a href="#2-1-1-zhong-duan-xiang-liang-biao-pian-yi-vector-base" class="header-anchor">#</a></h3><p>在向量表里，一般都是放置一条跳转指令，发生该异常时，CPU 就会执行向量表中的跳转指令，去调用更复杂的函数。当然，向量表的位置并不总是从 0 地址开始，很多芯片可以设置某个 <code>vector base </code>寄存器，指定向量表在其他位置，比如imx6ull芯片设置 <code>vector base </code>为 <code>0x80000000</code>，指定为 DDR 的某个地址。但是表中的各个异常向量的偏移地址，是固定的：复位向量偏移地址是 0，中断是 0x18。</p>
+<h2><span id="2-2-gic-gai-shu">2.2 GIC概述</span><a href="#2-2-gic-gai-shu" class="header-anchor">#</a></h2><p>对于 ARM 的中断控制器，述语上称之为<code> GIC (Generic Interrupt Controller)</code>，到目前已经更新到 v4 版本了。在STM32叫做<code>NVIC</code>(内嵌向量中断控制器 <code>Nested Vectored Interrupt Controller</code>)<br>简单地说，<code>GIC v3/v4</code> 用于 <code>ARMv8</code> 架构，即 64 位 ARM 芯片。<br>而 <code>GIC v2</code> 用于<code> ARMv7</code> 和其他更低的32位架构。v2架构下一节：<a href="https://www.cnblogs.com/fuzidage/p/17733146.html">设备驱动-10.中断子系统-5 armv7 GIC架构解析</a> 会展开细说。</p>
+<p>v8架构是在32位ARM架构上进行开发的，将被首先用于对扩展虚拟地址和64位数据处理技术有更高要求的产品领域，如企业应用、高档消费电子产品。<code>ARMv8</code>架构包含两个执行状态：<code>AArch64</code>和<code>AArch32</code>。<code>AArch64</code>执行状态针对64位处理技术，引入了一个全新指令集A64；而<code>AArch32</code>执行状态将支持现有的ARM指令集。</p>
+<h2><span id="2-3-bao-hu-xian-chang-hui-fu-xian-chang-de-he-xin-zhan">2.3 保护现场，恢复现场的核心：栈</span><a href="#2-3-bao-hu-xian-chang-hui-fu-xian-chang-de-he-xin-zhan" class="header-anchor">#</a></h2><p>中断当前正在运行的进程、线程。进程、线程是什么？内核如何切换进程、线程、中断？要理解这些概念，必须理解栈的作用。</p>
+<p>进程是资源分配的基本单位，线程是调度的基本单位。<br>    比如全局变量a, 对不同线程它是共享的，但是这个资源a是属于该进程独立的资源，对其他进程是不可见的。<br>    一个进程可以包含多个线程，线程有自己的栈空间，也就是局部变量。</p>
+<h3><span id="2-3-1-arm-chu-li-qi-cheng-xu-yun-xing-de-guo-cheng">2.3.1 ARM 处理器程序运行的过程</span><a href="#2-3-1-arm-chu-li-qi-cheng-xu-yun-xing-de-guo-cheng" class="header-anchor">#</a></h3><p>ARM 芯片属于精简指令集计算机(<code>RISC：Reduced Instruction Set  Computing</code>)，它所用的指令比较简单，有如下特点：</p>
+<pre><code>对内存只有读、写指令
+对于数据的运算是在 CPU 内部实现
+使用 RISC 指令的 CPU 复杂度小一点，易于设计
+</code></pre>
+<p>比如对于<code>a=a+b</code>这样的算式，需要经过下面 4 个步骤才可以实现：<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/4.png" alt="image"><br>我们先忽略各种 CPU 模式(系统模式、用户模式等等)。详细过程如下：<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/5.png" alt="image"></p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">LDR R0, [a]</span><br><span class="line">LDR R1, [b]</span><br><span class="line">ADD R0, R0, R1</span><br><span class="line">STR R0, [a]</span><br><span class="line">/*翻译如下：</span><br><span class="line">把内存 a 的值读入 CPU 寄存器 R0</span><br><span class="line">把内存 b 的值读入 CPU 寄存器 R1</span><br><span class="line">把 R0、R1 累加，存入 R0</span><br><span class="line">把 R0 的值写入内存 a*/</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-3-2-ru-zhan-bao-hu-xian-chang-x2f-chu-zhan-hui-fu-xian-chang">2.3.2 入栈保护现场&#x2F;出栈恢复现场</span><a href="#2-3-2-ru-zhan-bao-hu-xian-chang-x2f-chu-zhan-hui-fu-xian-chang" class="header-anchor">#</a></h3><p>当进行函数调用跳转到下一个函数，又或者中断一个程序，就需要把这些寄存器的值保存下来：这就称为<strong>保存现场</strong>。保存的寄存器那块内存就称为栈空间。<br>当跳转的函数执行完成，就需要从栈中恢复那些 CPU 内部寄存器的值，这一出栈的过程也被叫做<strong>“恢复现场”</strong>。</p>
+<p><strong>①函数调用：</strong></p>
+<pre><code>1.在函数 A 里调用函数 B，实际就是中断函数 A 的执行。
+2.那么需要把函数 A 调用 B 之前瞬间的 CPU 寄存器的值，保存到栈里
+</code></pre>
+<p><strong>②中断处理：</strong></p>
+<pre><code>a) 进程 A 正在执行，这时候发生了中断。
+b) CPU 强制跳到中断异常向量地址去执行，
+c) 这时就需要保存进程 A 被中断瞬间的 CPU 寄存器值，
+d) 可以保存在进程 A 的内核态栈，也可以保存在进程 A 的内核结构体中。
+e) 中断处理完毕，要继续运行进程 A 之前，恢复这些值
+</code></pre>
+<p><strong>③进程切换：</strong><br>进程 A 的时间用完了，就切换到进程 B。怎么切换？切换过程是发生在内核态里的，跟中断的处理类似。<br>a) 进程 A 被切换瞬间的 CPU 寄存器值保存在某个地方；<br>b) 恢复进程 B 之前保存的 CPU 寄存器值，这样就可以运行进程 B 了。<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/6.png" alt="image"><br>总结有3种场景会要用到栈去保存和恢复现场：</p>
+<p>①函数调用，②进程切换，③中断过程。<strong>进程调度核心就是靠定时器中断来实现</strong>。</p>
+<h2><span id="2-4-ying-jian-zhong-duan-ruan-jian-zhong-duan">2.4 硬件中断、软件中断</span><a href="#2-4-ying-jian-zhong-duan-ruan-jian-zhong-duan" class="header-anchor">#</a></h2><h3><span id="2-4-1-ying-zhong-duan">2.4.1 硬中断</span><a href="#2-4-1-ying-zhong-duan" class="header-anchor">#</a></h3><p>硬件产生的中断，称之为<code>“硬件中断”</code>(<code>hard irq</code>)。每个硬件中断都有对应的处理函数，比如按键中断、网卡中断，定时器中断的处理函数肯定不一样。<br>为方便理解，可以先认为对硬件中断的处理是用数组来实现的，数组里存放的是函数指针：一个中断号对应一个中断服务函数<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/7.png" alt="image"></p>
+<h3><span id="2-4-2-ruan-zhong-duan">2.4.2 软中断</span><a href="#2-4-2-ruan-zhong-duan" class="header-anchor">#</a></h3><p>相对的，还可以人为地制造中断：软件中断(<code>soft irq</code>)，如下图所示：<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/8.png" alt="image"></p>
+<ol>
+<li><p>软件中断何时生产？<br> 由软件决定，对于 X 号软件中断，只需要把它的 flag 设置为 1 就表示发生了该中断。</p>
+</li>
+<li><p>软件中断何时处理？<br> 软件中断嘛，并不是那么十万火急，有空再处理它好了,因此一般软件中断是硬件中断处理完后，顺便来处理软件中断。</p>
+</li>
+<li><p>有哪些软件中断？<br> 查内核源码<code> include/linux/interrupt.h</code><br> <img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/9.png" alt="image"><br> 怎么设置使用软中断，比如<code>tasklet </code>（后面会讲中断上半部分， 和中断下半部分）就是使用软件中断实现的。还有上一节<a href="https://fuzidage.github.io/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-8-%E5%86%85%E6%A0%B8%E5%AE%9A%E6%97%B6%E5%99%A8/">字符设备驱动-8-内核定时器</a>   <a href="https://www.cnblogs.com/fuzidage/p/17473292.html">字符设备驱动-9.内核定时器</a>也是利用软中断实现的。</p>
+</li>
+</ol>
+<p>  3.1 设置软件中断的处理函数：<br>  <img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/10.png" alt="image"><br>  <img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/11.png" alt="image"><br>  最核心的函数是 <code>raise_softirq</code>，简单地理解就是设置<code> softirq_veq[nr]</code>的标记位，设置后表示使能该软中断号。</p>
+<h3><span id="2-4-3-ying-jian-zhong-duan-he-ruan-jian-qu-bie">2.4.3 硬件中断和软件区别</span><a href="#2-4-3-ying-jian-zhong-duan-he-ruan-jian-qu-bie" class="header-anchor">#</a></h3><p><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/12.png" alt="image"></p>
+<ol>
+<li>硬件中断包含gpio，网卡，外围电路IP等等，<code>tick</code>（产生一次tick系统滴答中断，<code>jiffies加1</code>）</li>
+<li>软件中断包含<code>TIMER</code> 表示定时中断、RCU 表示 RCU 锁中断、<code>SCHED </code>表示内核调度中断</li>
+</ol>
+<p><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/13.png" alt="image"></p>
+<p><strong>区别：</strong><br>上半部直接处理硬件请求，也就是硬中断，主要是负责耗时短的工作，特点是快速执行；<br>下半部是由内核触发，也就说软中断，主要是负责上半部未完成的工作，通常都是耗时比较长的事情，特点是延迟执行<br>硬中断（上半部）是会打断 CPU 正在执行的任务，然后立即执行中断处理程序，而软中断（下半部）是以内核线程的方式执行</p>
+<p><code>cat /proc/softirqs</code>可以看软件中断信息<br><code>cat /proc/interrupts</code>可以看硬件中断</p>
+<h2><span id="2-5-zhong-duan-chu-li-yuan-ze">2.5 中断处理原则</span><a href="#2-5-zhong-duan-chu-li-yuan-ze" class="header-anchor">#</a></h2><h3><span id="2-5-1-yuan-ze-1-bu-neng-qian-tao">2.5.1 原则 1:不能嵌套</span><a href="#2-5-1-yuan-ze-1-bu-neng-qian-tao" class="header-anchor">#</a></h3><p>中断 A 正在处理的过程中，假设又发生了中断 B，那么在栈里要保存 A 的现场，然后处理 B。在处理 B 的过程中又发生了中断 C，那么在栈里要保存 B 的现场，然后处理C。<br>如果中断嵌套突然暴发，那么栈将越来越大，栈终将耗尽。<br>为了防止这种情况发生，也是为了简单化中断的处理，在 Linux 系统上规定中断无法嵌套：即当前中断 A 没处理完之前，不会响应另一个中断 B(即使它的优先级更高)。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">local_irq_disable();</span><br></pre></td></tr></table></figure>
+<h3><span id="2-5-2-yuan-ze-2-yue-kuai-yue-hao">2.5.2 原则 2:越快越好</span><a href="#2-5-2-yuan-ze-2-yue-kuai-yue-hao" class="header-anchor">#</a></h3><p>在单核心芯片系统中，假设中断处理很慢，那应用程序在这段时间内就无法执行：系统显得很迟顿。</p>
+<h3><span id="2-5-3-yuan-ze-3-hao-shi-jiu-de-zhong-duan-cao-zuo-qie-fen-wei-zhong-duan-shang-ban-bu-xia-ban-bu">2.5.3 原则 3:耗时久的中断操作切分为中断上半部、下半部</span><a href="#2-5-3-yuan-ze-3-hao-shi-jiu-de-zhong-duan-cao-zuo-qie-fen-wei-zhong-duan-shang-ban-bu-xia-ban-bu" class="header-anchor">#</a></h3><p>当处理某个中断要做的事情就是很多，没办法加快。比如对于按键中断，我们需要等待几十毫秒消除机械抖动。难道要在<code>irq_handler</code> 中等待吗？对于计算机来说，这可是一个段很长的时间。又比如图像处理中，当一个硬件IP处理完成一张图像的操作，那么对这张图像的后处理操作难道要放在中断服务中来操作嘛，显然这个耗时是非常久的。<br>那么中断操作切分为中断上半部、下半部。上半部分关中断，清中断执行关键紧急的事情，下半部分去处理耗时久的事情，如下图：<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/14.png" alt="image"><br>中断下半部的实现有很多种方法： ①<code>tasklet</code>(小任务)、②<code>work queue</code>(工作队列)， ③<code>threaded irq</code>等。</p>
+<h3><span id="2-5-4-yuan-ze-4-shang-ban-bu-he-xia-ban-bu-jun-bu-neng-xiu-mian">2.5.4 原则 4:上半部和下半部均不能休眠</span><a href="#2-5-4-yuan-ze-4-shang-ban-bu-he-xia-ban-bu-jun-bu-neng-xiu-mian" class="header-anchor">#</a></h3><p>中断上半部、下半部的执行过程中，不能休眠：中断休眠的话，以后谁来调度进程啊？</p>
+<h2><span id="2-6-zhong-duan-xia-ban-bu-chu-li-fang-fa">2.6 中断下半部处理方法</span><a href="#2-6-zhong-duan-xia-ban-bu-chu-li-fang-fa" class="header-anchor">#</a></h2><h3><span id="2-6-1-xiao-ren-wu-tasklet">2.6.1 小任务tasklet</span><a href="#2-6-1-xiao-ren-wu-tasklet" class="header-anchor">#</a></h3><p><code>tasklet</code> 是使用软中断来实现的：<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/15.png" alt="image"><br><strong>中断上半部和下半部的处理流程：</strong><br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/16.png" alt="image"><br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/17.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="number">1.</span> 中断源产生中断，执行irq_enter(), 最开始preempt_count=<span class="number">0</span>，preempt_count++后为<span class="number">1</span>, generic_handle_irq中会找到该中断源对应的中断服务程序</span><br><span class="line"><span class="number">2.</span> 执行irq函数，执行中断上半部，（注意执行上半部分时是无法被中断的，调用了local_irq_disable()）</span><br><span class="line"><span class="number">3.</span> irq_exit(),preempt_count-- 后为<span class="number">0</span>，</span><br><span class="line"><span class="number">4.</span> 判断preempt_count是否等于<span class="number">0</span>，此时等于<span class="number">0</span>，也就是执行下半部分，也叫做软中断流程</span><br><span class="line"><span class="number">5.</span> 下半部过程中会对preempt_count++，开始软件中断</span><br><span class="line"><span class="number">6.</span> 由于是软件中断，开总中断，允许其他的硬件中断响应local_irq_enable();</span><br><span class="line"><span class="number">7.</span> 根据软中断号找到服务函数，执行所谓的中断下半部分（可以进行耗时的一些操作，因为有使能中断）</span><br><span class="line"><span class="number">8.</span> 下半部分执行完后，local_irq_disable()</span><br><span class="line"><span class="number">9.</span> preempt_count--，preempt_count又回到<span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<p>上半部中断（硬件中断）有<code>local_irq_disable()</code>，中断是不允许被另一个中断打断的。而下半部（软件中断）时中断是开的，它可以被其他中断打断<code>local_irq_enable()</code>。</p>
+<p>那么软中断（下半部）A还没有执行到<code>⑨preempt_count--</code>，当被其他中断B打断时，又执行<code>①preempt_count++</code>，等于2，又进入了下一个硬件中断B流程。当下一个硬件中断B流程执行完后，<code>preempt_count--</code>，等于1，此时不会进入软总断流程直接结束，然后恢复A中断的下半部，继续执行完A中断下半部分的代码。<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/18.png" alt="image"><br>那这样B的下半部怎么执行呢？难道不要了吗？注意：<code>步骤7</code>中的中断下半部处理过程中，它处理的是所有中断的下半部分，处理完A的下半部后会继续处理B中断的下半部。所以，多个中断的下半部，是汇集在一起处理的。<br>总结：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">1.中断的处理可以分为上半部，下半部</span><br><span class="line">2.中断上半部，用来处理紧急的事，它是在关中断的状态下执行的</span><br><span class="line">3.中断下半部，用来处理耗时的、不那么紧急的事，它是在开中断的状态下执行的. 中断下半部执行时，有可能会被其他硬件中断打断</span><br><span class="line">4.中断上半部、下半部的执行过程中，不能休眠</span><br></pre></td></tr></table></figure>
+<h3><span id="2-6-2-gong-zuo-dui-lie-workqueue">2.6.2 工作队列workqueue</span><a href="#2-6-2-gong-zuo-dui-lie-workqueue" class="header-anchor">#</a></h3><p>如果下半部要做的事情太多，那么<code>tasklet</code>就有点不太符合需求了，我们希望建立一个线程来专门执行中断后处理，用内核线程来做：在中断上半部唤醒内核线程。<br>在linux操作系统中，有一个内核线程**<code>kworker</code>** 线程，是系统帮我们创建的。内核中有很多这样的线程：<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/19.png" alt="image"><br><code>kworker</code> 线程要去<code>“工作队列”(work queue)</code>上取出一个一个<code>“工作”(work)</code>，来执行它里面的函数。</p>
+<p>1.创建 <code>work</code><br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/20.png" alt="image"></p>
+<p>2.要执行这个函数时，把<code> work</code> 提交给 <code>work queue </code>就可以了<br><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/21.png" alt="image"><br>上述函数会把 <code>work</code> 提供给**<code>系统默认的 work queue：system_wq</code>**，它是一个队列。<code>schedule_work</code> 函数不仅仅是把 <code>work </code>放入队列，还会把<code>kworker </code>线程唤醒。</p>
+<p>3.什么时候把 <code>work </code>提交给 <code>work queue</code>？<br>在中断场景中，可以在中断上半部调用 <code>schedule_work</code> 函数。<br>因此耗时久的中断下半部分，应该利用线程化处理方式，比如使用工作队列<code>workqueue</code>，上半部调用<code>schedule_work </code>函数，触发<code> work</code> 的处理。</p>
+<h3><span id="2-6-3-threaded-irq">2.6.3 threaded irq</span><a href="#2-6-3-threaded-irq" class="header-anchor">#</a></h3><p><img src="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/22.png" alt="image"><br><code>threaded_irq</code>：下半部也是利用线程化处理。前面的<code>workqueue</code>处理使用方法太麻烦，需要在上半部进行<code>work</code>定义，<code>schedule_work</code>操作。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">参数handler:上半部分可以为空</span><br><span class="line">参数：thread_fn，系统会为这个函数创建一个内核线程。发生中断时，内核线程就会执行这个函数</span><br></pre></td></tr></table></figure>
+<p>以前用 <code>work </code>来线程化地处理中断，一个 <code>worker </code>线程只能由一个 CPU 执行，多个中断的 <code>work</code> 都由同一个<code> worker</code> 线程来处理，在单 CPU 系统中也只能忍着了。但是在 SMP 系统中，明明有那么多 CPU 空着，你偏偏让多个中断挤在这个CPU 上？<br>新技术 <code>threaded irq</code>，为每一个中断都创建一个内核线程；多个中断的内核线程可以分配到多个 CPU 上执行，这提高了效率。</p>
+]]></content>
+      <tags>
+        <tag>Linux设备驱动</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>字符设备驱动-9-中断子系统-GICv2架构解析</title>
+    <url>/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/</url>
+    <content><![CDATA[<div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-armv7-32-wei-gicv2-jie-shao">1 armv7 32位GICv2介绍</a><ul>
+<li><a href="#1-0-fen-fa-qi-duan-he-cpu-jie-kou-duan">1.0 分发器端和 CPU 接口端</a></li>
+<li><a href="#1-1-gic-lei-xing">1.1 GIC 类型</a></li>
+<li><a href="#1-2-zhong-duan-id">1.2 中断 ID</a></li>
+<li><a href="#1-3-zhong-duan-pei-zhi-1-7-you-xiang-xi-miao-shu">1.3 中断配置(1.7有详细描述)</a><ul>
+<li><a href="#1-3-1-irq-he-fiq-zong-zhong-duan-shi-neng">1.3.1 IRQ 和 FIQ 总中断使能</a></li>
+<li><a href="#1-3-2-id0-id1019-zhong-duan-shi-neng-he-jin-zhi">1.3.2 <code>ID0~ID1019</code> 中断使能和禁止</a></li>
+<li><a href="#1-3-3-zhong-duan-you-xian-ji-shu-liang-gicc-pmr">1.3.3 中断优先级数量 GICC_PMR</a></li>
+<li><a href="#1-3-4-zhong-duan-qiang-zhan-you-xian-ji-he-zi-you-xian-ji-wei-shu-gicc-bpr">1.3.4 中断抢占优先级和子优先级位数 GICC_BPR</a></li>
+<li><a href="#1-3-5-zhong-duan-priority-d-ipriorityr">1.3.5 中断priority D_IPRIORITYR</a></li>
+</ul>
+</li>
+<li><a href="#1-4-zhong-duan-zhuang-tai-ji">1.4 中断状态机</a></li>
+<li><a href="#1-5-gic-chu-shi-hua-ying-jian-liu-cheng-ruan-jian-liu-cheng-jian-3-3">1.5 GIC初始化硬件流程（软件流程见3.3）</a></li>
+<li><a href="#1-6-gic-zhong-duan-chu-li">1.6 GIC中断处理</a></li>
+<li><a href="#1-7-gic-kong-zhi-qi-ji-cun-qi-jie-shao">1.7 GIC控制器寄存器介绍</a><ul>
+<li><a href="#1-7-1-gic-de-nei-cun-ying-she">1.7.1 GIC的内存映射</a><ul>
+<li><a href="#1-7-1-1-fen-fa-qi-ji-cun-qi">1.7.1.1 分发器寄存器</a><ul>
+<li><a href="#1-7-1-1-1-gicd-ctlr-distributor-control-register">1.7.1.1.1 GICD_CTLR(Distributor Control Register)</a></li>
+<li><a href="#1-7-1-1-2-gicd-typer-controller-type-register">1.7.1.1.2 GICD_TYPER(Controller Type Register)</a></li>
+<li><a href="#1-7-1-1-3-gicd-iidr-implementer-identification-register">1.7.1.1.3 GICD_IIDR(Implementer Identification Register)</a></li>
+<li><a href="#1-7-1-1-4-gicd-igrouprn-group-registers">1.7.1.1.4 GICD_IGROUPRn(Group Registers)</a></li>
+<li><a href="#1-7-1-1-5-gicd-isenablern-set-enable-registers">1.7.1.1.5 GICD_ISENABLERn(Set-Enable Registers)</a></li>
+<li><a href="#1-7-1-1-6-gicd-icenablern-clear-enable-registers">1.7.1.1.6 GICD_ICENABLERn(Clear-Enable Registers)</a></li>
+<li><a href="#1-7-1-1-7-gicd-isactivern-set-active-registers">1.7.1.1.7 GICD_ISACTIVERn(Set-Active Registers)</a></li>
+<li><a href="#1-7-1-1-8-gicd-icactivern-clear-active-registers">1.7.1.1.8 GICD_ICACTIVERn(Clear-Active Registers)</a></li>
+<li><a href="#1-7-1-1-9-gicd-ipriorityrn-priority-registers">1.7.1.1.9 GICD_IPRIORITYRn(Priority Registers)</a></li>
+<li><a href="#1-7-1-1-10-gicd-itargetsrn-processor-targets-registers">1.7.1.1.10 GICD_ITARGETSRn(Processor Targets Registers)</a></li>
+<li><a href="#1-7-1-1-11-gicd-icfgrn-configuration-registers">1.7.1.1.11 GICD_ICFGRn(Configuration Registers)</a></li>
+<li><a href="#1-7-1-1-12-icpidr2-identification-registers-peripheral-id2-register">1.7.1.1.12 ICPIDR2(Identification registers: Peripheral ID2 Register)</a></li>
+</ul>
+</li>
+<li><a href="#1-7-1-2-cpu-jie-kou-duan-ji-cun-qi">1.7.1.2 cpu接口端寄存器</a><ul>
+<li><a href="#1-7-1-2-1-gicc-ctlr-cpu-interface-control-register">1.7.1.2.1 GICC_CTLR(CPU Interface Control Register)</a></li>
+<li><a href="#1-7-1-2-2-gicc-pmr-priority-mask-register">1.7.1.2.2 GICC_PMR(Priority Mask Register)</a></li>
+<li><a href="#1-7-1-2-3-gicc-bpr-binary-point-register">1.7.1.2.3 GICC_BPR(Binary Point Register)</a></li>
+<li><a href="#1-7-1-2-4-gicc-iar-acknowledge-register">1.7.1.2.4 GICC_IAR(Acknowledge Register)</a></li>
+<li><a href="#1-7-1-2-5-gicc-eoir-interrupt-register">1.7.1.2.5 GICC_EOIR(Interrupt Register)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-zhong-duan-shi-li-start-s-fen-xi">2. 中断示例start.s分析</a><ul>
+<li><a href="#2-1-start-s-qi-dong-liu-cheng">2.1 start.s启动流程</a></li>
+</ul>
+</li>
+<li><a href="#3-gic-zhong-duan-chu-li-liu-cheng">3 GIC中断处理流程</a><ul>
+<li><a href="#3-1-yi-ji-zhong-duan-kong-zhi-qi-liu-cheng">3.1 一级中断控制器流程</a></li>
+<li><a href="#3-2-duo-ji-zhong-duan-kong-zhi-qi-liu-cheng">3.2 多级中断控制器流程</a></li>
+<li><a href="#3-3-gic-ruan-jian-chu-shi-hua-guo-cheng">3.3 GIC软件初始化过程</a><ul>
+<li><a href="#3-3-1-gic-qu-dong-zhu-ce">3.3.1 gic驱动注册</a><ul>
+<li><a href="#3-3-1-1-dts-pi-pei">3.3.1.1 dts匹配</a></li>
+<li><a href="#3-3-1-2-gic-of-init-gic-qu-dong-chu-shi-hua-ru-kou">3.3.1.2 gic_of_init(GIC驱动初始化入口)</a></li>
+<li><a href="#3-3-1-3-shen-qing-gic-zhong-duan">3.3.1.3 申请GIC中断</a><ul>
+<li><a href="#3-3-1-3-1-zai-she-bei-shu-li-zhi-ding-zhong-duan">3.3.1.3.1 在设备树里指定中断</a></li>
+<li><a href="#3-3-1-3-2-dui-she-bei-shu-zhong-duan-de-chu-li">3.3.1.3.2 对设备树中断的处理</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-4-gic-zhong-duan-chu-guo-cheng">3.4 GIC中断处过程</a><ul>
+<li><a href="#3-4-1-handle-arch-irq-ru-kou">3.4.1 handle_arch_irq入口</a><ul>
+<li><a href="#3-4-1-1-gic-handle-irq">3.4.1.1 gic_handle_irq</a><ul>
+<li><a href="#3-4-1-1-1-handle-domain-irq">3.4.1.1.1 handle_domain_irq</a><ul>
+<li><a href="#3-4-1-1-1-1-generic-handle-irq">3.4.1.1.1.1 generic_handle_irq</a></li>
+</ul>
+</li>
+<li><a href="#3-4-1-1-2-zong-jie-request-irq-de-han-shu-ru-he-bei-zhi-xing">3.4.1.1.2 总结request_irq的函数如何被执行</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#4-zhong-duan-kong-zhi-qi-gic-de-she-bei-shu-miao-shu">4 中断控制器GIC的设备树描述</a><ul>
+<li><a href="#4-1-huo-qu-zhong-duan-hao-han-shu">4.1 获取中断号函数</a></li>
+<li><a href="#4-2-gic-shi-yong-shi-li-an-jian-gpio-zhong-duan">4.2 gic使用示例-按键gpio中断</a><ul>
+<li><a href="#4-2-1-dts-miao-shu">4.2.1 dts描述</a></li>
+<li><a href="#4-2-2-qu-dong-dai-ma-yu-fen-xi">4.2.2 驱动代码与分析</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-armv7-32-wei-gicv2-jie-shao">1 armv7 32位GICv2介绍</span><a href="#1-armv7-32-wei-gicv2-jie-shao" class="header-anchor">#</a></h1><p>armv7 32位 gic采用v2版本，参考手册 <a href="https://developer.arm.com/documentation/ihi0048/bb/?lang=en">https://developer.arm.com/documentation/ihi0048/bb/?lang=en</a></p>
+<p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/1.png" alt="image"><br><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/1-2.png" alt="image"></p>
+<p> <code>GIC400 </code>就是v2版本的中断控制器 IP 核，当 GIC 接收到外部中断信号以后就会报给 ARM 内核。框架如下：<br> <img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/2.png" alt="image"></p>
+<p>GIC 架构分为了两个逻辑块：<code>Distributor</code> 和 <code>CPU Interface</code>，也就是分发器端和 CPU 接口端。</p>
+<h2><span id="1-0-fen-fa-qi-duan-he-cpu-jie-kou-duan">1.0 分发器端和 CPU 接口端</span><a href="#1-0-fen-fa-qi-duan-he-cpu-jie-kou-duan" class="header-anchor">#</a></h2><ol>
+<li><p>分发器用来全局中断使能控制，每一个中断使能开关，中断优先级，外部中断触发方式（边沿触发、电平触发）等。外设-&gt;分发器会设置成<code>pending</code>（或者<code>active and pending</code>状态），这时分发器传递优先级最高的pending中断给cpu 接收端。</p>
+</li>
+<li><p>cpu接收端用来接收中断信号汇报给cpu, 如：应答中断，通知中断处理完成，定义抢占策略，设置优先级掩码，当多个中断到来选择最高优先级的中断号。</p>
+<p> 例如：I.MX6U给了一个<code> core_ca7.h</code>定义了GIC的所有寄存器。</p>
+ <figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">* GIC 寄存器描述结构体，</span></span><br><span class="line"><span class="comment">* GIC 分为分发器端和 CPU 接口端</span></span><br><span class="line"><span class="comment">  */</span></span><br><span class="line">  <span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">      <span class="comment">/* 分发器端寄存器 */</span></span><br><span class="line">      <span class="type">int32_t</span> RESERVED0[<span class="number">1024</span>];</span><br><span class="line">      _IOM <span class="type">uint32_t</span> D_CTLR; <span class="comment">/* Offset: 0x1000 (R/W) */</span></span><br><span class="line">      _IM <span class="type">uint32_t</span> D_TYPER; <span class="comment">/* Offset: 0x1004 (R/ ) */</span></span><br><span class="line">      _IM <span class="type">uint32_t</span> D_IIDR; <span class="comment">/* Offset: 0x1008 (R/ ) */</span></span><br><span class="line">      <span class="type">int32_t</span> RESERVED1[<span class="number">29</span>];</span><br><span class="line">      _IOM <span class="type">uint32_t</span> D_IGROUPR[<span class="number">16</span>]; <span class="comment">/* Offset: 0x1080 - 0x0BC (R/W) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED2[<span class="number">16</span>];</span><br><span class="line">      __IOM <span class="type">uint32_t</span> D_ISENABLER[<span class="number">16</span>];<span class="comment">/* Offset: 0x1100 - 0x13C (R/W) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED3[<span class="number">16</span>];</span><br><span class="line">      __IOM <span class="type">uint32_t</span> D_ICENABLER[<span class="number">16</span>];<span class="comment">/* Offset: 0x1180 - 0x1BC (R/W) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED4[<span class="number">16</span>];</span><br><span class="line">      __IOM <span class="type">uint32_t</span> D_ISPENDR[<span class="number">16</span>]; <span class="comment">/* Offset: 0x1200 - 0x23C (R/W) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED5[<span class="number">16</span>];</span><br><span class="line">      __IOM <span class="type">uint32_t</span> D_ICPENDR[<span class="number">16</span>]; <span class="comment">/* Offset: 0x1280 - 0x2BC (R/W) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED6[<span class="number">16</span>];</span><br><span class="line">      __IOM <span class="type">uint32_t</span> D_ISACTIVER[<span class="number">16</span>];<span class="comment">/* Offset: 0x1300 - 0x33C (R/W) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED7[<span class="number">16</span>];</span><br><span class="line">      __IOM <span class="type">uint32_t</span> D_ICACTIVER[<span class="number">16</span>];<span class="comment">/* Offset: 0x1380 - 0x3BC (R/W) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED8[<span class="number">16</span>];</span><br><span class="line">      __IOM <span class="type">uint8_t</span> D_IPRIORITYR[<span class="number">512</span>];<span class="comment">/* Offset: 0x1400 - 0x5FC (R/W) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED9[<span class="number">128</span>];</span><br><span class="line">      __IOM <span class="type">uint8_t</span> D_ITARGETSR[<span class="number">512</span>];<span class="comment">/* Offset: 0x1800 - 0x9FC (R/W) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED10[<span class="number">128</span>];</span><br><span class="line">      __IOM <span class="type">uint32_t</span> D_ICFGR[<span class="number">32</span>]; <span class="comment">/* Offset: 0x1C00 - 0xC7C (R/W) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED11[<span class="number">32</span>];</span><br><span class="line">      __IM <span class="type">uint32_t</span> D_PPISR; <span class="comment">/* Offset: 0x1D00 (R/ ) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> D_SPISR[<span class="number">15</span>]; <span class="comment">/* Offset: 0x1D04 - 0xD3C (R/ ) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED12[<span class="number">112</span>];</span><br><span class="line">      __OM <span class="type">uint32_t</span> D_SGIR; <span class="comment">/* Offset: 0x1F00 ( /W) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED13[<span class="number">3</span>];</span><br><span class="line">      __IOM <span class="type">uint8_t</span> D_CPENDSGIR[<span class="number">16</span>];<span class="comment">/* Offset: 0x1F10 - 0xF1C (R/W) */</span></span><br><span class="line">      __IOM <span class="type">uint8_t</span> D_SPENDSGIR[<span class="number">16</span>];<span class="comment">/* Offset: 0x1F20 - 0xF2C (R/W) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED14[<span class="number">40</span>];</span><br><span class="line">      __IM <span class="type">uint32_t</span> D_PIDR4; <span class="comment">/* Offset: 0x1FD0 (R/ ) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> D_PIDR5; <span class="comment">/* Offset: 0x1FD4 (R/ ) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> D_PIDR6; <span class="comment">/* Offset: 0x1FD8 (R/ ) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> D_PIDR7; <span class="comment">/* Offset: 0x1FDC (R/ ) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> D_PIDR0; <span class="comment">/* Offset: 0x1FE0 (R/ ) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> D_PIDR1; <span class="comment">/* Offset: 0x1FE4 (R/ ) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> D_PIDR2; <span class="comment">/* Offset: 0x1FE8 (R/ ) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> D_PIDR3; <span class="comment">/* Offset: 0x1FEC (R/ ) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> D_CIDR0; <span class="comment">/* Offset: 0x1FF0 (R/ ) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> D_CIDR1; <span class="comment">/* Offset: 0x1FF4 (R/ ) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> D_CIDR2; <span class="comment">/* Offset: 0x1FF8 (R/ ) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> D_CIDR3; <span class="comment">/* Offset: 0x1FFC (R/ ) */</span></span><br><span class="line"></span><br><span class="line">      <span class="comment">/* CPU 接口端寄存器 */</span></span><br><span class="line">      __IOM <span class="type">uint32_t</span> C_CTLR; <span class="comment">/* Offset: 0x2000 (R/W) */</span></span><br><span class="line">      __IOM <span class="type">uint32_t</span> C_PMR; <span class="comment">/* Offset: 0x2004 (R/W) */</span></span><br><span class="line">      __IOM <span class="type">uint32_t</span> C_BPR; <span class="comment">/* Offset: 0x2008 (R/W) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> C_IAR; <span class="comment">/* Offset: 0x200C (R/ ) */</span></span><br><span class="line">      __OM <span class="type">uint32_t</span> C_EOIR; <span class="comment">/* Offset: 0x2010 ( /W) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> C_RPR; <span class="comment">/* Offset: 0x2014 (R/ ) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> C_HPPIR; <span class="comment">/* Offset: 0x2018 (R/ ) */</span></span><br><span class="line">      __IOM <span class="type">uint32_t</span> C_ABPR; <span class="comment">/* Offset: 0x201C (R/W) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> C_AIAR; <span class="comment">/* Offset: 0x2020 (R/ ) */</span></span><br><span class="line">      __OM <span class="type">uint32_t</span> C_AEOIR; <span class="comment">/* Offset: 0x2024 ( /W) */</span></span><br><span class="line">      __IM <span class="type">uint32_t</span> C_AHPPIR; <span class="comment">/* Offset: 0x2028 (R/ ) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED15[<span class="number">41</span>];</span><br><span class="line">      __IOM <span class="type">uint32_t</span> C_APR0; <span class="comment">/* Offset: 0x20D0 (R/W) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED16[<span class="number">3</span>];</span><br><span class="line">      __IOM <span class="type">uint32_t</span> C_NSAPR0; <span class="comment">/* Offset: 0x20E0 (R/W) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED17[<span class="number">6</span>];</span><br><span class="line">      __IM <span class="type">uint32_t</span> C_IIDR; <span class="comment">/* Offset: 0x20FC (R/ ) */</span></span><br><span class="line">      <span class="type">uint32_t</span> RESERVED18[<span class="number">960</span>];</span><br><span class="line">      __OM <span class="type">uint32_t</span> C_DIR; <span class="comment">/* Offset: 0x3000 ( /W) */</span></span><br><span class="line">  &#125; GIC_Type;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2><span id="1-1-gic-lei-xing">1.1 GIC 类型</span><a href="#1-1-gic-lei-xing" class="header-anchor">#</a></h2><p>GIC 将众多的中断源分为分为三类：<br>①、<code>SPI</code>(<code>Shared Peripheral Interrupt</code>),共享中断，顾名思义，所有 Core 共享的中断，这个是最常见的，那些外部中断都属于 SPI 中断 。<br>②、<code>PPI</code>(<code>Private Peripheral Interrupt)</code>，私有中断，我们说了 GIC 是支持多核的，每个核肯定有自己独有的中断。这些独有的中断肯定是要指定的核心处理，因此这些中断就叫做私有中断。<br>③、<code>SGI</code>(<code>Software-generated Interrupt</code>)，软件中断，由软件触发引起的中断，通过向寄存器<code>GICD_SGIR</code> 写入数据来触发，系统会使用 SGI 中断来完成多核之间的通信。</p>
+<h2><span id="1-2-zhong-duan-id">1.2 中断 ID</span><a href="#1-2-zhong-duan-id" class="header-anchor">#</a></h2><p>为了区分这些不同的中断源肯定要给他们分配一个唯一 ID，这些 ID 就是中断 ID。每一个 CPU 最多支持 1020 个中断 ID，<code>ID0~ID1019</code> 中断使能和禁止。这 1020 个 ID 包含了 PPI、SPI 和 SGI。</p>
+<pre><code>ID0~ID15：这 16 个 ID 分配给 SGI。
+ID16~ID31：这 16 个 ID 分配给 PPI。
+ID32~ID1019：这 988 个 ID 分配给 SPI。
+</code></pre>
+<p>例如：I.MX6U 的总共使用了 128 个中断 ID，加上前面属于 PPI 和 SGI 的 32 个 ID，I.MX6U 的中断源共有 <code>128+32=160</code>，那么irq为0的中断ID即为32。<br>个。NXP 官方 SDK中的文件 <code>MCIMX6Y2C.h</code>定义了160个中断ID。<br><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/3.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> NUMBER_OF_INT_VECTORS 160 <span class="comment">/* 中断源 160 个，SGI+PPI+SPI*/</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">enum</span> <span class="title">IRQn</span> &#123;</span></span><br><span class="line">	<span class="comment">/* Auxiliary constants */</span></span><br><span class="line">	otAvail_IRQn = <span class="number">-128</span>,</span><br><span class="line">	<span class="comment">/* Core interrupts */</span></span><br><span class="line">	oftware0_IRQn = <span class="number">0</span>, </span><br><span class="line">	oftware1_IRQn = <span class="number">1</span>, </span><br><span class="line">	Software2_IRQn = <span class="number">2</span>, </span><br><span class="line">	Software3_IRQn = <span class="number">3</span>, </span><br><span class="line">	Software4_IRQn = <span class="number">4</span>, </span><br><span class="line">	Software5_IRQn = <span class="number">5</span>, </span><br><span class="line">	Software6_IRQn = <span class="number">6</span>, </span><br><span class="line">	Software7_IRQn = <span class="number">7</span>, </span><br><span class="line">	Software8_IRQn = <span class="number">8</span>, </span><br><span class="line">	Software9_IRQn = <span class="number">9</span>, </span><br><span class="line">	Software10_IRQn = <span class="number">10</span>, </span><br><span class="line">	Software11_IRQn = <span class="number">11</span>, </span><br><span class="line">	Software12_IRQn = <span class="number">12</span>, </span><br><span class="line">	Software13_IRQn = <span class="number">13</span>, </span><br><span class="line">	Software14_IRQn = <span class="number">14</span>, </span><br><span class="line">	Software15_IRQn = <span class="number">15</span>, </span><br><span class="line">	VirtualMaintenance_IRQn = <span class="number">25</span>, </span><br><span class="line">	HypervisorTimer_IRQn = <span class="number">26</span>, </span><br><span class="line">	VirtualTimer_IRQn = <span class="number">27</span>, </span><br><span class="line">	LegacyFastInt_IRQn = <span class="number">28</span>, </span><br><span class="line">	SecurePhyTimer_IRQn = <span class="number">29</span>, </span><br><span class="line">	NonSecurePhyTimer_IRQn = <span class="number">30</span>, </span><br><span class="line">	LegacyIRQ_IRQn = <span class="number">31</span>, </span><br><span class="line">	<span class="comment">/* Device specific interrupts */</span></span><br><span class="line">	IOMUXC_IRQn = <span class="number">32</span>, </span><br><span class="line">	DAP_IRQn = <span class="number">33</span>, </span><br><span class="line">	SDMA_IRQn = <span class="number">34</span>, </span><br><span class="line">	TSC_IRQn = <span class="number">35</span>, </span><br><span class="line">	SNVS_IRQn = <span class="number">36</span>, </span><br><span class="line">	...... ...... </span><br><span class="line">&#125; IRQn_Type;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="1-3-zhong-duan-pei-zhi-1-7-you-xiang-xi-miao-shu">1.3 中断配置(1.7有详细描述)</span><a href="#1-3-zhong-duan-pei-zhi-1-7-you-xiang-xi-miao-shu" class="header-anchor">#</a></h2><h3><span id="1-3-1-irq-he-fiq-zong-zhong-duan-shi-neng">1.3.1 IRQ 和 FIQ 总中断使能</span><a href="#1-3-1-irq-he-fiq-zong-zhong-duan-shi-neng" class="header-anchor">#</a></h3><p>“<strong>CPSR程序状态寄存器</strong>”已经讲过了，寄存器 CPSR 的 I&#x3D;1 禁止 IRQ，当 I&#x3D;0 使<br>能 IRQ；F&#x3D;1 禁止 FIQ，F&#x3D;0 使能 FIQ。我们还有更简单的指令来完成 IRQ 或者 FIQ 的使能和<br>禁止:</p>
+<table>
+<thead>
+<tr>
+<th>指令</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>cpsid i</td>
+<td>禁止 IRQ 中断。</td>
+</tr>
+<tr>
+<td>cpsie i</td>
+<td>使能 IRQ 中断。</td>
+</tr>
+<tr>
+<td>cpsid f</td>
+<td>禁止 FIQ 中断。</td>
+</tr>
+<tr>
+<td>cpsie f</td>
+<td>使能 FIQ 中断。</td>
+</tr>
+</tbody></table>
+<h3><span id="1-3-2-id0-id1019-zhong-duan-shi-neng-he-jin-zhi">1.3.2 <code>ID0~ID1019</code> 中断使能和禁止</span><a href="#1-3-2-id0-id1019-zhong-duan-shi-neng-he-jin-zhi" class="header-anchor">#</a></h3><p>前面讲到中断ID有<code> ID0~ID1019</code>， GIC 寄存器 <code>GICD_ISENABLERn </code>和 <code>GICD_ ICENABLERn </code>用来完成外部中断的使能和禁止，对于 Cortex-A7 内核来说中断 ID 只使用了 512 个。<br>一共16组<code>GICD_ISENABLER</code>和<code>GICD_ISENABLER</code>，其中<code>GICD_ISENABLER0 </code>的 <code>bit[15:0]</code>对应<code>ID15~0</code> 的 SGI 中断，<code>GICD_ISENABLER0 </code>的 <code>bit[31:16]</code>对应<code>ID31~16</code>的 PPI 中断。剩下的<code>GICD_ISENABLER1~GICD_ISENABLER15 </code>就是控制 SPI 中断的。</p>
+<h3><span id="1-3-3-zhong-duan-you-xian-ji-shu-liang-gicc-pmr">1.3.3 中断优先级数量 GICC_PMR</span><a href="#1-3-3-zhong-duan-you-xian-ji-shu-liang-gicc-pmr" class="header-anchor">#</a></h3><p>Cortex-A7 GIC 控制器最多可以支持 256 个优先级，数字越小，优先级越高！Cortex-A7 选择了 32 个优先级，<code>GICC_PMR</code> 寄存器，此寄存器用来决定使用几级优先级,<code>GICC_PMR</code> 寄存器只有低 8 位有效，这 8 位最多可以设置 256 个优先级:<br><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/4.png" alt="image"><br>I.MX6U 为例 Cortex-A7内核，所以支持 32 个优先级，因此 GICC_PMR 要设置为<code> 0b11111000</code>。</p>
+<h3><span id="1-3-4-zhong-duan-qiang-zhan-you-xian-ji-he-zi-you-xian-ji-wei-shu-gicc-bpr">1.3.4 中断抢占优先级和子优先级位数 GICC_BPR</span><a href="#1-3-4-zhong-duan-qiang-zhan-you-xian-ji-he-zi-you-xian-ji-wei-shu-gicc-bpr" class="header-anchor">#</a></h3><p>寄存器 <code>GICC_BPR </code>只有低 3 位有效，其值不同，抢占优先级和子优先级占用的位数也不同：<br><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/5.png" alt="image"><br>比如 I.MX6U 的优先级位数为 5(32 个优先级)，所以可以设置 Binary point 为 2，表示 5 个优先级位全部为抢占优先级。</p>
+<h3><span id="1-3-5-zhong-duan-priority-d-ipriorityr">1.3.5 中断priority D_IPRIORITYR</span><a href="#1-3-5-zhong-duan-priority-d-ipriorityr" class="header-anchor">#</a></h3><p>Cortex-A7 使用了 512 个中断 ID，每个中断 ID 配有一个优先级寄存器，所以一共有 512 个 <code>D_IPRIORITYR </code>寄存器。如果优先级个数为 32 的话，使用寄存器 <code>D_IPRIORITYR 的 bit7:4 </code>来设置优先级，也就是说实际的优先级要左移 3 位。比如要设置ID40 中断的优先级为 5，示例代码如下：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">GICD_IPRIORITYR[<span class="number">40</span>] = <span class="number">5</span> &lt;&lt; <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="1-4-zhong-duan-zhuang-tai-ji">1.4 中断状态机</span><a href="#1-4-zhong-duan-zhuang-tai-ji" class="header-anchor">#</a></h2><p>① <strong>非活动状态（Inactive）</strong>：这意味着该中断未触发。 </p>
+<p>② <strong>挂起（Pending）</strong>：这意味着中断源已被触发，但正在等待CPU核处理。待处理的中断要通过转发到CPU接口单元，然后再由CPU接口单元转发到内核。</p>
+<p>③ <strong>活动（Active）</strong>：描述了一个已被内核接收并正在处理的中断。 </p>
+<p>④ <strong>活动和挂起（Active and pending）</strong>：描述了一种情况，其中CPU核正在为中断服务，而GIC又收到来自同一源的中断。</p>
+<h2><span id="1-5-gic-chu-shi-hua-ying-jian-liu-cheng-ruan-jian-liu-cheng-jian-3-3">1.5 GIC初始化硬件流程（软件流程见3.3）</span><a href="#1-5-gic-chu-shi-hua-ying-jian-liu-cheng-ruan-jian-liu-cheng-jian-3-3" class="header-anchor">#</a></h2><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/6.png" alt="image"></p>
+<h2><span id="1-6-gic-zhong-duan-chu-li">1.6 GIC中断处理</span><a href="#1-6-gic-zhong-duan-chu-li" class="header-anchor">#</a></h2><p>当CPU核接收到中断时，<code>cpu interface</code>中有<code>Interrupt Acknowledge Register</code>可以读，获取中断ID。并且标记为active状态。</p>
+<p>当对应的中断服务程序执行完，会将中断ID写入<code>CPU interface</code>模块中的<code>End of Interrupt register</code>。标记为<code>inactive</code>或<code>pending</code>（如果状态为<code>inactive and pending</code>）。</p>
+<h2><span id="1-7-gic-kong-zhi-qi-ji-cun-qi-jie-shao">1.7 GIC控制器寄存器介绍</span><a href="#1-7-gic-kong-zhi-qi-ji-cun-qi-jie-shao" class="header-anchor">#</a></h2><p>前面讲了GIC 架构分为了两个逻辑块：<code>Distributor </code>和<code> CPU Interface</code>，也就是分发器端和 CPU 接口端。</p>
+<h3><span id="1-7-1-gic-de-nei-cun-ying-she">1.7.1 GIC的内存映射</span><a href="#1-7-1-gic-de-nei-cun-ying-she" class="header-anchor">#</a></h3><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/7.png" alt="image"><br>GIC基地址偏移0x1000是分发器 block, 偏移0x2000是CPU 接口端 block。</p>
+<h4><span id="1-7-1-1-fen-fa-qi-ji-cun-qi">1.7.1.1 分发器寄存器</span><a href="#1-7-1-1-fen-fa-qi-ji-cun-qi" class="header-anchor">#</a></h4><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/8.png" alt="image"></p>
+<h5><span id="1-7-1-1-1-gicd-ctlr-distributor-control-register">1.7.1.1.1 GICD_CTLR(Distributor Control Register)</span><a href="#1-7-1-1-1-gicd-ctlr-distributor-control-register" class="header-anchor">#</a></h5><p><code>Distributor Control Register</code>，分发器控制寄存器。</p>
+<p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/9.png" alt="image"></p>
+<table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">1</td>
+<td align="left">EnableGrp1</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">用于将pending Group 1中断从Distributor转发到CPU interfaces 0：group 1中断不转发 1：根据优先级规则转发Group 1中断</td>
+</tr>
+<tr>
+<td align="left">0</td>
+<td align="left">EnableGrp0</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">用于将pending Group 0中断从Distributor转发到CPU interfaces 0：group 0中断不转发 1：根据优先级规则转发Group 0中断</td>
+</tr>
+</tbody></table>
+<h5><span id="1-7-1-1-2-gicd-typer-controller-type-register">1.7.1.1.2 GICD_TYPER(Controller Type Register)</span><a href="#1-7-1-1-2-gicd-typer-controller-type-register" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/10.png" alt="image"></p>
+<table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">15:11</td>
+<td align="left">LSPI</td>
+<td align="left">R</td>
+<td align="left">如果GIC实现了安全扩展，则此字段的值是已实现的可锁定SPI的最大数量，范围为0（0b00000）到31（0b11111）。 如果此字段为0b00000，则GIC不会实现配置锁定。 如果GIC没有实现安全扩展，则保留该字段。</td>
+</tr>
+<tr>
+<td align="left">10</td>
+<td align="left">SecurityExtn</td>
+<td align="left">R</td>
+<td align="left">表示GIC是否实施安全扩展： 0未实施安全扩展； 1实施了安全扩展</td>
+</tr>
+<tr>
+<td align="left">7:5</td>
+<td align="left">CPUNumber</td>
+<td align="left">R</td>
+<td align="left">表示已实现的CPU interfaces的数量。 已实现的CPU interfaces数量比该字段的值大1。 例如，如果此字段为0b011，则有四个CPU interfaces。</td>
+</tr>
+<tr>
+<td align="left">4:0</td>
+<td align="left">ITLinesNumber</td>
+<td align="left">R</td>
+<td align="left">表示GIC支持的最大中断数。 如果ITLinesNumber &#x3D; N，则最大中断数为32*(N+1)。 中断ID的范围是0到（ID的数量– 1）。 例如：0b00011最多128条中断线，中断ID 0-127。 中断的最大数量为1020（0b11111）。 无论此字段定义的中断ID的范围如何，都将中断ID 1020-1023保留用于特殊目的</td>
+</tr>
+</tbody></table>
+<h5><span id="1-7-1-1-3-gicd-iidr-implementer-identification-register">1.7.1.1.3 GICD_IIDR(Implementer Identification Register)</span><a href="#1-7-1-1-3-gicd-iidr-implementer-identification-register" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/11.png" alt="image"></p>
+<table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">31:24</td>
+<td align="left">ProductID</td>
+<td align="left">R</td>
+<td align="left">产品标识ID</td>
+</tr>
+<tr>
+<td align="left">23:20</td>
+<td align="left">保留</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">19:16</td>
+<td align="left">Variant</td>
+<td align="left">R</td>
+<td align="left">通常是产品的主要版本号</td>
+</tr>
+<tr>
+<td align="left">15:12</td>
+<td align="left">Revision</td>
+<td align="left">R</td>
+<td align="left">通常此字段用于区分产品的次版本号</td>
+</tr>
+<tr>
+<td align="left">11:0</td>
+<td align="left">Implementer</td>
+<td align="left">R</td>
+<td align="left">含有实现这个GIC的公司的JEP106代码； [11:8]：JEP106 continuation code，对于ARM实现，此字段为0x4； [7]：始终为0； [6:0]：实现者的JEP106code，对于ARM实现，此字段为0x3B</td>
+</tr>
+</tbody></table>
+<h5><span id="1-7-1-1-4-gicd-igrouprn-group-registers">1.7.1.1.4 GICD_IGROUPRn(Group Registers)</span><a href="#1-7-1-1-4-gicd-igrouprn-group-registers" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/12.png" alt="image"></p>
+<table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">31:0</td>
+<td align="left">Group status bits</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">组状态位，对于每个位： 0：相应的中断为Group 0； 1：相应的中断为Group 1。</td>
+</tr>
+</tbody></table>
+<p>对于一个中断，如何设置它的Group ？首先找到对应的<code>GICD_IGROUPRn</code>寄存器，即n是多少？还要确定使用这个寄存器里哪一位。</p>
+<p>对于<code>interrtups ID m</code>，如下计算：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">n = m DIV <span class="number">32</span>，GICD_IGROUPRn里的n就确定了；</span><br><span class="line">GICD_IGROUPRn在GIC内部的偏移地址是多少？<span class="number">0x080</span>+(<span class="number">4</span>*n)</span><br><span class="line">使用GICD_IPRIORITYRn中哪一位来表示interrtups ID m？</span><br><span class="line">bit = m mod <span class="number">32</span>。</span><br></pre></td></tr></table></figure>
+
+<h5><span id="1-7-1-1-5-gicd-isenablern-set-enable-registers">1.7.1.1.5 GICD_ISENABLERn(Set-Enable Registers)</span><a href="#1-7-1-1-5-gicd-isenablern-set-enable-registers" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/13.png" alt="image"></p>
+<table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">31:0</td>
+<td align="left">Set-enable bits</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">对于SPI和PPI类型的中断，每一位控制对应中断的转发行为：从Distributor转发到CPU interface： 读： 0：表示当前是禁止转发的； 1：表示当前是使能转发的； 写： 0：无效 1：使能转发</td>
+</tr>
+</tbody></table>
+<p>对于一个中断，如何找到<code>GICD_ISENABLERn</code>并确定相应的位？</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">对于interrtups ID m，如下计算：</span><br><span class="line">n = m DIV <span class="number">32</span>，GICD_ISENABLERn里的n就确定了；</span><br><span class="line">GICD_ISENABLERn在GIC内部的偏移地址是多少？<span class="number">0x100</span>+(<span class="number">4</span>*n)</span><br><span class="line">使用GICD_ISENABLERn中哪一位来表示interrtups ID m？</span><br><span class="line">bit = m mod <span class="number">32</span>。</span><br></pre></td></tr></table></figure>
+
+<h5><span id="1-7-1-1-6-gicd-icenablern-clear-enable-registers">1.7.1.1.6 GICD_ICENABLERn(Clear-Enable Registers)</span><a href="#1-7-1-1-6-gicd-icenablern-clear-enable-registers" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/14.png" alt="img"></p>
+<table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">31:0</td>
+<td align="left">Clear-enable bits</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">对于SPI和PPI类型的中断，每一位控制对应中断的转发行为：从Distributor转发到CPU interface： 读： 0：表示当前是禁止转发的； 1：表示当前是使能转发的； 写： 0：无效 1：禁止转发</td>
+</tr>
+</tbody></table>
+<p>对于一个中断，如何找到<code>GICD_ICENABLERn</code>并确定相应的位？</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">对于interrtups ID m，如下计算：</span><br><span class="line">n = m DIV <span class="number">32</span>，GICD_ISENABLERn里的n就确定了；</span><br><span class="line">GICD_ISENABLERn在GIC内部的偏移地址是多少？<span class="number">0x100</span>+(<span class="number">4</span>*n)</span><br><span class="line">使用GICD_ISENABLERn中哪一位来表示interrtups ID m？</span><br><span class="line">bit = m mod <span class="number">32</span>。</span><br></pre></td></tr></table></figure>
+
+<h5><span id="1-7-1-1-7-gicd-isactivern-set-active-registers">1.7.1.1.7 GICD_ISACTIVERn(Set-Active Registers)</span><a href="#1-7-1-1-7-gicd-isactivern-set-active-registers" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/15.png" alt="img"></p>
+<table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">31:0</td>
+<td align="left">Set-active bits</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">读： 0：表示相应中断不是active状态； 1：表示相应中断是active状态； 写： 0：无效 1：把相应中断设置为active状态，如果中断已处于Active状态，则写入无效</td>
+</tr>
+</tbody></table>
+<p>对于一个中断，如何找到<code>GICD_ISACTIVERn</code>并确定相应的位？</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">对于interrtups ID m，如下计算：</span><br><span class="line">n = m DIV 32，GICD_ISACTIVERn里的n就确定了；</span><br><span class="line">GICD_ISACTIVERn在GIC内部的偏移地址是多少？0x300+(4*n)</span><br><span class="line">使用GICD_ISACTIVERn 中哪一位来表示interrtups ID m？</span><br><span class="line">bit = m mod 32。</span><br></pre></td></tr></table></figure>
+
+<h5><span id="1-7-1-1-8-gicd-icactivern-clear-active-registers">1.7.1.1.8 GICD_ICACTIVERn(Clear-Active Registers)</span><a href="#1-7-1-1-8-gicd-icactivern-clear-active-registers" class="header-anchor">#</a></h5><table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">31:0</td>
+<td align="left">Clear-active bits</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">读： 0：表示相应中断不是active状态； 1：表示相应中断是active状态； 写： 0：无效 1：把相应中断设置为deactive状态，如果中断已处于dective状态，则写入无效</td>
+</tr>
+</tbody></table>
+<p>对于一个中断，如何找到<code>GICD_ICACTIVERn</code>并确定相应的位？</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">对于interrtups ID m，如下计算：</span><br><span class="line">n = m DIV 32，GICD_ICACTIVERn里的n就确定了；</span><br><span class="line">GICD_ICACTIVERn 在GIC内部的偏移地址是多少？0x380+(4*n)</span><br><span class="line">使用GICD_ICACTIVERn中哪一位来表示interrtups ID m？</span><br><span class="line">bit = m mod 32。</span><br></pre></td></tr></table></figure>
+
+<h5><span id="1-7-1-1-9-gicd-ipriorityrn-priority-registers">1.7.1.1.9 GICD_IPRIORITYRn(Priority Registers)</span><a href="#1-7-1-1-9-gicd-ipriorityrn-priority-registers" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/16.png" alt="img"></p>
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left"></th>
+<th align="left"></th>
+<th align="left"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">位域</td>
+<td align="left">名</td>
+<td align="left">读写</td>
+<td align="left">描述</td>
+</tr>
+<tr>
+<td align="left">31:24</td>
+<td align="left">Priority, byte offset 3</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">对于每一个中断，都有对应的8位数据用来描述：它的优先级。 每个优先级字段都对应一个优先级值，值越小，相应中断的优先级越高</td>
+</tr>
+<tr>
+<td align="left">23:16</td>
+<td align="left">Priority, byte offset 2</td>
+<td align="left">R&#x2F;W</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">15:8</td>
+<td align="left">Priority, byte offset 1</td>
+<td align="left">R&#x2F;W</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">7:0</td>
+<td align="left">Priority, byte offset 0</td>
+<td align="left">R&#x2F;W</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>如何设置它的优先级(<code>Priority</code>)，首先找到对应的<code>GICD_IPRIORITYRn</code>寄存器，即n是多少？还要确定使用这个寄存器里哪一个字节。</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">对于interrtups ID m，如下计算：</span><br><span class="line">n = m DIV <span class="number">4</span>，GICD_IPRIORITYRn里的n就确定了；</span><br><span class="line">GICD_IPRIORITYRn在GIC内部的偏移地址是多少？<span class="number">0x400</span>+(<span class="number">4</span>*n)</span><br><span class="line">使用GICD_IPRIORITYRn中<span class="number">4</span>个字节中的哪一个来表示interrtups ID m的优先级？</span><br><span class="line">byte offset = m mod <span class="number">4</span>。</span><br><span class="line">byte offset <span class="number">0</span>对应寄存器里的[<span class="number">7</span>:<span class="number">0</span>]；</span><br><span class="line">byte offset <span class="number">1</span>对应寄存器里的[<span class="number">15</span>:<span class="number">8</span>]；</span><br><span class="line">byte offset <span class="number">2</span>对应寄存器里的[<span class="number">23</span>:<span class="number">16</span>]；</span><br><span class="line">byte offset <span class="number">3</span>对应寄存器里的[<span class="number">31</span>:<span class="number">24</span>]。</span><br></pre></td></tr></table></figure>
+
+<h5><span id="1-7-1-1-10-gicd-itargetsrn-processor-targets-registers">1.7.1.1.10 GICD_ITARGETSRn(Processor Targets Registers)</span><a href="#1-7-1-1-10-gicd-itargetsrn-processor-targets-registers" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/17.png" alt="img"></p>
+<table>
+<thead>
+<tr>
+<th align="left"></th>
+<th align="left"></th>
+<th align="left"></th>
+<th align="left"></th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">位域</td>
+<td align="left">名</td>
+<td align="left">读写</td>
+<td align="left">描述</td>
+</tr>
+<tr>
+<td align="left">31:24</td>
+<td align="left">CPU targets, byte offset 3</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">对于每一个中断，都有对应的8位数据用来描述：这个中断可以发给哪些CPU。 处理器编号从0开始，8位数里每个位均指代相应的处理器。 例如，值0x3表示将中断发送到处理器0和1。 当读取GICD_ITARGETSR0～GICD_ITARGETSR7时，读取里面任意字节，返回的都是执行这个读操作的CPU的编号。</td>
+</tr>
+<tr>
+<td align="left">23:16</td>
+<td align="left">CPU targets, byte offset 2</td>
+<td align="left">R&#x2F;W</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">15:8</td>
+<td align="left">CPU targets, byte offset 1</td>
+<td align="left">R&#x2F;W</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">7:0</td>
+<td align="left">CPU targets, byte offset 0</td>
+<td align="left">R&#x2F;W</td>
+<td align="left"></td>
+</tr>
+</tbody></table>
+<p>如何设置它的目杯CPU？优先级(<code>Priority</code>)，首先找到对应的<code>GICD_ITARGETSRn</code>寄存器，即n是多少？还要确定使用这个寄存器里哪一个字节。</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">对于interrtups ID m，如下计算：</span><br><span class="line">n = m DIV 4，GICD_ITARGETSRn里的n就确定了；</span><br><span class="line">GICD_ITARGETSRn在GIC内部的偏移地址是多少？0x800+(4*n)</span><br><span class="line">使用GICD_ITARGETSRn中4个字节中的哪一个来表示interrtups ID m的目标CPU？</span><br><span class="line">byte offset = m mod 4。</span><br><span class="line">byte offset 0对应寄存器里的[7:0]；</span><br><span class="line">byte offset 1对应寄存器里的[15:8]；</span><br><span class="line">byte offset 2对应寄存器里的[23:16]；</span><br><span class="line">byte offset 3对应寄存器里的[31:24]。</span><br></pre></td></tr></table></figure>
+
+<h5><span id="1-7-1-1-11-gicd-icfgrn-configuration-registers">1.7.1.1.11 GICD_ICFGRn(Configuration Registers)</span><a href="#1-7-1-1-11-gicd-icfgrn-configuration-registers" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/18.png" alt="img"></p>
+<table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">[2F+1:2F]</td>
+<td align="left">Int_config, field F</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">对于每一个中断，都有对应的2位数据用来描述：它的边沿触发，还是电平触发。 对于Int_config [1]，即高位[2F + 1]，含义为： 0：相应的中断是电平触发； 1：相应的中断是边沿触发。 对于Int_config [0]，即低位[2F]，是保留位。</td>
+</tr>
+</tbody></table>
+<p>如何找到<code>GICD_ICFGRn</code>并确定相应的位域F？</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">对于interrtups ID m，如下计算：</span><br><span class="line">n = m DIV <span class="number">16</span>，GICD_ICFGRn里的n就确定了；</span><br><span class="line">GICD_ICACTIVERn 在GIC内部的偏移地址是多少？<span class="number">0xC00</span>+(<span class="number">4</span>*n)</span><br><span class="line">F = m mod <span class="number">16</span>。</span><br></pre></td></tr></table></figure>
+
+<h5><span id="1-7-1-1-12-icpidr2-identification-registers-peripheral-id2-register">1.7.1.1.12 ICPIDR2(Identification registers: Peripheral ID2 Register)</span><a href="#1-7-1-1-12-icpidr2-identification-registers-peripheral-id2-register" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/19.png" alt="img"></p>
+<table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">[31:0]</td>
+<td align="left">-</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">由实现定义</td>
+</tr>
+<tr>
+<td align="left">[7:4]</td>
+<td align="left">ArchRev</td>
+<td align="left">R</td>
+<td align="left">该字段的值取决于GIC架构版本： 0x1：GICv1； 0x2：GICv2。</td>
+</tr>
+<tr>
+<td align="left">[3:0]</td>
+<td align="left">-</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">由实现定义</td>
+</tr>
+</tbody></table>
+<h4><span id="1-7-1-2-cpu-jie-kou-duan-ji-cun-qi">1.7.1.2 cpu接口端寄存器</span><a href="#1-7-1-2-cpu-jie-kou-duan-ji-cun-qi" class="header-anchor">#</a></h4><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/20.png" alt="image"></p>
+<h5><span id="1-7-1-2-1-gicc-ctlr-cpu-interface-control-register">1.7.1.2.1 GICC_CTLR(CPU Interface Control Register)</span><a href="#1-7-1-2-1-gicc-ctlr-cpu-interface-control-register" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/21.png" alt="img"></p>
+<table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">[31:10]</td>
+<td align="left">-</td>
+<td align="left"></td>
+<td align="left">保留</td>
+</tr>
+<tr>
+<td align="left">[9]</td>
+<td align="left">EOImodeNS</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">控制对GICC_EOIR和GICC_DIR寄存器的非安全访问： 0：GICC_EOIR具有降低优先级和deactivate中断的功能； 对GICC_DIR的访问是未定义的。 1：GICC_EOIR仅具有降低优先级功能； GICC_DIR寄存器具有deactivate中断功能。</td>
+</tr>
+<tr>
+<td align="left">[8:7]</td>
+<td align="left">-</td>
+<td align="left"></td>
+<td align="left">保留</td>
+</tr>
+<tr>
+<td align="left">[6]</td>
+<td align="left">IRQBypDisGrp1</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">当CPU interface的IRQ信号被禁用时，该位控制是否向处理器发送bypass IRQ信号： 0：将bypass IRQ信号发送给处理器； 1：将bypass IRQ信号不发送到处理器。</td>
+</tr>
+<tr>
+<td align="left">[5]</td>
+<td align="left">FIQBypDisGrp1</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">当CPU interface的FIQ信号被禁用时，该位控制是否向处理器发送bypass FIQ信号： 0：将bypass FIQ信号发送给处理器； 1：旁路FIQ信号不发送到处理器</td>
+</tr>
+<tr>
+<td align="left">[4:1]</td>
+<td align="left">-</td>
+<td align="left"></td>
+<td align="left">保留</td>
+</tr>
+<tr>
+<td align="left">[0]</td>
+<td align="left">-</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">使能CPU interface向连接的处理器发出的组1中断的信号: 0：禁用中断信号 1：使能中断信号</td>
+</tr>
+</tbody></table>
+<h5><span id="1-7-1-2-2-gicc-pmr-priority-mask-register">1.7.1.2.2 GICC_PMR(Priority Mask Register)</span><a href="#1-7-1-2-2-gicc-pmr-priority-mask-register" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/22.png" alt="img"></p>
+<table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">[31:8]</td>
+<td align="left">-</td>
+<td align="left"></td>
+<td align="left">保留</td>
+</tr>
+<tr>
+<td align="left">[7:0]</td>
+<td align="left">-</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">优先级高于这个值的中断，才会发送给CPU</td>
+</tr>
+</tbody></table>
+<p><code>[7:0]</code>共8位，可以表示256个优先级。但是某些芯片里的GIC支持的优先级少于256个，则某些位为RAZ &#x2F; WI，如下所示：</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line">如果有128个级别，则寄存器中bit[0] = 0b0，即使用[7:1]来表示优先级；</span><br><span class="line">如果有64个级别，则寄存器中bit[1:0] = 0b00，即使用[7:2]来表示优先级；</span><br><span class="line">如果有32个级别，则寄存器中bit[2:0] = 0b000，即使用[7:3]来表示优先级；</span><br><span class="line">如果有16个级别，则寄存器中bit[3:0] = 0b0000，即使用[7:4]来表示优先级；</span><br></pre></td></tr></table></figure>
+
+<h5><span id="1-7-1-2-3-gicc-bpr-binary-point-register">1.7.1.2.3 GICC_BPR(Binary Point Register)</span><a href="#1-7-1-2-3-gicc-bpr-binary-point-register" class="header-anchor">#</a></h5><p>此寄存器用来把8位的优先级字段拆分为组优先级和子优先级，组优先级用来决定中断抢占。</p>
+<table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">[31:3]</td>
+<td align="left">-</td>
+<td align="left"></td>
+<td align="left">保留</td>
+</tr>
+<tr>
+<td align="left">[2:0]</td>
+<td align="left">Binary point</td>
+<td align="left">R&#x2F;W</td>
+<td align="left">此字段的值控制如何将8bit中断优先级字段拆分为组优先级和子优先级，组优先级用来决定中断抢占。 更多信息还得看看GIC手册。</td>
+</tr>
+</tbody></table>
+<h5><span id="1-7-1-2-4-gicc-iar-acknowledge-register">1.7.1.2.4 GICC_IAR(Acknowledge Register)</span><a href="#1-7-1-2-4-gicc-iar-acknowledge-register" class="header-anchor">#</a></h5><p>读此寄存器，获得当前中断的<code>interrtup ID</code>。</p>
+<p><code>GICC_IAR</code>寄存器描述来自<code>《ARM Generic Interrupt Controller Architecture Specification.pdf》</code>,它用来表示中断ID号。<br><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/23.png" alt="image"><br>处理完具体的中断处理函数，需要将<code>GICC_IAR</code>寄存器的值写入<code>GICC_EOIR</code>寄存器中。</p>
+<table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">[31:13]</td>
+<td align="left">-</td>
+<td align="left"></td>
+<td align="left">保留</td>
+</tr>
+<tr>
+<td align="left">[12:10]</td>
+<td align="left">CPUID</td>
+<td align="left">R</td>
+<td align="left">对于SGI类中断，它表示谁发出了中断。例如，值为3表示该请求是通过对CPU interface 3上的GICD_SGIR的写操作生成的。</td>
+</tr>
+<tr>
+<td align="left">[9:0]</td>
+<td align="left">Interrupt ID</td>
+<td align="left">R</td>
+<td align="left">中断ID</td>
+</tr>
+</tbody></table>
+<h5><span id="1-7-1-2-5-gicc-eoir-interrupt-register">1.7.1.2.5 GICC_EOIR(Interrupt Register)</span><a href="#1-7-1-2-5-gicc-eoir-interrupt-register" class="header-anchor">#</a></h5><p> 写此寄存器，表示某中断已经处理完毕。<code>GICC_IAR</code>的值表示当前在处理的中断，把<code>GICC_IAR</code>的值写入<code>GICC_EOIR</code>就表示中断处理完了。<br><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/24.png" alt="image"></p>
+<table>
+<thead>
+<tr>
+<th align="left">位域</th>
+<th align="left">名</th>
+<th align="left">读写</th>
+<th align="left">描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">[31:13]</td>
+<td align="left">-</td>
+<td align="left"></td>
+<td align="left">保留</td>
+</tr>
+<tr>
+<td align="left">[12:10]</td>
+<td align="left">CPUID</td>
+<td align="left">W</td>
+<td align="left">对于SGI类中断，它的值跟GICD_IAR. CPUID的相同。</td>
+</tr>
+<tr>
+<td align="left">[9:0]</td>
+<td align="left">EOIINTID</td>
+<td align="left">W</td>
+<td align="left">中断ID，它的值跟GICD_IAR里的中断ID相同</td>
+</tr>
+</tbody></table>
+<h1><span id="2-zhong-duan-shi-li-start-s-fen-xi">2. 中断示例start.s分析</span><a href="#2-zhong-duan-shi-li-start-s-fen-xi" class="header-anchor">#</a></h1><p>以nxp的IMX6UL为例，SDK中<code>core_ca7.h</code>定了了GIC相关函数：</p>
+<table>
+<thead>
+<tr>
+<th>函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GIC_Init</td>
+<td>初始化 GIC。</td>
+</tr>
+<tr>
+<td>GIC_EnableIRQ</td>
+<td>使能指定的外设中断。</td>
+</tr>
+<tr>
+<td>GIC_DisableIRQ</td>
+<td>关闭指定的外设中断。</td>
+</tr>
+<tr>
+<td>GIC_AcknowledgeIRQ</td>
+<td>返回中断号。</td>
+</tr>
+<tr>
+<td>GIC_DeactivateIRQ</td>
+<td>无效化指定中断。</td>
+</tr>
+<tr>
+<td>GIC_GetRunningPriority</td>
+<td>获取当前正在运行的中断优先级。</td>
+</tr>
+<tr>
+<td>GIC_SetPriorityGrouping</td>
+<td>设置抢占优先级位数。</td>
+</tr>
+<tr>
+<td>GIC_GetPriorityGrouping</td>
+<td>获取抢占优先级位数。</td>
+</tr>
+<tr>
+<td>GIC_SetPriority</td>
+<td>设置指定中断的优先级。</td>
+</tr>
+<tr>
+<td>GIC_GetPriority</td>
+<td>获取指定中断的优先级。</td>
+</tr>
+</tbody></table>
+<details>
+<summary>点击查看代码</summary>
+
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">.global _start  				<span class="comment">/* 全局标号 */</span></span><br><span class="line">_start:</span><br><span class="line">	ldr pc, =Reset_Handler		<span class="comment">/* 复位中断 					*/</span>	</span><br><span class="line">	ldr pc, =Undefined_Handler	<span class="comment">/* 未定义中断 					*/</span></span><br><span class="line">	ldr pc, =SVC_Handler		<span class="comment">/* SVC(Supervisor)中断 		*/</span></span><br><span class="line">	ldr pc, =PrefAbort_Handler	<span class="comment">/* 预取终止中断 					*/</span></span><br><span class="line">	ldr pc, =DataAbort_Handler	<span class="comment">/* 数据终止中断 					*/</span></span><br><span class="line">	ldr	pc, =NotUsed_Handler	<span class="comment">/* 未使用中断					*/</span></span><br><span class="line">	ldr pc, =IRQ_Handler		<span class="comment">/* IRQ中断 					*/</span></span><br><span class="line">	ldr pc, =FIQ_Handler		<span class="comment">/* FIQ(快速中断)未定义中断 			*/</span></span><br><span class="line"><span class="comment">/* 复位中断 */</span>	</span><br><span class="line">Reset_Handler:</span><br><span class="line">	cpsid i						<span class="comment">/* 关闭全局中断 */</span></span><br><span class="line">	<span class="comment">/* 关闭I,DCache和MMU </span></span><br><span class="line"><span class="comment">	 * 采取读-改-写的方式。</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	mrc     p15, <span class="number">0</span>, r0, c1, c0, <span class="number">0</span>     <span class="comment">/* 读取CP15的C1寄存器到R0中       		        	*/</span></span><br><span class="line">    bic     r0,  r0, #(<span class="number">0x1</span> &lt;&lt; <span class="number">12</span>)     <span class="comment">/* 清除C1寄存器的bit12位(I位)，关闭I Cache            	*/</span></span><br><span class="line">    bic     r0,  r0, #(<span class="number">0x1</span> &lt;&lt;  <span class="number">2</span>)     <span class="comment">/* 清除C1寄存器的bit2(C位)，关闭D Cache    				*/</span></span><br><span class="line">    bic     r0,  r0, #<span class="number">0x2</span>             <span class="comment">/* 清除C1寄存器的bit1(A位)，关闭对齐						*/</span></span><br><span class="line">    bic     r0,  r0, #(<span class="number">0x1</span> &lt;&lt; <span class="number">11</span>)     <span class="comment">/* 清除C1寄存器的bit11(Z位)，关闭分支预测					*/</span></span><br><span class="line">    bic     r0,  r0, #<span class="number">0x1</span>             <span class="comment">/* 清除C1寄存器的bit0(M位)，关闭MMU				       	*/</span></span><br><span class="line">    mcr     p15, <span class="number">0</span>, r0, c1, c0, <span class="number">0</span>     <span class="comment">/* 将r0寄存器中的值写入到CP15的C1寄存器中	 				*/</span></span><br><span class="line"><span class="meta">#<span class="keyword">if</span> 0</span></span><br><span class="line">	<span class="comment">/* 汇编版本设置中断向量表偏移 */</span></span><br><span class="line">	ldr r0, =<span class="number">0X87800000</span></span><br><span class="line"></span><br><span class="line">	dsb</span><br><span class="line">	isb</span><br><span class="line">	mcr p15, <span class="number">0</span>, r0, c12, c0, <span class="number">0</span></span><br><span class="line">	dsb</span><br><span class="line">	isb</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">	<span class="comment">/* 设置各个模式下的栈指针，</span></span><br><span class="line"><span class="comment">	 * 注意：IMX6UL的堆栈是向下增长的！</span></span><br><span class="line"><span class="comment">	 * 堆栈指针地址一定要是4字节地址对齐的！！！</span></span><br><span class="line"><span class="comment">	 * DDR范围:0X80000000~0X9FFFFFFF</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	<span class="comment">/* 进入IRQ模式 */</span></span><br><span class="line">	mrs r0, cpsr</span><br><span class="line">	bic r0, r0, #<span class="number">0x1f</span> 	<span class="comment">/* 将r0寄存器中的低5位清零，也就是cpsr的M0~M4 	*/</span></span><br><span class="line">	orr r0, r0, #<span class="number">0x12</span> 	<span class="comment">/* r0或上0x13,表示使用IRQ模式					*/</span></span><br><span class="line">	msr cpsr, r0		<span class="comment">/* 将r0 的数据写入到cpsr_c中 					*/</span></span><br><span class="line">	ldr sp, =<span class="number">0x80600000</span>	<span class="comment">/* 设置IRQ模式下的栈首地址为0X80600000,大小为2MB */</span></span><br><span class="line">	<span class="comment">/* 进入SYS模式 */</span></span><br><span class="line">	mrs r0, cpsr</span><br><span class="line">	bic r0, r0, #<span class="number">0x1f</span> 	<span class="comment">/* 将r0寄存器中的低5位清零，也就是cpsr的M0~M4 	*/</span></span><br><span class="line">	orr r0, r0, #<span class="number">0x1f</span> 	<span class="comment">/* r0或上0x13,表示使用SYS模式					*/</span></span><br><span class="line">	msr cpsr, r0		<span class="comment">/* 将r0 的数据写入到cpsr_c中 					*/</span></span><br><span class="line">	ldr sp, =<span class="number">0x80400000</span>	<span class="comment">/* 设置SYS模式下的栈首地址为0X80400000,大小为2MB */</span></span><br><span class="line">	<span class="comment">/* 进入SVC模式 */</span></span><br><span class="line">	mrs r0, cpsr</span><br><span class="line">	bic r0, r0, #<span class="number">0x1f</span> 	<span class="comment">/* 将r0寄存器中的低5位清零，也就是cpsr的M0~M4 	*/</span></span><br><span class="line">	orr r0, r0, #<span class="number">0x13</span> 	<span class="comment">/* r0或上0x13,表示使用SVC模式					*/</span></span><br><span class="line">	msr cpsr, r0		<span class="comment">/* 将r0 的数据写入到cpsr_c中 					*/</span></span><br><span class="line">	ldr sp, =<span class="number">0X80200000</span>	<span class="comment">/* 设置SVC模式下的栈首地址为0X80200000,大小为2MB */</span></span><br><span class="line">	cpsie i				<span class="comment">/* 打开全局中断 */</span></span><br><span class="line"><span class="meta">#<span class="keyword">if</span> 0</span></span><br><span class="line">	<span class="comment">/* 使能IRQ中断 */</span></span><br><span class="line">	mrs r0, cpsr		<span class="comment">/* 读取cpsr寄存器值到r0中 			*/</span></span><br><span class="line">	bic r0, r0, #<span class="number">0x80</span>	<span class="comment">/* 将r0寄存器中bit7清零，也就是CPSR中的I位清零，表示允许IRQ中断 */</span></span><br><span class="line">	msr cpsr, r0		<span class="comment">/* 将r0重新写入到cpsr中 			*/</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">	b main				<span class="comment">/* 跳转到main函数 			 	*/</span></span><br><span class="line"><span class="comment">/* 未定义中断 */</span></span><br><span class="line">Undefined_Handler:</span><br><span class="line">	ldr r0, =Undefined_Handler</span><br><span class="line">	bx r0</span><br><span class="line"><span class="comment">/* SVC中断 */</span></span><br><span class="line">SVC_Handler:</span><br><span class="line">	ldr r0, =SVC_Handler</span><br><span class="line">	bx r0</span><br><span class="line"><span class="comment">/* 预取终止中断 */</span></span><br><span class="line">PrefAbort_Handler:</span><br><span class="line">	ldr r0, =PrefAbort_Handler	</span><br><span class="line">	bx r0</span><br><span class="line"><span class="comment">/* 数据终止中断 */</span></span><br><span class="line">DataAbort_Handler:</span><br><span class="line">	ldr r0, =DataAbort_Handler</span><br><span class="line">	bx r0</span><br><span class="line"><span class="comment">/* 未使用的中断 */</span></span><br><span class="line">NotUsed_Handler:</span><br><span class="line">	ldr r0, =NotUsed_Handler</span><br><span class="line">	bx r0</span><br><span class="line"></span><br><span class="line"><span class="comment">/* IRQ中断！重点！！！！！ */</span></span><br><span class="line">IRQ_Handler:</span><br><span class="line">	push &#123;lr&#125;					<span class="comment">/* 保存lr地址 */</span></span><br><span class="line">	push &#123;r0-r3, r12&#125;			<span class="comment">/* 保存r0-r3，r12寄存器 */</span></span><br><span class="line"></span><br><span class="line">	mrs r0, spsr				<span class="comment">/* 读取spsr寄存器 */</span></span><br><span class="line">	push &#123;r0&#125;					<span class="comment">/* 保存spsr寄存器 */</span></span><br><span class="line"></span><br><span class="line">	mrc p15, <span class="number">4</span>, r1, c15, c0, <span class="number">0</span> <span class="comment">/* 从CP15的C0寄存器内的值到R1寄存器中</span></span><br><span class="line"><span class="comment">								* 参考文档ARM Cortex-A(armV7)编程手册V4.0.pdf P49</span></span><br><span class="line"><span class="comment">								* Cortex-A7 Technical ReferenceManua.pdf P68 P138</span></span><br><span class="line"><span class="comment">								*/</span>							</span><br><span class="line">	add r1, r1, #<span class="number">0X2000</span>			<span class="comment">/* GIC基地址加0X2000，也就是GIC的CPU接口端基地址 */</span></span><br><span class="line">	ldr r0, [r1, #<span class="number">0XC</span>]			<span class="comment">/* GIC的CPU接口端基地址加0X0C就是GICC_IAR寄存器，</span></span><br><span class="line"><span class="comment">								 * GICC_IAR寄存器保存这当前发生中断的中断号，我们要根据</span></span><br><span class="line"><span class="comment">								 * 这个中断号来绝对调用哪个中断服务函数</span></span><br><span class="line"><span class="comment">								 */</span></span><br><span class="line">	push &#123;r0, r1&#125;				<span class="comment">/* 保存r0,r1 */</span></span><br><span class="line">	</span><br><span class="line">	cps #<span class="number">0x13</span>					<span class="comment">/* 进入SVC模式，允许其他中断再次进去 */</span></span><br><span class="line">	</span><br><span class="line">	push &#123;lr&#125;					<span class="comment">/* 保存SVC模式的lr寄存器 */</span></span><br><span class="line">	ldr r2, =system_irqhandler	<span class="comment">/* 加载C语言中断处理函数到r2寄存器中*/</span></span><br><span class="line">	blx r2						<span class="comment">/* 运行C语言中断处理函数，带有一个参数，保存在R0寄存器中 */</span></span><br><span class="line"></span><br><span class="line">	pop &#123;lr&#125;					<span class="comment">/* 执行完C语言中断服务函数，lr出栈 */</span></span><br><span class="line">	cps #<span class="number">0x12</span>					<span class="comment">/* 进入IRQ模式 */</span></span><br><span class="line">	pop &#123;r0, r1&#125;				</span><br><span class="line">	str r0, [r1, #<span class="number">0X10</span>]			<span class="comment">/* 中断执行完成，写EOIR */</span></span><br><span class="line"></span><br><span class="line">	pop &#123;r0&#125;						</span><br><span class="line">	msr spsr_cxsf, r0			<span class="comment">/* 恢复spsr */</span></span><br><span class="line"></span><br><span class="line">	pop &#123;r0-r3, r12&#125;			<span class="comment">/* r0-r3,r12出栈 */</span></span><br><span class="line">	pop &#123;lr&#125;					<span class="comment">/* lr出栈 */</span></span><br><span class="line">	subs pc, lr, #<span class="number">4</span>				<span class="comment">/* 将lr-4赋给pc */</span></span><br><span class="line"><span class="comment">/* FIQ中断 */</span></span><br><span class="line">FIQ_Handler:</span><br><span class="line"></span><br><span class="line">	ldr r0, =FIQ_Handler	</span><br><span class="line">	bx r0</span><br></pre></td></tr></table></figure>
+</details>
+
+<h2><span id="2-1-start-s-qi-dong-liu-cheng">2.1 start.s启动流程</span><a href="#2-1-start-s-qi-dong-liu-cheng" class="header-anchor">#</a></h2><ol>
+<li>进入<code>_start</code>,初始化异常向量表。进入复位中断，初始化时钟，关闭看门狗，关闭<code>MMU</code>和<code>ICACHE</code> <code>DCACHE</code>,关闭总中断</li>
+<li>设置各个模式的<code>SP</code>指针</li>
+<li>代码段重定位到DDR上并且清bss段</li>
+<li>开启总中断</li>
+<li>跳转到C语言main函数执行</li>
+</ol>
+<p>这里很多流程如代码重定位，清除bss，关闭看门狗等没有列举出来。</p>
+<h1><span id="3-gic-zhong-duan-chu-li-liu-cheng">3 GIC中断处理流程</span><a href="#3-gic-zhong-duan-chu-li-liu-cheng" class="header-anchor">#</a></h1><h2><span id="3-1-yi-ji-zhong-duan-kong-zhi-qi-liu-cheng">3.1 一级中断控制器流程</span><a href="#3-1-yi-ji-zhong-duan-kong-zhi-qi-liu-cheng" class="header-anchor">#</a></h2><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/25.png" alt="image"></p>
+<ul>
+<li>假设GIC可以向CPU发出<code>16-1019</code>号中断，这些数字被称为<code>hwirq</code>。<code>0-15</code>用于Process之间通信，比较特殊。</li>
+<li>假设要使用UART模块，它发出的中断连接到GIC的32号中断，分配的<code>irq_desc</code>序号为16</li>
+<li>在<code>GIC domain</code>中会记录<code>(32, 16)</code></li>
+<li>那么注册中断时就是：<code>request_irq(16, ...)</code></li>
+<li>发生UART中断时    <ul>
+<li>程序从GIC中读取寄存器知道发生了32号中断，通过GIC <code>irq_domain</code>可以知道<code>virq</code>为16</li>
+<li>调用<code>irq_desc[16]</code>中的<code>handleA</code>函数，它的作用是调用action链表中用户注册的函数.</li>
+</ul>
+</li>
+</ul>
+<h2><span id="3-2-duo-ji-zhong-duan-kong-zhi-qi-liu-cheng">3.2 多级中断控制器流程</span><a href="#3-2-duo-ji-zhong-duan-kong-zhi-qi-liu-cheng" class="header-anchor">#</a></h2><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/26.png" alt="img"></p>
+<ul>
+<li>假设GPIO模块下有4个引脚，都可以产生中断，都连接到GIC的33号中断</li>
+<li><strong>GPIO也可以看作一个中断控制器</strong>，对于它的4个中断</li>
+<li>对于GPIO模块中<code>0~3</code>这四个<code>hwirq</code>，一般都会一下子分配四个<code>irq_desc</code></li>
+<li>假设这4个<code>irq_desc</code>的序号为<code>100~103</code>，在<code>GPIO domain</code>中记录<code>(0,100) (1,101)(2,102) (3,103)</code></li>
+<li>对于KEY，注册中断时就是：<code>request_irq(102, ...)</code></li>
+<li>按下KEY时：    <ul>
+<li>程序从GIC中读取寄存器知道发生了33号中断，通过<code>GIC irq_domain</code>可以知道virq为16.</li>
+<li>调用<code>irq_desc[16]</code>中的<code>handleB</code>函数      <ul>
+<li><code>handleB</code>读取GPIO寄存器，确定是GPIO里2号引脚发生中断</li>
+<li>通过GPIO<code> irq_domain</code>可以知道<code>virq</code>为102</li>
+<li>调用<code>irq_desc[102]</code>中的<code>handleA</code>函数，它的作用是调用<code>action</code>链表中用户注册的函数</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2><span id="3-3-gic-ruan-jian-chu-shi-hua-guo-cheng">3.3 GIC软件初始化过程</span><a href="#3-3-gic-ruan-jian-chu-shi-hua-guo-cheng" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line">start_kernel (init\main.c)</span><br><span class="line">    init_IRQ (arch\arm\kernel\irq.c)</span><br><span class="line">    	irqchip_init (drivers\irqchip\irqchip.c)</span><br><span class="line">    		of_irq_init (drivers\of\irq.c)<span class="comment">//gic子系统</span></span><br><span class="line">    			desc-&gt;irq_init_cb = match-&gt;data;</span><br><span class="line">                ret = desc-&gt;irq_init_cb(desc-&gt;dev,</span><br><span class="line">                            desc-&gt;interrupt_parent);</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-3-1-gic-qu-dong-zhu-ce">3.3.1 gic驱动注册</span><a href="#3-3-1-gic-qu-dong-zhu-ce" class="header-anchor">#</a></h3><p>内核支持多种GIC, 在内核为每一类GIC定义一个结构体<code>of_device_id</code>，并放在一个段里：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// drivers\irqchip\irq-gic.c</span></span><br><span class="line">IRQCHIP_DECLARE(gic_400, <span class="string">&quot;arm,gic-400&quot;</span>, gic_of_init);</span><br><span class="line">IRQCHIP_DECLARE(arm11mp_gic, <span class="string">&quot;arm,arm11mp-gic&quot;</span>, gic_of_init);</span><br><span class="line">IRQCHIP_DECLARE(arm1176jzf_dc_gic, <span class="string">&quot;arm,arm1176jzf-devchip-gic&quot;</span>, gic_of_init);</span><br><span class="line">IRQCHIP_DECLARE(cortex_a15_gic, <span class="string">&quot;arm,cortex-a15-gic&quot;</span>, gic_of_init);</span><br><span class="line">IRQCHIP_DECLARE(cortex_a9_gic, <span class="string">&quot;arm,cortex-a9-gic&quot;</span>, gic_of_init);</span><br><span class="line">IRQCHIP_DECLARE(cortex_a7_gic, <span class="string">&quot;arm,cortex-a7-gic&quot;</span>, gic_of_init);<span class="comment">//imx6ull对应gic类型</span></span><br><span class="line">IRQCHIP_DECLARE(msm_8660_qgic, <span class="string">&quot;qcom,msm-8660-qgic&quot;</span>, gic_of_init);</span><br><span class="line">IRQCHIP_DECLARE(msm_qgic2, <span class="string">&quot;qcom,msm-qgic2&quot;</span>, gic_of_init);</span><br><span class="line">IRQCHIP_DECLARE(pl390, <span class="string">&quot;arm,pl390&quot;</span>, gic_of_init);</span><br></pre></td></tr></table></figure>
+
+<p><code> IRQCHIP_DECLARE</code>宏进行展开：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="comment">// include\linux\irqchip.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IRQCHIP_DECLARE(name, compat, fn) OF_DECLARE_2(irqchip, name, compat, fn)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> OF_DECLARE_2(table, name, compat, fn) \</span></span><br><span class="line"><span class="meta">		_OF_DECLARE(table, name, compat, fn, of_init_fn_2)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _OF_DECLARE(table, name, compat, fn, fn_type)			\</span></span><br><span class="line"><span class="meta">	static const struct of_device_id __of_table_##name		\</span></span><br><span class="line"><span class="meta">		__used __section(__irqchip_of_table)			\</span></span><br><span class="line"><span class="meta">		 = &#123; .compatible = compat,				\</span></span><br><span class="line"><span class="meta">		     .data = (fn == (fn_type)NULL) ? fn : fn  &#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>例如：<code>IRQCHIP_DECLARE(cortex_a7_gic, &quot;arm,cortex-a7-gic&quot;, gic_of_init);</code>展开后：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">of_device_id</span> __<span class="title">of_table_cortex_a7_gic</span>		\</span></span><br><span class="line"><span class="class">	__<span class="title">used</span> __<span class="title">section</span>(__<span class="title">irqchip_of_table</span>)			\</span></span><br><span class="line"><span class="class">	 =</span> &#123; .compatible = <span class="string">&quot;arm,cortex-a7-gic&quot;</span>,				\</span><br><span class="line">		 .data = gic_of_init  &#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-3-1-1-dts-pi-pei">3.3.1.1 dts匹配</span><a href="#3-3-1-1-dts-pi-pei" class="header-anchor">#</a></h4><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/27.png" alt="在这里插入图片描述"></p>
+<p>根据dts匹配调用<code>IRQCHIP_DECLARE(cortex_a7_gic, &quot;arm,cortex-a7-gic&quot;, gic_of_init);</code>, 对<code>irq chip driver</code> 的声明。</p>
+<p>定义 <code>IRQCHIP_DECLARE </code>之后，相应的内容会保存到 <code>__irqchip_of_table </code>里。<code>__irqchip_of_table </code>在链接脚本 <code>vmlinux.lds </code>里，被放到了<code>__irqchip_begin</code>和 <code>__irqchip_of_end</code> 之间，该段用于存放中断控制器信息。</p>
+<h4><span id="3-3-1-2-gic-of-init-gic-qu-dong-chu-shi-hua-ru-kou">3.3.1.2 gic_of_init(GIC驱动初始化入口)</span><a href="#3-3-1-2-gic-of-init-gic-qu-dong-chu-shi-hua-ru-kou" class="header-anchor">#</a></h4><p><code>gic_of_init</code>内容太多，大致就是对中断控制器初始化：</p>
+<ol>
+<li><p>初始化<code>GICD</code>(分发器寄存器)</p>
+</li>
+<li><p>初始化<code>GICC</code>(cpu接口端寄存器)</p>
+</li>
+<li><p>调用<code>gic_init_bases</code> 流程</p>
+<ol>
+<li><p>调用<code>set_handle_irq</code>注册<code>gic_handle_irq</code>,异常处理的入口</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">void</span> __init <span class="title function_">set_handle_irq</span><span class="params">(<span class="type">void</span> (*handle_irq)(<span class="keyword">struct</span> pt_regs *))</span>&#123;</span><br><span class="line"> <span class="keyword">if</span> (handle_arch_irq)</span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line"> handle_arch_irq = handle_irq;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">gic_init_bases</span><span class="params">(<span class="type">void</span> __iomem *dist_base,</span></span><br><span class="line"><span class="params">     <span class="keyword">struct</span> redist_region *rdist_regs,</span></span><br><span class="line"><span class="params">     u32 nr_redist_regions,</span></span><br><span class="line"><span class="params">     u64 redist_stride,</span></span><br><span class="line"><span class="params">     <span class="keyword">struct</span> fwnode_handle *handle)</span> &#123;</span><br><span class="line"> set_handle_irq(gic_handle_irq);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+</ol>
+</li>
+</ol>
+<h4><span id="3-3-1-3-shen-qing-gic-zhong-duan">3.3.1.3 申请GIC中断</span><a href="#3-3-1-3-shen-qing-gic-zhong-duan" class="header-anchor">#</a></h4><h5><span id="3-3-1-3-1-zai-she-bei-shu-li-zhi-ding-zhong-duan">3.3.1.3.1 在设备树里指定中断</span><a href="#3-3-1-3-1-zai-she-bei-shu-li-zhi-ding-zhong-duan" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/28.png" alt="image-20240809003246767"></p>
+<h5><span id="3-3-1-3-2-dui-she-bei-shu-zhong-duan-de-chu-li">3.3.1.3.2 对设备树中断的处理</span><a href="#3-3-1-3-2-dui-she-bei-shu-zhong-duan-de-chu-li" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/29.png" alt="在这里插入图片描述"></p>
+<h2><span id="3-4-gic-zhong-duan-chu-guo-cheng">3.4 GIC中断处过程</span><a href="#3-4-gic-zhong-duan-chu-guo-cheng" class="header-anchor">#</a></h2><ol>
+<li>进入中断栈<code>irq_stack_entry</code></li>
+<li>执行中断控制器的中断入口<code>handle_arch_irq</code></li>
+<li>退出中断栈<code>irq_stack_exit</code></li>
+</ol>
+<p>中断栈用来保存中断的上下文，中断发生和退出的时候调用 <code>irq_stack_entry </code>和 <code>irq_stack_exit </code>来进入和退出中断栈。</p>
+<h3><span id="3-4-1-handle-arch-irq-ru-kou">3.4.1 handle_arch_irq入口</span><a href="#3-4-1-handle-arch-irq-ru-kou" class="header-anchor">#</a></h3><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/30.png" alt="image-20240810150555648"></p>
+<h4><span id="3-4-1-1-gic-handle-irq">3.4.1.1 gic_handle_irq</span><a href="#3-4-1-1-gic-handle-irq" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">static</span> asmlinkage <span class="type">void</span> __exception_irq_entry <span class="title function_">gic_handle_irq</span><span class="params">(<span class="keyword">struct</span> pt_regs *regs)</span>&#123;</span><br><span class="line"> u32 irqnr;</span><br><span class="line"></span><br><span class="line"> <span class="keyword">do</span> &#123;</span><br><span class="line">  irqnr = gic_read_iar();                                     ------(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (likely(irqnr &gt; <span class="number">15</span> &amp;&amp; irqnr &lt; <span class="number">1020</span>) || irqnr &gt;= <span class="number">8192</span>) &#123;  ------(<span class="number">2</span>)</span><br><span class="line">   <span class="type">int</span> err;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">if</span> (static_key_true(&amp;supports_deactivate))</span><br><span class="line">    gic_write_eoir(irqnr);</span><br><span class="line">   <span class="keyword">else</span></span><br><span class="line">    isb();</span><br><span class="line"></span><br><span class="line">   err = handle_domain_irq(gic_data.domain, irqnr, regs);    ------(<span class="number">3</span>)</span><br><span class="line">   <span class="keyword">if</span> (err) &#123;</span><br><span class="line">    WARN_ONCE(<span class="literal">true</span>, <span class="string">&quot;Unexpected interrupt received!\n&quot;</span>);</span><br><span class="line">    <span class="keyword">if</span> (static_key_true(&amp;supports_deactivate)) &#123;</span><br><span class="line">     <span class="keyword">if</span> (irqnr &lt; <span class="number">8192</span>)</span><br><span class="line">      gic_write_dir(irqnr);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">     gic_write_eoir(irqnr);</span><br><span class="line">    &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">continue</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (irqnr &lt; <span class="number">16</span>) &#123;                                          ------(<span class="number">4</span>)</span><br><span class="line">   gic_write_eoir(irqnr);</span><br><span class="line">   <span class="keyword">if</span> (static_key_true(&amp;supports_deactivate))</span><br><span class="line">    gic_write_dir(irqnr);</span><br><span class="line"><span class="meta">#<span class="keyword">ifdef</span> CONFIG_SMP</span></span><br><span class="line">   <span class="comment">/*</span></span><br><span class="line"><span class="comment">    * Unlike GICv2, we don&#x27;t need an smp_rmb() here.</span></span><br><span class="line"><span class="comment">    * The control dependency from gic_read_iar to</span></span><br><span class="line"><span class="comment">    * the ISB in gic_write_eoir is enough to ensure</span></span><br><span class="line"><span class="comment">    * that any shared data read by handle_IPI will</span></span><br><span class="line"><span class="comment">    * be read after the ACK.</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">   handle_IPI(irqnr, regs);                                ------(<span class="number">5</span>)</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">   WARN_ONCE(<span class="literal">true</span>, <span class="string">&quot;Unexpected SGI received!\n&quot;</span>);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">   <span class="keyword">continue</span>;</span><br><span class="line">  &#125;</span><br><span class="line"> &#125; <span class="keyword">while</span> (irqnr != ICC_IAR1_EL1_SPURIOUS);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>读取中断控制器的寄存器<code>GICC_IAR</code>，并获取 <code>hwirq</code></li>
+<li>外设触发的中断。硬件中断号<code>0-15</code>表示 <code>SGI (软件中断)</code>类型的中断，<code>15-1020 </code>表示外设中断（SPI或PPI共享中断类型），<code>8192-MAX </code>表示 LPI 类型的中断</li>
+<li>中断控制器中断处理的主体</li>
+<li>软件触发的中断</li>
+<li>核间交互触发的中断</li>
+</ol>
+<h5><span id="3-4-1-1-1-handle-domain-irq">3.4.1.1.1 handle_domain_irq</span><a href="#3-4-1-1-1-handle-domain-irq" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/31.png" alt="image-20240810151815454"></p>
+<ol>
+<li>进入中断上下文</li>
+<li>根据 <code>hwirq</code> 去查找 linux 中断号</li>
+<li>通过中断号找到全局中断描述符数组<code>irq_desc[NR_IRQS]</code>中的一项，然后调用<code> generic_handle_irq_desc</code>，执行该 irq 号注册的<code> action</code></li>
+<li>退出中断上下文</li>
+</ol>
+<h6><span id="3-4-1-1-1-1-generic-handle-irq">3.4.1.1.1.1 generic_handle_irq</span><a href="#3-4-1-1-1-1-generic-handle-irq" class="header-anchor">#</a></h6><p>把<code>generic_handle_irq</code>展开：</p>
+<p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/32.png" alt="image-20240810151917713"></p>
+<p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/32-1.png" alt="image-20240810152019303"></p>
+<p>调用 <code>desc-&gt;handle_irq </code>指向的回调函数。</p>
+<p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/33.png" alt="image-20240810152332559"></p>
+<p><code>irq_domain_set_info</code> 根据硬件中断号的范围设置 <code>irq_desc-&gt;handle_irq </code>的指针，共享中断入口为<code> handle_fasteoi_irq</code>，私有中断入口为 <code>handle_percpu_devid_irq</code>。</p>
+<ul>
+<li><code>handle_percpu_devid_irq</code>：处理私有中断处理，在这个过程中会分别调用中断控制器的处理函数进行硬件操作，该函数调用 <code>action-&gt;handler()</code> 来进行中断处理</li>
+<li><code>handle_fasteoi_irq</code>：处理共享中断，并且遍历 <code>irqaction</code> 链表，逐个调用 <code>action-&gt;handler() </code>函数，这个函数正是设备驱动程序调用 <code>request_irq/request_threaded_irq </code>接口注册的中断处理函数，此外如果中断线程化处理的话，还会调用<code>__irq_wake_thread</code>唤醒内核线程。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">irqreturn_t</span> __handle_irq_event_percpu(<span class="keyword">struct</span> irq_desc *desc, <span class="type">unsigned</span> <span class="type">int</span> *flags) &#123;</span><br><span class="line">    <span class="type">irqreturn_t</span> retval = IRQ_NONE;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> irq = desc-&gt;irq_data.irq;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">irqaction</span> *<span class="title">action</span>;</span></span><br><span class="line"></span><br><span class="line">    for_each_action_of_desc(desc, action) &#123;            </span><br><span class="line">        <span class="type">irqreturn_t</span> res;</span><br><span class="line">        res = action-&gt;handler(irq, action-&gt;dev_id);<span class="comment">//requst_irq注册的函数</span></span><br><span class="line">        <span class="keyword">switch</span> (res) &#123;</span><br><span class="line">        <span class="keyword">case</span> IRQ_WAKE_THREAD:</span><br><span class="line">            __irq_wake_thread(desc, action);          </span><br><span class="line">        <span class="keyword">case</span> IRQ_HANDLED:</span><br><span class="line">            *flags |= action-&gt;flags;</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h5><span id="3-4-1-1-2-zong-jie-request-irq-de-han-shu-ru-he-bei-zhi-xing">3.4.1.1.2 总结request_irq的函数如何被执行</span><a href="#3-4-1-1-2-zong-jie-request-irq-de-han-shu-ru-he-bei-zhi-xing" class="header-anchor">#</a></h5><p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/34.png" alt="image-20240810152452686"></p>
+<h1><span id="4-zhong-duan-kong-zhi-qi-gic-de-she-bei-shu-miao-shu">4 中断控制器GIC的设备树描述</span><a href="#4-zhong-duan-kong-zhi-qi-gic-de-she-bei-shu-miao-shu" class="header-anchor">#</a></h1><p>中断控制器而言 ，设备树绑定信息参考文档<code>Documentation/devicetree/bindings/arm/gic.txt</code>。以nxp的<code>imx6ull.dtsi</code>为例：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">intc: interrupt-controller@<span class="number">00</span>a01000 &#123;</span><br><span class="line">	compatible = <span class="string">&quot;arm,cortex-a7-gic&quot;</span>;</span><br><span class="line">	<span class="meta">#interrupt-cells = <span class="string">&lt;3&gt;</span>;</span></span><br><span class="line">	interrupt-controller;</span><br><span class="line">	reg = &lt;<span class="number">0x00a01000</span> <span class="number">0x1000</span>&gt;,</span><br><span class="line">	&lt;<span class="number">0x00a02000</span> <span class="number">0x100</span>&gt;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+<ol>
+<li><code>compatible</code> 属性值为<code>“arm,cortex-a7-gic”</code>在 Linux 内核源码中搜索<code>“arm,cortex-a7-gic”</code>即可找到 GIC 中断控制器驱动文件， GIC 中断控制器驱是架构通用的，在<code>drivers/irqchip/irq-gic.c</code></li>
+<li><code>interrupt-cells </code>和<code>#address-cells、#size-cells </code>一样。<br> 2.1 每个 cells 都是 32 位整形值，对于 ARM 处理的GIC 来说，一共有 3 个 cells，这三个 cells 的含义如下：</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">第一个 cells：中断类型，<span class="number">0</span> 表示 SPI(共享) 中断，<span class="number">1</span> 表示 PPI（私有） 中断。</span><br><span class="line">第二个 cells：中断号，对于 SPI 中断来说中断号的范围为 <span class="number">0</span>~<span class="number">987</span>，对于PPI</span><br><span class="line">       中断来说中断号的范围为 <span class="number">0</span>~<span class="number">15</span>。</span><br><span class="line">第三个 cells：标志，bit[<span class="number">3</span>:<span class="number">0</span>]表示中断触发类型，为 <span class="number">1</span> 的时候表示上升沿触发，</span><br><span class="line">       为 <span class="number">2</span> 的时候表示下降沿触发，为 <span class="number">4</span> 的时候表示高电平触发，为 <span class="number">8</span> 的时候表示低</span><br><span class="line">       电平触发。bit[<span class="number">15</span>:<span class="number">8</span>]为 PPI 中断的 CPU 掩码。</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li><code>interrupt-controller</code>表示该节点中断控制器</li>
+</ol>
+<p>对于gpio来说也可以作为中断控制器，如imx6ull的<code>gpio5</code>：<br><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/35.png" alt="image"><br>对于 gpio5 来说一共有两条信息，中断类型都是 SPI，<br>触发电平都是<code> IRQ_TYPE_LEVEL_HIGH</code>。不同之处在于中断源，一个是 74，一个是 75，打开可以打开《IMX6ULL 参考手册》的<code>“Chapter 3 Interrupts and DMA Events”</code>章节：<br><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/36.png" alt="image"><br>GPIO5 一共用了 2 个中断号，一个是 74，一个是 75。其中 74 对应<code>GPIO5_IO00~GPIO5_IO15</code>这低 16 个 IO，75 对应 <code>GPIO5_IO16~GPIOI5_IO31 </code>这高 16 位 IO。</p>
+<p>使用者：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">fxls8471@<span class="number">1</span>e &#123;</span><br><span class="line">	compatible = <span class="string">&quot;fsl,fxls8471&quot;</span>;</span><br><span class="line">	reg = &lt;<span class="number">0x1e</span>&gt;;</span><br><span class="line">	position = &lt;<span class="number">0</span>&gt;;</span><br><span class="line">	interrupt-parent = &lt;&amp;gpio5&gt;;</span><br><span class="line">	interrupts = &lt;<span class="number">0</span> <span class="number">8</span>&gt;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><code>fxls8471</code> 有一个中断引脚链接到了 I.MX6ULL 的<code>SNVS_TAMPER0</code>因脚上，这个引脚可以复用为<code>GPIO5_IO00 interrupts</code>设置中断信息，0 表示 <code>GPIO5_IO00</code>，8 表示低电平触发。</p>
+<h2><span id="4-1-huo-qu-zhong-duan-hao-han-shu">4.1 获取中断号函数</span><a href="#4-1-huo-qu-zhong-duan-hao-han-shu" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">int</span> <span class="title function_">irq_of_parse_and_map</span><span class="params">(<span class="keyword">struct</span> device_node *dev,<span class="type">int</span> index)</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">gpio_to_irq</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> gpio)</span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">int</span> <span class="title function_">irq_create_mapping</span><span class="params">(<span class="keyword">struct</span> irq_domain *domain,</span></span><br><span class="line"><span class="params">				<span class="type">irq_hw_number_t</span> hwirq)</span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>irq_of_parse_and_map </code>函数从 interupts 属性中提取到对应的设备号，<br>dev：设备节点。<br>index：索引号，interrupts 属性可能包含多条中断信息，通过 index 指定要获取的信息。<br>返回值：中断号。</p>
+<h2><span id="4-2-gic-shi-yong-shi-li-an-jian-gpio-zhong-duan">4.2 gic使用示例-按键gpio中断</span><a href="#4-2-gic-shi-yong-shi-li-an-jian-gpio-zhong-duan" class="header-anchor">#</a></h2><h3><span id="4-2-1-dts-miao-shu">4.2.1 dts描述</span><a href="#4-2-1-dts-miao-shu" class="header-anchor">#</a></h3><p>我们驱动一个按键，采用中断的方式，并且采用定时器来实现按键消抖，应用程序读取按键值并且通过终端打印出来：</p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line">key &#123;</span><br><span class="line">	<span class="meta">#size-cells = <span class="string">&lt;1&gt;</span>;</span></span><br><span class="line">	compatible = <span class="string">&quot;atkalpha-key&quot;</span>;</span><br><span class="line">	pinctrl-names = <span class="string">&quot;default&quot;</span>;</span><br><span class="line">	pinctrl<span class="number">-0</span> = &lt;&amp;pinctrl_key&gt;;</span><br><span class="line">	key-gpio = &lt;&amp;gpio1 <span class="number">18</span> GPIO_ACTIVE_LOW&gt;; <span class="comment">/* KEY0 */</span></span><br><span class="line">	interrupt-parent = &lt;&amp;gpio1&gt;;</span><br><span class="line">	interrupts = &lt;<span class="number">18</span> IRQ_TYPE_EDGE_BOTH&gt;; <span class="comment">/* FALLING RISING */</span></span><br><span class="line">	status = <span class="string">&quot;okay&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到key使用<code>key-gpio</code>使用<code>GPIO1_IO18</code>, 可以看到也用到了gpio中断源interrupts，<code>IRQ_TYPE_EDGE_BOTH</code>定义在<code>include/linux/irq.h：</code></p>
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> &#123;</span></span><br><span class="line">	IRQ_TYPE_NONE = <span class="number">0x00000000</span>,</span><br><span class="line">	IRQ_TYPE_EDGE_RISING = <span class="number">0x00000001</span>,</span><br><span class="line">	IRQ_TYPE_EDGE_FALLING = <span class="number">0x00000002</span>,</span><br><span class="line">	IRQ_TYPE_EDGE_BOTH = (IRQ_TYPE_EDGE_FALLING |</span><br><span class="line">		IRQ_TYPE_EDGE_RISING),</span><br><span class="line">	IRQ_TYPE_LEVEL_HIGH = <span class="number">0x00000004</span>,</span><br><span class="line">	IRQ_TYPE_LEVEL_LOW = <span class="number">0x00000008</span>,</span><br><span class="line">	IRQ_TYPE_LEVEL_MASK = (IRQ_TYPE_LEVEL_LOW |</span><br><span class="line">		IRQ_TYPE_LEVEL_HIGH),</span><br><span class="line">&#125;；</span><br></pre></td></tr></table></figure>
+
+<h3><span id="4-2-2-qu-dong-dai-ma-yu-fen-xi">4.2.2 驱动代码与分析</span><a href="#4-2-2-qu-dong-dai-ma-yu-fen-xi" class="header-anchor">#</a></h3><details>
+<summary>驱动代码</summary>
+
+<figure class="highlight c"><table><tr><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/delay.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/ide.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/gpio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/cdev.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/device.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/of.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/of_address.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/of_gpio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/semaphore.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/timer.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/of_irq.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/irq.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/mach/map.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/uaccess.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/io.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMX6UIRQ_CNT		1			<span class="comment">/* 设备号个数 	*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IMX6UIRQ_NAME		<span class="string">&quot;imx6uirq&quot;</span>	<span class="comment">/* 名字 		*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> KEY0VALUE			0X01		<span class="comment">/* KEY0按键值 	*/</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INVAKEY				0XFF		<span class="comment">/* 无效的按键值 */</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> KEY_NUM				1			<span class="comment">/* 按键数量 	*/</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* 中断IO描述结构体 */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">irq_keydesc</span> &#123;</span></span><br><span class="line">	<span class="type">int</span> gpio;								<span class="comment">/* gpio */</span></span><br><span class="line">	<span class="type">int</span> irqnum;								<span class="comment">/* 中断号     */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> value;					<span class="comment">/* 按键对应的键值 */</span></span><br><span class="line">	<span class="type">char</span> name[<span class="number">10</span>];							<span class="comment">/* 名字 */</span></span><br><span class="line">	<span class="type">irqreturn_t</span> (*handler)(<span class="type">int</span>, <span class="type">void</span> *);	<span class="comment">/* 中断服务函数 */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* imx6uirq设备结构体 */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">imx6uirq_dev</span>&#123;</span></span><br><span class="line">	<span class="type">dev_t</span> devid;			<span class="comment">/* 设备号 	 */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">cdev</span> <span class="title">cdev</span>;</span>		<span class="comment">/* cdev 	*/</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="keyword">class</span> *<span class="keyword">class</span>;</span>	<span class="comment">/* 类 		*/</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">device</span> *<span class="title">device</span>;</span>	<span class="comment">/* 设备 	 */</span></span><br><span class="line">	<span class="type">int</span> major;				<span class="comment">/* 主设备号	  */</span></span><br><span class="line">	<span class="type">int</span> minor;				<span class="comment">/* 次设备号   */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">device_node</span>	*<span class="title">nd</span>;</span> <span class="comment">/* 设备节点 */</span></span><br><span class="line">	<span class="type">atomic_t</span> keyvalue;		<span class="comment">/* 有效的按键键值 */</span></span><br><span class="line">	<span class="type">atomic_t</span> releasekey;	<span class="comment">/* 标记是否完成一次完成的按键，包括按下和释放 */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">timer_list</span> <span class="title">timer</span>;</span><span class="comment">/* 定义一个定时器*/</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">irq_keydesc</span> <span class="title">irqkeydesc</span>[<span class="title">KEY_NUM</span>];</span>	<span class="comment">/* 按键描述数组 */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> curkeynum;				<span class="comment">/* 当前的按键号 */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">imx6uirq_dev</span> <span class="title">imx6uirq</span>;</span></span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">irqreturn_t</span> <span class="title function_">key0_handler</span><span class="params">(<span class="type">int</span> irq, <span class="type">void</span> *dev_id)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">imx6uirq_dev</span> *<span class="title">dev</span> =</span> (<span class="keyword">struct</span> imx6uirq_dev *)dev_id;</span><br><span class="line"></span><br><span class="line">	dev-&gt;curkeynum = <span class="number">0</span>;</span><br><span class="line">	dev-&gt;timer.data = (<span class="keyword">volatile</span> <span class="type">long</span>)dev_id;</span><br><span class="line">	mod_timer(&amp;dev-&gt;timer, jiffies + msecs_to_jiffies(<span class="number">10</span>));	<span class="comment">/* 10ms定时 */</span></span><br><span class="line">	<span class="keyword">return</span> IRQ_RETVAL(IRQ_HANDLED);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">timer_function</span><span class="params">(<span class="type">unsigned</span> <span class="type">long</span> arg)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> value;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> num;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">irq_keydesc</span> *<span class="title">keydesc</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">imx6uirq_dev</span> *<span class="title">dev</span> =</span> (<span class="keyword">struct</span> imx6uirq_dev *)arg;</span><br><span class="line"></span><br><span class="line">	num = dev-&gt;curkeynum;</span><br><span class="line">	keydesc = &amp;dev-&gt;irqkeydesc[num];</span><br><span class="line"></span><br><span class="line">	value = gpio_get_value(keydesc-&gt;gpio); 	<span class="comment">/* 读取IO值 */</span></span><br><span class="line">	<span class="keyword">if</span>(value == <span class="number">0</span>)&#123; 						<span class="comment">/* 按下按键 */</span></span><br><span class="line">		<span class="type">atomic_set</span>(&amp;dev-&gt;keyvalue, keydesc-&gt;value);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">else</span>&#123; 									<span class="comment">/* 按键松开 */</span></span><br><span class="line">		<span class="type">atomic_set</span>(&amp;dev-&gt;keyvalue, <span class="number">0x80</span> | keydesc-&gt;value);</span><br><span class="line">		<span class="type">atomic_set</span>(&amp;dev-&gt;releasekey, <span class="number">1</span>);	<span class="comment">/* 标记松开按键，即完成一次完整的按键过程 */</span>			</span><br><span class="line">	&#125;	</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">keyio_init</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> i = <span class="number">0</span>;</span><br><span class="line">	<span class="type">int</span> ret = <span class="number">0</span>;</span><br><span class="line">	</span><br><span class="line">	imx6uirq.nd = of_find_node_by_path(<span class="string">&quot;/key&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (imx6uirq.nd== <span class="literal">NULL</span>)&#123;</span><br><span class="line">		printk(<span class="string">&quot;key node not find!\r\n&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> -EINVAL;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; KEY_NUM; i++) &#123;</span><br><span class="line">		imx6uirq.irqkeydesc[i].gpio = of_get_named_gpio(imx6uirq.nd ,<span class="string">&quot;key-gpio&quot;</span>, i);</span><br><span class="line">		<span class="keyword">if</span> (imx6uirq.irqkeydesc[i].gpio &lt; <span class="number">0</span>) &#123;</span><br><span class="line">			printk(<span class="string">&quot;can&#x27;t get key%d\r\n&quot;</span>, i);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; KEY_NUM; i++) &#123;</span><br><span class="line">		<span class="built_in">memset</span>(imx6uirq.irqkeydesc[i].name, <span class="number">0</span>, <span class="keyword">sizeof</span>(imx6uirq.irqkeydesc[i].name));	<span class="comment">/* 缓冲区清零 */</span></span><br><span class="line">		<span class="built_in">sprintf</span>(imx6uirq.irqkeydesc[i].name, <span class="string">&quot;KEY%d&quot;</span>, i);		<span class="comment">/* 组合名字 */</span></span><br><span class="line">		gpio_request(imx6uirq.irqkeydesc[i].gpio, imx6uirq.irqkeydesc[i].name);</span><br><span class="line">		gpio_direction_input(imx6uirq.irqkeydesc[i].gpio);	</span><br><span class="line">		imx6uirq.irqkeydesc[i].irqnum = irq_of_parse_and_map(imx6uirq.nd, i);</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> 0</span></span><br><span class="line">		imx6uirq.irqkeydesc[i].irqnum = gpio_to_irq(imx6uirq.irqkeydesc[i].gpio);</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">		printk(<span class="string">&quot;key%d:gpio=%d, irqnum=%d\r\n&quot;</span>,i, imx6uirq.irqkeydesc[i].gpio,</span><br><span class="line">                                         imx6uirq.irqkeydesc[i].irqnum);</span><br><span class="line">	&#125;</span><br><span class="line">	imx6uirq.irqkeydesc[<span class="number">0</span>].handler = key0_handler;</span><br><span class="line">	imx6uirq.irqkeydesc[<span class="number">0</span>].value = KEY0VALUE;</span><br><span class="line">	</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; KEY_NUM; i++) &#123;</span><br><span class="line">		ret = request_irq(imx6uirq.irqkeydesc[i].irqnum, imx6uirq.irqkeydesc[i].handler, </span><br><span class="line">		                 IRQF_TRIGGER_FALLING|IRQF_TRIGGER_RISING, imx6uirq.irqkeydesc[i].name, &amp;imx6uirq);</span><br><span class="line">		<span class="keyword">if</span>(ret &lt; <span class="number">0</span>)&#123;</span><br><span class="line">			printk(<span class="string">&quot;irq %d request failed!\r\n&quot;</span>, imx6uirq.irqkeydesc[i].irqnum);</span><br><span class="line">			<span class="keyword">return</span> -EFAULT;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	init_timer(&amp;imx6uirq.timer);</span><br><span class="line">	imx6uirq.timer.function = timer_function;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">imx6uirq_open</span><span class="params">(<span class="keyword">struct</span> inode *inode, <span class="keyword">struct</span> file *filp)</span></span><br><span class="line">&#123;</span><br><span class="line">	filp-&gt;private_data = &amp;imx6uirq;	<span class="comment">/* 设置私有数据 */</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">ssize_t</span> <span class="title function_">imx6uirq_read</span><span class="params">(<span class="keyword">struct</span> file *filp, <span class="type">char</span> __user *buf, <span class="type">size_t</span> cnt, <span class="type">loff_t</span> *offt)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> ret = <span class="number">0</span>;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> keyvalue = <span class="number">0</span>;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> releasekey = <span class="number">0</span>;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">imx6uirq_dev</span> *<span class="title">dev</span> =</span> (<span class="keyword">struct</span> imx6uirq_dev *)filp-&gt;private_data;</span><br><span class="line"></span><br><span class="line">	keyvalue = <span class="type">atomic_read</span>(&amp;dev-&gt;keyvalue);</span><br><span class="line">	releasekey = <span class="type">atomic_read</span>(&amp;dev-&gt;releasekey);</span><br><span class="line">	<span class="keyword">if</span> (releasekey) &#123; <span class="comment">/* 有按键按下 */</span></span><br><span class="line">		<span class="keyword">if</span> (keyvalue &amp; <span class="number">0x80</span>) &#123;</span><br><span class="line">			keyvalue &amp;= ~<span class="number">0x80</span>;</span><br><span class="line">			ret = copy_to_user(buf, &amp;keyvalue, <span class="keyword">sizeof</span>(keyvalue));</span><br><span class="line">		&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">			<span class="keyword">goto</span> data_error;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="type">atomic_set</span>(&amp;dev-&gt;releasekey, <span class="number">0</span>);<span class="comment">/* 按下标志清零 */</span></span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="keyword">goto</span> data_error;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">data_error:</span><br><span class="line">	<span class="keyword">return</span> -EINVAL;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> <span class="title">imx6uirq_fops</span> =</span> &#123;</span><br><span class="line">	.owner = THIS_MODULE,</span><br><span class="line">	.open = imx6uirq_open,</span><br><span class="line">	.read = imx6uirq_read,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">imx6uirq_init</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">if</span> (imx6uirq.major) &#123;</span><br><span class="line">		imx6uirq.devid = MKDEV(imx6uirq.major, <span class="number">0</span>);</span><br><span class="line">		register_chrdev_region(imx6uirq.devid, IMX6UIRQ_CNT, IMX6UIRQ_NAME);</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		alloc_chrdev_region(&amp;imx6uirq.devid, <span class="number">0</span>, IMX6UIRQ_CNT, IMX6UIRQ_NAME);</span><br><span class="line">		imx6uirq.major = MAJOR(imx6uirq.devid);</span><br><span class="line">		imx6uirq.minor = MINOR(imx6uirq.devid);</span><br><span class="line">	&#125;</span><br><span class="line">	cdev_init(&amp;imx6uirq.cdev, &amp;imx6uirq_fops);</span><br><span class="line">	cdev_add(&amp;imx6uirq.cdev, imx6uirq.devid, IMX6UIRQ_CNT);</span><br><span class="line">	imx6uirq.class = class_create(THIS_MODULE, IMX6UIRQ_NAME);</span><br><span class="line">	<span class="keyword">if</span> (IS_ERR(imx6uirq.class)) &#123;</span><br><span class="line">		<span class="keyword">return</span> PTR_ERR(imx6uirq.class);</span><br><span class="line">	&#125;</span><br><span class="line">	imx6uirq.device = device_create(imx6uirq.class, <span class="literal">NULL</span>, imx6uirq.devid, <span class="literal">NULL</span>, IMX6UIRQ_NAME);</span><br><span class="line">	<span class="keyword">if</span> (IS_ERR(imx6uirq.device)) &#123;</span><br><span class="line">		<span class="keyword">return</span> PTR_ERR(imx6uirq.device);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="type">atomic_set</span>(&amp;imx6uirq.keyvalue, INVAKEY);</span><br><span class="line">	<span class="type">atomic_set</span>(&amp;imx6uirq.releasekey, <span class="number">0</span>);</span><br><span class="line">	keyio_init();</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> __exit <span class="title function_">imx6uirq_exit</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">	del_timer_sync(&amp;imx6uirq.timer);</span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; KEY_NUM; i++) &#123;</span><br><span class="line">		free_irq(imx6uirq.irqkeydesc[i].irqnum, &amp;imx6uirq);</span><br><span class="line">		gpio_free(imx6uirq.irqkeydesc[i].gpio);</span><br><span class="line">	&#125;</span><br><span class="line">	cdev_del(&amp;imx6uirq.cdev);</span><br><span class="line">	unregister_chrdev_region(imx6uirq.devid, IMX6UIRQ_CNT);</span><br><span class="line">	device_destroy(imx6uirq.class, imx6uirq.devid);</span><br><span class="line">	class_destroy(imx6uirq.class);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</details>
+分析：
+![image](字符设备驱动-9-中断子系统-GICv2架构解析/37.png)
+从key节点取出key-gpio,得到gpio编号
+调用gpio请求配置函数，配成input模式
+根据key节点信息解析出中断号，或者gpio编号转成中断号.（这里用到一个函数`irq_of_parse_and_map`)
+注册中断
+创建定时器用来消抖
+
+<p>中断响应过程：<br><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/38.png" alt="image"><br><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/39.png" alt="image"><br>按键按下或松开，中断产生调用<code>key0_handler</code>，修改定时器超时10ms, 如果是抖动那么，定时器中断那么不会触发（原理请参考<a href="https://www.cnblogs.com/fuzidage/p/12464079.html" title="定时器中断">定时器中断</a>），只有当不是抖动真正按下或松开，定时器中断触发进行读取按键，原子操作设置键值。releasekey置1表示一次完整的按下松开。<br><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/40.png" alt="image"><br>最后用户调用read, 返回键值。可见releasekey很好的控制着按键按下和read的次数，比如当连续read 2次但是只按了一次，则读取失败。<br><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/41.png" alt="image"></p>
+<p>硬中断和虚拟中断号的映射关系可以用 <code>/proc/interrupts </code>查看：</p>
+<p><img src="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/42.png" alt="img"></p>
+<p>通过 ps 命令可以查看系统中的中断线程，注意这些线程是实时线程 <code>SCHED_FIFO</code>:</p>
+<figure class="highlight plaintext"><table><tr><td class="code"><pre><span class="line"># ps -A | grep &quot;irq/&quot;</span><br><span class="line">root          1749     2       0      0 irq_thread          0 S [irq/433-imx_drm]</span><br><span class="line">root          1750     2       0      0 irq_thread          0 S [irq/439-imx_drm]</span><br><span class="line">root          1751     2       0      0 irq_thread          0 S [irq/445-imx_drm]</span><br><span class="line">root          1752     2       0      0 irq_thread          0 S [irq/451-imx_drm]</span><br><span class="line">root          2044     2       0      0 irq_thread          0 S [irq/279-isl2902]</span><br><span class="line">root          2192     2       0      0 irq_thread          0 S [irq/114-mmc0]</span><br><span class="line">root          2199     2       0      0 irq_thread          0 S [irq/115-mmc1]</span><br><span class="line">root          2203     2       0      0 irq_thread          0 S [irq/322-5b02000]</span><br><span class="line">root          2361     2       0      0 irq_thread          0 S [irq/294-4-0051]</span><br></pre></td></tr></table></figure>
+]]></content>
       <tags>
         <tag>Linux设备驱动</tag>
       </tags>

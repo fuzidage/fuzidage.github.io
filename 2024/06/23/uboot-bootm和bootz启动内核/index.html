@@ -38,7 +38,7 @@
 <meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/23.png">
 <meta property="og:image" content="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/24.png">
 <meta property="article:published_time" content="2024-06-23T09:56:01.000Z">
-<meta property="article:modified_time" content="2024-06-23T10:23:34.000Z">
+<meta property="article:modified_time" content="2024-08-06T15:51:29.026Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="linux系统构建">
 <meta property="article:tag" content="boot启动">
@@ -156,6 +156,7 @@
 </ul>
 </li>
 <li><a href="#5-fu-lu-bi-te-yu-shi-liu-jin-zhi-zhuan-huan-kuai-cha-biao">5 附录：比特与十六进制转换快查表</a></li>
+<li><a href="#6-mkimage-gong-ju">6 mkimage工具</a></li>
 </ul>
 <!-- tocstop -->
 
@@ -228,6 +229,67 @@
 <p><code>setenv bootargs &#39;console=ttymxc0,115200 root=/dev/mmcblk1p2 rootwait rw&#39;</code><br><code>setenv bootcmd &#39;tftp 80800000 zImage; tftp 83000000 imx6ull-alientek-emmc.dtb; bootz 80800000 - 83000000&#39;</code><br><code>saveenv</code><br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/23.png" alt="image"><br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/24.png" alt="image"></p>
 <h1><span id="5-fu-lu-bi-te-yu-shi-liu-jin-zhi-zhuan-huan-kuai-cha-biao">5 附录：比特与十六进制转换快查表</span><a href="#5-fu-lu-bi-te-yu-shi-liu-jin-zhi-zhuan-huan-kuai-cha-biao" class="header-anchor">#</a></h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * include/linux/sizes.h</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * This program is free software; you can redistribute it and/or modify</span></span><br><span class="line"><span class="comment"> * it under the terms of the GNU General Public License version 2 as</span></span><br><span class="line"><span class="comment"> * published by the Free Software Foundation.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> __LINUX_SIZES_H__</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __LINUX_SIZES_H__</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1				0x00000001</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2				0x00000002</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_4				0x00000004</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_8				0x00000008</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_16				0x00000010</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_32				0x00000020</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_64				0x00000040</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_128				0x00000080</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_256				0x00000100</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_512				0x00000200</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1K				0x00000400</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2K				0x00000800</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_4K				0x00001000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_8K				0x00002000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_16K				0x00004000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_32K				0x00008000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_64K				0x00010000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_128K				0x00020000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_256K				0x00040000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_512K				0x00080000</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1M				0x00100000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2M				0x00200000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_4M				0x00400000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_8M				0x00800000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_16M				0x01000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_32M				0x02000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_64M				0x04000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_128M				0x08000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_256M				0x10000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_512M				0x20000000</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1G				0x40000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2G				0x80000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">/* __LINUX_SIZES_H__ */</span></span></span><br></pre></td></tr></table></figure>
 
+<h1><span id="6-mkimage-gong-ju">6 mkimage工具</span><a href="#6-mkimage-gong-ju" class="header-anchor">#</a></h1><p>用来制作不压缩或者压缩的多种可启动映象文件。比如内核启动镜像(给zImage镜像添加64字节的头信息成uImage)，再比如<code>rootfs.img</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Usage: ./mkimage -l image</span><br><span class="line">          -l ==&gt; list image header information</span><br><span class="line">       ./mkimage [-x] -A arch -O os -T type -C comp -a addr -e ep -n name -d data_file[:data_file...] image</span><br><span class="line">          -A ==&gt; set architecture to &#x27;arch&#x27; </span><br><span class="line">          -O ==&gt; set operating system to &#x27;os&#x27;</span><br><span class="line">          -T ==&gt; set image type to &#x27;type&#x27;</span><br><span class="line">          -C ==&gt; set compression type &#x27;comp&#x27;</span><br><span class="line">          -a ==&gt; set load address to &#x27;addr&#x27; (hex)</span><br><span class="line">          -e ==&gt; set entry point to &#x27;ep&#x27; (hex)</span><br><span class="line">          -n ==&gt; set image name to &#x27;name&#x27;</span><br><span class="line">          -d ==&gt; use image data from &#x27;datafile&#x27;</span><br><span class="line">          -x ==&gt; set XIP (execute in place)</span><br><span class="line">       ./mkimage [-D dtc_options] -f fit-image.its fit-image</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-A</td>
+<td>指定CPU的架构，比如：arm或者x86</td>
+</tr>
+<tr>
+<td>-O</td>
+<td>指定操作系统的类型，比如：linux</td>
+</tr>
+<tr>
+<td>-T</td>
+<td>指定镜像的类型，比如：standalone、kernel、ramdisk、multi、firmware、script、filesystem</td>
+</tr>
+<tr>
+<td>-C</td>
+<td>指定压缩的方式，比如：none 不压缩、gzip 用gzip的压缩方式、bzip2 用bzip2的压缩方式</td>
+</tr>
+<tr>
+<td>-a</td>
+<td>指定镜像在内存中的加载地址</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>指定镜像运行的入口点地址</td>
+</tr>
+<tr>
+<td>-n</td>
+<td>指定镜像的名字</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>指定制作镜像的源文件</td>
+</tr>
+<tr>
+<td>-x</td>
+<td>镜像是否可以片上执行</td>
+</tr>
+</tbody></table>
+<p><code>mkimage</code>命令举例如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#mkimage -n &quot;My Kernel&quot; -A arm -O linux -T kernel -C gzip –a 0x8000 –e 0x8000 -d kernel.gz kernel.img</span></span><br></pre></td></tr></table></figure>
+<p>以上命令将压缩了的内核二进制文件<code>kernel.gz</code>转换成u-boot能够辨认的二进制文件<code>kernel.img</code>，并指定<code>kernel.img</code>的名字为<code>“My Kernel”</code>，处理器体系架构为arm，操作系统类型为linux，程序类型为操作系统内核，程序由gzip压缩，程序的链接起始地址为0x8000，程序的入口地址为0x8000，注意这两个地址一定要是物理地址而不是对应的虚拟地址。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#mkimage -n &quot;My Rootfs&quot; -A arm -O linux -T ramdisk -C gzip -d ramdisk.gz ramdisk.img</span></span><br></pre></td></tr></table></figure>
+<p>以上命令将压缩了的ramdisk根文件系统二进制文件<code>ramdisk.gz</code>转换成u-boot能够辨认的二进制文件<code>ramdisk.img</code>，并指定<code>ramdisk.img</code>的名字为<code>“My Rootfs”</code>，处理器体系架构为arm，操作系统类型为linux，程序类型为ramdisk，程序由gzip压缩，不需要指定ramdisk的链接起始地址和入口地址。</p>
+<p>如果我们将<code>kernel.img</code>和<code>ramdisk.img</code>文件分别写到flash芯片的<code>0xFF000000</code>和<code>0xFF200000</code>位置，系统启动后进入u-boot命令行界面，执行以下u-boot命令：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># bootm 0xFF000000 0xFF200000</span></span><br></pre></td></tr></table></figure>
+<p>那么u-boot将把<code>0xFF000000</code>位置的Linux内核解压缩到RAM中的<code>0x8000</code>位置，再将<code>0xFF200000</code>位置的ramdisk文件系统映像文件刨掉u-boot头部后复制到RAM中的某个位置，然后跳转到内核的入口地址<code>0x8000</code>位置启动内核，同时把板子信息、ramdisk在RAM中的起始地址和结束地址、命令行字符串传给内核，这样Linux开始启动运行。</p>
+<p>如果没有可以片上执行的norflash:</p>
+<ol>
+<li>mkimage<br><code>mkimage -n &#39;linux-2.6.14&#39; -A arm -O linux -T kernel -C none -a 0x30008000 -e 0x30008040 -d zImage zImage.img</code></li>
+<li>tftp下载到ddr<br><code>ftp 0x30008000 zImage.img</code></li>
+<li>启动内核<br><code>bootm 0x30008000</code></li>
+</ol>
+
       
     </div>
     <footer class="article-footer">
@@ -285,7 +347,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 16.36px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 19.09px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17.27px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15.45px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.18px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.82px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14.55px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.91px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 11.82px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.73px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17.27px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.64px;">通信协议</a>
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 17px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 19px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 16px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 14px;">通信协议</a>
     </div>
   </div>
 
@@ -307,6 +369,14 @@
       <ul>
         
           <li>
+            <a href="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/">字符设备驱动-9-中断子系统-GICv2架构解析</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/">字符设备驱动-9-中断子系统-中断引入</a>
+          </li>
+        
+          <li>
             <a href="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-8-%E5%86%85%E6%A0%B8%E5%AE%9A%E6%97%B6%E5%99%A8/">字符设备驱动-8-内核定时器</a>
           </li>
         
@@ -316,14 +386,6 @@
         
           <li>
             <a href="/2024/07/30/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-6-poll%E5%BA%95%E5%B1%82%E9%A9%B1%E5%8A%A8%E6%9C%BA%E5%88%B6/">字符设备驱动-6-poll底层驱动机制</a>
-          </li>
-        
-          <li>
-            <a href="/2024/07/30/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-6-pre-%E4%BC%91%E7%9C%A0%E5%94%A4%E9%86%92%E6%9C%BA%E5%88%B6/">字符设备驱动-6-pre-休眠唤醒机制</a>
-          </li>
-        
-          <li>
-            <a href="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-5-%E8%AE%BE%E5%A4%87%E6%A0%91%E5%87%BD%E6%95%B0/">字符设备驱动-5-设备树函数</a>
           </li>
         
       </ul>

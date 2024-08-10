@@ -69,6 +69,314 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-uboot-menuconfig和Kconfig图像化配置" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/" class="article-date">
+  <time class="dt-published" datetime="2024-06-23T14:14:48.000Z" itemprop="datePublished">2024-06-23</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/">uboot-menuconfig和Kconfig图像化配置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-ncurses-ku-an-zhuang">1 ncurses 库安装</a></li>
+<li><a href="#2-menuconfig-cai-dan-shi-yong-shuo-ming-he-ju-li">2 menuconfig菜单使用说明和举例</a></li>
+<li><a href="#3-menuconfig-tu-xing-hua-pei-zhi-yuan-li">3 menuconfig 图形化配置原理</a><ul>
+<li><a href="#3-1-make-menuconfig-guo-cheng">3.1 make menuconfig 过程</a><ul>
+<li><a href="#3-1-1-kconfig-yu-fa-jian-jie">3.1.1 Kconfig 语法简介</a><ul>
+<li><a href="#3-1-1-1-mainmenu">3.1.1.1 mainmenu</a></li>
+<li><a href="#3-1-1-2-zi-kconfig">3.1.1.2 子Kconfig</a></li>
+<li><a href="#3-1-1-3-menu-endmenu-cai-dan">3.1.1.3 menu&#x2F;endmenu 菜单</a></li>
+<li><a href="#3-1-1-4-config-tiao-mu">3.1.1.4 config条目</a></li>
+<li><a href="#3-1-1-5-depends-on-he-select">3.1.1.5 depends on 和 select</a></li>
+<li><a href="#3-1-1-6-choice-endchoice">3.1.1.6 choice&#x2F;endchoice</a></li>
+<li><a href="#3-1-1-7-menuconfig">3.1.1.7 menuconfig</a></li>
+<li><a href="#3-1-1-8-comment">3.1.1.8 comment</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#4-menuconfig-cai-dan-shi-zhan-lian-xi">4 menuconfig菜单实战练习</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-ncurses-ku-an-zhuang">1 ncurses 库安装</span><a href="#1-ncurses-ku-an-zhuang" class="header-anchor">#</a></h1><p>uboot 或 Linux 内核可以通过输入<code>make menuconfig</code>来打开图形化配置界面，<code>menuconfig</code>是一套图形化的配置工具，需要<code>ncurses</code>库支持。<br><code>sudo apt-get install build-essential</code><br><code>sudo apt-get install libncurses5-dev</code></p>
+<h1><span id="2-menuconfig-cai-dan-shi-yong-shuo-ming-he-ju-li">2 menuconfig菜单使用说明和举例</span><a href="#2-menuconfig-cai-dan-shi-yong-shuo-ming-he-ju-li" class="header-anchor">#</a></h1><p><code>menuconfig </code>重点会用到两个文件：<code>.config </code>和 <code>Kconfig</code>，<code>.config </code>文件前面已经说了，这个文件保存着 uboot 的配置项，使用 <code>menuconfig </code>配置完 uboot 以后会更新<code>.config </code>文件。<code>Kconfig</code>文件是图形界面的描述文件，也就是描述界面应该有什么内容，很多目录下都会有<code>Kconfig</code>文件。<br><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- mx6ull_alientek_emmc_defconfig</code><br><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- menuconfig</code><br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/1.png" alt="image"><br>通过键盘上的<code>“↑”</code>和<code>“↓”</code>键来选择要配置的菜单，按下<code>“Enter”</code>键进入子菜单。菜单中高亮的字母就是此菜单的热键，在键盘上按下此高亮字母对应的键可以快速选中对应的菜单。选中子菜单以后按下<code>“Y”</code>键就会将相应的代码编译进 Uboot 中，菜单前面变为<code>“&lt; * &gt;”</code>。按下<code>“N”</code>键不编译相应的代码，按下<code>“M”</code>键就会将相应的代码编译为模块，菜单前面变为<code>“&lt; M &gt;”</code>。按两下<code>“Esc”</code>键退出，也就是返回到上一级，按下<code>“?”</code>键查看此菜单的帮助信息，按下<code>“/”</code>键打开搜索框，可以在搜索框输入要搜索的内容。<br>在配置界面下方会有五个按钮，这五个按钮的功能如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;Select&gt;：选中按钮，和“Enter”键的功能相同，负责选中并进入某个菜单。</span><br><span class="line">&lt;Exit&gt;：退出按钮，和按两下“Esc”键功能相同，退出当前菜单，返回到上一级。</span><br><span class="line">&lt;Help&gt;：帮助按钮，查看选中菜单的帮助信息。</span><br><span class="line">&lt;Save&gt;：保存按钮，保存修改后的配置文件。</span><br><span class="line">&lt;Load&gt;：加载按钮，加载指定的配置文件。</span><br></pre></td></tr></table></figure>
+<p>就以如何使能<code>dns</code>命令为例，讲解一下如何通过图形化界面来配置 uboot。进入<code>“Command line interface ---&gt;”</code>这个配置项:<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/2.png" alt="image"><br>选择<code>“Network commands ---&gt;”</code>，进入网络相关命令配置项:<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/3.png" alt="image"><br>可以看出，uboot 中有很多和网络有关的命令，比如<code>bootp、tftpboot、dhcp</code>等等。选中<code> dns</code>，然后按下键盘上的<code>“Y”</code>键，此时<code>dns</code>前面的<code>“[ ]”</code>变成了<code>“[ * ]” </code>:<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/4.png" alt="image"><br>细心的朋友应该会发现，在<code>mx6ull_alientek_emmc.h</code>里面我们配置使能了<code> dhcp</code> 和<code>ping</code>命令，但是在上图中的<code>“[ ]”</code>并不是<code>“[ * ]”</code>，也就是说不编译<code>dhcp</code>和 <code>ping</code>命令，这不是冲突了吗？实际情况是<code> dhcp</code> 和<code> ping</code> 命令是会编译的。之所以在上图中没有体现出来时因为我们是直接在<code>mx6ull_alientek_emmc.h</code>中定义的宏<code>CONFIG_CMD_PING</code>和<code>CONFIG_CMD_DHCP</code>，而<code> menuconfig</code> 是通过读取<code>.config </code>文件来判断使能了哪些功能，<code>.config</code>里面并没有宏<code>CONFIG_CMD_PING</code>和<code>CONFIG_CMD_DHCP</code>,因此<code>menuconfig</code>不会选中这两项。<br>总结下：配置选项来自2个地方，一个是<code>mx6ull_alientek_emmc.h</code>，一个是<code>.config</code><br>选中<code> dns</code>，然后按下<code>“H”</code>或者<code>“?”</code>键可以打开<code>dns</code>命令的帮助提示信息：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/5.png" alt="image"><br>选择<code>dns</code>命令以后，按两下 <code>ESC </code>键（按两下<code>ESC</code>键相当于返回上一层），退出当前配置项，进入到上一层配置项，输入<code>Y</code>保存修改后的配置到<code>.config</code>。<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/6.png" alt="image"><br>再打开<code>.config</code>，会发现多了<code>“CONFIG_CMD_DNS=y”</code>这一行：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/7.png" alt="image"><br>再次编译：<br><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j16</code><br>烧录uboot进sd卡，开机从sd卡启动,进入uboot命令行后，输入<code>help或者?</code>就可以看到uboot支持了dns命令。<br>测试：先将板子连接能上外网的路由器，要先设置一下<code>dns</code>服务器的 IP 地址，也就是设置环境变量 <code>dnsip </code>的值：<br><code>setenv dnsip 114.114.114.114</code><br><code>saveenv</code><br>设置好以后就可以使用 dns 命令查看百度官网的 IP 地址了:<br><code>dns www.baidu.com</code><br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/8.png" alt="image"><br>可以看到dns解析命令功能正常。</p>
+<h1><span id="3-menuconfig-tu-xing-hua-pei-zhi-yuan-li">3 menuconfig 图形化配置原理</span><a href="#3-menuconfig-tu-xing-hua-pei-zhi-yuan-li" class="header-anchor">#</a></h1><h2><span id="3-1-make-menuconfig-guo-cheng">3.1 make menuconfig 过程</span><a href="#3-1-make-menuconfig-guo-cheng" class="header-anchor">#</a></h2><p>同<code>defconfig</code>一样，<code>make menuconfig</code> 也会匹配到顶层<code> Makefile。</code> </p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17859528.html">Uboot顶层Makefile解析-1. defconfig过程分析 - fuzidage - 博客园 (cnblogs.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/">uboot-编译defconfig分析 | Hexo (fuzidage.github.io)</a></p>
+<p><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/9.png" alt="image"><br>其中 <code>build=-f ./scripts/Makefile.build obj</code>, 展开后：<br><code>make -f ./scripts/Makefile.build obj=scripts/kconfig menuconfig</code><br><code>Makefile.build </code>会读取<code>scripts/kconfig/Makefile</code>中的内容，在<code>scripts/kconfig/Makefile</code>中可以找到如下代码：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/10.png" alt="image"><br>其中<code>obj= scripts/kconfig</code>，<code>silent</code>是设置静默编译的，在这里可以忽略不计，<code>Kconfig=Kconfig</code>，因此扩展以后就是：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/11.png" alt="image"><br><code>scripts/kconfig/mconf.c </code>这个文件会被编译，生成 <code>mconf </code>这个可执行文件。<code>mconf </code>会调用 uboot 根目录下的 <code>Kconfig </code>文件开始构建图形配置界面。</p>
+<h3><span id="3-1-1-kconfig-yu-fa-jian-jie">3.1.1 Kconfig 语法简介</span><a href="#3-1-1-kconfig-yu-fa-jian-jie" class="header-anchor">#</a></h3><h4><span id="3-1-1-1-mainmenu">3.1.1.1 mainmenu</span><a href="#3-1-1-1-mainmenu" class="header-anchor">#</a></h4><p>输入<code>make menuconfig</code>以后打开的默认界面就是<code>mainmenu</code>，在顶层<code> Kconfig</code> 中有如下代码：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/12.png" alt="image"><br>我们的uboot是<code>UBOOTVERSION=2016.03</code>，如下：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/13.png" alt="image"></p>
+<h4><span id="3-1-1-2-zi-kconfig">3.1.1.2 子Kconfig</span><a href="#3-1-1-2-zi-kconfig" class="header-anchor">#</a></h4><p><code>Kconfig </code>也可以调用其他子目录中的<code>Kconfig</code>文件，调用方法如下:<br><code>source &quot;xxx/Kconfig&quot;</code><br>顶层<code>Kconfig</code>中，调用了很多子<code>Kconfig</code>:<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/14.png" alt="image"></p>
+<h4><span id="3-1-1-3-menu-x2f-endmenu-cai-dan">3.1.1.3 menu&#x2F;endmenu 菜单</span><a href="#3-1-1-3-menu-x2f-endmenu-cai-dan" class="header-anchor">#</a></h4><p><code>menu </code>用于生成菜单，<code>endmenu </code>就是菜单结束标志。在顶层<code>Kconfig </code>中有如下代码：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/15.png" alt="image"><br>体现在主菜单界面如下所示：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/16.png" alt="image"><br>在<code>“General setup”</code>菜单上面还有 <code>“Architecture select (ARM architecture)”</code>和<code>“ARM architecture”</code>这两个子菜单，但是在顶层 <code>Kconfig </code>中并没有看到这两个子菜单对应的<code>menu/endmenu </code>代码块，那这两个子菜单是怎么来的呢？这两个子菜单就是<code>arch/Kconfig</code>文件生成的。包括主界面中的<code>“Boot timing”、“Console recording”</code>等等这些子菜单，都是分别由顶层<code>Kconfig </code>所调用的 <code>common/Kconfig、cmd/Kconfig</code> 等这些子<code>Kconfig</code>文件来创建的。</p>
+<h4><span id="3-1-1-4-config-tiao-mu">3.1.1.4 config条目</span><a href="#3-1-1-4-config-tiao-mu" class="header-anchor">#</a></h4><p>顶层<code>Kconfig</code>中的<code>“General setup”</code>子菜单内容如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">14 menu <span class="string">&quot;General setup&quot;</span></span><br><span class="line">15</span><br><span class="line">16 config LOCALVERSION</span><br><span class="line">17 string <span class="string">&quot;Local version - append to U-Boot release&quot;</span></span><br><span class="line">18 help</span><br><span class="line">19 Append an extra string to the end of your U-Boot version.</span><br><span class="line">20 This will show up on your boot log, for example.</span><br><span class="line">21 The string you set here will be appended after the contents of</span><br><span class="line">22 any files with a filename matching localversion* in your</span><br><span class="line">23 object and source tree, in that order. Your total string can</span><br><span class="line">24 be a maximum of 64 characters.</span><br><span class="line">25 </span><br><span class="line">26 config LOCALVERSION_AUTO</span><br><span class="line">27 bool <span class="string">&quot;Automatically append version information to the version </span></span><br><span class="line"><span class="string">string&quot;</span></span><br><span class="line">28 default y</span><br><span class="line">29 help</span><br><span class="line">......</span><br><span class="line">45 </span><br><span class="line">46 config CC_OPTIMIZE_FOR_SIZE</span><br><span class="line">47 bool <span class="string">&quot;Optimize for size&quot;</span></span><br><span class="line">48 default y</span><br><span class="line">49 help</span><br><span class="line">......</span><br><span class="line">54 </span><br><span class="line">55 config SYS_MALLOC_F</span><br><span class="line">56 bool <span class="string">&quot;Enable malloc() pool before relocation&quot;</span></span><br><span class="line">57 default y if DM</span><br><span class="line">58 help</span><br><span class="line">......</span><br><span class="line">63 </span><br><span class="line">64 config SYS_MALLOC_F_LEN</span><br><span class="line">65 hex <span class="string">&quot;Size of malloc() pool before relocation&quot;</span></span><br><span class="line">66 depends on SYS_MALLOC_F</span><br><span class="line">67 default 0x400</span><br><span class="line">68 help</span><br><span class="line">......</span><br><span class="line">73 </span><br><span class="line">74 menuconfig EXPERT</span><br><span class="line">75 bool <span class="string">&quot;Configure standard U-Boot features (expert users)&quot;</span></span><br><span class="line">76 default y</span><br><span class="line">77 help</span><br><span class="line">......</span><br><span class="line">82 </span><br><span class="line">83 if EXPERT</span><br><span class="line">84 config SYS_MALLOC_CLEAR_ON_INIT</span><br><span class="line">85 bool <span class="string">&quot;Init with zeros the memory reserved for malloc (slow)&quot;</span></span><br><span class="line">86 default y</span><br><span class="line">87 help</span><br><span class="line">......</span><br><span class="line">99 <span class="keyword">endif</span></span><br><span class="line">100 endmenu <span class="comment"># General setup</span></span><br></pre></td></tr></table></figure>
+<p>可以看到有大量的<code>“config xxxx”</code>的代码块，也就是<code>config</code>条目。<code>“General setup”</code>菜单的<code>config</code>条目具体配置项如下：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/17.png" alt="image"><br><code>“config LOCALVERSION”</code>对应着第一个配置项，<code>“config LOCALVERSION_AUTO”</code>对应着 第 二 个 配 置 项。</p>
+<p>① 第 16 和 26 行，这两行都以 <code>config </code>关键字开头，后面跟着 <code>LOCALVERSION </code>和<code>LOCALVERSION_AUTO</code>，这两个就是配置项名字。假如我们使能了<code> LOCALVERSION_AUTO</code>这个功能，那么就会下<code>.config</code> 文件中生成 <code>CONFIG_LOCALVERSION_AUTO</code>。</p>
+<p>②<code>config</code>关键字下面的这几行是配置项属性，17<del>24 行是<code> LOCALVERSION</code> 的属性，27</del>44 行是<code> LOCALVERSION_AUTO</code> 的属性。</p>
+<p>③ 属性里面描述了配置项的类型、输入提示、依赖关系、帮助信息和默认值等。第 17 行的<code>string</code>是变量类型，也就<code>“CONFIG_ LOCALVERSION”</code>的变量类型。可以为：<code>bool、tristate、string、hex 和 int</code>，一共 5 种。最常用的是 <code>bool、tristate 和 string </code>这三种，<code>bool </code>类型有两种值：<code>y 和 n</code>，当为 y 的时候表示使能这个配置项，当为 n 的时候就禁止这个配置项。<code>tristate </code>类型有三种值：<code>y、m 和 n</code>，其中 y 和 n 的涵义与 bool 类型一样，m 表示将这个配置项编译为模块。<code>string </code>为字符串类型，所以 <code>LOCALVERSION </code>是个字符串变量，用来存储本地字符串，选中以后即可输入用户定义的本地版本号，如下图：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/18.png" alt="image"></p>
+<p><code>string </code>后面的<code>“Local version - append to U-Boot release”</code>就是这个配置项在图形界面上的显示出来的标题。<br>④ 第 18 行，<code>help </code>表示帮助信息，告诉我们配置项的含义，当我们按下<code>“h”或“?”</code>弹出来的帮助界面就是 <code>help </code>的内容。<br>⑤ 第 27 行，说明<code>“CONFIG_LOCALVERSION_AUTO”</code>是个<code>bool </code>类型，可以通过按下 Y 或N 键来使能或者禁止 <code>CONFIG_LOCALVERSION_AUTO</code>。<br>⑥ 第 28 行，<code>“default y”</code>表示 <code>CONFIG_LOCALVERSION_AUTO </code>的默认值就是 y，所以这一行默认会被选中。</p>
+<h4><span id="3-1-1-5-depends-on-he-select">3.1.1.5 depends on 和 select</span><a href="#3-1-1-5-depends-on-he-select" class="header-anchor">#</a></h4><p>打开 <code>arch/Kconfig </code>文件，在里面有这如下代码：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/19.png" alt="image"><br>第 9 行，<code>“depends on”</code>说明<code>“SYS_GENERIC_BOARD”</code>项依赖于<code>“HAVE_GENERIC_BOARD”</code>,也就是说<code>“HAVE_GENERIC_BOARD”</code>被选中以后<code>“SYS_GENERIC_BOARD”</code>才能被选中。<br>第 17~20 行，<code>“select”</code>表示方向依赖，当选中<code>“ARC”</code>以后，<code>“HAVE_PRIVATE_LIBGCC”、“HAVE_GENERIC_BOARD”、“SYS_GENERIC_BOARD”和“SUPPORT_OF_CONTROL”</code>这四个也会被选中。</p>
+<h4><span id="3-1-1-6-choice-x2f-endchoice">3.1.1.6 choice&#x2F;endchoice</span><a href="#3-1-1-6-choice-x2f-endchoice" class="header-anchor">#</a></h4><p>在<code>arch/Kconfig</code>文件中有如下代码：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">11 choice</span><br><span class="line">12 prompt <span class="string">&quot;Architecture select&quot;</span></span><br><span class="line">13 default SANDBOX</span><br><span class="line">14 </span><br><span class="line">15 config ARC</span><br><span class="line">16 bool <span class="string">&quot;ARC architecture&quot;</span></span><br><span class="line">......</span><br><span class="line">21 </span><br><span class="line">22 config ARM</span><br><span class="line">23 bool <span class="string">&quot;ARM architecture&quot;</span></span><br><span class="line">......</span><br><span class="line">29 </span><br><span class="line">30 config AVR32</span><br><span class="line">31 bool <span class="string">&quot;AVR32 architecture&quot;</span></span><br><span class="line">......</span><br><span class="line">35 </span><br><span class="line">36 config BLACKFIN</span><br><span class="line">37 bool <span class="string">&quot;Blackfin architecture&quot;</span></span><br><span class="line">......</span><br><span class="line">40 </span><br><span class="line">41 config M68K</span><br><span class="line">42 bool <span class="string">&quot;M68000 architecture&quot;</span></span><br><span class="line">......</span><br><span class="line">117</span><br><span class="line">118 endchoice</span><br></pre></td></tr></table></figure>
+
+<p><code>choice/endchoice </code>代码段定义了一组可选择项，将多个类似的配置项组合在一起，供用户单选或者多选。该示例就是选择处理器架构，可以从<code>ARC、ARM、AVR32</code>等这些架构中选择，这里是单选。在 uboot 图形配置界面上选择<code>“Architecture select”</code>，进入以后如下图：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/20.png" alt="image"><br>第 12 行的<code>prompt</code>给出这个<code>choice/endchoice </code>段的提示信息为<code>“Architecture select”</code>。</p>
+<h4><span id="3-1-1-7-menuconfig">3.1.1.7 menuconfig</span><a href="#3-1-1-7-menuconfig" class="header-anchor">#</a></h4><p><code>menuconfig 和 menu </code>很类似，但是 <code>menuconfig </code>是个<strong>带选项的菜单</strong>,如顶层<code>Kconfig</code>中的<code>“General setup”</code>中的列表中有一项<code>menuconfig EXPERT</code>：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/21.png" alt="image"><br>结果如下：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/22.png" alt="image"><br>可以看到，前面有<code>“[ ]”</code>说明这个<strong>菜单是可选的</strong>，当选中这个菜单以后就可以进入到子选项中：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/23.png" alt="image"><br>如果不选择<code>“Configure standard U-Boot features (expert users)”</code>，那么所描述的菜单就不会显示出来，进去以后是空白的。</p>
+<h4><span id="3-1-1-8-comment">3.1.1.8 comment</span><a href="#3-1-1-8-comment" class="header-anchor">#</a></h4><p><code>comment</code>用于注释， 也就是在图形化界面中显示一行注释。例如<code>drivers/mtd/nand/Kconfig</code>中：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">74 config NAND_ARASAN</span><br><span class="line">75 bool <span class="string">&quot;Configure Arasan Nand&quot;</span></span><br><span class="line">76 help</span><br><span class="line">......</span><br><span class="line">80</span><br><span class="line">81 comment <span class="string">&quot;Generic NAND options&quot;</span></span><br></pre></td></tr></table></figure>
+<p>第 81 行使用<code>comment</code>标注了一行注释，注释内容为：<code>“Generic NAND options”</code>，这行注释在配置项<code> NAND_ARASAN</code> 的下面。<br>在配置项<code>“Configure Arasan Nand”</code>下面有一行注释，注释内容为<code>“*** Generic NAND options ***”</code>：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/24.png" alt="image"></p>
+<h1><span id="4-menuconfig-cai-dan-shi-zhan-lian-xi">4 menuconfig菜单实战练习</span><a href="#4-menuconfig-cai-dan-shi-zhan-lian-xi" class="header-anchor">#</a></h1><p>接下来自定义一个菜单进行练习，自定义菜单要求如下：<br>①、在主界面中添加一个名为<code>“My test menu”</code>，此菜单内部有一个配置项。<br>②、配置项为<code>“MY_TESTCONFIG”</code>，此配置项处于菜单<code>“My test menu”</code>中。<br>③、配置项的为变量类型为<code> bool</code>，默认值为 <code>y</code>。<br>④、配置项菜单名字为<code>“This is my test config”</code><br>⑤、配置项的帮助内容为<code>“This is a empty config, just for tset!”</code>。<br>在顶层 <code>Kconfig</code>，在最后面加入如下代码：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">1 menu <span class="string">&quot;My test menu&quot;</span></span><br><span class="line">2</span><br><span class="line">3 config MY_TESTCONFIG</span><br><span class="line">4 bool <span class="string">&quot;This is my test config&quot;</span></span><br><span class="line">5 default y</span><br><span class="line">6 help</span><br><span class="line">7 This is a empty config, just for test!</span><br><span class="line">8</span><br><span class="line">9 endmenu <span class="comment"># my test menu</span></span><br></pre></td></tr></table></figure>
+<p>再次执行<code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- menuconfig</code>：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/25.png" alt="image"><br>可以看出，主菜单最后面出现了一个名为<code>“My test menu”</code>的子菜单，这个就是上面添加进来的子菜单。进入此子菜单：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/26.png" alt="image"><br>可以看出，配置项也添加成功，按H查看帮助信息：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/27.png" alt="image"><br>保存退出，打开.config文件：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/28.png" alt="image"><br>配置项<code>MY_TESTCONFIG</code>默认也是被选中的，因此在<code>.config </code>文件中肯定会有<code>“CONFIG_MY_TESTCONFIG=y”</code>这一行。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/" data-id="clyylnk8s00267wufapxp7aqn" data-title="uboot-menuconfig和Kconfig图像化配置" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-uboot-bootm和bootz启动内核" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/" class="article-date">
+  <time class="dt-published" datetime="2024-06-23T09:56:01.000Z" itemprop="datePublished">2024-06-23</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/">uboot-bootm和bootz启动内核</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-images-quan-ju-bian-liang">1 images 全局变量</a><ul>
+<li><a href="#1-1-bootm-tou-bu-jie-gou">1.1 bootm头部结构</a><ul>
+<li><a href="#1-1-1-xi-tong-jing-xiang-tou-bu-jie-gou">1.1.1 系统镜像头部结构</a></li>
+<li><a href="#1-1-2-xi-tong-jing-xiang-jie-gou">1.1.2 系统镜像结构</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-do-bootz-han-shu">2 do_bootz 函数</a><ul>
+<li><a href="#2-1-bootz-start">2.1 bootz_start</a><ul>
+<li><a href="#2-1-1-bootm-start">2.1.1 bootm_start</a></li>
+<li><a href="#2-1-2-bootz-setup">2.1.2 bootz_setup</a></li>
+<li><a href="#2-1-3-bootm-find-images">2.1.3 bootm_find_images</a></li>
+</ul>
+</li>
+<li><a href="#2-2-do-bootm-states">2.2 do_bootm_states</a><ul>
+<li><a href="#2-2-1-bootm-os-get-boot-func">2.2.1 bootm_os_get_boot_func</a></li>
+<li><a href="#2-2-2-boot-pre-linux">2.2.2 boot_pre_linux</a></li>
+<li><a href="#2-2-3-boot-jump-linux">2.2.3 boot_jump_linux</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-zong-jie-bootz-qi-dong-guo-cheng">3 总结bootz启动过程</a></li>
+<li><a href="#4-uboot-qi-dong-linux-ce-shi">4 uboot 启动 Linux 测试</a><ul>
+<li><a href="#4-1-emmc-qi-dong-linux">4.1 EMMC 启动 Linux</a></li>
+<li><a href="#4-2-wang-luo-qi-dong-linux">4.2 网络启动 Linux</a></li>
+</ul>
+</li>
+<li><a href="#5-fu-lu-bi-te-yu-shi-liu-jin-zhi-zhuan-huan-kuai-cha-biao">5 附录：比特与十六进制转换快查表</a></li>
+<li><a href="#6-mkimage-gong-ju">6 mkimage工具</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-images-quan-ju-bian-liang">1 images 全局变量</span><a href="#1-images-quan-ju-bian-liang" class="header-anchor">#</a></h1><p>不管是<code>bootz</code>还是<code>bootm</code>命令,启动kernel都会用到<code>images</code>全局变量。<code>images 定义在文件 cmd/bootm.c</code>：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/1.png" alt="image"><br><code>include/image.h </code>中的定义了<code>bootm_headers_t</code>结构：该结构描述的是<code>bootm</code>启动时的头部信息。该结构又包含了系统镜像头部和系统镜像。</p>
+<h2><span id="1-1-bootm-tou-bu-jie-gou">1.1 bootm头部结构</span><a href="#1-1-bootm-tou-bu-jie-gou" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">304</span> <span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">bootm_headers</span> &#123;</span></span><br><span class="line"><span class="number">305</span> 	<span class="comment">/*</span></span><br><span class="line"><span class="comment">306 	* Legacy os image header, if it is a multi component image</span></span><br><span class="line"><span class="comment">307 	* then boot_get_ramdisk() and get_fdt() will attempt to get</span></span><br><span class="line"><span class="comment">308 	* data from second and third component accordingly.</span></span><br><span class="line"><span class="comment">309 	*/</span></span><br><span class="line"><span class="number">310</span> 	<span class="type">image_header_t</span> *legacy_hdr_os; <span class="comment">/* image header pointer */</span></span><br><span class="line"><span class="number">311</span> 	<span class="type">image_header_t</span> legacy_hdr_os_copy; <span class="comment">/* header copy */</span></span><br><span class="line"><span class="number">312</span> 	ulong legacy_hdr_valid;</span><br><span class="line"><span class="number">313</span></span><br><span class="line">......</span><br><span class="line"><span class="number">333</span></span><br><span class="line"><span class="number">334</span> 	<span class="meta">#<span class="keyword">ifndef</span> USE_HOSTCC</span></span><br><span class="line"><span class="number">335</span> 	<span class="type">image_info_t</span> os; <span class="comment">/* OS 镜像信息 */</span></span><br><span class="line"><span class="number">336</span> 	ulong ep; <span class="comment">/* OS 入口点 */</span></span><br><span class="line"><span class="number">337</span></span><br><span class="line"><span class="number">338</span> 	ulong rd_start, rd_end; <span class="comment">/* ramdisk 开始和结束位置 */</span></span><br><span class="line"><span class="number">339</span></span><br><span class="line"><span class="number">340</span> 	<span class="type">char</span> *ft_addr; <span class="comment">/* 设备树地址 */</span></span><br><span class="line"><span class="number">341</span> 	ulong ft_len; <span class="comment">/* 设备树长度 */</span></span><br><span class="line"><span class="number">342</span></span><br><span class="line"><span class="number">343</span> 	ulong initrd_start; <span class="comment">/* initrd 开始位置 */</span> </span><br><span class="line"><span class="number">344</span> 	ulong initrd_end; <span class="comment">/* initrd 结束位置 */</span></span><br><span class="line"><span class="number">345</span> 	ulong cmdline_start; <span class="comment">/* cmdline 开始位置 */</span></span><br><span class="line"><span class="number">346</span> 	ulong cmdline_end; <span class="comment">/* cmdline 结束位置 */</span></span><br><span class="line"><span class="number">347</span> 	<span class="type">bd_t</span> *kbd;</span><br><span class="line"><span class="number">348</span> <span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="number">349</span></span><br><span class="line"><span class="number">350</span> 	<span class="type">int</span> verify; <span class="comment">/* getenv(&quot;verify&quot;)[0] != &#x27;n&#x27; */</span></span><br><span class="line"><span class="number">351</span></span><br><span class="line"><span class="number">352</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_START (0x00000001)</span></span><br><span class="line"><span class="number">353</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_FINDOS (0x00000002)</span></span><br><span class="line"><span class="number">354</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_FINDOTHER (0x00000004)</span></span><br><span class="line"><span class="number">355</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_LOADOS (0x00000008)</span></span><br><span class="line"><span class="number">356</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_RAMDISK (0x00000010)</span></span><br><span class="line"><span class="number">357</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_FDT (0x00000020)</span></span><br><span class="line"><span class="number">358</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_OS_CMDLINE (0x00000040)</span></span><br><span class="line"><span class="number">359</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_OS_BD_T (0x00000080)</span></span><br><span class="line"><span class="number">360</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_OS_PREP (0x00000100)</span></span><br><span class="line"><span class="number">361</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_OS_FAKE_GO (0x00000200)<span class="comment">/*&#x27;Almost&#x27; run the OS*/</span></span></span><br><span class="line"><span class="number">362</span> 	<span class="meta">#<span class="keyword">define</span> BOOTM_STATE_OS_GO (0x00000400)</span></span><br><span class="line"><span class="number">363</span> 	<span class="type">int</span> state;</span><br><span class="line"><span class="number">364</span></span><br><span class="line"><span class="number">365</span> 	<span class="meta">#<span class="keyword">ifdef</span> CONFIG_LMB</span></span><br><span class="line"><span class="number">366</span> 	<span class="class"><span class="keyword">struct</span> <span class="title">lmb</span> <span class="title">lmb</span>;</span> <span class="comment">/* 内存管理相关，不深入研究 */</span></span><br><span class="line"><span class="number">367</span> <span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"><span class="number">368</span> &#125; <span class="type">bootm_headers_t</span>;</span><br></pre></td></tr></table></figure>
+
+<p>第 352~362 行这 11 个宏定义表示 BOOT 的不同阶段。</p>
+<h3><span id="1-1-1-xi-tong-jing-xiang-tou-bu-jie-gou">1.1.1 系统镜像头部结构</span><a href="#1-1-1-xi-tong-jing-xiang-tou-bu-jie-gou" class="header-anchor">#</a></h3><p>先来看下<code>image_header_t</code>结构，也就是系统镜像头部信息：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/2.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">image_header</span> &#123;</span></span><br><span class="line">	__be32		ih_magic;	<span class="comment">/* Image Header Magic Number	*/</span></span><br><span class="line">	__be32		ih_hcrc;	<span class="comment">/* Image Header CRC Checksum	*/</span></span><br><span class="line">	__be32		ih_time;	<span class="comment">/* Image Creation Timestamp	*/</span></span><br><span class="line">	__be32		ih_size;	<span class="comment">/* Image Data Size		*/</span></span><br><span class="line">	__be32		ih_load;	<span class="comment">/* Data	 Load  Address		*/</span></span><br><span class="line">	__be32		ih_ep;		<span class="comment">/* Entry Point Address		*/</span></span><br><span class="line">	__be32		ih_dcrc;	<span class="comment">/* Image Data CRC Checksum	*/</span></span><br><span class="line">	<span class="type">uint8_t</span>		ih_os;		<span class="comment">/* Operating System		*/</span></span><br><span class="line">	<span class="type">uint8_t</span>		ih_arch;	<span class="comment">/* CPU architecture		*/</span></span><br><span class="line">	<span class="type">uint8_t</span>		ih_type;	<span class="comment">/* Image Type			*/</span></span><br><span class="line">	<span class="type">uint8_t</span>		ih_comp;	<span class="comment">/* Compression Type		*/</span></span><br><span class="line">	<span class="type">uint8_t</span>		ih_name[IH_NMLEN];	<span class="comment">/* Image Name		*/</span></span><br><span class="line">&#125; <span class="type">image_header_t</span>;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="1-1-2-xi-tong-jing-xiang-jie-gou">1.1.2 系统镜像结构</span><a href="#1-1-2-xi-tong-jing-xiang-jie-gou" class="header-anchor">#</a></h3><p>再来看下<code>image_info_t</code>结构，也就是系统镜像信息结构：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/3.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> <span class="title">image_info</span> &#123;</span></span><br><span class="line">	ulong		start, end;		<span class="comment">/* start/end of blob */</span></span><br><span class="line">	ulong		image_start, image_len; <span class="comment">/* start of image within blob, len of image */</span></span><br><span class="line">	ulong		load;			<span class="comment">/* load addr for the image */</span></span><br><span class="line">	<span class="type">uint8_t</span>		comp, type, os;		<span class="comment">/* compression, type of image, os type */</span></span><br><span class="line">	<span class="type">uint8_t</span>		arch;			<span class="comment">/* CPU architecture */</span></span><br><span class="line">&#125; <span class="type">image_info_t</span>;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="2-do-bootz-han-shu">2 do_bootz 函数</span><a href="#2-do-bootz-han-shu" class="header-anchor">#</a></h1><p><code>do_bootz </code>函数定义在<code>cmd/bootm.c</code>：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/4.png" alt="image"><br>先执行<code>bootz_start</code>。先执行<code>BOOTM_STATE_START </code>阶段。<br>第 638 行，设置<code>images.os.os</code>为<code> IH_OS_LINUX</code>，也就是设置系统镜像为 Linux，表示我们要启动的是 Linux 系统！后面会用到 <code>images.os.os </code>来挑选具体的启动函数。<br>第 639 行，调用函数<code>do_bootm_states</code>来执行不同的 BOOT 阶段，这里要执行的 BOOT 阶段有：<code>BOOTM_STATE_OS_PREP 、BOOTM_STATE_OS_FAKE_GO 和BOOTM_STATE_OS_GO</code>。</p>
+<h2><span id="2-1-bootz-start">2.1 bootz_start</span><a href="#2-1-bootz-start" class="header-anchor">#</a></h2><p><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/5.png" alt="image"></p>
+<ol>
+<li><p>调用函数<code> do_bootm_states</code>，执行 <code>BOOTM_STATE_START </code>阶段。</p>
+</li>
+<li><p>593 行，设置<code> images 的 ep</code>，也就是系统镜像的入口点，使用<code>bootz</code>命令启动系统的时候就会设置系统在 DRAM 中的存储位置，这个存储位置就是系统镜像的入口点，因此<code> images-&gt;ep=0X80800000</code>。镜像加载地址定义在<code>include/configs/mx6ullevk.h</code><br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/6.png" alt="image"></p>
+</li>
+<li><p>调用<code>bootz_setup</code>函数，此函数会判断当前的系统镜像文件是否为 Linux 的镜像文件，并且会打印出镜像相关信息，<code>bootz_setup </code>函数稍后会讲解。</p>
+</li>
+<li><p>调用<code>bootm_find_images</code>查找<code>ramdisk</code>和<code>设备树(dtb)</code>文件，但是我们没有用到 <code>ramdisk</code>，因此此函数在这里仅仅用于查找<code>设备树(dtb)</code>文件，此函数稍后也会讲解。</p>
+</li>
+</ol>
+<h3><span id="2-1-1-bootm-start">2.1.1 bootm_start</span><a href="#2-1-1-bootm-start" class="header-anchor">#</a></h3><p>执行<code>BOOTM_STATE_START</code>阶段时，执行<code>bootm_start</code>：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/7.png" alt="image"><br>初始化<code>verfify </code>成员， 设置<code>images</code>状态为 <code>BOOTM_STATE_START</code>。</p>
+<h3><span id="2-1-2-bootz-setup">2.1.2 bootz_setup</span><a href="#2-1-2-bootz-setup" class="header-anchor">#</a></h3><p>定义在文件 <code>arch/arm/lib/bootm.c</code>:<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/8.png" alt="image"></p>
+<ol>
+<li>宏<code>LINUX_ARM_ZIMAGE_MAGIC</code>就是 ARM Linux 系统<code>魔术数</code>。</li>
+<li>从传递进来的参数<code> image(也就是系统镜像首地址)</code>中获取<code>zimage</code>头。</li>
+<li>判断<code>image</code>是否为 ARM 的 Linux 系统镜像，如果不是的话就直接返回，并且打印出<code>“Bad Linux ARM zImage magic!”</code>，比如我们输入一个错误的启动命令：<br><code>bootz 80000000 – 900000000</code><br>因为我们并没有在<code>0X80000000</code>处存放 <code>Linux 镜像文件(zImage)</code>，因此上面的命令肯定会执行出错如下:<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/9.png" alt="image"></li>
+<li>初始化函数<code>bootz_setup</code>的参数<code> start 和 end</code>。</li>
+<li>打印启动信息，如果 Linux 系统镜像正常的话打印如下：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/10.png" alt="image"></li>
+</ol>
+<h3><span id="2-1-3-bootm-find-images">2.1.3 bootm_find_images</span><a href="#2-1-3-bootm-find-images" class="header-anchor">#</a></h3><p>定义在文件<code> common/bootm.c</code>：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/11.png" alt="image"></p>
+<ol>
+<li>查找<code> ramdisk</code>，但是我们没有用到 <code>ramdisk</code>，因此这部分代码不用管。</li>
+<li>查找<code>设备树(dtb)</code>文件，找到以后就将设备树的起始地址和长度分别写到<code>images </code>的<code>ft_addr</code>和 <code>ft_len </code>成员变量中。我们使用 <code>bootz </code>启动 Linux 的时候已经指明了设备树在DRAM 中的存储地址，因此<code> images.ft_addr=0X83000000</code>，长度根据具体的设备树文件而定，比如我现在使用的设备树文件长度为<code> 0X8C81</code>，因此<code> images.ft_len=0X8C81</code>。</li>
+</ol>
+<h2><span id="2-2-do-bootm-states">2.2 do_bootm_states</span><a href="#2-2-do-bootm-states" class="header-anchor">#</a></h2><p><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/12.png" alt="image"><br>前面将<code>state</code>先处理了<code>BOOTM_STATE_START</code>阶段，接下来处里下面三个状态：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BOOTM_STATE_OS_PREP | BOOTM_STATE_OS_FAKE_GO | BOOTM_STATE_OS_GO</span><br></pre></td></tr></table></figure>
+<h3><span id="2-2-1-bootm-os-get-boot-func">2.2.1 bootm_os_get_boot_func</span><a href="#2-2-1-bootm-os-get-boot-func" class="header-anchor">#</a></h3><p>进入第658行，通过<code>bootm_os_get_boot_func</code>来查找系统启动函数。由于前面提到<code>images-&gt;os.os </code>就是系统类型设置 为 <code>IH_OS_LINUX</code>，根据这个<code>os</code>类型来选择对应的启动函数名为<code>do_bootm_linux</code>:<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/13.png" alt="image"></p>
+<h3><span id="2-2-2-boot-pre-linux">2.2.2 boot_pre_linux</span><a href="#2-2-2-boot-pre-linux" class="header-anchor">#</a></h3><p>第 676-677 行，处理<code>BOOTM_STATE_OS_PREP</code>状态，调用函数<code> do_bootm_linux，do_bootm_linux</code>调用<code>boot_prep_linux</code>来完成具体的处理过程。<code>boot_prep_linux </code>主要用于处理环境变量<code>bootargs，bootargs </code>保存着传递给<code>Linux kernel</code>的参数：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/14.png" alt="image"></p>
+<pre><code>设备树的chosen节点下存放了子节点bootargs，bootargs子节点存放bootargs环境变量
+</code></pre>
+<h3><span id="2-2-3-boot-jump-linux">2.2.3 boot_jump_linux</span><a href="#2-2-3-boot-jump-linux" class="header-anchor">#</a></h3><p>第699行，调用函数<code>boot_selected_os</code>启动 Linux 内核，此函数第 4 个参数为 Linux 系统镜像头，第 5 个参数就是 Linux 系统启动函数<code> do_bootm_linux</code>。<code>boot_selected_os </code>函数定义在文件<code>common/bootm_os.c</code>如下：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/15.png" alt="image"><br>最终调用<code> boot_selected_os-&gt;boot_fn(即do_bootm_linux)-&gt;boot_jump_linux</code>来启动 Linux 内核：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/16.png" alt="image"><br><code>boot_jump_linux</code>：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/17.png" alt="image"></p>
+<ol>
+<li><p>我们的板子IMX6ULL是armv7 32位架构，因此从else开始，第293 行，变量 <code>machid </code>保存机器 ID，如果不使用设备树的话这个机器 ID 会被传递给 Linux内核，Linux 内核会在自己的机器 ID 列表里面查找是否存在与<code>uboot</code>传递进来的<code>machid</code>匹配的项目，如果存在就说明 Linux 内核支持这个机器，那么 Linux 就会启动！如果使用设备树的话这个<code>machid</code>就无效了，设备树存有一个“兼容性”这个属性，Linux 内核会比较“兼容性”属性的值(字符串)来查看是否支持这个机器。</p>
+</li>
+<li><p>第 295 行，函数<code> kernel_entry</code>，看名字“内核_进入”，说明此函数是进入 Linux 内核的，也就是最终的大boss！此函数有三个参数：<code>zero，arch，params</code>，第一个参数<code>zero</code>同样为 0；第二个参数为<code>机器 ID</code>；第三个参数<code> ATAGS 或者设备树(DTB)首地址</code>，<code>ATAGS </code>是传统的方法，用于传递一些命令行信息啥的，如果使用设备树的话就要传递<code>设备树(DTB)</code>。</p>
+</li>
+<li><p>第 299 行，获取 <code>kernel_entry </code>函数，函数<code>kernel_entry</code>并不是 <code>uboot </code>定义的，而是 Linux 内核定义的，Linux 内核镜像文件的第一行代码就是函数<code> kernel_entry</code>，而 <code>images-&gt;ep </code>保存着 Linux内核镜像的起始地址，起始地址保存的正是 Linux 内核第一行代码！</p>
+</li>
+<li><p>第 313 行，调用函数<code>announce_and_cleanup</code>来打印一些信息并做一些清理工作：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/18.png" alt="image"><br>因此每次启动 Linux 之前输出<code>“Starting kernel ...”</code>信息如下：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/19.png" alt="image"></p>
+</li>
+<li><p>继续回到函数<code> boot_jump_linux</code>,第 315~318 行是设置寄存器<code> r2</code> 的值。为什么要设置<code>r2</code>的值呢？Linux 内核一开始是汇编代码，因此函数<code>kernel_entry</code>就是个汇编函数。向汇编函数传递参数要使用<code> r0、r1 和 r2</code>(参数数量不超过 3 个的时候)，所以<code> r2</code> 寄存器就是函数<code>kernel_entry</code>的第三个参数。</p>
+</li>
+<li><p>第 316 行，如果使用设备树的话，<code>r2 </code>应该是设备树的起始地址，而设备树地址保存在<code> images</code>的<code>ftd_addr</code>成员变量中。</p>
+</li>
+<li><p>第 317 行，如果不使用设备树的话，<code>r2</code> 应该是<code>uboot</code>传递给 Linux 的参数起始地址，也就是环境变量<code>bootargs</code>的值，</p>
+</li>
+<li><p>最后调用调用<code>kernel_entry</code>函数进入 Linux 内核，至此<code>Uboot</code>的整个运行流程结束，<code>uboot </code>的使命也就完成了。</p>
+</li>
+</ol>
+<h1><span id="3-zong-jie-bootz-qi-dong-guo-cheng">3 总结bootz启动过程</span><a href="#3-zong-jie-bootz-qi-dong-guo-cheng" class="header-anchor">#</a></h1><p><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/20.png" alt="image"></p>
+<h1><span id="4-uboot-qi-dong-linux-ce-shi">4 uboot 启动 Linux 测试</span><a href="#4-uboot-qi-dong-linux-ce-shi" class="header-anchor">#</a></h1><h2><span id="4-1-emmc-qi-dong-linux">4.1 EMMC 启动 Linux</span><a href="#4-1-emmc-qi-dong-linux" class="header-anchor">#</a></h2><p>编译出来的 Linux 镜像文件 <code>zImage </code>和设备树文件保存在 EMMC中，<code>uboot </code>从 EMMC 中读取这两个文件并启动，这个是我们产品最终的启动方式。但是我们目前还没有讲解如何移植linux 和设备树文件，以及如何将 <code>zImage </code>和设备树文件保存到 EMMC中。不过大家拿到手的 I.MX6U-ALPHA 开发板(EMMC 版本)已经将<code> zImage</code> 文件和设备树文件烧写到了 EMMC 中，所以我们可以直接读取来测试。先检查一下 EMMC 的分区 1 中有没有<code>zImage </code>文件和设备树文件，输入命令<code>ls mmc 1:1</code>:<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/21.png" alt="image"><br>EMMC 分区 1 中存在<code>zimage</code>和 <code>imx6ull-alientek-emmc.dtb</code>这两个文件，所以我们可以测试新移植的 uboot能不能启动 linux 内核。设置 <code>bootargs </code>和<code> bootcmd</code>这两个环境变量:<br><code>setenv bootargs &#39;console=ttymxc0,115200 root=/dev/mmcblk1p2 rootwait rw&#39;</code><br><code>setenv bootcmd &#39;mmc dev 1; fatload mmc 1:1 80800000 zImage; fatload mmc 1:1 83000000 imx6ull-alientek-emmc.dtb; bootz 80800000 - 83000000;&#39;</code><br><code>saveenv</code><br>直接输入<code> boot</code>，或者<code>run bootcmd</code>即可启动 Linux 内核，如果 Linux 内核启动成功的话就会输出如下：<br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/22.png" alt="image"></p>
+<h2><span id="4-2-wang-luo-qi-dong-linux">4.2 网络启动 Linux</span><a href="#4-2-wang-luo-qi-dong-linux" class="header-anchor">#</a></h2><p>调试过程中由于我们不断更改kernel, 那么如果每次都烧录进emmc，从emmc启动就很繁琐，直接从网络启动。<br>先将<code>zImage</code>和<code>dtb</code>文件放在tftp共享目录下，通过<code>nfs 或者 tftp</code>从 Ubuntu 中下载<code>zImage</code>和设备树文件：</p>
+<p><code>setenv bootargs &#39;console=ttymxc0,115200 root=/dev/mmcblk1p2 rootwait rw&#39;</code><br><code>setenv bootcmd &#39;tftp 80800000 zImage; tftp 83000000 imx6ull-alientek-emmc.dtb; bootz 80800000 - 83000000&#39;</code><br><code>saveenv</code><br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/23.png" alt="image"><br><img src="/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/24.png" alt="image"></p>
+<h1><span id="5-fu-lu-bi-te-yu-shi-liu-jin-zhi-zhuan-huan-kuai-cha-biao">5 附录：比特与十六进制转换快查表</span><a href="#5-fu-lu-bi-te-yu-shi-liu-jin-zhi-zhuan-huan-kuai-cha-biao" class="header-anchor">#</a></h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * include/linux/sizes.h</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * This program is free software; you can redistribute it and/or modify</span></span><br><span class="line"><span class="comment"> * it under the terms of the GNU General Public License version 2 as</span></span><br><span class="line"><span class="comment"> * published by the Free Software Foundation.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> __LINUX_SIZES_H__</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __LINUX_SIZES_H__</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1				0x00000001</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2				0x00000002</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_4				0x00000004</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_8				0x00000008</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_16				0x00000010</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_32				0x00000020</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_64				0x00000040</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_128				0x00000080</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_256				0x00000100</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_512				0x00000200</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1K				0x00000400</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2K				0x00000800</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_4K				0x00001000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_8K				0x00002000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_16K				0x00004000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_32K				0x00008000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_64K				0x00010000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_128K				0x00020000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_256K				0x00040000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_512K				0x00080000</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1M				0x00100000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2M				0x00200000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_4M				0x00400000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_8M				0x00800000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_16M				0x01000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_32M				0x02000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_64M				0x04000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_128M				0x08000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_256M				0x10000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_512M				0x20000000</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_1G				0x40000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SZ_2G				0x80000000</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span> <span class="comment">/* __LINUX_SIZES_H__ */</span></span></span><br></pre></td></tr></table></figure>
+
+<h1><span id="6-mkimage-gong-ju">6 mkimage工具</span><a href="#6-mkimage-gong-ju" class="header-anchor">#</a></h1><p>用来制作不压缩或者压缩的多种可启动映象文件。比如内核启动镜像(给zImage镜像添加64字节的头信息成uImage)，再比如<code>rootfs.img</code>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Usage: ./mkimage -l image</span><br><span class="line">          -l ==&gt; list image header information</span><br><span class="line">       ./mkimage [-x] -A arch -O os -T type -C comp -a addr -e ep -n name -d data_file[:data_file...] image</span><br><span class="line">          -A ==&gt; set architecture to &#x27;arch&#x27; </span><br><span class="line">          -O ==&gt; set operating system to &#x27;os&#x27;</span><br><span class="line">          -T ==&gt; set image type to &#x27;type&#x27;</span><br><span class="line">          -C ==&gt; set compression type &#x27;comp&#x27;</span><br><span class="line">          -a ==&gt; set load address to &#x27;addr&#x27; (hex)</span><br><span class="line">          -e ==&gt; set entry point to &#x27;ep&#x27; (hex)</span><br><span class="line">          -n ==&gt; set image name to &#x27;name&#x27;</span><br><span class="line">          -d ==&gt; use image data from &#x27;datafile&#x27;</span><br><span class="line">          -x ==&gt; set XIP (execute in place)</span><br><span class="line">       ./mkimage [-D dtc_options] -f fit-image.its fit-image</span><br></pre></td></tr></table></figure>
+<table>
+<thead>
+<tr>
+<th>选项</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-A</td>
+<td>指定CPU的架构，比如：arm或者x86</td>
+</tr>
+<tr>
+<td>-O</td>
+<td>指定操作系统的类型，比如：linux</td>
+</tr>
+<tr>
+<td>-T</td>
+<td>指定镜像的类型，比如：standalone、kernel、ramdisk、multi、firmware、script、filesystem</td>
+</tr>
+<tr>
+<td>-C</td>
+<td>指定压缩的方式，比如：none 不压缩、gzip 用gzip的压缩方式、bzip2 用bzip2的压缩方式</td>
+</tr>
+<tr>
+<td>-a</td>
+<td>指定镜像在内存中的加载地址</td>
+</tr>
+<tr>
+<td>-e</td>
+<td>指定镜像运行的入口点地址</td>
+</tr>
+<tr>
+<td>-n</td>
+<td>指定镜像的名字</td>
+</tr>
+<tr>
+<td>-d</td>
+<td>指定制作镜像的源文件</td>
+</tr>
+<tr>
+<td>-x</td>
+<td>镜像是否可以片上执行</td>
+</tr>
+</tbody></table>
+<p><code>mkimage</code>命令举例如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#mkimage -n &quot;My Kernel&quot; -A arm -O linux -T kernel -C gzip –a 0x8000 –e 0x8000 -d kernel.gz kernel.img</span></span><br></pre></td></tr></table></figure>
+<p>以上命令将压缩了的内核二进制文件<code>kernel.gz</code>转换成u-boot能够辨认的二进制文件<code>kernel.img</code>，并指定<code>kernel.img</code>的名字为<code>“My Kernel”</code>，处理器体系架构为arm，操作系统类型为linux，程序类型为操作系统内核，程序由gzip压缩，程序的链接起始地址为0x8000，程序的入口地址为0x8000，注意这两个地址一定要是物理地址而不是对应的虚拟地址。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#mkimage -n &quot;My Rootfs&quot; -A arm -O linux -T ramdisk -C gzip -d ramdisk.gz ramdisk.img</span></span><br></pre></td></tr></table></figure>
+<p>以上命令将压缩了的ramdisk根文件系统二进制文件<code>ramdisk.gz</code>转换成u-boot能够辨认的二进制文件<code>ramdisk.img</code>，并指定<code>ramdisk.img</code>的名字为<code>“My Rootfs”</code>，处理器体系架构为arm，操作系统类型为linux，程序类型为ramdisk，程序由gzip压缩，不需要指定ramdisk的链接起始地址和入口地址。</p>
+<p>如果我们将<code>kernel.img</code>和<code>ramdisk.img</code>文件分别写到flash芯片的<code>0xFF000000</code>和<code>0xFF200000</code>位置，系统启动后进入u-boot命令行界面，执行以下u-boot命令：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># bootm 0xFF000000 0xFF200000</span></span><br></pre></td></tr></table></figure>
+<p>那么u-boot将把<code>0xFF000000</code>位置的Linux内核解压缩到RAM中的<code>0x8000</code>位置，再将<code>0xFF200000</code>位置的ramdisk文件系统映像文件刨掉u-boot头部后复制到RAM中的某个位置，然后跳转到内核的入口地址<code>0x8000</code>位置启动内核，同时把板子信息、ramdisk在RAM中的起始地址和结束地址、命令行字符串传给内核，这样Linux开始启动运行。</p>
+<p>如果没有可以片上执行的norflash:</p>
+<ol>
+<li>mkimage<br><code>mkimage -n &#39;linux-2.6.14&#39; -A arm -O linux -T kernel -C none -a 0x30008000 -e 0x30008040 -d zImage zImage.img</code></li>
+<li>tftp下载到ddr<br><code>ftp 0x30008000 zImage.img</code></li>
+<li>启动内核<br><code>bootm 0x30008000</code></li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/" data-id="clyylnk8r00247wufgpp2653a" data-title="uboot-bootm和bootz启动内核" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-uboot-启动流程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" class="article-date">
@@ -2590,520 +2898,6 @@ news - network news subsystem（网络系统信息）
 
 
   
-    <article id="post-linux基本命令集合" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/" class="article-date">
-  <time class="dt-published" datetime="2024-05-26T11:03:01.000Z" itemprop="datePublished">2024-05-26</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/">linux基本命令集合</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-qian-yan-can-kao-zi-liao">1 前言-参考资料</a></li>
-<li><a href="#2-linux-ming-ling">2 linux 命令</a><ul>
-<li><a href="#1-1-ci-pan-xiang-guan">1.1 磁盘相关</a><ul>
-<li><a href="#1-1-1-fdisk">1.1.1 fdisk</a><ul>
-<li><a href="#1-1-1-1-cha-kan-fen-qu">1.1.1.1 查看分区</a></li>
-<li><a href="#1-1-1-2-shan-chu-fen-qu">1.1.1.2 删除分区</a></li>
-<li><a href="#1-1-1-3-chuang-jian-fen-qu">1.1.1.3 创建分区</a></li>
-</ul>
-</li>
-<li><a href="#1-1-2-ci-pan-ge-shi-hua-ming-ling-mkfs">1.1.2 磁盘格式化命令-mkfs</a></li>
-<li><a href="#1-1-3-du">1.1.3 du</a></li>
-<li><a href="#1-1-4-df">1.1.4 df</a></li>
-</ul>
-</li>
-<li><a href="#1-2-wen-jian-zi-fu-cao-zuo-ming-ling">1.2 文件字符操作命令</a><ul>
-<li><a href="#1-2-1-xargs">1.2.1 xargs</a></li>
-<li><a href="#1-2-2-grep">1.2.2 grep</a></li>
-</ul>
-</li>
-<li><a href="#1-3-wang-luo-ming-ling">1.3 网络命令</a></li>
-</ul>
-</li>
-<li><a href="#3-shell-jiao-ben-ming-ling">3 shell脚本命令</a><ul>
-<li><a href="#3-1-jie-shi-qi">3.1 解释器</a></li>
-<li><a href="#3-2-duan-dai-ma-zhu-shi">3.2 段代码注释</a></li>
-<li><a href="#3-3-read-ming-ling">3.3 read命令</a></li>
-<li><a href="#3-4-test-ming-ling">3.4 test命令</a></li>
-<li><a href="#3-5-ming-ling-xing-can-shu">3.5 命令行参数</a></li>
-<li><a href="#3-6-tiao-jian-yu-ju">3.6 条件语句</a></li>
-<li><a href="#3-7-case-yu-ju">3.7 case语句</a></li>
-<li><a href="#3-8-han-shu">3.8 函数</a></li>
-<li><a href="#3-9-xun-huan-yu-ju">3.9 循环语句</a></li>
-<li><a href="#3-10-typeset-huo-zhe-declare">3.10 typeset或者declare</a></li>
-<li><a href="#3-11-unset">3.11 unset</a></li>
-<li><a href="#3-12-readonly">3.12 readonly</a></li>
-<li><a href="#3-13-sed">3.13 sed</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-qian-yan-can-kao-zi-liao">1 前言-参考资料</span><a href="#1-qian-yan-can-kao-zi-liao" class="header-anchor">#</a></h1><p>正点原子：<a target="_blank" rel="noopener" href="http://www.openedv.com/docs/boards/arm-linux/zdyz-i.mx6ull.html">http://www.openedv.com/docs/boards/arm-linux/zdyz-i.mx6ull.html</a></p>
-<h1><span id="2-linux-ming-ling">2 linux 命令</span><a href="#2-linux-ming-ling" class="header-anchor">#</a></h1><h2><span id="1-1-ci-pan-xiang-guan">1.1 磁盘相关</span><a href="#1-1-ci-pan-xiang-guan" class="header-anchor">#</a></h2><h3><span id="1-1-1-fdisk">1.1.1 fdisk</span><a href="#1-1-1-fdisk" class="header-anchor">#</a></h3><h4><span id="1-1-1-1-cha-kan-fen-qu">1.1.1.1 查看分区</span><a href="#1-1-1-1-cha-kan-fen-qu" class="header-anchor">#</a></h4><p><code>fdisk -l</code>显示磁盘分区使用情况</p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/0.png" alt="image"></p>
-<h4><span id="1-1-1-2-shan-chu-fen-qu">1.1.1.2 删除分区</span><a href="#1-1-1-2-shan-chu-fen-qu" class="header-anchor">#</a></h4><p><code>fdisk /dev/sdb1 </code>用来对sdb1进行分区.</p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/1.png" alt="image"></p>
-<p>输入m表示获取帮助，默认有分区sdb1, 然后输入d删除分区1，p打印出分区表，i表示打印出详细分区信息，n表示新增分区信息，w表示保存，q表示退出。</p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/2.png" alt="image"></p>
-<p>来看dev&#x2F;sd*信息，发现已经没有了sdb1.</p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/3.png" alt="image"></p>
-<h4><span id="1-1-1-3-chuang-jian-fen-qu">1.1.1.3 创建分区</span><a href="#1-1-1-3-chuang-jian-fen-qu" class="header-anchor">#</a></h4><p>再来看如何建立分区1：<br>先建立一个1GB的分区，<code>1GB= 1024 * 1024 * 1024=1073741824 B = 2097152</code>个sector，一个sector有512 byte,再加上2048 个sector，那么等于2099200个sector。</p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/4.png" alt="image"></p>
-<p>再来何建立分区2：</p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/5.png" alt="image"></p>
-<p>这里First sector使用默认值2101248，Last sector使用4198400（1G是2097152， 2101248 + 2097152 &#x3D; 4198400），分区2也是1GB<br>再来何建立分区3：</p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/6.png" alt="image"></p>
-<p>First sector和Last sector使用默认，那么最终分区3有26.8GiB。</p>
-<p>最后输入w保存退出，来看下分区:</p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/7.png" alt="image"></p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/8.png" alt="image"></p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/9.png" alt="image"></p>
-<h3><span id="1-1-2-ci-pan-ge-shi-hua-ming-ling-mkfs">1.1.2 磁盘格式化命令-mkfs</span><a href="#1-1-2-ci-pan-ge-shi-hua-ming-ling-mkfs" class="header-anchor">#</a></h3><p>mkfs命令用来对磁盘分区格式化，将格式化好的sd卡放入windows系统查看，可以看到3个盘:</p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/10.png" alt="image"></p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/11.png" alt="image"></p>
-<h3><span id="1-1-3-du">1.1.3 du</span><a href="#1-1-3-du" class="header-anchor">#</a></h3><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/12.png" alt="image"></p>
-<h3><span id="1-1-4-df">1.1.4 df</span><a href="#1-1-4-df" class="header-anchor">#</a></h3><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/13.png" alt="image"></p>
-<h2><span id="1-2-wen-jian-zi-fu-cao-zuo-ming-ling">1.2 文件字符操作命令</span><a href="#1-2-wen-jian-zi-fu-cao-zuo-ming-ling" class="header-anchor">#</a></h2><h3><span id="1-2-1-xargs">1.2.1 xargs</span><a href="#1-2-1-xargs" class="header-anchor">#</a></h3><p><code>find -name *.sh |xargs grep -rn &quot;build_all&quot;</code></p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/14.png" alt="image"></p>
-<h3><span id="1-2-2-grep">1.2.2 grep</span><a href="#1-2-2-grep" class="header-anchor">#</a></h3><p><code>find /path/to/directory -type f -name &quot;*.txt&quot; | grep &quot;keyword&quot;</code></p>
-<p>-w 全词匹配。<br>-v 反向搜索<br>-i 不区分大小写</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$匹配以字符串结尾的行</span><br><span class="line">^ 匹配以字符串开头的行</span><br><span class="line"></span><br><span class="line">找出空行 grep <span class="string">&quot;^$&quot;</span> test.txt -n</span><br><span class="line">找出unix开头的行grep <span class="string">&quot;^unix&quot;</span> geekfile.txt</span><br><span class="line">找出.结尾的行 grep <span class="string">&quot;\.$&quot;</span> test.txt -n -o</span><br><span class="line">找出os.结尾的行，grep <span class="string">&quot;os.$&quot;</span> geekfile.txt</span><br></pre></td></tr></table></figure>
-
-<p><strong>[abc]中括号</strong></p>
-<p>匹配abc字符中的任意一个:</p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/15.png" alt="image"></p>
-<p>匹配a-z:</p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/16.png" alt="image"></p>
-<p>下面一个脚本用grep -v排除掉不需要的行，也就是删除包含指定字符的行从一个文件。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 定义要删除的特定字符</span></span><br><span class="line">pattern=<span class="string">&quot;特定字符&quot;</span></span><br><span class="line"><span class="comment"># 定义要处理的文件名</span></span><br><span class="line">filename=<span class="string">&quot;文件名&quot;</span></span><br><span class="line"><span class="comment"># 使用grep命令找到含有特定字符的行，并将结果输出到一个临时文件中</span></span><br><span class="line">grep -v <span class="string">&quot;<span class="variable">$pattern</span>&quot;</span> <span class="string">&quot;<span class="variable">$filename</span>&quot;</span> &gt; temp.txt</span><br><span class="line"><span class="comment"># 将临时文件的内容复制回原始文件</span></span><br><span class="line"><span class="built_in">cat</span> temp.txt &gt; <span class="string">&quot;<span class="variable">$filename</span>&quot;</span></span><br><span class="line"><span class="comment"># 删除临时文件</span></span><br><span class="line"><span class="built_in">rm</span> temp.txt</span><br></pre></td></tr></table></figure>
-
-<h2><span id="1-3-wang-luo-ming-ling">1.3 网络命令</span><a href="#1-3-wang-luo-ming-ling" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ifconfig eth0 up/down</span><br><span class="line">udhcpc -i eth0 //通过路由器分配 IP 地址</span><br><span class="line">ifconfig eth0 192.168.1.251 netmask 255.255.255.0 //设置 IP 地址和子网掩码</span><br><span class="line">route add default gw 192.168.1.1 //添加默认网关</span><br></pre></td></tr></table></figure>
-
-<h1><span id="3-shell-jiao-ben-ming-ling">3 shell脚本命令</span><a href="#3-shell-jiao-ben-ming-ling" class="header-anchor">#</a></h1><h2><span id="3-1-jie-shi-qi">3.1 解释器</span><a href="#3-1-jie-shi-qi" class="header-anchor">#</a></h2><ol>
-<li><p>sh解释器</p>
-</li>
-<li><p>bash解释器<br>脚本开头用<code>#！</code>用来申明用什么解释器，如：</p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/17.png" alt="image"></p>
-</li>
-</ol>
-<h2><span id="3-2-duan-dai-ma-zhu-shi">3.2 段代码注释</span><a href="#3-2-duan-dai-ma-zhu-shi" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;&lt;EOF</span><br><span class="line">...</span><br><span class="line">EOF</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/18.png" alt="image"></p>
-<h2><span id="3-3-read-ming-ling">3.3 read命令</span><a href="#3-3-read-ming-ling" class="header-anchor">#</a></h2><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/19.png" alt="image"></p>
-<h2><span id="3-4-test-ming-ling">3.4 test命令</span><a href="#3-4-test-ming-ling" class="header-anchor">#</a></h2><p>测试文件，数值，权限，字符串等参数。</p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/20.png" alt="image"></p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/21.png" alt="image"></p>
-<p>中括号也能表示测试，里面只能用&#x3D;&#x3D;或!&#x3D;。</p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/22.png" alt="image"></p>
-<h2><span id="3-5-ming-ling-xing-can-shu">3.5 命令行参数</span><a href="#3-5-ming-ling-xing-can-shu" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$0</span>, <span class="variable">$1</span>, <span class="variable">$2</span>, <span class="variable">$3</span>...</span><br><span class="line"><span class="variable">$0</span>表示脚本文件名</span><br><span class="line"><span class="variable">$1</span>表示第一个参数</span><br><span class="line"><span class="variable">$n</span>表示第n个参数</span><br><span class="line"><span class="variable">$#</span>表示一共有多少个命令行参数</span><br><span class="line"><span class="variable">$@</span>表示所有的命令行参数集合，<span class="variable">$0</span> <span class="variable">$1</span> <span class="variable">$2</span> ... <span class="variable">$n</span></span><br><span class="line">$*表示等价<span class="variable">$@</span></span><br><span class="line">$?表示上一条命令是否返回成功，成功为0,错误非0</span><br><span class="line">$$表示当前脚本的进程号</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/23.png" alt="image"></p>
-<h2><span id="3-6-tiao-jian-yu-ju">3.6 条件语句</span><a href="#3-6-tiao-jian-yu-ju" class="header-anchor">#</a></h2><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/24.png" alt="image"></p>
-<h2><span id="3-7-case-yu-ju">3.7 case语句</span><a href="#3-7-case-yu-ju" class="header-anchor">#</a></h2><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/25.png" alt="image"></p>
-<h2><span id="3-8-han-shu">3.8 函数</span><a href="#3-8-han-shu" class="header-anchor">#</a></h2><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/26.png" alt="image"></p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/27.png" alt="image"></p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/28.png" alt="image"></p>
-<h2><span id="3-9-xun-huan-yu-ju">3.9 循环语句</span><a href="#3-9-xun-huan-yu-ju" class="header-anchor">#</a></h2><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/29.png" alt="image"></p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/30.png" alt="image"></p>
-<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/31.png" alt="image"></p>
-<h2><span id="3-10-typeset-huo-zhe-declare">3.10 typeset或者declare</span><a href="#3-10-typeset-huo-zhe-declare" class="header-anchor">#</a></h2><p>sh脚本默认所有变量都是字符串，比如val&#x3D;1，也表示val是一个字符串“1”。那么需要如何声明一个变量类型，用typeset或者declare。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">typeset</span> -i data=1</span><br></pre></td></tr></table></figure>
-
-<h2><span id="3-11-unset">3.11 unset</span><a href="#3-11-unset" class="header-anchor">#</a></h2><p>清除变量值.</p>
-<h2><span id="3-12-readonly">3.12 readonly</span><a href="#3-12-readonly" class="header-anchor">#</a></h2><p>只读变量.</p>
-<h2><span id="3-13-sed">3.13 sed</span><a href="#3-13-sed" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find /path/to/dir -<span class="built_in">type</span> f -name <span class="string">&quot;*.[c-h]&quot;</span> -<span class="built_in">exec</span> sed -i <span class="string">&#x27;s/oldstring/newstring/g&#x27;</span> &#123;&#125; +</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">find /path/to/dir：找到指定目录/path/to/dir下的所有文件。</span><br><span class="line">-<span class="built_in">type</span> f：仅查找文件。</span><br><span class="line">-name <span class="string">&quot;*.txt&quot;</span>：限制文件名以.txt结尾。</span><br><span class="line">-<span class="built_in">exec</span>：对找到的每个文件执行后面的命令。</span><br><span class="line">sed -i：使用sed进行替换，-i表示直接修改文件内容。</span><br><span class="line"><span class="string">&#x27;s/oldstring/newstring/g&#x27;</span>：sed的替换表达式，g表示全局替换。</span><br><span class="line">&#123;&#125;：表示find找到的文件名。</span><br><span class="line">+：结束-<span class="built_in">exec</span>命令，批量处理匹配到的文件。</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/" data-id="clyylnk8n00137wufbpqxbono" data-title="linux基本命令集合" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-markdown语法教程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/" class="article-date">
-  <time class="dt-published" datetime="2024-05-26T09:24:38.000Z" itemprop="datePublished">2024-05-26</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/">markdown语法教程</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-duo-ji-biao-ti-mu-lu-jie-gou">1 多级标题目录结构</a></li>
-<li><a href="#yi-ji-biao-ti">一级标题</a><ul>
-<li><a href="#er-ji-biao-ti">二级标题</a><ul>
-<li><a href="#san-ji-biao-ti">三级标题</a><ul>
-<li><a href="#si-ji-biao-ti">四级标题</a><ul>
-<li><a href="#wu-ji-biao-ti">五级标题</a><ul>
-<li><a href="#liu-ji-biao-ti">六级标题</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#2-duan-luo">2 段落</a><ul>
-<li><a href="#2-1-huan-xing">2.1 换行</a></li>
-</ul>
-</li>
-<li><a href="#3-zi-ti">3 字体</a></li>
-<li><a href="#4-zi-ti-yan-se-da-xiao">4 字体颜色,大小</a></li>
-<li><a href="#5-zi-ti-bei-jing-yan-se">5 字体背景颜色</a></li>
-<li><a href="#5-xia-hua-xian">5 下划线</a></li>
-<li><a href="#6-lie-biao-xiang">6 列表项</a></li>
-<li><a href="#7-dai-ma-kuai-yu-yu-fa-gao-liang">7 代码块与语法高亮</a><ul>
-<li><a href="#7-1-xing-nei-dai-ma">7.1 行内代码</a></li>
-<li><a href="#7-2-kuai-dai-ma">7.2 块代码</a></li>
-</ul>
-</li>
-<li><a href="#8-dai-ma-zhe-die">8 代码折叠</a></li>
-<li><a href="#9-cha-ru-lian-jie">9 插入链接</a><ul>
-<li><a href="#9-1-zi-dong-lian-jie">9.1 自动链接</a></li>
-</ul>
-</li>
-<li><a href="#10-tian-jia-tu-pian">10 添加图片</a></li>
-<li><a href="#11-biao-ge">11 表格</a></li>
-<li><a href="#12-zhuan-yi-zi-fu">12 转义字符</a></li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-duo-ji-biao-ti-mu-lu-jie-gou">1 多级标题目录结构</span><a href="#1-duo-ji-biao-ti-mu-lu-jie-gou" class="header-anchor">#</a></h1><pre><code># 一级标题
-## 二级标题
-### 三级标题
-#### 四级标题
-##### 五级标题
-###### 六级标题
-</code></pre>
-<p>效果如下：</p>
-<h1><span id="yi-ji-biao-ti">一级标题</span><a href="#yi-ji-biao-ti" class="header-anchor">#</a></h1><h2><span id="er-ji-biao-ti">二级标题</span><a href="#er-ji-biao-ti" class="header-anchor">#</a></h2><h3><span id="san-ji-biao-ti">三级标题</span><a href="#san-ji-biao-ti" class="header-anchor">#</a></h3><h4><span id="si-ji-biao-ti">四级标题</span><a href="#si-ji-biao-ti" class="header-anchor">#</a></h4><h5><span id="wu-ji-biao-ti">五级标题</span><a href="#wu-ji-biao-ti" class="header-anchor">#</a></h5><h6><span id="liu-ji-biao-ti">六级标题</span><a href="#liu-ji-biao-ti" class="header-anchor">#</a></h6><h1><span id="2-duan-luo">2 段落</span><a href="#2-duan-luo" class="header-anchor">#</a></h1><h2><span id="2-1-huan-xing">2.1 换行</span><a href="#2-1-huan-xing" class="header-anchor">#</a></h2><p>Markdown段落的换行是使用两个以上空格加上回车，当然也可以在段落后面使用一个空行来表示重新开始一个段落。</p>
-<h1><span id="3-zi-ti">3 字体</span><a href="#3-zi-ti" class="header-anchor">#</a></h1><pre><code>*斜体*
-**粗体**
-***加粗斜体***
-
-&lt;font face=&quot;黑体&quot;&gt;我是黑体字&lt;/font&gt;
-&lt;font face=&quot;微软雅黑&quot;&gt;我是微软雅黑&lt;/font&gt;
-&lt;font face=&quot;STCAIYUN&quot;&gt;我是华文彩云&lt;/font&gt;
-</code></pre>
-<p>效果：</p>
-<p><em>斜体</em><br><strong>粗体</strong><br><em><strong>加粗斜体</strong></em></p>
-<p><font face="黑体">我是黑体字</font><br><font face="微软雅黑">我是微软雅黑</font><br><font face="STCAIYUN">我是华文彩云</font></p>
-<h1><span id="4-zi-ti-yan-se-da-xiao">4 字体颜色,大小</span><a href="#4-zi-ti-yan-se-da-xiao" class="header-anchor">#</a></h1><pre><code>&lt;font color=#0099ff size=12 face=&quot;黑体&quot;&gt;黑体&lt;/font&gt;
-&lt;font color=gray size=5&gt;gray&lt;/font&gt;
-&lt;font color=#00ffff size=3&gt;null&lt;/font&gt;
-</code></pre>
-<p>效果：</p>
-<p><font color="#0099ff" size="12" face="黑体">黑体</font><br><font color="gray" size="5">gray</font><br><font color="#00ffff" size="3">null</font></p>
-<h1><span id="5-zi-ti-bei-jing-yan-se">5 字体背景颜色</span><a href="#5-zi-ti-bei-jing-yan-se" class="header-anchor">#</a></h1><pre><code>&lt;table&gt;&lt;td bgcolor=pink&gt; 
-背景色是pink &lt;/table&gt;
-
-&lt;table&gt;&lt;td bgcolor=LightGoldenRodYellow&gt; 
-LightGoldenRodYellow &lt;/table&gt;
-
-&lt;table&gt;&lt;td bgcolor=PeachPuff&gt; 
-PeachPuff &lt;/table&gt;
-
-&lt;table&gt;&lt;td bgcolor=PapayaWhip&gt; 
-PapayaWhip &lt;/table&gt;
-
-&lt;table&gt;&lt;td bgcolor=PaleGreen&gt; 
-PaleGreen &lt;/table&gt;
-
-&lt;table&gt;&lt;td bgcolor=PaleGoldenRod&gt; 
-PaleGoldenRod &lt;/table&gt;
-
-&lt;table&gt;&lt;td bgcolor=MistyRose&gt; 
-MistyRose &lt;/table&gt;
-
-&lt;table&gt;&lt;td bgcolor=Linen&gt; 
-Linen &lt;/table&gt;
-
-&lt;table&gt;&lt;td bgcolor=LightPink&gt; 
-LightPink &lt;/table&gt;
-
-&lt;table&gt;&lt;td bgcolor=BurlyWood&gt; 
-BurlyWood &lt;/table&gt;
-</code></pre>
-<p>效果：</p>
-<table><td bgcolor="pink"> 
-背景色是pink </td></table>
-
-<table><td bgcolor="LightGoldenRodYellow"> 
-LightGoldenRodYellow </td></table>
-
-<table><td bgcolor="PeachPuff"> 
-PeachPuff </td></table>
-
-<table><td bgcolor="PapayaWhip"> 
-PapayaWhip </td></table>
-
-<table><td bgcolor="PaleGreen"> 
-PaleGreen </td></table>
-
-<table><td bgcolor="PaleGoldenRod"> 
-PaleGoldenRod </td></table>
-
-<table><td bgcolor="MistyRose"> 
-MistyRose </td></table>
-
-<table><td bgcolor="Linen"> 
-Linen </td></table>
-
-<table><td bgcolor="LightPink"> 
-LightPink </td></table>
-
-<table><td bgcolor="BurlyWood"> 
-BurlyWood </td></table>
-
-
-<h1><span id="5-xia-hua-xian">5 下划线</span><a href="#5-xia-hua-xian" class="header-anchor">#</a></h1><p>写法：<br>    <code>&lt;u&gt;下划线&lt;/u&gt;</code></p>
-<p>效果如下：<br><u>下划线</u></p>
-<h1><span id="6-lie-biao-xiang">6 列表项</span><a href="#6-lie-biao-xiang" class="header-anchor">#</a></h1><p>无序列表使用星号(*)、加号(+)或是减号(-)作为列表标记：</p>
-<pre><code>* 第一项
-* 第二项
-* 第三项
-</code></pre>
-<p>显示效果：  </p>
-<ul>
-<li>第一项</li>
-<li>第二项</li>
-<li>第三项</li>
-</ul>
-<p>有序列表使用数字并加上 <code>.</code> 号来表示： 	<br>    1. 第一项<br>        1. 小一项<br>        2. 小二项<br>    2. 第二项<br>    3. 第三项<br>显示效果： </p>
-<ol>
-<li>第一项<ol>
-<li>小一项</li>
-<li>小二项</li>
-</ol>
-</li>
-<li>第二项</li>
-<li>第三项</li>
-</ol>
-<h1><span id="7-dai-ma-kuai-yu-yu-fa-gao-liang">7 代码块与语法高亮</span><a href="#7-dai-ma-kuai-yu-yu-fa-gao-liang" class="header-anchor">#</a></h1><h2><span id="7-1-xing-nei-dai-ma">7.1 行内代码</span><a href="#7-1-xing-nei-dai-ma" class="header-anchor">#</a></h2><p>用反引号 &#96;&#96; 来标记或插入代码区段</p>
-<p>效果：<br><code>int main(void)</code></p>
-<h2><span id="7-2-kuai-dai-ma">7.2 块代码</span><a href="#7-2-kuai-dai-ma" class="header-anchor">#</a></h2><p>用tab键或者用&#96;&#96;&#96;</p>
-<p>效果：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(vpod)</span> &#123;</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;hello world\n&quot;</span>);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h1><span id="8-dai-ma-zhe-die">8 代码折叠</span><a href="#8-dai-ma-zhe-die" class="header-anchor">#</a></h1><p>写法：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;details&gt;</span><br><span class="line">&lt;summary&gt;点击展开代码&lt;/summary&gt;</span><br><span class="line">&lt;pre&gt;&lt;code&gt;</span><br><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">int main(int argc, char **argv)</span><br><span class="line">&#123;</span><br><span class="line">    printf(&quot;hello world\n&quot;);</span><br><span class="line">    return 0;</span><br><span class="line">&#125;</span><br><span class="line">&lt;/code&gt;&lt;/pre&gt;</span><br><span class="line">&lt;/details&gt;</span><br></pre></td></tr></table></figure>
-
-<p>效果如下：</p>
-<details>
-<summary>点击展开代码</summary>
-<pre><code>
-    #include &lt;stdio.h&gt;
-    int main(int argc, char **argv)
-    &#123;
-        printf("hello world\n");
-        return 0;
-    &#125;
-
-<p></p></code></pre><p></p>
-</details>
-
-<h1><span id="9-cha-ru-lian-jie">9 插入链接</span><a href="#9-cha-ru-lian-jie" class="header-anchor">#</a></h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">用:</span><br><span class="line">[fuzidage的博客](https://www.cnblogs.com/fuzidage/)</span><br></pre></td></tr></table></figure>
-<p>效果：</p>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/">fuzidage的博客</a></p>
-<h2><span id="9-1-zi-dong-lian-jie">9.1 自动链接</span><a href="#9-1-zi-dong-lian-jie" class="header-anchor">#</a></h2><p>只要是用&lt;&gt;包起来， Markdown 就会自动把它转成链接：</p>
-<p>效果：<br><a target="_blank" rel="noopener" href="https://github.com/fuzidage">https://github.com/fuzidage</a></p>
-<h1><span id="10-tian-jia-tu-pian">10 添加图片</span><a href="#10-tian-jia-tu-pian" class="header-anchor">#</a></h1><pre><code>写法：![](https://img2018.cnblogs.com/blog/1876680/201912/1876680-20191214155002138-1798053565.png)
-当然如果是本地图片写法：
-![](./markdown语法教程/1.png)
-</code></pre>
-<p>引用网络效果：</p>
-<p><img src="https://img2018.cnblogs.com/blog/1876680/201912/1876680-20191214155002138-1798053565.png"></p>
-<p>引用本地图片效果：<br><img src="/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/1.png" alt="image-20240526174126727"></p>
-<h1><span id="11-biao-ge">11 表格</span><a href="#11-biao-ge" class="header-anchor">#</a></h1><p>写法：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">| 左对齐 | 右对齐 | 居中对齐 |</span><br><span class="line">| :-----| ----: | :----:|</span><br><span class="line">| 单元格 | 单元格 | 单元格 |</span><br><span class="line">| 单元格 | 单元格 | 单元格 |</span><br></pre></td></tr></table></figure>
-<p>效果：</p>
-<table>
-<thead>
-<tr>
-<th align="left">左对齐</th>
-<th align="right">右对齐</th>
-<th align="center">居中对齐</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">单元格</td>
-<td align="right">单元格</td>
-<td align="center">单元格</td>
-</tr>
-<tr>
-<td align="left">单元格</td>
-<td align="right">单元格</td>
-<td align="center">单元格</td>
-</tr>
-</tbody></table>
-<h1><span id="12-zhuan-yi-zi-fu">12 转义字符</span><a href="#12-zhuan-yi-zi-fu" class="header-anchor">#</a></h1><table>
-<thead>
-<tr>
-<th>显示结果</th>
-<th>描述</th>
-<th>输入</th>
-<th>实体编号</th>
-</tr>
-</thead>
-<tbody><tr>
-<td></td>
-<td>空格</td>
-<td>&amp;nbsp；</td>
-<td>&amp;#160；</td>
-</tr>
-<tr>
-<td>&lt;</td>
-<td>小于号</td>
-<td>&amp;lt；</td>
-<td>&amp;#60；</td>
-</tr>
-<tr>
-<td>&gt;</td>
-<td>大于号</td>
-<td>&amp;gt；</td>
-<td>&amp;#62；</td>
-</tr>
-<tr>
-<td>&amp;</td>
-<td>和号</td>
-<td>&amp;amp；</td>
-<td>&amp;#38；</td>
-</tr>
-<tr>
-<td>“</td>
-<td>引号</td>
-<td>&amp;quot；</td>
-<td>&amp;#34；</td>
-</tr>
-<tr>
-<td>‘</td>
-<td>撇号</td>
-<td>&amp;apos；</td>
-<td>(IE不支持)	&amp;#39；</td>
-</tr>
-<tr>
-<td>￠</td>
-<td>分</td>
-<td>&amp;cent；</td>
-<td>&amp;#162；</td>
-</tr>
-<tr>
-<td>£</td>
-<td>镑</td>
-<td>&amp;pound；</td>
-<td>&amp;#163；</td>
-</tr>
-<tr>
-<td>¥</td>
-<td>日圆</td>
-<td>&amp;yen；</td>
-<td>&amp;#165；</td>
-</tr>
-<tr>
-<td>§</td>
-<td>节</td>
-<td>&amp;sect；</td>
-<td>&amp;#167；</td>
-</tr>
-<tr>
-<td>©</td>
-<td>版权</td>
-<td>&amp;copy；</td>
-<td>&amp;#169；</td>
-</tr>
-<tr>
-<td>®</td>
-<td>注册商标</td>
-<td>&amp;reg；</td>
-<td>&amp;#174；</td>
-</tr>
-<tr>
-<td>×</td>
-<td>乘号</td>
-<td>&amp;times；</td>
-<td>&amp;#215；</td>
-</tr>
-<tr>
-<td>÷</td>
-<td>除号</td>
-<td>&amp;divide；</td>
-<td>&amp;#247；</td>
-</tr>
-</tbody></table>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/" data-id="clyylnk8n00177wufhpuw5rwg" data-title="markdown语法教程" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -3132,7 +2926,7 @@ BurlyWood </td></table>
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 16.36px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 19.09px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17.27px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15.45px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18.18px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.82px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14.55px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.91px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 11.82px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12.73px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17.27px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13.64px;">通信协议</a>
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 17px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 19px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 17px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 16px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 18px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 20px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 17px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 14px;">通信协议</a>
     </div>
   </div>
 
@@ -3154,6 +2948,14 @@ BurlyWood </td></table>
       <ul>
         
           <li>
+            <a href="/2024/08/07/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-GICv2%E6%9E%B6%E6%9E%84%E8%A7%A3%E6%9E%90/">字符设备驱动-9-中断子系统-GICv2架构解析</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/05/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-9-%E4%B8%AD%E6%96%AD%E5%AD%90%E7%B3%BB%E7%BB%9F-%E4%B8%AD%E6%96%AD%E5%BC%95%E5%85%A5/">字符设备驱动-9-中断子系统-中断引入</a>
+          </li>
+        
+          <li>
             <a href="/2024/08/04/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-8-%E5%86%85%E6%A0%B8%E5%AE%9A%E6%97%B6%E5%99%A8/">字符设备驱动-8-内核定时器</a>
           </li>
         
@@ -3163,14 +2965,6 @@ BurlyWood </td></table>
         
           <li>
             <a href="/2024/07/30/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-6-poll%E5%BA%95%E5%B1%82%E9%A9%B1%E5%8A%A8%E6%9C%BA%E5%88%B6/">字符设备驱动-6-poll底层驱动机制</a>
-          </li>
-        
-          <li>
-            <a href="/2024/07/30/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-6-pre-%E4%BC%91%E7%9C%A0%E5%94%A4%E9%86%92%E6%9C%BA%E5%88%B6/">字符设备驱动-6-pre-休眠唤醒机制</a>
-          </li>
-        
-          <li>
-            <a href="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-5-%E8%AE%BE%E5%A4%87%E6%A0%91%E5%87%BD%E6%95%B0/">字符设备驱动-5-设备树函数</a>
           </li>
         
       </ul>
