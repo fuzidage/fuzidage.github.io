@@ -1691,6 +1691,280 @@ board_xxx.c里面实现了具体单板的button_operations，当insmod这个驱�
 
 
   
+    <article id="post-buildroot教程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/" class="article-date">
+  <time class="dt-published" datetime="2024-07-23T15:36:29.000Z" itemprop="datePublished">2024-07-23</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/">buildroot教程</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-yin-ru-buildroot">1 引入buildroot</a><ul>
+<li><a href="#1-1-xia-zai-buildroot">1.1 下载buildroot</a></li>
+<li><a href="#1-2-buildroot-mu-lu-jie-gou">1.2 buildroot目录结构</a><ul>
+<li><a href="#1-2-0-buildroot-yuan-mu-lu">1.2.0 buildroot源目录</a></li>
+<li><a href="#1-2-1-bian-yi-chu-de-output-shu-chu-mu-lu-jie-shao">1.2.1 编译出的output输出目录介绍</a></li>
+</ul>
+</li>
+<li><a href="#1-3-pei-zhi-target-options">1.3 配置 Target options</a></li>
+<li><a href="#1-4-pei-zhi-gong-ju-lian">1.4 配置工具链</a><ul>
+<li><a href="#1-4-1-nei-bu-gong-ju-lian">1.4.1 内部工具链</a></li>
+<li><a href="#1-4-2-wai-bu-gong-ju-lian">1.4.2 外部工具链</a></li>
+</ul>
+</li>
+<li><a href="#1-5-pei-zhi-build-options">1.5 配置 build options</a></li>
+<li><a href="#1-6-pei-zhi-system-configuration">1.6 配置 System configuration</a></li>
+<li><a href="#1-7-pei-zhi-filesystem-images">1.7 配置 Filesystem images</a></li>
+<li><a href="#1-8-jin-zhi-bian-yi-linux-nei-he-he-uboot">1.8 禁止编译 Linux 内核和 uboot</a></li>
+<li><a href="#1-9-pei-zhi-target-packages">1.9 配置 Target packages</a></li>
+</ul>
+</li>
+<li><a href="#2-bian-yi-buildroot">2 编译buildroot</a><ul>
+<li><a href="#2-1-make-help">2.1 make help</a></li>
+<li><a href="#2-2-make-print-version">2.2 make print-version</a></li>
+<li><a href="#2-3-make-menuconfig">2.3 make menuconfig</a></li>
+<li><a href="#2-4-make-xxxx-defconfig">2.4 make xxxx_defconfig</a></li>
+<li><a href="#2-5-make">2.5 make</a><ul>
+<li><a href="#2-5-1-nfs-gua-zai-gen-wen-jian-xi-tong">2.5.1 nfs 挂载根文件系统</a></li>
+</ul>
+</li>
+<li><a href="#2-6-make-show-targets">2.6 make show-targets</a></li>
+</ul>
+</li>
+<li><a href="#3-buildroot-kuang-jia-yuan-li">3 buildroot框架原理</a><ul>
+<li><a href="#3-1-tian-jia-zi-ji-de-ruan-jian-bao">3.1 添加自己的软件包</a><ul>
+<li><a href="#3-1-1-package-config-in-zong-ru-kou-tian-jia-cai-dan">3.1.1 package&#x2F;Config.in总入口添加菜单</a></li>
+<li><a href="#3-1-2-pei-zhi-app-dui-ying-de-config-in-he-mk-wen-jian">3.1.2 配置APP对应的Config.in和mk文件</a><ul>
+<li><a href="#3-1-2-1-config-in">3.1.2.1 Config.in</a></li>
+<li><a href="#3-1-2-2-helloworld-mk">3.1.2.2 helloworld.mk</a></li>
+</ul>
+</li>
+<li><a href="#3-1-3-bian-xie-app-yuan-ma-he-makefile">3.1.3 编写APP源码和Makefile</a></li>
+<li><a href="#3-1-4-tong-guo-make-menuconfig-xuan-zhong-app">3.1.4 通过make menuconfig选中APP</a></li>
+<li><a href="#3-1-5-bian-yi-shi-yong-app">3.1.5 编译使用APP</a></li>
+</ul>
+</li>
+<li><a href="#3-2-ru-he-chong-xin-bian-yi-ruan-jian-bao">3.2 如何重新编译软件包</a></li>
+<li><a href="#3-3-shi-neng-di-san-fang-ruan-jian-he-ku">3.3 使能第三方软件和库</a><ul>
+<li><a href="#3-3-1-shi-neng-yin-pin-de-alsa-ku-tao-jian">3.3.1 使能音频的ALSA库套件</a></li>
+<li><a href="#3-3-2-shi-neng-busybox-tao-jian">3.3.2 使能busybox套件</a><ul>
+<li><a href="#3-3-2-1-xiu-gai-pei-zhi-busybox-tao-jian">3.3.2.1 修改配置busybox套件</a></li>
+<li><a href="#3-3-2-2-rebuild-busybox-tao-jian">3.3.2.2 rebuild busybox套件</a></li>
+</ul>
+</li>
+<li><a href="#3-3-3-ps1-huan-jing-bian-liang">3.3.3 PS1环境变量</a></li>
+</ul>
+</li>
+<li><a href="#3-4-dan-du-sheng-cheng-mu-biao-build-out-of-tree">3.4 单独生成目标（build out of tree）</a></li>
+</ul>
+</li>
+<li><a href="#4-buildroot-guan-fang-jiao-cheng-lian-jie">4 buildroot官方教程链接</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-yin-ru-buildroot">1 引入buildroot</span><a href="#1-yin-ru-buildroot" class="header-anchor">#</a></h1><p>Buildroot是Linux平台上一个开源的嵌入式Linux系统<strong>自动构建框架</strong>。用来制作根文件系统，我们还要自己去移植一些第三方软件和库，比如 <code>alsa</code>、<code>iperf</code>、<code>mplayer</code> 等等。</p>
+<p>那么有没有一种傻瓜式的方法或软件，它不仅包含了 <code>busybox</code> 的功能，而且里面还集成了各种软件，需要什么软件就选择什么软件，不需要我们去移植。答案肯定是有的，<code>buildroot </code>就是这样一种工具。</p>
+<h2><span id="1-1-xia-zai-buildroot">1.1 下载buildroot</span><a href="#1-1-xia-zai-buildroot" class="header-anchor">#</a></h2><p>Buildroot版本每2个月，2月，5月，8月和11月发布一次。版本号的格式为YYYY.MM，例如2013.02、2014.08。</p>
+<p>可以从<a target="_blank" rel="noopener" href="http://buildroot.org/downloads/">http://buildroot.org/downloads/</a>获得发行包。</p>
+<p>也可通过<code>github</code>仓库获取最新版本：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> git://git.busybox.net/buildroot</span><br></pre></td></tr></table></figure>
+
+<p><code>buildroot</code> 和<code> uboot</code>、<code>Linux kernel </code>一样也支持图形化配置：<br><code>make menuconfig</code><br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/1.png" alt="image"></p>
+<h2><span id="1-2-buildroot-mu-lu-jie-gou">1.2 buildroot目录结构</span><a href="#1-2-buildroot-mu-lu-jie-gou" class="header-anchor">#</a></h2><h3><span id="1-2-0-buildroot-yuan-mu-lu">1.2.0 buildroot源目录</span><a href="#1-2-0-buildroot-yuan-mu-lu" class="header-anchor">#</a></h3><ul>
+<li><p><code>arch</code>: CPU架构相关的配置脚本</p>
+</li>
+<li><p><code>board</code>: 在构建系统时，board默认的boot和Linux kernel配置文件，以及一些板级相关脚本</p>
+</li>
+<li><p><code>boot</code>: uboot配置脚本目录</p>
+</li>
+<li><p><code>configs</code>: 板级配置文件，该目录下的配置文件记录着该机器平台或者方案使用的工具链，boot， kernel，各种应用软件包的配置</p>
+</li>
+<li><p><code>dl</code>: download的简写，下载一些开源包。第一次下载后，下次就不会再去从官网下载了，而是从dl&#x2F;目录下拿开源包，以节约时间</p>
+</li>
+<li><p><code>docs</code>:</p>
+</li>
+<li><p><code>fs</code>: 各种文件系统的自动构建脚本</p>
+</li>
+<li><p><code>linux</code>: 存放Linux kernel的自动构建脚本</p>
+</li>
+<li><p><code>package</code>: 第三方开源包的自动编译构建脚本，用来配置编译dl目录下载的开源包</p>
+</li>
+<li><p><code>support</code>:</p>
+</li>
+<li><p><code>system</code>: 存放文件系统目录的和设备节点的模板，这些模板会被拷贝到<code>output/</code>目录下，用于制作根文件系统<code>rootfs</code></p>
+</li>
+<li><p><code>toolchain/ </code>目录中存放着各种制作工具链的脚本</p>
+</li>
+</ul>
+<h3><span id="1-2-1-bian-yi-chu-de-output-shu-chu-mu-lu-jie-shao">1.2.1 编译出的output输出目录介绍</span><a href="#1-2-1-bian-yi-chu-de-output-shu-chu-mu-lu-jie-shao" class="header-anchor">#</a></h3><ul>
+<li><p><code>images/</code>存储所有映像（内核映像，引导加载程序和根文件系统映像）的位置。这些是您需要放在目标系统上的文件。</p>
+</li>
+<li><p><code>build/</code>构建所有组件的位置（包括主机上Buildroot所需的工具和针对目标编译的软件包）。该目录为每个组件包含一个子目录。</p>
+</li>
+<li><p><code>host/</code>包含为主机构建的工具和目标工具链。</p>
+</li>
+<li><p><code>staging/</code>是到内部目标工具链host&#x2F;的符号链接 </p>
+</li>
+<li><p><code>target/</code>它几乎包含了目标的完整根文件系统。除了设备文件<code>/dev/</code>（Buildroot无法创建它们，因为Buildroot不能以root身份运行并且不想以root身份运行）之外，所需的一切都存在。</p>
+</li>
+</ul>
+<h2><span id="1-3-pei-zhi-target-options">1.3 配置 Target options</span><a href="#1-3-pei-zhi-target-options" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Target options</span><br><span class="line">	-&gt; Target Architecture = ARM (little endian)</span><br><span class="line">	-&gt; Target Binary Format = ELF</span><br><span class="line">	-&gt; Target Architecture Variant = cortex-A7</span><br><span class="line">	-&gt; Target ABI = EABIhf</span><br><span class="line">	-&gt; Floating point strategy = NEON/VFPv4</span><br><span class="line">	-&gt; ARM instruction <span class="built_in">set</span> = ARM</span><br></pre></td></tr></table></figure>
+<p>配置输出目标选项，架构，格式，浮点策略，指令集啊。配置好后如下：<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/2.png" alt="image"></p>
+<h2><span id="1-4-pei-zhi-gong-ju-lian">1.4 配置工具链</span><a href="#1-4-pei-zhi-gong-ju-lian" class="header-anchor">#</a></h2><p>Buildroot为交叉编译工具链提供了两种解决方案：</p>
+<h3><span id="1-4-1-nei-bu-gong-ju-lian">1.4.1 内部工具链</span><a href="#1-4-1-nei-bu-gong-ju-lian" class="header-anchor">#</a></h3><ul>
+<li>内部工具链，称为<code>Buildroot toolchain</code>。<code>buildroot </code>其实是可以自动下载交叉编译器的，但是都是从国外服务器下载的， 鉴于国内的网络环境，推荐大家设置成自己所使用的交叉编译器(也就是外部工具链)。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/3.png" alt="image"></li>
+</ul>
+<h3><span id="1-4-2-wai-bu-gong-ju-lian">1.4.2 外部工具链</span><a href="#1-4-2-wai-bu-gong-ju-lian" class="header-anchor">#</a></h3><ul>
+<li>外部工具链<code>External toolchain</code>。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Toolchain</span><br><span class="line">-&gt; Toolchain type = External toolchain</span><br><span class="line">-&gt; Toolchain = Custom toolchain <span class="comment">//选择用户自己的交叉编译器</span></span><br><span class="line">-&gt; Toolchain origin = Pre-installed toolchain <span class="comment">//选择预装的编译器,否则Toolchain to be downloaded and installed</span></span><br><span class="line">-&gt; Toolchain path =/usr/local/arm/gcc-linaro<span class="number">-4.9</span><span class="number">.4</span><span class="number">-2017.01</span>-x86_64_arm-linux-gnueabihf</span><br><span class="line">-&gt; Toolchain prefix = $(ARCH)-linux-gnueabihf <span class="comment">//前缀</span></span><br><span class="line">-&gt; External toolchain gcc version = <span class="number">4.9</span>.x</span><br><span class="line">-&gt; External toolchain kernel headers series = <span class="number">4.1</span>.x</span><br><span class="line">-&gt; External toolchain C library = glibc/eglibc</span><br><span class="line">-&gt; [*] Toolchain has SSP support? (NEW) <span class="comment">//选中</span></span><br><span class="line">-&gt; [*] Toolchain has RPC support? (NEW) <span class="comment">//选中</span></span><br><span class="line">-&gt; [*] Toolchain has C++ support? <span class="comment">//选中</span></span><br><span class="line">-&gt; [*] Enable MMU support (NEW) <span class="comment">//选中</span></span><br></pre></td></tr></table></figure>
+
+<p><code>Toolchain</code>：设置为 Custom toolchain，表示使用用户自己的交叉编译器。<br><code>Toolchain origin</code>：设置为 Pre-installed toolchain，表示使用预装的交叉编译器。<br><code>Toolchain path</code>：设置自己安装的交叉编译器绝对路径！buildroot 要用到。<br><code>Toolchain prefix</code>：设置交叉编译器前缀，要根据自己实际所使用的交叉编译器来设置，比如我们使用的是 <code>arm-linux-gnueabihf-gcc</code>，因此前缀就是<code>$(ARCH)-linux-gnueabihf</code>，其中 ARCH 我们前面已经设置为了 arm。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/4.png" alt="image"></p>
+<h2><span id="1-5-pei-zhi-build-options">1.5 配置 build options</span><a href="#1-5-pei-zhi-build-options" class="header-anchor">#</a></h2><p>编译选项，编译第三方插件使用静态还是动态链接等。</p>
+<h2><span id="1-6-pei-zhi-system-configuration">1.6 配置 System configuration</span><a href="#1-6-pei-zhi-system-configuration" class="header-anchor">#</a></h2><p>系统配置，比如开发板名字、欢迎语、用户名、密码等。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">System configuration</span><br><span class="line">-&gt; System hostname = alpha_imx6ull <span class="comment">//平台名字，自行设置</span></span><br><span class="line">-&gt; System banner = Welcome to alpha i.mx6ull <span class="comment">//欢迎语</span></span><br><span class="line">-&gt; Init system = BusyBox <span class="comment">//使用 busybox</span></span><br><span class="line">-&gt; /dev management = Dynamic using devtmpfs + mdev <span class="comment">//使用 mdev</span></span><br><span class="line">-&gt; [*] Enable root login with password (NEW) <span class="comment">//使能登录密码</span></span><br><span class="line">-&gt; Root password = <span class="number">123456</span> <span class="comment">//登录密码为 123456</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="1-7-pei-zhi-filesystem-images">1.7 配置 Filesystem images</span><a href="#1-7-pei-zhi-filesystem-images" class="header-anchor">#</a></h2><p>根文件系统格式。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-&gt; Filesystem images</span><br><span class="line">-&gt; [*] ext2/<span class="number">3</span>/<span class="number">4</span> root filesystem <span class="comment">//如果是 EMMC 或 SD 卡的话就用 ext3/ext4</span></span><br><span class="line">-&gt; ext2/<span class="number">3</span>/<span class="number">4</span> variant = ext4 <span class="comment">//选择 ext4 格式</span></span><br><span class="line">-&gt; [*] ubi image containing an ubifs root filesystem <span class="comment">//如果使用 NAND 的话就用 ubifs</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/5.png" alt="image"></p>
+<h2><span id="1-8-jin-zhi-bian-yi-linux-nei-he-he-uboot">1.8 禁止编译 Linux 内核和 uboot</span><a href="#1-8-jin-zhi-bian-yi-linux-nei-he-he-uboot" class="header-anchor">#</a></h2><p>一版不建议uboot和kernel也用buildroot。buildroot 不仅仅能构建根文件系统，也可以编译 linux 内核和 uboot。</p>
+<p>buildroot如果开启了uboot和Linux内核的编译，会自动下载最新的 linux 内核和 uboot，那么最新的内核和uboot会对编译器版本号有要求，可能导致编译失败。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-&gt; Kernel</span><br><span class="line">-&gt; [ ] Linux Kernel <span class="comment">//不要选择编译 Linux Kernel 选项！</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/6.png" alt="image"></p>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/7.png" alt="image"></p>
+<h2><span id="1-9-pei-zhi-target-packages">1.9 配置 Target packages</span><a href="#1-9-pei-zhi-target-packages" class="header-anchor">#</a></h2><p><a name="1.9配置Targetpackages"></a></p>
+<p>配置要选择的第三方库或软件、比如 <code>alsa-utils、ffmpeg、iperf</code>等工具。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/8.png" alt="image"></p>
+<h1><span id="2-bian-yi-buildroot">2 编译buildroot</span><a href="#2-bian-yi-buildroot" class="header-anchor">#</a></h1><h2><span id="2-1-make-help">2.1 make help</span><a href="#2-1-make-help" class="header-anchor">#</a></h2><p>可以看到<code>buildroot</code>下make的使用细节，包括对<code>package、uclibc、busybox、linux</code>以及文档生成等配置。</p>
+<h2><span id="2-2-make-print-version">2.2 make print-version</span><a href="#2-2-make-print-version" class="header-anchor">#</a></h2><p>打印<code>buildroot</code>版本号</p>
+<h2><span id="2-3-make-menuconfig">2.3 make menuconfig</span><a href="#2-3-make-menuconfig" class="header-anchor">#</a></h2><p>或者(<code>make linux-menuconfig</code>…):进行图形化配置</p>
+<h2><span id="2-4-make-xxxx-defconfig">2.4 make xxxx_defconfig</span><a href="#2-4-make-xxxx-defconfig" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Buildroot_2020.02.x/configs$ <span class="built_in">ls</span></span><br><span class="line">100ask                                                nexbox_a95x_defconfig</span><br><span class="line">100ask_imx6ull_mini_ddr512m_systemV_core_defconfig    nitrogen6sx_defconfig</span><br><span class="line">100ask_imx6ull_mini_ddr512m_systemV_qt5_defconfig     nitrogen6x_defconfig</span><br><span class="line">100ask_imx6ull_pro_ddr512m_systemV_core_defconfig     nitrogen7_defconfig</span><br><span class="line">100ask_imx6ull_pro_ddr512m_systemV_qt5_defconfig      nitrogen8m_defconfig</span><br><span class="line">100ask_stm32mp157_pro_ddr512m_busybox_core_defconfig  odroidxu4_defconfig</span><br><span class="line">100ask_stm32mp157_pro_ddr512m_systemD_core_defconfig  olimex_a10_olinuxino_lime_defconfig</span><br><span class="line">100ask_stm32mp157_pro_ddr512m_systemD_qt5_defconfig   olimex_a13_olinuxino_defconfig</span><br><span class="line">100ask_stm32mp157_pro_ddr512m_systemV_core_defconfig  olimex_a20_olinuxino_lime2_defconfig</span><br></pre></td></tr></table></figure>
+
+<p><code>make 100ask_imx6ull_pro_ddr512m_systemV_core_defconfig</code>即可产生<code>.config</code>和<code>output目录</code>：<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/9.png" alt="image"></p>
+<h2><span id="2-5-make">2.5 make</span><a href="#2-5-make" class="header-anchor">#</a></h2><p><code>sudo make //注意不能-jxxx，来指定多核编译</code></p>
+<p>make命令通常将执行以下步骤：</p>
+<ol>
+<li>下载源文件（根据需要）；</li>
+<li>配置、构建和安装交叉编译工具链，或仅导入外部工具链；</li>
+<li>配置、构建和安装选定的目标软件包；</li>
+<li>构建内核映像（如果选择）；</li>
+<li>构建引导加载程序映像（如果选择）；</li>
+<li>以选定的格式创建一个根文件系统</li>
+</ol>
+<ul>
+<li><code>make clean</code>：delete all build products (including build directories, host, staging and target trees, the images and the toolchain)</li>
+<li><code>make distclean</code>: 等于make clean+删除配置</li>
+<li><code>make show-targets</code>:显示出本次配置所要编译所有的目标</li>
+<li><code>make  pkg-target</code>:单独编译某个pkg模块</li>
+<li><code>make pkg-rebuild</code>:重新编译pkg</li>
+<li><code>make  pkg-extrac</code>t:只下载解压pkg,不编译，pkg解压后放在 <code>output/build/</code>对应的<code>pkg-dir</code>目录下</li>
+<li><code>make pkg-source</code>:只下载某pkg，然后不做任何事情</li>
+<li><code>make list-defconfigs</code>:例举所有可用的defconfigs。</li>
+<li><code>make xxx_menuconfig</code>:比如<code>make linux-menuconfig</code></li>
+</ul>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/10.png" alt="image"></p>
+<p><code>rootfs.tar</code>就是编译出的根文件系统，解压缩后就能使用。</p>
+<h3><span id="2-5-1-nfs-gua-zai-gen-wen-jian-xi-tong">2.5.1 nfs 挂载根文件系统</span><a href="#2-5-1-nfs-gua-zai-gen-wen-jian-xi-tong" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">setenv bootargs <span class="string">&#x27;console=tty1 console=ttymxc0,115200 root=/dev/nfs nfsroot=192.168.1.253:</span></span><br><span class="line"><span class="string">/home/zuozhongkai/linux/nfs/buildrootfs rw ip=192.168.1.251:192.168.1.253:192.168.1.1:255.255.</span></span><br><span class="line"><span class="string">255.0::eth0:off&#x27;</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/11.png" alt="image"></p>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/12.png" alt="image"></p>
+<p>可以看到能进入rootfs，但是驱动ko和第三方软件和库没有。</p>
+<h2><span id="2-6-make-show-targets">2.6 make show-targets</span><a href="#2-6-make-show-targets" class="header-anchor">#</a></h2><p><code>make show-targets</code>显示出本次配置所要编译所有的目标。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/13.png" alt="image"></p>
+<h1><span id="3-buildroot-kuang-jia-yuan-li">3 buildroot框架原理</span><a href="#3-buildroot-kuang-jia-yuan-li" class="header-anchor">#</a></h1><p><code>Buildroot</code>提供了函数框架和变量命令框架，采用它的框架编写的<code>app_pkg.mk</code>这种<code>Makefile</code>格式的<code>自动构建脚本</code>，将被<code>package/pkg-generic.mk</code> 这个核心脚本展开填充到<code>buildroot</code>主目录下的<code>Makefile</code>中去。</p>
+<p>最后<code>make all</code>执行<code>Buildroot</code>主目录下的<code>Makefile</code>，生成你想要的image。 <code>package/pkg-generic.mk</code>中通过调用同目录下的<code>pkg-download.mk</code>、<code>pkg-utils.mk</code>文件，已经帮你自动实现了下载、解压、依赖包下载编译等一系列机械化的流程。</p>
+<p>你只要需要按照格式写<code>app_pkg.mk</code>，填充下载地址，链接依赖库的名字等一些特有的构建细节即可。 总而言之，<code>Buildroot</code>本身提供构建流程的框架，开发者按照格式写脚本，提供必要的构建细节，配置整个系统，最后自动构建出你的系统。</p>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/14.png"></p>
+<h2><span id="3-1-tian-jia-zi-ji-de-ruan-jian-bao">3.1 添加自己的软件包</span><a href="#3-1-tian-jia-zi-ji-de-ruan-jian-bao" class="header-anchor">#</a></h2><h3><span id="3-1-1-package-x2f-config-in-zong-ru-kou-tian-jia-cai-dan">3.1.1 package&#x2F;Config.in总入口添加菜单</span><a href="#3-1-1-package-x2f-config-in-zong-ru-kou-tian-jia-cai-dan" class="header-anchor">#</a></h3><p>添加如下语句：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">menu <span class="string">&quot;myown(fuzidage) package&quot;</span></span><br><span class="line">	source <span class="string">&quot;package/helloworld/Config.in&quot;</span></span><br><span class="line">endmenu</span><br></pre></td></tr></table></figure>
+
+<p>为自己的软件包添加入口，这样在<code>make menuconfig</code>的时候就可以找到自己的软件包的<code>Config.in</code>，如果在<code>make menuconfig</code>的时候选中<code>helloworld</code>，那么<code>&quot;BR2_PACKAGE_HELLOWORLD=y&quot;</code>也会同步到<code>.config</code>中去。</p>
+<h3><span id="3-1-2-pei-zhi-app-dui-ying-de-config-in-he-mk-wen-jian">3.1.2 配置APP对应的Config.in和mk文件</span><a href="#3-1-2-pei-zhi-app-dui-ying-de-config-in-he-mk-wen-jian" class="header-anchor">#</a></h3><p>在<code>package</code>中新增目录<code>helloworld</code>，并在里面添加<code>Config.in</code>和<code>helloworld.mk</code></p>
+<h4><span id="3-1-2-1-config-in">3.1.2.1 Config.in</span><a href="#3-1-2-1-config-in" class="header-anchor">#</a></h4><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">config BR2_PACKAGE_HELLOWORLD</span><br><span class="line">bool <span class="string">&quot;helloworld&quot;</span></span><br><span class="line">help</span><br><span class="line">  This is a demo to add myown(fuzidage) package.</span><br></pre></td></tr></table></figure>
+
+<p><code>helloworld/Config.in</code>文件，可以通过<code>make menuconfig</code>可以对<code>helloworld</code>进行选择。只有在<code>BR2_PACKAGE_HELLOWORLD=y</code>条件下，才会调用<code>helloworld.mk</code>进行编译</p>
+<h4><span id="3-1-2-2-helloworld-mk">3.1.2.2 helloworld.mk</span><a href="#3-1-2-2-helloworld-mk" class="header-anchor">#</a></h4><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">################################################################################</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># helloworld</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">################################################################################</span></span><br><span class="line">HELLOWORLD_VERSION:= 1.0.0</span><br><span class="line">HELLOWORLD_SITE:= <span class="variable">$(CURDIR)</span>/work/helloworld</span><br><span class="line">HELLOWORLD_SITE_METHOD:=local</span><br><span class="line">HELLOWORLD_INSTALL_TARGET:=YES</span><br><span class="line"></span><br><span class="line"><span class="keyword">define</span> HELLOWORLD_BUILD_CMDS</span><br><span class="line">    <span class="variable">$(MAKE)</span> CC=<span class="string">&quot;<span class="variable">$(TARGET_CC)</span>&quot;</span> LD=<span class="string">&quot;<span class="variable">$(TARGET_LD)</span>&quot;</span> -C $(@D) all</span><br><span class="line"><span class="keyword">endef</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">define</span> HELLOWORLD_INSTALL_TARGET_CMDS</span><br><span class="line">    <span class="variable">$(INSTALL)</span> -D -m 0755 $(@D)/helloworld <span class="variable">$(TARGET_DIR)</span>/bin</span><br><span class="line"><span class="keyword">endef</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">define</span> HELLOWORLD_PERMISSIONS</span><br><span class="line">    /bin/helloworld f 4755 0 0 - - - - -</span><br><span class="line"><span class="keyword">endef</span></span><br><span class="line"><span class="variable">$(<span class="built_in">eval</span> $(generic-package)</span>)</span><br></pre></td></tr></table></figure>
+
+<p><code>helloworld.mk</code>包括源码位置、安装目录、权限设置等。</p>
+<h3><span id="3-1-3-bian-xie-app-yuan-ma-he-makefile">3.1.3 编写APP源码和Makefile</span><a href="#3-1-3-bian-xie-app-yuan-ma-he-makefile" class="header-anchor">#</a></h3><p>创建一个<code>work/helloworld</code>目录，建立<code>hello_world.c</code>和<code>makefile</code>。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#include &lt;stdio.h&gt;</span></span><br><span class="line">int main()&#123;</span><br><span class="line">	printf(<span class="string">&quot;hello world\n&quot;</span>);</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line"><span class="section">all: helloworld</span></span><br><span class="line"><span class="section">helloworld: helloworld.o</span></span><br><span class="line">	<span class="variable">$(CC)</span> -o helloworld helloworld.o</span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">	rm -rf *.o</span><br><span class="line">	rm -rf helloworld</span><br><span class="line"><span class="section">install:</span></span><br><span class="line">	<span class="variable">$(INSTALL)</span> -D -m 0755 helloworld <span class="variable">$(TARGET_DIR)</span>/bin</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-1-4-tong-guo-make-menuconfig-xuan-zhong-app">3.1.4 通过make menuconfig选中APP</span><a href="#3-1-4-tong-guo-make-menuconfig-xuan-zhong-app" class="header-anchor">#</a></h3><p>通过上面对<code>package/Config.in</code>入口的配置, 我们可以通过<code>make menuconfig</code>，进入<code>Target packages</code>可以看见多了一个<code>&quot;myown(fuzidage) package&quot;</code>入口，选中，保存配置到<code>.config</code>。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/15.png" alt="image"></p>
+<p>然后<code>make savedefconfig</code>，对helloworld的配置就会保存到对应的<code>xxx_defconfig</code>中。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/16.png" alt="image"></p>
+<h3><span id="3-1-5-bian-yi-shi-yong-app">3.1.5 编译使用APP</span><a href="#3-1-5-bian-yi-shi-yong-app" class="header-anchor">#</a></h3><p>可以和整个平台一起编译APP；或者<code>make helloworld</code>单独编译。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/17.png" alt="image"></p>
+<p>编译过程中，会被拷贝到<code>output/build/helloworld-1.0.0</code>文件夹中。然后生成的bin文件拷贝到<code>output/target/bin/helloworld</code>，这个文件会打包到文件系统中。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/18.png" alt="image"></p>
+<p>如果需要清空相应的源文件，通过<code>make helloworld-dirclean</code>。</p>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/19.png" alt="image"></p>
+<h2><span id="3-2-ru-he-chong-xin-bian-yi-ruan-jian-bao">3.2 如何重新编译软件包</span><a href="#3-2-ru-he-chong-xin-bian-yi-ruan-jian-bao" class="header-anchor">#</a></h2><p>经过第一次完整编译后，如果我们需要对源码包重新配置，我们不能直接在<code>buildroot</code>上的根目录下直接make，<code>buildroot</code>是不知道你已经对源码进行重新配置，它只会将第一次编译出来的文件，再次打包成根文件系统镜像文件。</p>
+<p>那么可以通过以下2种方式重新编译：</p>
+<ol>
+<li><p>直接删除源码包,然后<code>make all</code></p>
+ <figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">例如我们要重新编译helloworld，那么可以直接删除output/build/helloworld目录，</span><br><span class="line">那么当你make的时候，就会自动从dl文件夹下，解压缩源码包，并重新安装。这种效率偏低</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>进行<code>xxx-rebuild</code>,然后<code>make all</code></p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">也是以helloworld为例子，我们直接输入make helloworld-rebuild，</span><br><span class="line">即可对build/helloworld/目录进行重新编译，然后还要进行make all(或者make world 或者 make target-post-image)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>如果要重新配置编译安装：</p>
+ <figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make &lt;package&gt;-reconfigure; make all</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2><span id="3-3-shi-neng-di-san-fang-ruan-jian-he-ku">3.3 使能第三方软件和库</span><a href="#3-3-shi-neng-di-san-fang-ruan-jian-he-ku" class="header-anchor">#</a></h2><p>前面 <a href="#1.9%E9%85%8D%E7%BD%AETargetpackages">1.9配置Targetpackages</a> 有引入介绍。</p>
+<h3><span id="3-3-1-shi-neng-yin-pin-de-alsa-ku-tao-jian">3.3.1 使能音频的ALSA库套件</span><a href="#3-3-1-shi-neng-yin-pin-de-alsa-ku-tao-jian" class="header-anchor">#</a></h3><p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/20.png" alt="image"></p>
+<h3><span id="3-3-2-shi-neng-busybox-tao-jian">3.3.2 使能busybox套件</span><a href="#3-3-2-shi-neng-busybox-tao-jian" class="header-anchor">#</a></h3><p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/21.png" alt="image"></p>
+<p>使能后，<code>buildroot</code> 会自动下载 <code>busybox</code> 压缩包，<code>buildroot </code>下载的源码压缩包都存 放在<code>/dl </code>目录下，在<code> dl</code> 目录下就有一个叫做<code>“busybox”</code>的文件夹，此目录下保存着 busybox 压 缩包:<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/22.png" alt="image"></p>
+<p><code>make all</code>编译完后, <code>buildroot</code> 将所有解压缩后的软件保存在<code>/output/build </code>软件中，我们可以找到<code>/output/build/busybox-1.29.3</code> 这个文件夹，此文件夹就是解压后的 busybox 源码:<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/23.png" alt="image"><br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/24.png" alt="image"></p>
+<h4><span id="3-3-2-1-xiu-gai-pei-zhi-busybox-tao-jian">3.3.2.1 修改配置busybox套件</span><a href="#3-3-2-1-xiu-gai-pei-zhi-busybox-tao-jian" class="header-anchor">#</a></h4><p>修改busybox源码就直接在<code>/output/build/busybox-1.29.3</code>修改。</p>
+<p><code>make busybox-menuconfig</code>可以配置busybox套件选择哪些功能：<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/25.png" alt="image"></p>
+<h4><span id="3-3-2-2-rebuild-busybox-tao-jian">3.3.2.2 rebuild busybox套件</span><a href="#3-3-2-2-rebuild-busybox-tao-jian" class="header-anchor">#</a></h4><p><code>make busybox</code>或者<code>make busybox-rebuild</code>即可重新编译。</p>
+<p>编译完后还要<code>make</code>或者<code>make target-post-image</code>对其进行打包进根文件系统。</p>
+<h3><span id="3-3-3-ps1-huan-jing-bian-liang">3.3.3 PS1环境变量</span><a href="#3-3-3-ps1-huan-jing-bian-liang" class="header-anchor">#</a></h3><p>我们构建的根文件系统启动以后会发现， 输入命令的时候命令行前面一直都是<code>“#”</code>，如果我们进入到某个目录的话前面并不会显示当前目录路径:<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/26.png" alt="image"></p>
+<p>PS1 用于设置命令提示符格式，格式如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">PS1 = ‘命令列表’</span><br><span class="line">命令列表中可选的参数如下：</span><br><span class="line">\! 显示该命令的历史记录编号。</span><br><span class="line"> \<span class="comment"># 显示当前命令的命令编号。</span></span><br><span class="line"> \$ 显示$符作为提示符，如果用户是 root 的话，则显示<span class="comment">#号。</span></span><br><span class="line"> \\ 显示反斜杠。</span><br><span class="line"> \d 显示当前日期。</span><br><span class="line"> \h 显示主机名。</span><br><span class="line"> \n 打印新行。</span><br><span class="line"> \nnn 显示 nnn 的八进制值。</span><br><span class="line"> \s 显示当前运行的 shell 的名字。</span><br><span class="line"> \t 显示当前时间。</span><br><span class="line"> \u 显示当前用户的用户名。</span><br><span class="line"> \W 显示当前工作目录的名字。</span><br><span class="line"> \w 显示当前工作目录的路径</span><br></pre></td></tr></table></figure>
+
+<p>我们打开&#x2F;etc&#x2F;profie，修改成如下：<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/27.png" alt="image"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PS1=<span class="string">&#x27;[\u@\h]:\w$:&#x27;</span></span><br><span class="line"><span class="built_in">export</span> PS1</span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-4-dan-du-sheng-cheng-mu-biao-build-out-of-tree">3.4 单独生成目标（build out of tree）</span><a href="#3-4-dan-du-sheng-cheng-mu-biao-build-out-of-tree" class="header-anchor">#</a></h2><p><code>make O=/home/XXX/output</code></p>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/28.png"></p>
+<h1><span id="4-buildroot-guan-fang-jiao-cheng-lian-jie">4 buildroot官方教程链接</span><a href="#4-buildroot-guan-fang-jiao-cheng-lian-jie" class="header-anchor">#</a></h1><p><a target="_blank" rel="noopener" href="https://bootlin.com/doc/training/buildroot/">buildroot官方训练教程</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2147438">buildroot中文手册</a></p>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/29.png" alt="image-20240814004339288"></p>
+<p>可以下载正点原子翻译的中文版buildroot手册。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/07/23/buildroot%E6%95%99%E7%A8%8B/" data-id="clzso22o20000psufbgf8aqtf" data-title="buildroot教程" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Linux内核-异常输出函数调用栈calltrace分析" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/" class="article-date">
@@ -2752,227 +3026,6 @@ board_xxx.c里面实现了具体单板的button_operations，当insmod这个驱�
     </div>
     <footer class="article-footer">
       <a data-url="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/" data-id="clzp8utsw00079oufci3gfawk" data-title="Linux内核-并发与同步" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-Linux内核-rootfs构建移植" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/" class="article-date">
-  <time class="dt-published" datetime="2024-07-20T09:47:28.000Z" itemprop="datePublished">2024-07-20</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/">Linux内核-rootfs构建移植</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-gen-wen-jian-xi-tong-de-yin-ru">1 根文件系统的引入</a></li>
-<li><a href="#2-gen-wen-jian-xi-tong-de-zu-cheng">2 根文件系统的组成</a><ul>
-<li><a href="#2-1-bin-mu-lu">2.1 &#x2F;bin 目录</a></li>
-<li><a href="#2-2-dev-mu-lu">2.2 &#x2F;dev 目录</a></li>
-<li><a href="#2-3-etc-mu-lu">2.3 &#x2F;etc 目录</a></li>
-<li><a href="#2-4-lib-mu-lu">2.4 &#x2F;lib 目录</a></li>
-<li><a href="#2-5-mnt-mu-lu">2.5 &#x2F;mnt 目录</a></li>
-<li><a href="#2-6-proc-mu-lu">2.6 &#x2F;proc 目录</a></li>
-<li><a href="#2-7-usr-mu-lu">2.7 &#x2F;usr 目录</a></li>
-<li><a href="#2-8-var-mu-lu">2.8 &#x2F;var 目录</a></li>
-<li><a href="#2-9-sys-mu-lu">2.9 &#x2F;sys 目录</a></li>
-</ul>
-</li>
-<li><a href="#3-gou-jian-gen-wen-jian-xi-tong">3 构建根文件系统</a><ul>
-<li><a href="#3-1-busybox">3.1 busybox</a><ul>
-<li><a href="#3-1-1-pei-zhi-bian-yi-busybox">3.1.1 配置编译 BusyBox</a><ul>
-<li><a href="#3-1-1-1-busybox-zhi-chi-zhong-wen-shi-bie">3.1.1.1 busybox支持中文识别</a></li>
-<li><a href="#3-1-1-2-busybox-pei-zhi">3.1.1.2 busybox配置</a></li>
-<li><a href="#3-1-1-3-bian-yi">3.1.1.3 编译</a></li>
-</ul>
-</li>
-<li><a href="#3-1-2-gen-wen-jian-xi-tong-tian-jia-lib-ku">3.1.2 根文件系统添加 lib 库</a><ul>
-<li><a href="#3-1-2-1-lib-ku-tian-jia">3.1.2.1 &#x2F;lib库添加</a></li>
-<li><a href="#3-1-2-2-usr-lib-ku-tian-jia">3.1.2.2 &#x2F;usr&#x2F;lib库添加</a></li>
-</ul>
-</li>
-<li><a href="#3-1-3-gen-wen-jian-xi-tong-tian-jia-qi-ta-mu-lu">3.1.3 根文件系统添加其他目录</a></li>
-<li><a href="#3-1-4-gen-wen-jian-xi-tong-ce-shi">3.1.4 根文件系统测试</a></li>
-<li><a href="#3-1-5-gen-wen-jian-xi-tong-tian-jia-etc-pei-zhi-jiao-ben">3.1.5 根文件系统添加 etc配置脚本</a><ul>
-<li><a href="#3-1-5-1-chuang-jian-etc-init-d-rcs">3.1.5.1 创建&#x2F;etc&#x2F;init.d&#x2F;rcS</a></li>
-<li><a href="#3-1-5-2-chuang-jian-etc-fstab">3.1.5.2 创建&#x2F;etc&#x2F;fstab</a></li>
-<li><a href="#3-1-5-3-chuang-jian-etc-inittab-wen-jian">3.1.5.3 创建&#x2F;etc&#x2F;inittab文件</a></li>
-<li><a href="#3-1-5-3-chuang-jian-etc-resolv-conf">3.1.5.3 创建&#x2F;etc&#x2F;resolv.conf</a></li>
-<li><a href="#3-1-5-4-proc-cmdline">3.1.5.4 <code>/proc/cmdline</code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-gen-wen-jian-xi-tong-de-yin-ru">1 根文件系统的引入</span><a href="#1-gen-wen-jian-xi-tong-de-yin-ru" class="header-anchor">#</a></h1><p>我们知道文件系统类型有 <code>FATFS、FAT、EXT4、YAFFS 和 NTFS，squashfs</code>等。文件系统可以让我们利用文件IO的形式对文件目录进行访问，而不用去访问flash存储地址，在使用上更为方便轻松。<br>根文件系统rootfs, 首先是内核启动时所 mount(挂载)的第一个文件系统，系统引导启动程序会在根文件系统挂载之后从中把一些基本的初始化脚本和服务等加载到内存中去运行。<br>百度百科上说内核代码镜像文件保存在根文件系统中(对电脑端的Ubuntu来说确实是，放在<code>/boot/vmlinuz-5.4.0-152-generic</code>)。但是我们嵌入式 Linux 并没有将内核代码镜像保存在根文件系统中，而是保存到了其他地方，比如 NAND Flash 的指定存储地址、EMMC 专用分区中。<br>嵌入式根文件系统和 Linux 内核是分开的，单独的 Linux 内核是没法正常工作的，必须要搭配根文件系统。如果不提供根文件系统，Linux 内核在启动的时候就会提示内核崩溃(Kernel panic)：<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/1.png" alt="image"></p>
-<h1><span id="2-gen-wen-jian-xi-tong-de-zu-cheng">2 根文件系统的组成</span><a href="#2-gen-wen-jian-xi-tong-de-zu-cheng" class="header-anchor">#</a></h1><p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/2.png" alt="image"></p>
-<h2><span id="2-1-x2f-bin-mu-lu">2.1 &#x2F;bin 目录</span><a href="#2-1-x2f-bin-mu-lu" class="header-anchor">#</a></h2><p>存放着系统需要的可执行文件，一般都是一些命令，比如<code>ls、cp、mv</code>等命令。<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/3.png" alt="image"></p>
-<h2><span id="2-2-x2f-dev-mu-lu">2.2 &#x2F;dev 目录</span><a href="#2-2-x2f-dev-mu-lu" class="header-anchor">#</a></h2><p>此目录下的文件都是设备节点文件：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ls</span> -l /dev/</span><br><span class="line">crw-rw----    1 root     root       89,   9 Jan  1 08:00 /dev/i2c-9</span><br><span class="line">crw-rw----    1 root     root       10,  62 Jan  1 08:00 /dev/ion</span><br><span class="line">crw-rw----    1 root     root        1,  11 Jan  1 08:00 /dev/kmsg</span><br><span class="line">srw-rw-rw-    1 root     root             0 Jan  1 08:00 /dev/log</span><br><span class="line">crw-rw----    1 root     root       10, 237 Jan  1 08:00 /dev/loop-control</span><br><span class="line">brw-rw----    1 root     root        7,   0 Jan  1 08:00 /dev/loop0</span><br><span class="line">brw-rw----    1 root     root        7,   1 Jan  1 08:00 /dev/loop1</span><br><span class="line">brw-rw----    1 root     root      179,   0 Jan  1 08:00 /dev/mmcblk0</span><br><span class="line">brw-rw----    1 root     root      179,   8 Jan  1 08:00 /dev/mmcblk0boot0</span><br><span class="line">brw-rw----    1 root     root      179,  16 Jan  1 08:00 /dev/mmcblk0boot1</span><br><span class="line">brw-rw----    1 root     root      179,   1 Jan  1 08:00 /dev/mmcblk0p1</span><br><span class="line">brw-rw----    1 root     root      179,   2 Jan  1 08:00 /dev/mmcblk0p2</span><br><span class="line">brw-rw----    1 root     root      179,   3 Jan  1 08:00 /dev/mmcblk0p3</span><br><span class="line">brw-rw----    1 root     root      179,   4 Jan  1 08:00 /dev/mmcblk0p4</span><br></pre></td></tr></table></figure>
-
-<h2><span id="2-3-x2f-etc-mu-lu">2.3 &#x2F;etc 目录</span><a href="#2-3-x2f-etc-mu-lu" class="header-anchor">#</a></h2><p>此目录下存放着各种配置文件。</p>
-<h2><span id="2-4-x2f-lib-mu-lu">2.4 &#x2F;lib 目录</span><a href="#2-4-x2f-lib-mu-lu" class="header-anchor">#</a></h2><p>存放着 Linux 所必须的库文件。这些库文件是共享库，命令和用户编写的应用程序要使用这些库文件。</p>
-<h2><span id="2-5-x2f-mnt-mu-lu">2.5 &#x2F;mnt 目录</span><a href="#2-5-x2f-mnt-mu-lu" class="header-anchor">#</a></h2><p>临时挂载目录，一般是空目录，可以在此目录下创建空的子目录，比如&#x2F;mnt&#x2F;sd、&#x2F;mnt&#x2F;usb，这样就可以将 SD 卡或者 U 盘挂载到&#x2F;mnt&#x2F;sd 或者&#x2F;mnt&#x2F;usb 目录中。</p>
-<h2><span id="2-6-x2f-proc-mu-lu">2.6 &#x2F;proc 目录</span><a href="#2-6-x2f-proc-mu-lu" class="header-anchor">#</a></h2><p>proc虚拟文件系统，输出硬件驱动模块的相关信息，各种输出打印。（后续专门出一篇博文介绍）<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/4.png" alt="image"></p>
-<h2><span id="2-7-x2f-usr-mu-lu">2.7 &#x2F;usr 目录</span><a href="#2-7-x2f-usr-mu-lu" class="header-anchor">#</a></h2><p>这里的usr 不是 user 的缩写，而是 <code>Unix Software Resource </code>的缩写，也就是 Unix 操作系统软件资源目录。<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/5.png" alt="image"></p>
-<h2><span id="2-8-x2f-var-mu-lu">2.8 &#x2F;var 目录</span><a href="#2-8-x2f-var-mu-lu" class="header-anchor">#</a></h2><p>存放一些可以改变的数据。如&#x2F;var&#x2F;log。</p>
-<pre><code>[root@robin]/var/log# ls
-messages    messages.0  messages.1  messages.2  messages.3
-</code></pre>
-<h2><span id="2-9-x2f-sys-mu-lu">2.9 &#x2F;sys 目录</span><a href="#2-9-x2f-sys-mu-lu" class="header-anchor">#</a></h2><p>此目录作为 sysfs 文件系统的挂载点，sysfs 是一个类似于 proc 文件系统的特殊文件系统，sysfs 也是基于 ram 的文件系统，也就是说它也没有实际的存储设备。此目录是系统设备管理的重要目录，此目录通过一定的组织结构向用户提供详细的内核数据结构信息。</p>
-<p>查看硬件模块IP的<code>base addr</code>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">[root@robin]/sys/devices<span class="comment"># cd platform/</span></span><br><span class="line">[root@robin]/sys/devices/platform<span class="comment"># ls</span></span><br><span class="line">1040000.mon                 29230000.spi3</span><br><span class="line">1900000.rtos_cmdqu          29240000.can</span><br><span class="line">203c0000.bmtpu              29300000.cv-emmc</span><br><span class="line">20400000.pcie               29310000.cv-sd</span><br><span class="line">20bc0000.sata               29320000.cv-sd</span><br><span class="line">20bc0000.sata:sata-port@0   29330000.wifi-sd</span><br><span class="line">20bc0000.sata:sata-port@1   29340000.dma</span><br><span class="line">21020000.vc_drv             29350000.dma</span><br><span class="line">27000000.cv-wd              39000100.usb</span><br><span class="line">27010000.gpio               39000200.usb</span><br><span class="line">27011000.gpio               41d0c00.pdm</span><br><span class="line">27012000.gpio               5021000.gpio</span><br></pre></td></tr></table></figure>
-
-
-<p>查看debug相关：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">[root@robin]/sys/kernel/debug<span class="comment"># ls</span></span><br><span class="line">27000000.cv-wd      dw_spi2             mtd</span><br><span class="line">asoc                dw_spi3             pinctrl</span><br><span class="line">bdi                 dynamic_debug       pwm</span><br><span class="line">block               extfrag             regmap</span><br><span class="line">bluetooth           fault_around_bytes  sched_debug</span><br><span class="line">clear_warn_once     gpio                sched_features</span><br><span class="line">clk                 hid                 sleep_time</span><br><span class="line">debug_enabled       ieee80211           split_huge_pages</span><br></pre></td></tr></table></figure>
-<p>重要的有：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">/sys/kernel/debug/debug_enabled</span><br><span class="line">/sys/kernel/debug/dynamic_debug/control</span><br><span class="line">/sys/kernel/debug/clk/clk_summary</span><br></pre></td></tr></table></figure>
-
-<p>查看和设置驱动模块module param变量：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> /sys/module/soph_stitch/parameters</span><br><span class="line">[root@cvitek]/sys/module/soph_stitch/parameters<span class="comment"># cat stitch_log_lv</span></span><br><span class="line">2</span><br><span class="line">[root@cvitek]/sys/module/soph_stitch/parameters<span class="comment"># echo 2 &gt; stitch_log_lv</span></span><br><span class="line">[root@cvitek]/sys/module/soph_stitch/parameters<span class="comment"># cat stitch_log_lv</span></span><br><span class="line">2</span><br></pre></td></tr></table></figure>
-
-<h1><span id="3-gou-jian-gen-wen-jian-xi-tong">3 构建根文件系统</span><a href="#3-gou-jian-gen-wen-jian-xi-tong" class="header-anchor">#</a></h1><h2><span id="3-1-busybox">3.1 busybox</span><a href="#3-1-busybox" class="header-anchor">#</a></h2><p>BusyBox 是一个集成了大量的 Linux 命令和工具的软件，像<code>ls、mv、ifconfig</code>等命令 BusyBox 都会提供。<br>一般下载 BusyBox 的源码，然后配置 BusyBox，选择自己想要的功能，最后编译即可。<br>BusyBox 可以在其官网下载到，官网地址为：<br><a target="_blank" rel="noopener" href="https://busybox.net/downloads/">https://busybox.net/downloads/</a></p>
-<h3><span id="3-1-1-pei-zhi-bian-yi-busybox">3.1.1 配置编译 BusyBox</span><a href="#3-1-1-pei-zhi-bian-yi-busybox" class="header-anchor">#</a></h3><p>这里我下载的<code>busybox-1.29.0.tar.bz2</code>， 将其进行解压：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> rootfs；<span class="built_in">cd</span> rootfs; tar xfj busybox-1.29.0.tar.bz2</span><br></pre></td></tr></table></figure>
-<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/6.png" alt="image"><br>修改Makefile添加<code>toolchain</code>:</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">164 CROSS_COMPILE ?= /usr/local/arm/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-</span><br><span class="line">......</span><br><span class="line">190 ARCH ?= arm</span><br></pre></td></tr></table></figure>
-
-<h4><span id="3-1-1-1-busybox-zhi-chi-zhong-wen-shi-bie">3.1.1.1 busybox支持中文识别</span><a href="#3-1-1-1-busybox-zhi-chi-zhong-wen-shi-bie" class="header-anchor">#</a></h4><p>我们知道中文的编码如果采用<code>utf8</code>，那么<code>ascii</code>值肯定是大于<code>0x7f</code>的。因此需要修改busybox源码，让其能识别超过<code>ascii</code>的编码范围<code>0x7f</code>。</p>
-<p><strong>utf8 中文编码</strong>：<br>UTF-8是一种广泛使用的<code>Unicode</code>编码方式，它可以用来表示各种语言和符号。对于中文字来说，UTF-8采用了一种特殊的编码方式，即中文字符主要使用三个字节（21比特）来表示。具体来说，当一个汉字的Unicode码位于0x80到0x7FF之间的时，UTF-8会用三个字节来编码这个汉字。例如，汉字“爸”在UTF-8中的编码过程是这样的：</p>
-<p>首先，将汉字<code>“爸”</code>的<code>Unicode</code>码<code>（0x5BAD）</code>转换为二进制数<code>（0111 0010 0011 1000）</code>。<br>然后，按照UTF-8的三字节模式进行编码，即每个字节的最高位都设置为1，剩下的7位用于表示该字节所对应的Unicode值。在这个例子中，第一个字节的高位为1，表示这是一个16位的字节；接下来的三位为1011，对应于Unicode码中的第11位，即十进制的5；最后一位为0，代表这是一个字节的最低位。<br>最后，将这三个字节的二进制数转换为十六进制数<code>（0xE788B8）</code>，这就是汉字<code>“爸”</code>在UTF-8中的编码形式。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi libbb/unicode.c</span><br></pre></td></tr></table></figure>
-<p>打开函数<code>unicode_conv_to_printable2</code>,修改如下：<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/7.png" alt="image"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi libbb/printable_string.c</span><br></pre></td></tr></table></figure>
-<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/8.png" alt="image"></p>
-<h4><span id="3-1-1-2-busybox-pei-zhi">3.1.1.2 busybox配置</span><a href="#3-1-1-2-busybox-pei-zhi" class="header-anchor">#</a></h4><p>编译busybox前要先对 busybox 进行默认的配置，有以下几种配置选项：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">①、defconfig，缺省配置，也就是默认配置选项。</span><br><span class="line">②、allyesconfig，全选配置，也就是选中 busybox 的所有功能</span><br><span class="line">③、allnoconfig，最小配置。</span><br><span class="line"></span><br><span class="line">make defconfig</span><br><span class="line">make menuconfig</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/9.png" alt="image"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-&gt; Settings </span><br><span class="line">	-&gt; Build <span class="type">static</span> <span class="title function_">binary</span> <span class="params">(no shared libs)</span></span><br></pre></td></tr></table></figure>
-<p>这项请不要勾选，静态编译 busybox会DNS解析有问题。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-&gt; Settings</span><br><span class="line">	-&gt; vi-style line editing commands</span><br></pre></td></tr></table></figure>
-<p>建议勾选这项。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-&gt; Linux Module Utilities</span><br><span class="line">	-&gt; Simplified modutils</span><br></pre></td></tr></table></figure>
-<p>默认会选中“Simplified modutils”，这里我们要取消勾选。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-&gt; Linux System Utilities</span><br><span class="line">	-&gt; mdev (<span class="number">16</span> kb) <span class="comment">//确保下面的全部选中，默认都是选中的</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/10.png" alt="image"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-&gt; Settings</span><br><span class="line">	-&gt; Support Unicode <span class="comment">//选中</span></span><br><span class="line">		-&gt; Check $LC_ALL, $LC_CTYPE and $LANG environment variables <span class="comment">//选中</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/11.png" alt="image"></p>
-<h4><span id="3-1-1-3-bian-yi">3.1.1.3 编译</span><a href="#3-1-1-3-bian-yi" class="header-anchor">#</a></h4><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-</span><br><span class="line">make install CONFIG_PREFIX=/media/cvitek/robin.lee/rootfs ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf-</span><br></pre></td></tr></table></figure>
-<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/12.png" alt="image"><br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/13.png" alt="image"></p>
-<p>busybox 的所有工具和文件就会被安装到 rootfs 目录中，rootfs 目录内容如下：<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/14.png" alt="image"><br>命令和工具都再对应&#x2F;bin &#x2F;usr&#x2F;bin对应的目录：<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/15.png" alt="image"></p>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17995165" title="3.linux内核启动流程">3.linux内核启动流程</a></p>
-<p><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/">Linux内核启动流程 | Hexo (fuzidage.github.io)</a></p>
-<p>说过 Linux 内核 init 进程最后会查找用户空间的 init 程序，找到以后就会运行这个用户空间的 init 程序，从而切换到用户态。如果 <code>bootargs</code> 设置 <code>init=/linuxrc</code>，那么 linuxrc 就是可以作为用户空间的 init 程序，所以用户态空间的 init 程序是 busybox 来生成的。</p>
-<p>我们的根文件系统此时就制作好了，但此时还不能使用，还需要一些其他的文件，我们继续来完善 rootfs。</p>
-<h3><span id="3-1-2-gen-wen-jian-xi-tong-tian-jia-lib-ku">3.1.2 根文件系统添加 lib 库</span><a href="#3-1-2-gen-wen-jian-xi-tong-tian-jia-lib-ku" class="header-anchor">#</a></h3><h4><span id="3-1-2-1-x2f-lib-ku-tian-jia">3.1.2.1 &#x2F;lib库添加</span><a href="#3-1-2-1-x2f-lib-ku-tian-jia" class="header-anchor">#</a></h4><p>Linux 中的应用程序一般都是需要动态库的，当然你也可以编译成静态的，但是静态的可执行文件会很大。如果编译为动态的话就需要动态库，所以我们需要向根文件系统中添加动态库。lib 库文件从交叉编译器中获取：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> lib</span><br><span class="line"><span class="built_in">cd</span> gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/lib</span><br></pre></td></tr></table></figure>
-<p>libc库如下：将其拷贝进rootfs。<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/16.png" alt="image"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> *so* *.a /media/cvitek/robin.lee/rootfs/lib -d <span class="comment">#-d表示将软链接也一同拷贝</span></span><br></pre></td></tr></table></figure>
-
-<p>进入工具链的lib库：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/lib</span><br><span class="line"><span class="built_in">cp</span> *so* *.a /media/cvitek/robin.lee/rootfs/lib -d <span class="comment">#-d表示将软链接也一同拷贝</span></span><br></pre></td></tr></table></figure>
-<p>最终根文件系统的&#x2F;lib内容如下：<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/17.png" alt="image"></p>
-<h4><span id="3-1-2-2-x2f-usr-x2f-lib-ku-tian-jia">3.1.2.2 &#x2F;usr&#x2F;lib库添加</span><a href="#3-1-2-2-x2f-usr-x2f-lib-ku-tian-jia" class="header-anchor">#</a></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> /usr/lib</span><br><span class="line"><span class="built_in">cd</span> gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/lib</span><br></pre></td></tr></table></figure>
-<p>libc&#x2F;usr&#x2F;lib库如下：将其拷贝进rootfs。<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/18.png" alt="image"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> *so* *.a /media/cvitek/robin.lee/rootfs/usr/lib -d <span class="comment">#-d表示将软链接也一同拷贝</span></span><br></pre></td></tr></table></figure>
-<p>至此，根文件系统的库文件就全部添加好了。来看下库占用存储空间多少：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">robin.lee@WORKSTATION5:/media/cvitek/robin.lee/rootfs$ <span class="built_in">du</span> ./lib ./usr/lib/ -sh</span><br><span class="line">57M     ./lib</span><br><span class="line">67M     ./usr/lib/</span><br></pre></td></tr></table></figure>
-
-<h3><span id="3-1-3-gen-wen-jian-xi-tong-tian-jia-qi-ta-mu-lu">3.1.3 根文件系统添加其他目录</span><a href="#3-1-3-gen-wen-jian-xi-tong-tian-jia-qi-ta-mu-lu" class="header-anchor">#</a></h3><p>dev、proc、mnt、sys、tmp 和 root这些目录需要在rootfs进行创建。<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/19.png" alt="image"></p>
-<h3><span id="3-1-4-gen-wen-jian-xi-tong-ce-shi">3.1.4 根文件系统测试</span><a href="#3-1-4-gen-wen-jian-xi-tong-ce-shi" class="header-anchor">#</a></h3><p>初步测试我们的rootfs功能，我们最好是利用nfs挂载根文件系统，方便修改。之前<code>bootargs</code>都是设置：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">setenv bootargs <span class="string">&#x27;console=ttymxc0,115200 root=/dev/mmcblk1p2 rootwait rw&#x27;</span></span><br></pre></td></tr></table></figure>
-<p>从emmc分区2启动，分区2存放了根文件系统。现在bootargs改成nfs挂载rootfs要如何设置呢？<br>文档为 <code>Documentation/filesystems/nfs/nfsroot.txt</code>，格式如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">root=/dev/nfs nfsroot=[&lt;server-ip&gt;:]&lt;root-dir&gt;[,&lt;nfs-options&gt;] ip=&lt;client-ip&gt;:&lt;server-ip&gt;:&lt;gw-ip&gt;:&lt;netmask&gt;:&lt;hostname&gt;:&lt;device&gt;:&lt;autoconf&gt;:&lt;dns0-ip&gt;:&lt;dns1-ip&gt;</span><br><span class="line"></span><br><span class="line">&lt;server-ip&gt;：服务器 IP 地址，比如我的 Ubuntu 主机 IP 地址为 192.168.1.250。</span><br><span class="line">&lt;root-dir&gt;：根文件系统的存放路径，要保证放在nfs共享目录下。比如我的就是/media/cvitek/robin.lee/rootfs</span><br><span class="line">&lt;nfs-options&gt;：NFS 的其他可选选项，一般不设置。</span><br><span class="line">&lt;client-ip&gt;：客户端 IP 地址，也就是我们开发板的 IP 地址</span><br><span class="line">&lt;server-ip&gt;：服务器 IP 地址，前面已经说了。</span><br><span class="line">&lt;gw-ip&gt;：网关地址，我的就是 192.168.1.1。</span><br><span class="line">&lt;netmask&gt;：子网掩码，我的就是 255.255.255.0。</span><br><span class="line">&lt;hostname&gt;：客户机的名字，一般不设置，此值可以空着。</span><br><span class="line">&lt;device&gt;：设备名，也就是网卡名，一般是 eth0，eth1….，正点原子的 I.MX6U-ALPHA 开发板的 ENET2 为 eth0，ENET1 为 eth1。</span><br><span class="line">&lt;autoconf&gt;：自动配置，一般不使用，所以设置为 off。</span><br><span class="line">&lt;dns0-ip&gt;：DNS0 服务器 IP 地址，不使用。</span><br><span class="line">&lt;dns1-ip&gt;：DNS1 服务器 IP 地址，不使用。</span><br></pre></td></tr></table></figure>
-
-<p>最终我们设置 bootargs 环境变量的 root 值如下：<br><code>root=/dev/nfs nfsroot=192.168.1.250:/media/cvitek/robin.lee/rootfs,proto=tcp rw ip=192.168.1.251:192.168.1.250:192.168.1.1:255.255.255.0::eth0:off</code></p>
-<p><code>“proto=tcp”</code>表示使用 TCP 协议，<code>“rw”</code>表示 nfs 挂载的根文件系统为可读可写。<br>修改保存环境变量：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">setenv bootargs <span class="string">&#x27;console=ttymxc0,115200 root=/dev/nfs nfsroot=192.168.1.250:/media/cvitek/robin.lee/rootfs,proto=tcp rw ip=192.168.1.251:192.168.1.250:192.168.1.1:255.255.255.0::eth0:off&#x27;</span> <span class="comment">#设置 bootargs</span></span><br><span class="line">saveenv <span class="comment">#保存环境变量</span></span><br></pre></td></tr></table></figure>
-
-<p>设置好以后使用<code>“boot”</code>命令启动 Linux 内核，输出打印如下：<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/20.png" alt="image"><br>可以看到成功挂载rootfs，并且进入Linux控制台。</p>
-<h3><span id="3-1-5-gen-wen-jian-xi-tong-tian-jia-etc-pei-zhi-jiao-ben">3.1.5 根文件系统添加 etc配置脚本</span><a href="#3-1-5-gen-wen-jian-xi-tong-tian-jia-etc-pei-zhi-jiao-ben" class="header-anchor">#</a></h3><h4><span id="3-1-5-1-chuang-jian-x2f-etc-x2f-init-d-x2f-rcs">3.1.5.1 创建&#x2F;etc&#x2F;init.d&#x2F;rcS</span><a href="#3-1-5-1-chuang-jian-x2f-etc-x2f-init-d-x2f-rcs" class="header-anchor">#</a></h4><p>前面打印有一行报错，进入根文件系统的时候会有下面这一行错误提示：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">can<span class="string">&#x27;t run &#x27;</span>/etc/init.d/rcS<span class="string">&#x27;: No such file or directory</span></span><br></pre></td></tr></table></figure>
-<p>rcS 是个 shell 脚本，Linux 内核启动以后需要启动一些服务，而 rcS 就是规定启动哪些文件的脚本文件。在 rootfs 中创建<code>/etc/init.d/rcS </code>文件，然后在 rcS 中输入如下所示内容：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"></span><br><span class="line">PATH=/sbin:/bin:/usr/sbin:/usr/bin:<span class="variable">$PATH</span></span><br><span class="line">LD_LIBRARY_PATH=<span class="variable">$LD_LIBRARY_PATH</span>:/lib:/usr/lib</span><br><span class="line"><span class="built_in">export</span> PATH LD_LIBRARY_PATH</span><br><span class="line"></span><br><span class="line">mount -a</span><br><span class="line"><span class="built_in">mkdir</span> /dev/pts</span><br><span class="line">mount -t devpts devpts /dev/pts</span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> /sbin/mdev &gt; /proc/sys/kernel/hotplug</span><br><span class="line">mdev -s</span><br></pre></td></tr></table></figure>
-<p><code>PATH</code> 环境变量保存着可执行文件可能存在的目录;<br><code>LD_LIBRARY_PATH</code> 环境变量保存着库文件所在的目录;<br>mount 命令来挂载所有的文件系统，这些文件系统由文件<code>/etc/fstab</code> 来指定;<br>创建目录<code>/dev/pts</code>，然后将 <code>devpts</code> 挂载到<code>/dev/pts </code>目录中。<br>使用 mdev 来管理热插拔设备，通过这两行，Linux 内核就可以在&#x2F;dev 目录下自动创建设备节点。</p>
-<p>我们是简单构造了一个最简单的rcS, 大家如果去看 Ubuntu 或者其他大型 Linux操作系统中的 rcS 文件，就会发现其非常复杂。而且这么复杂的 rcS 文件也是借助其他工具创建的，比如 buildroot 等。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">chmod</span> 777 rcS</span><br></pre></td></tr></table></figure>
-<p>重新启动 Linux 内核，启动以后如下图：<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/21.png" alt="image"></p>
-<h4><span id="3-1-5-2-chuang-jian-x2f-etc-x2f-fstab">3.1.5.2 创建&#x2F;etc&#x2F;fstab</span><a href="#3-1-5-2-chuang-jian-x2f-etc-x2f-fstab" class="header-anchor">#</a></h4><p>fstab 在 Linux 开机以后自动配置哪些需要自动挂载的分区，格式如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&lt;file system&gt; &lt;mount point&gt; &lt;<span class="built_in">type</span>&gt; &lt;options&gt; &lt;dump&gt; &lt;pass&gt;</span><br><span class="line"></span><br><span class="line">&lt;file system&gt;：要挂载的特殊的设备，也可以是块设备，比如/dev/sda 等等</span><br><span class="line">&lt;mount point&gt;：挂载点。</span><br><span class="line">&lt;<span class="built_in">type</span>&gt;：文件系统类型，比如 ext2、ext3、proc、romfs、tmpfs 等等。</span><br><span class="line">&lt;options&gt;：挂载选项，一般使用 defaults，defaults 包含了 rw、suid、 dev、 <span class="built_in">exec</span>、 auto、 nouser 和 async。</span><br><span class="line">&lt;dump&gt;：为 1 的话表示允许备份，为 0 不备份，一般不备份，因此设置为 0。</span><br><span class="line">&lt;pass&gt;：磁盘检查设置，为 0 表示不检查。根目录‘/’设置为 1，其他的都不能设置为 1，因此这里一般设置为 0</span><br></pre></td></tr></table></figure>
-<p>fstab内容设置如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#&lt;file system&gt;   &lt;mount point&gt;     &lt;type&gt;     &lt;options&gt;   &lt;dump&gt;    &lt;pass&gt;</span></span><br><span class="line">proc             /proc             proc       defaults    0         0</span><br><span class="line">tmpfs            /tmp              tmpfs      defaults    0         0</span><br><span class="line">sysfs            /sys              sysfs      defaults    0         0</span><br></pre></td></tr></table></figure>
-
-<p><code>fstab </code>文件创建完成以后重新启动 Linux打印如下：<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/22.png" alt="image"></p>
-<h4><span id="3-1-5-3-chuang-jian-x2f-etc-x2f-inittab-wen-jian">3.1.5.3 创建&#x2F;etc&#x2F;inittab文件</span><a href="#3-1-5-3-chuang-jian-x2f-etc-x2f-inittab-wen-jian" class="header-anchor">#</a></h4><p>inittab 的详细内容可以参考 busybox 下的文件 <code>examples/inittab</code>。init 程序会读取<code>/etc/inittab</code>这个文件，inittab 由若干条指令组成。每条指令的结构都是一样的，由以“:”分隔的 4 个段组成，格式如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&lt;<span class="built_in">id</span>&gt;:&lt;runlevels&gt;:&lt;action&gt;:&lt;process&gt;</span><br><span class="line">&lt;<span class="built_in">id</span>&gt;：每个指令的标识符，不能重复。但是对于 busybox 的 init 来说，&lt;<span class="built_in">id</span>&gt;有着特殊意义。对于 busybox 而言&lt;<span class="built_in">id</span>&gt;用来指定启动进程的控制 <span class="built_in">tty</span>，一般我们将串口或者 LCD 屏幕设置为控制 <span class="built_in">tty</span>。</span><br><span class="line">&lt;runlevels&gt;：对 busybox 来说此项完全没用，所以空着。</span><br><span class="line">&lt;action&gt;：动作，用于指定&lt;process&gt;可能用到的动作:</span><br><span class="line">	busybox 支持的动作如下：</span><br><span class="line">	sysinit: 在系统初始化的时候 process 才会执行一次。</span><br><span class="line">	respawn: 当 process 终止以后马上启动一个新的。</span><br><span class="line">	askfirst:和 respawn 类似，在运行 process 之前在控制台上显示“Please press Enter to activate this console.”。只要用户按下“Enter”键以后才会执行 process。</span><br><span class="line">	<span class="built_in">wait</span>: 告诉 init，要等待相应的进程执行完以后才能继续执行。</span><br><span class="line">	once: 仅执行一次，而且不会等待 process 执行完成。</span><br><span class="line">	restart: 当 init 重启的时候才会执行 procee。</span><br><span class="line">	ctrlaltdel: 当按下 ctrl+alt+del 组合键才会执行 process。</span><br><span class="line">	shutdown: 关机的时候执行 process。</span><br><span class="line">&lt;process&gt;：具体的动作，比如程序、脚本或命令等</span><br></pre></td></tr></table></figure>
-
-<p>我们的&#x2F;etc&#x2F;inittab内容设置如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#etc/inittab</span></span><br><span class="line">::sysinit:/etc/init.d/rcS</span><br><span class="line">console::askfirst:-/bin/sh</span><br><span class="line">::restart:/sbin/init</span><br><span class="line">::ctrlaltdel:/sbin/reboot</span><br><span class="line">::shutdown:/bin/umount -a -r</span><br><span class="line">::shutdown:/sbin/swapoff -a</span><br></pre></td></tr></table></figure>
-
-<p>第 2 行，系统启动以后运行<code>/etc/init.d/rcS </code>这个脚本文件。<br>第 3 行，将 console 作为控制台终端，也就是 ttymxc0。<br>第 4 行，重启的话运行&#x2F;sbin&#x2F;init。<br>第 5 行，按下 ctrl+alt+del 组合键的话就运行<code>/sbin/reboot</code>，看来 ctrl+alt+del 组合键用于重启系统。<br>第 6 行，关机的时候执行<code>/bin/umount</code>，也就是卸载各个文件系统。<br>第 7 行，关机的时候执行<code>/sbin/swapoff</code>，也就是关闭交换分区。</p>
-<p><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/23.png" alt="image"></p>
-<h4><span id="3-1-5-3-chuang-jian-x2f-etc-x2f-resolv-conf">3.1.5.3 创建&#x2F;etc&#x2F;resolv.conf</span><a href="#3-1-5-3-chuang-jian-x2f-etc-x2f-resolv-conf" class="header-anchor">#</a></h4><p><code>/etc/resolv.conf</code>是DNS客户机配置文件，用于设置DNS服务器的IP地址及DNS域名，还包含了主机的域名搜索顺序。该文件是由域名解析器（resolver，一个根据主机名解析IP地址的库）使用的配置文件。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nameserver： 配置DNS服务器地址（顺序来查询，且只有当第一个nameserver没有反应时才查询下面的nameserver）</span><br><span class="line">domain： 声明主机的域名，当查询不完全的域名时主机名将被使用(相当于search的默认值)</span><br><span class="line">search： 它的多个参数指明域名查询顺序。当查询不完全的域名时会使用到（domain和search不能共存）</span><br></pre></td></tr></table></figure>
-
-<p>默认<code>/etc/resolv.conf</code>配置：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Generated by NetworkManager</span></span><br><span class="line">nameserver 192.168.248.2</span><br></pre></td></tr></table></figure>
-
-<p>一般将<strong>nameserver</strong>设置成网关地址，再加入<code>8.8.8.8</code>和<code>114.114.114.114</code></p>
-<p><code>ping blog.csdn.com</code>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@node2 ~]<span class="comment"># ping blog.csdn.com</span></span><br><span class="line">PING blog.csdn.com.com (45.11.57.36) 56(84) bytes of data.</span><br><span class="line">64 bytes from comcomproxy1.com.com (45.11.57.36): icmp_seq=1 ttl=44 time=291 ms</span><br><span class="line">64 bytes from comcomproxy1.com.com (45.11.57.36): icmp_seq=2 ttl=44 time=270 ms</span><br></pre></td></tr></table></figure>
-
-<p><code>ping blog</code>，发现不通，需要设置<code>domain域</code>：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[root@node2 ~]<span class="comment"># ping blog</span></span><br><span class="line">ping: blog: 未知的名称或服务</span><br></pre></td></tr></table></figure>
-<p>调整<code>/etc/resolv.conf</code>配置文件,添加<strong>domain</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@node2 ~]<span class="comment"># vi /etc/resolv.conf</span></span><br><span class="line"><span class="comment"># Generated by NetworkManager</span></span><br><span class="line">nameserver 192.168.248.2</span><br><span class="line">domain csdn.net</span><br></pre></td></tr></table></figure>
-
-<p>再次<code>ping blog</code>, ping不完整域名会自动补全</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">[root@node2 ~]<span class="comment"># ping blog</span></span><br><span class="line">PING blog.csdn.net (182.92.187.217) 56(84) bytes of data.</span><br><span class="line">64 bytes from 182.92.187.217 (182.92.187.217): icmp_seq=1 ttl=89 time=20.4 ms</span><br></pre></td></tr></table></figure>
-
-<p>调整<code>/etc/resolv.conf</code>配置文件,添加<strong>search</strong></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[root@node2 ~]<span class="comment"># vi /etc/resolv.conf</span></span><br><span class="line"><span class="comment"># Generated by NetworkManager</span></span><br><span class="line">nameserver 192.168.248.2</span><br><span class="line">search abc.com csdn.net</span><br></pre></td></tr></table></figure>
-
-<h4><span id="3-1-5-4-proc-cmdline">3.1.5.4 <code>/proc/cmdline</code></span><a href="#3-1-5-4-proc-cmdline" class="header-anchor">#</a></h4><p><code>cat /proc/cmdline</code> 可以看到内核启动时U-boot传入参数:<br><img src="/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/24.png" alt="image"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/" data-id="clzp8utsw00069ouf2g340fbd" data-title="Linux内核-rootfs构建移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       

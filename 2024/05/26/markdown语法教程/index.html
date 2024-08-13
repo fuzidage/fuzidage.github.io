@@ -6,17 +6,17 @@
   
   <title>markdown语法教程 | Hexo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="1 多级标题目录结构 一级标题 二级标题 三级标题 四级标题 五级标题 六级标题           2 段落 2.1 换行   3 字体 4 字体颜色,大小 5 字体背景颜色 5 下划线 6 列表项 7 代码块与语法高亮 7.1 行内代码 7.2 块代码   8 代码折叠 9 插入链接 9.1 自动链接   10 添加图片 11 表格 12 转义字符      1 多级标题目录结构##">
+  <meta name="description" content="1 多级标题目录结构 一级标题 二级标题 三级标题 四级标题 五级标题 六级标题           2 段落 2.1 换行   3 字体 4 字体颜色,大小 5 字体背景颜色 5 下划线 6 列表项 7 代码块与语法高亮 7.1 行内代码 7.2 块代码   8 代码折叠 9 插入链接 9.1 自动链接   10 添加图片 11 表格 12 转义字符 锚点 目录 第一节 第二节">
 <meta property="og:type" content="article">
 <meta property="og:title" content="markdown语法教程">
 <meta property="og:url" content="http://example.com/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/index.html">
 <meta property="og:site_name" content="Hexo">
-<meta property="og:description" content="1 多级标题目录结构 一级标题 二级标题 三级标题 四级标题 五级标题 六级标题           2 段落 2.1 换行   3 字体 4 字体颜色,大小 5 字体背景颜色 5 下划线 6 列表项 7 代码块与语法高亮 7.1 行内代码 7.2 块代码   8 代码折叠 9 插入链接 9.1 自动链接   10 添加图片 11 表格 12 转义字符      1 多级标题目录结构##">
+<meta property="og:description" content="1 多级标题目录结构 一级标题 二级标题 三级标题 四级标题 五级标题 六级标题           2 段落 2.1 换行   3 字体 4 字体颜色,大小 5 字体背景颜色 5 下划线 6 列表项 7 代码块与语法高亮 7.1 行内代码 7.2 块代码   8 代码折叠 9 插入链接 9.1 自动链接   10 添加图片 11 表格 12 转义字符 锚点 目录 第一节 第二节">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://img2018.cnblogs.com/blog/1876680/201912/1876680-20191214155002138-1798053565.png">
 <meta property="og:image" content="http://example.com/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/1.png">
 <meta property="article:published_time" content="2024-05-26T09:24:38.000Z">
-<meta property="article:modified_time" content="2024-05-26T09:47:50.000Z">
+<meta property="article:modified_time" content="2024-08-13T16:02:53.901Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="linux嵌入式环境搭建">
 <meta name="twitter:card" content="summary">
@@ -141,6 +141,14 @@
 <li><a href="#10-tian-jia-tu-pian">10 添加图片</a></li>
 <li><a href="#11-biao-ge">11 表格</a></li>
 <li><a href="#12-zhuan-yi-zi-fu">12 转义字符</a></li>
+<li><a href="#mao-dian">锚点</a><ul>
+<li><a href="#mu-lu">目录</a><ul>
+<li><a href="#di-yi-jie">第一节</a></li>
+<li><a href="#di-er-jie">第二节</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 <!-- tocstop -->
 
@@ -408,6 +416,12 @@ BurlyWood </td></table>
 <td>&amp;#247；</td>
 </tr>
 </tbody></table>
+<h1><span id="mao-dian">锚点</span><a href="#mao-dian" class="header-anchor">#</a></h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">## 目录</span></span><br><span class="line">[跳转到第一节](<span class="comment">#a)</span></span><br><span class="line">[跳转到第二节](<span class="comment">#b)</span></span><br><span class="line"></span><br><span class="line">&lt;a name=<span class="string">&quot;a&quot;</span>&gt;&lt;/a&gt;</span><br><span class="line"><span class="comment">### 第一节</span></span><br><span class="line">这是第一节的内容。</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">&lt;a name=<span class="string">&quot;b&quot;</span>&gt;&lt;/a&gt;</span><br><span class="line"><span class="comment">### 第二节</span></span><br><span class="line">这是第二节的内容。</span><br></pre></td></tr></table></figure>
+
+<h2><span id="mu-lu">目录</span><a href="#mu-lu" class="header-anchor">#</a></h2><p><a href="#a">跳转到第一节</a><br><a href="#b">跳转到第二节</a></p>
+<p><a name="a"></a></p>
+<h3><span id="di-yi-jie">第一节</span><a href="#di-yi-jie" class="header-anchor">#</a></h3><p>这是第一节的内容。<br>…<br>…<br>…<br>…<br>…<br>…<br>…<br>…<br>…<br>…<br>…<br><a name="b"></a></p>
+<h3><span id="di-er-jie">第二节</span><a href="#di-er-jie" class="header-anchor">#</a></h3><p>这是第二节的内容。</p>
 
       
     </div>
