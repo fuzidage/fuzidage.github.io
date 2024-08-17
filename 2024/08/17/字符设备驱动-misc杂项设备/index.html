@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>字符设备驱动-misc杂项设备 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 引入misc device 1.1 传统cdev方式 1.2 misc device方式   2 misc杂项设备解析 2.1 misc_init过程 2.2 misc设备注册misc_register过程 2.3 misc设备卸载过程 2.4 misc设备打开过程   3 如何从fops中获取模块设备信息 3.1 引入 3.1.1 方法1：（对于misc设备） 3.1.2 方法2：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="字符设备驱动-misc杂项设备">
+<meta property="og:url" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 引入misc device 1.1 传统cdev方式 1.2 misc device方式   2 misc杂项设备解析 2.1 misc_init过程 2.2 misc设备注册misc_register过程 2.3 misc设备卸载过程 2.4 misc设备打开过程   3 如何从fops中获取模块设备信息 3.1 引入 3.1.1 方法1：（对于misc设备） 3.1.2 方法2：">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/1.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/2.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/3.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/4.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/5.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/6.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/7.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/8.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/9.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/10.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/11.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/12.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/13.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/14.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/15.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/16.png">
+<meta property="article:published_time" content="2024-08-17T05:32:57.000Z">
+<meta property="article:modified_time" content="2024-08-17T06:38:19.070Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Linux设备驱动">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-字符设备驱动-misc杂项设备" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/" class="article-date">
+  <time class="dt-published" datetime="2024-08-17T05:32:57.000Z" itemprop="datePublished">2024-08-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      字符设备驱动-misc杂项设备
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-yin-ru-misc-device">1 引入misc device</a><ul>
+<li><a href="#1-1-chuan-tong-cdev-fang-shi">1.1 传统cdev方式</a></li>
+<li><a href="#1-2-misc-device-fang-shi">1.2 misc device方式</a></li>
+</ul>
+</li>
+<li><a href="#2-misc-za-xiang-she-bei-jie-xi">2 misc杂项设备解析</a><ul>
+<li><a href="#2-1-misc-init-guo-cheng">2.1 misc_init过程</a></li>
+<li><a href="#2-2-misc-she-bei-zhu-ce-misc-register-guo-cheng">2.2 misc设备注册misc_register过程</a></li>
+<li><a href="#2-3-misc-she-bei-xie-zai-guo-cheng">2.3 misc设备卸载过程</a></li>
+<li><a href="#2-4-misc-she-bei-da-kai-guo-cheng">2.4 misc设备打开过程</a></li>
+</ul>
+</li>
+<li><a href="#3-ru-he-cong-fops-zhong-huo-qu-mo-kuai-she-bei-xin-xi">3 如何从fops中获取模块设备信息</a><ul>
+<li><a href="#3-1-yin-ru">3.1 引入</a><ul>
+<li><a href="#3-1-1-fang-fa-1-dui-yu-misc-she-bei">3.1.1 方法1：（对于misc设备）</a></li>
+<li><a href="#3-1-2-fang-fa-2-dui-yu-cdev-she-bei">3.1.2 方法2：（对于cdev设备）</a></li>
+<li><a href="#3-1-3-fang-fa-3-xxx-open-zhong-bao-cun-she-bei-xin-xi">3.1.3方法3：xxx_open中保存设备信息</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-yin-ru-misc-device">1 引入misc device</span><a href="#1-yin-ru-misc-device" class="header-anchor">#</a></h1><h2><span id="1-1-chuan-tong-cdev-fang-shi">1.1 传统cdev方式</span><a href="#1-1-chuan-tong-cdev-fang-shi" class="header-anchor">#</a></h2><details>
+<summary>char_drv.c</summary>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/fs.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/delay.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/uaccess.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/irq.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/io.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/cdev.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/device.h&gt;</span></span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> led_major;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">cdev</span> <span class="title">cdev</span>;</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">led_drv_open</span><span class="params">(<span class="keyword">struct</span> inode *inode, <span class="keyword">struct</span> file *file)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">ssize_t</span> <span class="title function_">led_drv_write</span><span class="params">(<span class="keyword">struct</span> file *file, <span class="type">const</span> <span class="type">char</span> __user *buf, <span class="type">size_t</span> count, <span class="type">loff_t</span> * ppos)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> <span class="title">led_drv_fops</span> =</span> &#123;</span><br><span class="line">    .owner  =   THIS_MODULE,</span><br><span class="line">    .open   =   led_drv_open,</span><br><span class="line">    .write	=	led_drv_write,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">led_setup_cdev</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> err, devno = MKDEV(led_major, <span class="number">0</span>);<span class="comment">//index 为从设备号</span></span><br><span class="line">  cdev_init(&amp;cdev, &amp;led_drv_fops);</span><br><span class="line">  cdev.owner = THIS_MODULE;</span><br><span class="line">  cdev.ops = &amp;led_drv_fops;</span><br><span class="line">  err = cdev_add(&amp;cdev, devno, <span class="number">1</span>);<span class="comment">//devno 为第一个设备号，1为数量</span></span><br><span class="line">  <span class="keyword">if</span> (err)</span><br><span class="line">    printk(KERN_NOTICE <span class="string">&quot;Error %d adding&quot;</span>, err);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">led_drv_init</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="type">int</span> result;</span><br><span class="line">    <span class="type">dev_t</span> devno;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="keyword">class</span> *<span class="title">led_class</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">device</span> *<span class="title">dev</span>;</span></span><br><span class="line">    devno=MKDEV(led_major,<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span>(led_major)<span class="comment">//静态申请设备号</span></span><br><span class="line">        result=register_chrdev_region(devno,<span class="number">1</span>,<span class="string">&quot;led1_dev&quot;</span>);</span><br><span class="line">    <span class="keyword">else</span>&#123;</span><br><span class="line">        result = alloc_chrdev_region(&amp;devno,<span class="number">0</span>,<span class="number">1</span>,<span class="string">&quot;led1_dev&quot;</span>);<span class="comment">//动态申请设备号</span></span><br><span class="line">        led_major = MAJOR(devno);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span>(result&lt;<span class="number">0</span>) &#123;</span><br><span class="line">        printk (KERN_WARNING <span class="string">&quot;hello: can&#x27;t get major number %d\n&quot;</span>, led_major);</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">  </span><br><span class="line">    led_setup_cdev();</span><br><span class="line">    led_class = class_create(THIS_MODULE, <span class="string">&quot;led_class&quot;</span>);</span><br><span class="line">	dev = device_create(led_class, <span class="literal">NULL</span>, devno, <span class="literal">NULL</span>, <span class="string">&quot;%s&quot;</span>, <span class="string">&quot;led_dev&quot;</span>);</span><br><span class="line">	<span class="keyword">if</span> (IS_ERR(dev)) &#123;</span><br><span class="line">		dev_err(dev, <span class="string">&quot;device create failed error code(%ld)\n&quot;</span>, PTR_ERR(dev));</span><br><span class="line">		<span class="keyword">return</span> PTR_ERR(dev);</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">led_drv_exit</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    device_destroy(led_class, dev);     <span class="comment">/* remove the device */</span></span><br><span class="line">    class_destroy(led_class);           <span class="comment">/* remove the device class */</span></span><br><span class="line">    cdev_del(&amp;cdev);</span><br><span class="line">    unregister_chrdev_region(MKDEV(led_major,<span class="number">0</span>),<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line">module_init(led_drv_init);</span><br><span class="line">module_exit(led_drv_exit);</span><br><span class="line">MODULE_LICENSE(<span class="string">&quot;GPL&quot;</span>);</span><br></pre></td></tr></table></figure>
+</details>
+总结流程：
+
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">A：创建设备号。MKDEV(major_no,<span class="number">0</span>)，其值为一个整数。因为linux中使用设备号来关联相应的设备和设备对于的驱动程序。</span><br><span class="line">B：注册设备号。register_chrdev_region(devno,<span class="number">1</span>,<span class="string">&quot;led1_dev&quot;</span>)</span><br><span class="line">    或者alloc_chrdev_region(&amp;devno,<span class="number">0</span>,<span class="number">1</span>,<span class="string">&quot;led1_dev&quot;</span>);<span class="comment">//动态申请设备号</span></span><br><span class="line">C：初始化并关联file_operations结构体。  cdev_init(&amp;cdev, &amp;led_drv_fops);</span><br><span class="line">D：添加字符设备到内核。<span class="function"><span class="built_in">int</span> <span class="title">cdev_add</span>(<span class="params"><span class="keyword">struct</span> cdev *p, dev_t dev, unsigned count</span>)，</span></span><br><span class="line"><span class="function">E：移除字符设备及设备号。<span class="title">cdev_del</span>(<span class="params">&amp;cdev</span>)</span>; unregister_chrdev_region(MKDEV(led_major,<span class="number">0</span>),<span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+
+<p><code>kdev_t.h</code><br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/1.png" alt="image"></p>
+<p>上面涉及到的API可以在函数<code>linux/fs/char_dev.c</code>中找到定义。</p>
+<h2><span id="1-2-misc-device-fang-shi">1.2 misc device方式</span><a href="#1-2-misc-device-fang-shi" class="header-anchor">#</a></h2><p>使用<code>misc_register</code>，在加载模块时会自动创建设备节点，为<code>主设备号为10</code>的字符设备。使用<code>misc_deregister</code>，在卸载模块时会自动删除设备节点。因此<code>无需调用cdev这一套框架</code>流程，无需调用<code>class_create</code>和<code>device_create</code>操作。<code>misc_register</code>时会自行调用了<code> class_create()</code>, <code>device_create() </code>因此<code>/sys/class/misc</code>类会被创建， <code>/dev/</code>下的设备节点也会自动创建。<br><code>/proc/misc</code>记录了系统中所有加载的misc设备：<br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/2.png" alt="image"></p>
+<details>
+<summary>点击查看代码</summary>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/miscdevice.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/delay.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/irq.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/kernel.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/module.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/init.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/mm.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/fs.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/delay.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/moduleparam.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/slab.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/errno.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/ioctl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/cdev.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/list.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;linux/pci.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/uaccess.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/atomic.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;asm/unistd.h&gt;</span></span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">led_dev</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">miscdevice</span> <span class="title">miscdev</span>;</span></span><br><span class="line">	<span class="type">void</span> *data;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">led_dev</span> <span class="title">my_led</span>;</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">leds_ioctl</span><span class="params">(<span class="keyword">struct</span> inode *inode, <span class="keyword">struct</span> file *filp, <span class="type">unsigned</span> <span class="type">int</span> cmd, <span class="type">unsigned</span> <span class="type">long</span> arg)</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">leds_open</span><span class="params">(<span class="keyword">struct</span> inode *inode, <span class="keyword">struct</span> file *filp)</span>&#123;</span><br><span class="line">	<span class="comment">//filp-&gt;private_data = &amp;my_led;</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">leds_release</span><span class="params">(<span class="keyword">struct</span> inode *inode, <span class="keyword">struct</span> file *filp)</span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">ssize_t</span> <span class="title function_">leds_read</span><span class="params">(<span class="keyword">struct</span> file *filp, <span class="type">char</span> __user *buf, <span class="type">size_t</span> count, <span class="type">loff_t</span> *f_pos)</span>&#123;</span><br><span class="line">	  <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> <span class="title">leds_fops</span> =</span>&#123;</span><br><span class="line">	.owner   = THIS_MODULE,</span><br><span class="line">	.read    = leds_read,</span><br><span class="line">	.ioctl   = leds_ioctl,</span><br><span class="line">	.open    = leds_open,</span><br><span class="line">	.release = leds_release</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">dev_init</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">miscdevice</span> *<span class="title">miscdev</span> =</span> &amp;my_led.miscdev;</span><br><span class="line">	miscdev-&gt;minor = MISC_DYNAMIC_MINOR,</span><br><span class="line">	miscdev-&gt;name = <span class="string">&quot;misc_leds&quot;</span>,</span><br><span class="line">	miscdev-&gt;fops = &amp;leds_fops,</span><br><span class="line">	miscdev-&gt;parent = <span class="literal">NULL</span>;</span><br><span class="line">	<span class="type">int</span> ret = misc_register(miscdev);</span><br><span class="line">	<span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> __exit <span class="title function_">dev_exit</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">	misc_deregister(&amp;my_led.miscdev);</span><br><span class="line">&#125;</span><br><span class="line">module_init(dev_init);</span><br><span class="line">module_exit(dev_exit);</span><br><span class="line">MODULE_LICENSE(<span class="string">&quot;GPL&quot;</span>);</span><br></pre></td></tr></table></figure>
+</details>
+
+<h1><span id="2-misc-za-xiang-she-bei-jie-xi">2 misc杂项设备解析</span><a href="#2-misc-za-xiang-she-bei-jie-xi" class="header-anchor">#</a></h1><p>源代码位置<code>driver/char/misc.c</code>，主设备号固定为10，所有的<code>miscdevice</code>设备形成了一个链表，对设备访问时内核根据次设备号查找对应的miscdevice设备，然后调用其<code>file_operations</code>结构中注册的文件操作接口进行操作。</p>
+<h2><span id="2-1-misc-init-guo-cheng">2.1 misc_init过程</span><a href="#2-1-misc-init-guo-cheng" class="header-anchor">#</a></h2><p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/3.png" alt="image"><br>misc子系统的初始化是利用<code>subsys_initcall</code>进行子系统初始化，首先创建<code>/proc/misc</code>条目，对应<code>cat /proc/misc</code>可以看到所有misc设备信息，<code>cat /proc/misc</code>于是就会调用<code>misc_seq_ops</code>中的<code>misc_seq_show</code>函数，可以看到刚好为misc设备的次设备号和名字信息。<br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/4.png" alt="image"><br>主设备号固定为10，调用<code>class_create</code>创建<code>/sys/class/misc</code>, 调用<code>register_chrdev</code>注册字符设备，添加<code>file_operations</code>。(<code>register_chrdev</code>如果传入主设备号，则静态注册，否则动态注册返回主设备号)<br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/5.png" alt="image"><br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/6.png" alt="image"><br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/7.png" alt="image"></p>
+<h2><span id="2-2-misc-she-bei-zhu-ce-misc-register-guo-cheng">2.2 misc设备注册misc_register过程</span><a href="#2-2-misc-she-bei-zhu-ce-misc-register-guo-cheng" class="header-anchor">#</a></h2><p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/8.png" alt="image"></p>
+<p><code>MISC_DYNAMIC_MINOR = 255</code>，使用者调用<code>misc_register</code>时一般会次设备号传入<code>MISC_DYNAMIC_MINOR</code>，那么会自动分配次设备号；否则遍历<code>misc_list</code>链表，看这个次设备号以前有没有被用过，如果次设备号已被占有则退出返回-EBUSY。<br>得到这个次设备号后<code>set_bit(i, misc_minors);</code>设置位图中相应位为1。<code>device_create_with_groups</code>等同于<code>device_create</code>创建设备节点。<br>最后将list节点添加到<code>misc_list</code>链表中。<br><code>cat /sys/class</code>可以看到所有驱动中调用<code>class_creat()</code>函数的模块，<code>cat /sys/class/misc</code>则可以看到所有misc杂项驱动模块。<code>ls /dev/*</code>可以看到对应的设备节点<br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/9.png" alt="image"><br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/10.png" alt="image"><br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/11.png" alt="image"></p>
+<h2><span id="2-3-misc-she-bei-xie-zai-guo-cheng">2.3 misc设备卸载过程</span><a href="#2-3-misc-she-bei-xie-zai-guo-cheng" class="header-anchor">#</a></h2><p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/12.png" alt="image"><br>从<code>misc_list链表</code>中删除节点list,  然后删除设备节点。释放位图相应位清0，以便次设备号留给下一个模块使用。</p>
+<h2><span id="2-4-misc-she-bei-da-kai-guo-cheng">2.4 misc设备打开过程</span><a href="#2-4-misc-she-bei-da-kai-guo-cheng" class="header-anchor">#</a></h2><p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/13.png" alt="image"></p>
+<ol>
+<li>当用户调用<code>open(&quot;/dev/xxx&quot;)</code>时，由于misc设备主设备号都为10，那么会统一进入到<code>misc_open</code>，那么会根据次设备号来区分不同的misc设备，首先<code>iminor(inode)</code>取出次设备号，<code>i_rdev</code>是对应具体misc设备的<code>设备号dev_t</code>。<br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/14.png" alt="image"></li>
+<li>然后遍历<code>misc_list</code>链表，找到与<code>minor次设备号</code>相匹配的<code>misc device</code>，找到后将<code>file_operations(简称fops)</code>暂存到<code>new_fops</code>。如果匹配不到，则请求加载这个次设备号对应的模块。<code>request_module</code>表示让linux系统的用户空间调用<code>/sbin/modprobe</code>函数加载名为<code>char-major-%d-%d</code>的模块。<br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/15.png" alt="image"><br>匹配成功后<code>file-&gt;private_data = c;</code>表示将链表中匹配出的<code>miscdevice</code>作为<code>file-&gt;private_data</code>(后面会介绍作用)</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">* Place the miscdevice in the file&#x27;s</span></span><br><span class="line"><span class="comment">* private_data so it can be used by the</span></span><br><span class="line"><span class="comment">* file operations, including f_op-&gt;open below</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">file-&gt;private_data = c;</span><br></pre></td></tr></table></figure>
+<p>最后将暂存的<code>new_fops</code>赋值给<code>file-&gt;f_op</code>，调用具体的misc模块的fops：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">file-&gt;f_op-&gt;open(inode, file)；</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/16.png" alt="image"></p>
+<h1><span id="3-ru-he-cong-fops-zhong-huo-qu-mo-kuai-she-bei-xin-xi">3 如何从fops中获取模块设备信息</span><a href="#3-ru-he-cong-fops-zhong-huo-qu-mo-kuai-she-bei-xin-xi" class="header-anchor">#</a></h1><h2><span id="3-1-yin-ru">3.1 引入</span><a href="#3-1-yin-ru" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">xxx_dev</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">miscdevice</span> <span class="title">miscdev</span>;</span></span><br><span class="line">	<span class="type">void</span> *data;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">long</span> <span class="title function_">dwa_ioctl</span><span class="params">(<span class="keyword">struct</span> file *filp, <span class="type">unsigned</span> <span class="type">int</span> cmd, <span class="type">unsigned</span> <span class="type">long</span> arg)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">xxx_dev</span> *<span class="title">m</span> =</span> container_of(filp-&gt;private_data, <span class="keyword">struct</span> xxx_dev, miscdev);</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> __init <span class="title function_">xxx_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">xxx_dev</span> *<span class="title">m</span>;</span></span><br><span class="line">	...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-1-1-fang-fa-1-dui-yu-misc-she-bei">3.1.1 方法1：（对于misc设备）</span><a href="#3-1-1-fang-fa-1-dui-yu-misc-she-bei" class="header-anchor">#</a></h3><p>可以看到如果我们想要重file_oprations获取设备入口，可以通过如下方式：</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> xxx_dev *m = container_of(filp-&gt;private_data, <span class="keyword">struct</span> xxx_dev, miscdev);</span><br></pre></td></tr></table></figure>
+<p>前面2.4讲过了匹配成功后<code>file-&gt;private_data = c;</code>表示将链表中匹配出的<code>miscdevice</code>作为<code>file-&gt;private_data</code>.</p>
+<h3><span id="3-1-2-fang-fa-2-dui-yu-cdev-she-bei">3.1.2 方法2：（对于cdev设备）</span><a href="#3-1-2-fang-fa-2-dui-yu-cdev-she-bei" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">xxx_dev</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">cdev</span> <span class="title">cdev</span>;</span></span><br><span class="line">	<span class="type">void</span> *data;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">int</span> <span class="title function_">xxx_open</span><span class="params">(<span class="keyword">struct</span> inode *inode, <span class="keyword">struct</span> file *file)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> ret = <span class="number">0</span>;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">xxx_dev</span> *<span class="title">m</span>;</span></span><br><span class="line">	m = container_of(inode-&gt;i_cdev, <span class="keyword">struct</span> xxx_dev, cdev);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>inode</code>的<code>i_cdev</code>指向的即为<code>cdev</code>结构体。调用<code>container_of</code>即可获取设备信息。</p>
+<h3><span id="3-1-3-fang-fa-3-xxx-open-zhong-bao-cun-she-bei-xin-xi">3.1.3方法3：xxx_open中保存设备信息</span><a href="#3-1-3-fang-fa-3-xxx-open-zhong-bao-cun-she-bei-xin-xi" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">xxx_dev</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">cdev</span> <span class="title">cdev</span>;</span></span><br><span class="line">	<span class="type">void</span> *data;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">resource</span>* <span class="title">res</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">xxx_dev</span> *<span class="title">m</span>;</span></span><br><span class="line"><span class="type">static</span> <span class="type">long</span> <span class="title function_">keyscan_ioctl</span><span class="params">(<span class="keyword">struct</span> file *file, <span class="type">unsigned</span> <span class="type">int</span> cmd,</span></span><br><span class="line"><span class="params">			  <span class="type">unsigned</span> <span class="type">long</span> arg)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">xxx_dev</span> *<span class="title">m</span> =</span> file-&gt;private_data;</span><br><span class="line">	<span class="type">uint32_t</span> res_size = (<span class="type">uint32_t</span>)resource_size(m-&gt;res);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">xxx_open</span><span class="params">(<span class="keyword">struct</span> inode *inode, <span class="keyword">struct</span> file *file)</span></span><br><span class="line">&#123;</span><br><span class="line">	file-&gt;private_data = m;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>file-&gt;private_data = m</code>保存设备信息。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/" data-id="clzxrltbm000080ufh39mfp2u" data-title="字符设备驱动-misc杂项设备" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          字符设备驱动-ioctl命令详解
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2024/08/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-mmap%E9%A9%B1%E5%8A%A8%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">字符设备驱动-mmap驱动应用实例</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">linux内存管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13px;">通信协议</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">August 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">July 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/">字符设备驱动-用户态构造IP寄存器结构体和读写寄存器</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/">字符设备驱动-ioctl命令详解</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/">字符设备驱动-misc杂项设备</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-mmap%E9%A9%B1%E5%8A%A8%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B/">字符设备驱动-mmap驱动应用实例</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-mmap%E6%9C%BA%E5%88%B6/">字符设备驱动-mmap机制</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

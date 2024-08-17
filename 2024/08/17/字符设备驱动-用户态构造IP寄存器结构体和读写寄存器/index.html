@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>字符设备驱动-用户态构造IP寄存器结构体和读写寄存器 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 用户态定义寄存器结构 2 驱动代码 3 用户态代码      1 用户态定义寄存器结构#以键盘keyscan为例，定义一个IP寄存器描述头文件，IOCRREG, IOCWREG定义了两个ioctl命令，用来读写寄存器。struct msg用来存放寄存器地址和值。 12345678910111213141516171819&#x2F;* Keyscan register: addr + offs">
+<meta property="og:type" content="article">
+<meta property="og:title" content="字符设备驱动-用户态构造IP寄存器结构体和读写寄存器">
+<meta property="og:url" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 用户态定义寄存器结构 2 驱动代码 3 用户态代码      1 用户态定义寄存器结构#以键盘keyscan为例，定义一个IP寄存器描述头文件，IOCRREG, IOCWREG定义了两个ioctl命令，用来读写寄存器。struct msg用来存放寄存器地址和值。 12345678910111213141516171819&#x2F;* Keyscan register: addr + offs">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/1.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/2.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/3.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/4.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/5.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/6.png">
+<meta property="article:published_time" content="2024-08-17T06:46:12.000Z">
+<meta property="article:modified_time" content="2024-08-17T06:59:06.078Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="数据结构">
+<meta property="article:tag" content="Linux设备驱动">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-字符设备驱动-用户态构造IP寄存器结构体和读写寄存器" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/" class="article-date">
+  <time class="dt-published" datetime="2024-08-17T06:46:12.000Z" itemprop="datePublished">2024-08-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      字符设备驱动-用户态构造IP寄存器结构体和读写寄存器
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-yong-hu-tai-ding-yi-ji-cun-qi-jie-gou">1 用户态定义寄存器结构</a></li>
+<li><a href="#2-qu-dong-dai-ma">2 驱动代码</a></li>
+<li><a href="#3-yong-hu-tai-dai-ma">3 用户态代码</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-yong-hu-tai-ding-yi-ji-cun-qi-jie-gou">1 用户态定义寄存器结构</span><a href="#1-yong-hu-tai-ding-yi-ji-cun-qi-jie-gou" class="header-anchor">#</a></h1><p>以键盘<code>keyscan</code>为例，定义一个IP寄存器描述头文件，<code>IOCRREG</code>, <code>IOCWREG</code>定义了两个ioctl命令，用来读写寄存器。<code>struct msg</code>用来存放寄存器地址和值。<br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/1.png" alt="image"><br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/2.png" alt="image"></p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* Keyscan register: addr + offset + mask */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_keyscan_config1			0x0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_keyscan_config2			0x4</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_keyscan_config3			0x8</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_keyscan_config4			0xc</span></span><br><span class="line">......</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_fifo_count				0x20</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_fifo_count_OFFSET			0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_fifo_count_MASK				0xf</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_fifo_not_empty				0x20</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_fifo_not_empty_OFFSET			4</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_fifo_not_empty_MASK			0x10</span></span><br><span class="line"><span class="keyword">struct</span> msg &#123;</span><br><span class="line">	<span class="built_in">long</span> unsigned <span class="built_in">int</span> addr;</span><br><span class="line">	unsigned <span class="built_in">int</span> data;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOC_MAGIC &#x27;k&#x27;</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOCRREG _IOR(IOC_MAGIC, 1, struct msg)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOCWREG _IOW(IOC_MAGIC, 2, struct msg)</span></span><br></pre></td></tr></table></figure>
+
+<h1><span id="2-qu-dong-dai-ma">2 驱动代码</span><a href="#2-qu-dong-dai-ma" class="header-anchor">#</a></h1><p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/3.png" alt="image"></p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="built_in">long</span> <span class="title">keyscan_ioctl</span>(<span class="params"><span class="keyword">struct</span> file *file, unsigned <span class="built_in">int</span> cmd, unsigned <span class="built_in">long</span> arg</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">struct</span> msg m;</span><br><span class="line">	memset(&amp;m, <span class="number">0</span>, <span class="keyword">sizeof</span>(m));</span><br><span class="line">	<span class="keyword">void</span> __iomem* <span class="keyword">base</span> = dev-&gt;<span class="keyword">base</span>;</span><br><span class="line">	<span class="keyword">switch</span> (cmd) &#123;</span><br><span class="line">	<span class="keyword">case</span> IOCRREG:</span><br><span class="line">		<span class="keyword">if</span> (copy_from_user(&amp;m, (<span class="keyword">struct</span> msg __user *)arg, <span class="keyword">sizeof</span>(m)))</span><br><span class="line">			<span class="keyword">return</span> -EFAULT;</span><br><span class="line">		m.data = readl(<span class="keyword">base</span> + m.addr);</span><br><span class="line">		printk(KERN_DEBUG <span class="string">&quot;base_addr:0x%lx, offset:0x%lx, read data: 0x%x \n&quot;</span>, <span class="keyword">base</span>, m.addr, m.data);</span><br><span class="line">		<span class="keyword">if</span> (copy_to_user((<span class="keyword">struct</span> msg __user *)arg, &amp;m, <span class="keyword">sizeof</span>(m)))</span><br><span class="line">			<span class="keyword">return</span> -EFAULT;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">case</span> IOCWREG:</span><br><span class="line">		<span class="keyword">if</span> (copy_from_user(&amp;m, (<span class="keyword">struct</span> msg __user *)arg, <span class="keyword">sizeof</span>(m)))</span><br><span class="line">			<span class="keyword">return</span> -EFAULT;</span><br><span class="line">		printk(KERN_DEBUG <span class="string">&quot;base_addr:0x%lx, offset:0x%lx, write data: 0x%x \n&quot;</span>, <span class="keyword">base</span>, m.addr, m.data);</span><br><span class="line">		writel(m.data, <span class="keyword">base</span> + m.addr);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="literal">default</span>:</span><br><span class="line">		<span class="keyword">return</span> -EINVAL;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>驱动先定义<code>IP base addr</code>，然后透过<code>ioctl</code>进行<code>arg</code>参数接收，确定<code>msg</code>中的<code>addr</code>和<code>data</code>, 接收<code>cmd</code>调用<code>writel, readl</code>进行读写。</p>
+<h1><span id="3-yong-hu-tai-dai-ma">3 用户态代码</span><a href="#3-yong-hu-tai-dai-ma" class="header-anchor">#</a></h1><p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/4.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="keyword">inline</span> <span class="type">void</span> <span class="title function_">clrsetbits_32</span><span class="params">(<span class="type">long</span> <span class="type">unsigned</span> <span class="type">int</span> addr, <span class="type">unsigned</span> <span class="type">int</span> clear, <span class="type">unsigned</span> <span class="type">int</span> <span class="built_in">set</span>)</span> &#123;</span><br><span class="line">	<span class="type">int</span> ret;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">msg</span> <span class="title">m</span>;</span></span><br><span class="line">	<span class="built_in">memset</span>(&amp;m, <span class="number">0</span>, <span class="keyword">sizeof</span>(m));</span><br><span class="line">	m.addr = addr;</span><br><span class="line">	ret = ioctl(fd, IOCRREG, &amp;m);</span><br><span class="line">	<span class="keyword">if</span> (ret) &#123;</span><br><span class="line">		perror(<span class="string">&quot;ioctl: read error!&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	m.data = (m.data &amp; (~clear)) | <span class="built_in">set</span>;</span><br><span class="line">	ret = ioctl(fd, IOCWREG, &amp;m);</span><br><span class="line">	<span class="keyword">if</span> (ret) &#123;</span><br><span class="line">		perror(<span class="string">&quot;ioctl: write error&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">unsigned</span> <span class="type">int</span> <span class="title function_">read_reg</span><span class="params">(<span class="type">long</span> <span class="type">unsigned</span> <span class="type">int</span> addr)</span> &#123;</span><br><span class="line">	<span class="type">int</span> ret;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">msg</span> <span class="title">m</span>;</span></span><br><span class="line">	<span class="built_in">memset</span>(&amp;m, <span class="number">0</span>, <span class="keyword">sizeof</span>(m));</span><br><span class="line">	ret = ioctl(fd, IOCRREG, &amp;m);</span><br><span class="line">	<span class="keyword">if</span> (ret) &#123;</span><br><span class="line">		perror(<span class="string">&quot;ioctl: read reg error!&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> m.data;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先实现基础读写函数进行寄存器读写，<code>reg_read</code>函数传入<code>addr</code>即可得到<code>val</code>, <code>clrsetbits_32</code>需要先读，在写入<code>val.</code></p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> KEYSCAN_MASK(REG_NAME) keyscan_top_##REG_NAME##_MASK</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> KEYSCAN_OFFSET(REG_NAME) keyscan_top_##REG_NAME##_OFFSET</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> KEYSCAN_SET(REG_NAME, VAL)                                             \</span></span><br><span class="line">	clrsetbits_32(keyscan_top_<span class="meta">##REG_NAME, KEYSCAN_MASK(REG_NAME),          \</span></span><br><span class="line">			  (VAL) &lt;&lt; KEYSCAN_OFFSET(REG_NAME))</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> KEYSCAN_GET(REG_NAME)                                                  \</span></span><br><span class="line">	((read_reg(keyscan_top_<span class="meta">##REG_NAME) &amp; KEYSCAN_MASK(REG_NAME)) &gt;&gt;        \</span></span><br><span class="line">	 KEYSCAN_OFFSET(REG_NAME))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/5.png" alt="image"></p>
+<p>例如，当调用</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">KEYSCAN_GET(reg_fifo_count); <span class="comment">//表示read_reg(keycan_top_reg_fifo_count) &amp; keycan_top_reg_fifo_count_MASK &gt;&gt; keycan_top_reg_fifo_count_OFFSET</span></span><br></pre></td></tr></table></figure>
+
+<p><code>reg_fifo</code>表示IP的某一个寄存器，<code>count</code>表示位域，因此对<code>OFFSET</code>定义成位域在该寄存器的偏移量（<code>count位域是bit[3:0]</code>）定义为0，因此<code>MASK</code>定义为<code>0xf</code>.<br>同理<code>not_empty</code>也是一个位域，<code>bit[4]</code>，<code>OFFSET</code>定义成4，<code>MASK</code>定义成<code>0x10</code>，来屏蔽除<code>bit[4]</code>的其他bit.</p>
+<p><code>KEYSCAN_GET(reg_fifo_count);</code>最终就获取到了<code>reg_fifo</code>寄存器的<code>count</code>位域的内容。<br><code>KEYSCAN_GET(reg_fifo_not_empty);</code>最终就获取到了<code>reg_fifo</code>寄存器的<code>not_empty</code>位域的内容</p>
+<p>又例如，当调用</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">KEYSCAN_SET(reg_enable, <span class="number">1</span>);<span class="comment">//表示clrsetbits_32(keycan_top_reg_enable, keycan_top_reg_enable_MASK, 1 &lt;&lt; keycan_top_reg_enable_OFFSET</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/6.png" alt="image"></p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_row_mask			0x0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_row_mask_OFFSET			0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_row_mask_MASK			0xff</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_col_mask			0x0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_col_mask_OFFSET			8</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_col_mask_MASK			0xff00</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_enable				0x00</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_enable_OFFSET			16</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> keyscan_top_reg_enable_MASK			0x10000</span></span><br></pre></td></tr></table></figure>
+
+<p>可以看到<code>offset</code>定义为<code>16</code>，mask定义为<code>0x10000</code>，用来屏蔽除<code>bit[16]</code>的其他位。<code>clrsetbits_32</code>会先读出该寄存器，然后对该位set1, mask掉其他位，再次写入该寄存器。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/" data-id="clzxsfb1q0000n4uf7a0jennv" data-title="字符设备驱动-用户态构造IP寄存器结构体和读写寄存器" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">字符设备驱动-ioctl命令详解</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">linux内存管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13px;">通信协议</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">August 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">July 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/">字符设备驱动-用户态构造IP寄存器结构体和读写寄存器</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/">字符设备驱动-ioctl命令详解</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/">字符设备驱动-misc杂项设备</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-mmap%E9%A9%B1%E5%8A%A8%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B/">字符设备驱动-mmap驱动应用实例</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-mmap%E6%9C%BA%E5%88%B6/">字符设备驱动-mmap机制</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

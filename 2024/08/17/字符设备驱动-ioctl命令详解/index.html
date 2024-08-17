@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>字符设备驱动-ioctl命令详解 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 引入ioctl 2 用户空间 ioctl 3 内核空间 ioctl 4 IOCTL的命令构成 5 ioctl系统调用过程详解 5.1 app示例 5.2 驱动示例 5.3 ioctl过程详解 5.3.1 sys_ioctl 5.3.1.1 do_vfs_ioctl 5.3.1.1.1 vfs_ioctl                1 引入ioctl#一个字符设备驱动通常会实现设备">
+<meta property="og:type" content="article">
+<meta property="og:title" content="字符设备驱动-ioctl命令详解">
+<meta property="og:url" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 引入ioctl 2 用户空间 ioctl 3 内核空间 ioctl 4 IOCTL的命令构成 5 ioctl系统调用过程详解 5.1 app示例 5.2 驱动示例 5.3 ioctl过程详解 5.3.1 sys_ioctl 5.3.1.1 do_vfs_ioctl 5.3.1.1.1 vfs_ioctl                1 引入ioctl#一个字符设备驱动通常会实现设备">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/1.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/2.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/3.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/4.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/5.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/6.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/7.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/8.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/9.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/10.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/11.png">
+<meta property="og:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/12.png">
+<meta property="article:published_time" content="2024-08-17T06:11:24.000Z">
+<meta property="article:modified_time" content="2024-08-17T06:39:07.284Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Linux设备驱动">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-字符设备驱动-ioctl命令详解" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/" class="article-date">
+  <time class="dt-published" datetime="2024-08-17T06:11:24.000Z" itemprop="datePublished">2024-08-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      字符设备驱动-ioctl命令详解
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-yin-ru-ioctl">1 引入ioctl</a></li>
+<li><a href="#2-yong-hu-kong-jian-ioctl">2 用户空间 ioctl</a></li>
+<li><a href="#3-nei-he-kong-jian-ioctl">3 内核空间 ioctl</a></li>
+<li><a href="#4-ioctl-de-ming-ling-gou-cheng">4 IOCTL的命令构成</a></li>
+<li><a href="#5-ioctl-xi-tong-diao-yong-guo-cheng-xiang-jie">5 ioctl系统调用过程详解</a><ul>
+<li><a href="#5-1-app-shi-li">5.1 app示例</a></li>
+<li><a href="#5-2-qu-dong-shi-li">5.2 驱动示例</a></li>
+<li><a href="#5-3-ioctl-guo-cheng-xiang-jie">5.3 ioctl过程详解</a><ul>
+<li><a href="#5-3-1-sys-ioctl">5.3.1 sys_ioctl</a><ul>
+<li><a href="#5-3-1-1-do-vfs-ioctl">5.3.1.1 do_vfs_ioctl</a><ul>
+<li><a href="#5-3-1-1-1-vfs-ioctl">5.3.1.1.1 vfs_ioctl</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+
+
+<h1><span id="1-yin-ru-ioctl">1 引入ioctl</span><a href="#1-yin-ru-ioctl" class="header-anchor">#</a></h1><p>一个字符设备驱动通常会实现设备打开、关闭、读、写等功能，在一些需要细分的情境下，如果需要扩展新的功能增添命令，通常以增设 <code>ioctl() </code>命令的方式实现。<br>对于ioctl这个系统调用接口，Linux的创始人在2.0版本之前并没有进行添加，仅有write和read两个接口，但是后来发现当需要去控制文件的某些操作的时候，很显然这两个接口根本不够用。所以才有了这个万能控制接口ioctl，但是作为Linux的创始人Linus本人一直排斥该接口，因为这个ioctl接口的在内核中的使用相当于对应用层开设了一个能够直接交互的窗口，很影响内核整体的权限控制，不过由于目前还暂时没有更好可以替代的方法，所以还是继续保留了这个接口的使用。<br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/1.png" alt="image"></p>
+<h1><span id="2-yong-hu-kong-jian-ioctl">2 用户空间 ioctl</span><a href="#2-yong-hu-kong-jian-ioctl" class="header-anchor">#</a></h1><p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/2.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">ioctl</span><span class="params">(<span class="type">int</span> fd, <span class="type">int</span> request, …)</span>;</span><br><span class="line">ret = ioctl(fd, MYCMD);</span><br><span class="line"><span class="keyword">if</span> (ret == <span class="number">-1</span>) &#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;ioctl: %s\n&quot;</span>, strerror(errno));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>函数功能：<br>1.向硬件设备发送控制命令<br>2.还可以和硬件设备进行读或者写操作<br>参数：<br><code>fd：</code>文件描述符<br><code>request：</code>给硬件设备发送的控制命令<br><code>arg：</code>保存的就是用户缓冲区的首地址<br>返回值：执行成功返回0，执行失败返回-1, ioctl 最常见的<code> errorno</code> 值为<code> ENOTTY</code>（<code>error not a typewriter</code>)表示命令找不到。</p>
+<h1><span id="3-nei-he-kong-jian-ioctl">3 内核空间 ioctl</span><a href="#3-nei-he-kong-jian-ioctl" class="header-anchor">#</a></h1><p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/3.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">long</span> (*unlocked_ioctl) (<span class="keyword">struct</span> file *, <span class="type">unsigned</span> <span class="type">int</span>, <span class="type">unsigned</span> <span class="type">long</span>);</span><br><span class="line"><span class="type">long</span> (*compat_ioctl) (<span class="keyword">struct</span> file *, <span class="type">unsigned</span> <span class="type">int</span>, <span class="type">unsigned</span> <span class="type">long</span>);</span><br></pre></td></tr></table></figure>
+<h1><span id="4-ioctl-de-ming-ling-gou-cheng">4 IOCTL的命令构成</span><a href="#4-ioctl-de-ming-ling-gou-cheng" class="header-anchor">#</a></h1><p> ioctl命令就是用户和驱动约定的一种协议， 理论上可以为任意 int 型数据，可以为 0、1、2、3……，但是为了确保该 “协议” 的唯一性，ioctl 命令应该使用更科学严谨的方法赋值，在linux中，提供了一种 ioctl 命令的统一格式，将 32 位 int 型数据划分为四个位段，如下图所示：<br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/4.png" alt="image"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">1. <span class="built_in">dir</span>（direction），ioctl 命令访问模式（数据传输方向），占据 2 bit，</span><br><span class="line">	可以为 _IOC_NONE、_IOC_READ、_IOC_WRITE、_IOC_READ | _IOC_WRITE，</span><br><span class="line">	分别指示了四种访问模式：无数据、读数据、写数据、读写数据；</span><br><span class="line">2. size，涉及到 ioctl 函数第三个参数 arg ，占据14bit，指定了 arg 的数据类型及长度；</span><br><span class="line">3. <span class="built_in">type</span>（device <span class="built_in">type</span>），设备类型，占据 8 bit，可以为任意 char 型字符，</span><br><span class="line">	例如‘a’、’b’、’c’ 等等，其主要作用是使 ioctl 命令有唯一的设备标识；</span><br><span class="line">4. nr（number），命令编号/序数，占据 8 bit，可以为任意 unsigned char 型数据，</span><br><span class="line">	取值范围 0~255，如果定义了多个 ioctl 命令，通常从 0 开始编号递增</span><br></pre></td></tr></table></figure>
+
+<p>通常而言，为了方便会使用<code>宏 _IOC() 衍生的接口</code>来直接定义 ioctl 命令：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ioctl.h</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_NRBITS	8</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_TYPEBITS	8</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Let any architecture override either of the following before</span></span><br><span class="line"><span class="comment"> * including this file.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _IOC_SIZEBITS</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> _IOC_SIZEBITS	14</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _IOC_DIRBITS</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> _IOC_DIRBITS	2</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_NRMASK	((1 &lt;&lt; _IOC_NRBITS)-1)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_TYPEMASK	((1 &lt;&lt; _IOC_TYPEBITS)-1)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_SIZEMASK	((1 &lt;&lt; _IOC_SIZEBITS)-1)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_DIRMASK	((1 &lt;&lt; _IOC_DIRBITS)-1)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_NRSHIFT	0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_TYPESHIFT	(_IOC_NRSHIFT+_IOC_NRBITS)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_SIZESHIFT	(_IOC_TYPESHIFT+_IOC_TYPEBITS)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_DIRSHIFT	(_IOC_SIZESHIFT+_IOC_SIZEBITS)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Direction bits, which any architecture can choose to override</span></span><br><span class="line"><span class="comment"> * before including this file.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">NOTE:</span> _IOC_WRITE means userland is writing and kernel is</span></span><br><span class="line"><span class="comment"> * reading. _IOC_READ means userland is reading and kernel is writing.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _IOC_NONE</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> _IOC_NONE	0U</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _IOC_WRITE</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> _IOC_WRITE	1U</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> _IOC_READ</span></span><br><span class="line"><span class="meta"># <span class="keyword">define</span> _IOC_READ	2U</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC(dir,type,nr,size) \</span></span><br><span class="line"><span class="meta">	(((dir)  &lt;&lt; _IOC_DIRSHIFT) | \</span></span><br><span class="line"><span class="meta">	 ((type) &lt;&lt; _IOC_TYPESHIFT) | \</span></span><br><span class="line"><span class="meta">	 ((nr)   &lt;&lt; _IOC_NRSHIFT) | \</span></span><br><span class="line"><span class="meta">	 ((size) &lt;&lt; _IOC_SIZESHIFT))</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">ifndef</span> __KERNEL__</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_TYPECHECK(t) (sizeof(t))</span></span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Used to create numbers.</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * <span class="doctag">NOTE:</span> _IOW means userland is writing and kernel is reading. _IOR</span></span><br><span class="line"><span class="comment"> * means userland is reading and kernel is writing.</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IO(type,nr)		_IOC(_IOC_NONE,(type),(nr),0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOR(type,nr,size)	_IOC(_IOC_READ,(type),(nr),(_IOC_TYPECHECK(size)))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOW(type,nr,size)	_IOC(_IOC_WRITE,(type),(nr),(_IOC_TYPECHECK(size)))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOWR(type,nr,size)	_IOC(_IOC_READ|_IOC_WRITE,(type),(nr),(_IOC_TYPECHECK(size)))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOR_BAD(type,nr,size)	_IOC(_IOC_READ,(type),(nr),sizeof(size))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOW_BAD(type,nr,size)	_IOC(_IOC_WRITE,(type),(nr),sizeof(size))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOWR_BAD(type,nr,size)	_IOC(_IOC_READ|_IOC_WRITE,(type),(nr),sizeof(size))</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* used to decode ioctl numbers.. */</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_DIR(nr)		(((nr) &gt;&gt; _IOC_DIRSHIFT) &amp; _IOC_DIRMASK)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_TYPE(nr)		(((nr) &gt;&gt; _IOC_TYPESHIFT) &amp; _IOC_TYPEMASK)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_NR(nr)		(((nr) &gt;&gt; _IOC_NRSHIFT) &amp; _IOC_NRMASK)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_SIZE(nr)		(((nr) &gt;&gt; _IOC_SIZESHIFT) &amp; _IOC_SIZEMASK)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/* ...and for the drivers/sound files... */</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOC_IN		(_IOC_WRITE &lt;&lt; _IOC_DIRSHIFT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOC_OUT		(_IOC_READ &lt;&lt; _IOC_DIRSHIFT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOC_INOUT	((_IOC_WRITE|_IOC_READ) &lt;&lt; _IOC_DIRSHIFT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOCSIZE_MASK	(_IOC_SIZEMASK &lt;&lt; _IOC_SIZESHIFT)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOCSIZE_SHIFT	(_IOC_SIZESHIFT)</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/5.png" alt="image"><br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/6.png" alt="image"><br>除了<code>_IO/_IOR/_IOW/_IOW</code>等命令外，还支持反向解析 ioctl 命令的宏接口：主要就是利用Mask看是否4个位段是否越界,如果越界说明cmd构造的不合法：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_DIR(nr) (((nr) &gt;&gt; _IOC_DIRSHIFT) &amp; _IOC_DIRMASK)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_TYPE(nr) (((nr) &gt;&gt; _IOC_TYPESHIFT) &amp; _IOC_TYPEMASK)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_NR(nr) (((nr) &gt;&gt; _IOC_NRSHIFT) &amp; _IOC_NRMASK)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> _IOC_SIZE(nr) (((nr) &gt;&gt; _IOC_SIZESHIFT) &amp; _IOC_SIZEMASK)</span></span><br></pre></td></tr></table></figure>
+
+<p>举个例子比如<img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/7.png" alt="image">，展开命令成一个<code>unsigned int</code>的 cmd整数为：(<code>字符D的ascii码为68</code>)</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0</span>&lt;&lt;<span class="number">30</span> | <span class="number">0</span>&lt;&lt;<span class="number">16</span> | <span class="number">68</span>&lt;&lt;<span class="number">8</span> | <span class="number">0x7</span>&lt;&lt;<span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<h1><span id="5-ioctl-xi-tong-diao-yong-guo-cheng-xiang-jie">5 ioctl系统调用过程详解</span><a href="#5-ioctl-xi-tong-diao-yong-guo-cheng-xiang-jie" class="header-anchor">#</a></h1><h2><span id="5-1-app-shi-li">5.1 app示例</span><a href="#5-1-app-shi-li" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> IOC_MAGIC <span class="string">&#x27;c&#x27;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOCINIT _IO(IOC_MAGIC, 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOCRREG _IOR(IOC_MAGIC, 1, int)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOCWREG _IOW(IOC_MAGIC, 2, int)<span class="comment">//定义3个cmd</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOC_MAXNR 3</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">msg</span> &#123;</span></span><br><span class="line">	<span class="type">int</span> addr;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> data;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">fd = open(<span class="string">&quot;/dev/ioctl-test&quot;</span>, O_RDWR);</span><br><span class="line">ioctl(fd, IOCINIT);</span><br><span class="line"><span class="comment">/* 往寄存器0x01写入数据0xef */</span></span><br><span class="line"><span class="built_in">memset</span>(&amp;my_msg, <span class="number">0</span>, <span class="keyword">sizeof</span>(my_msg));</span><br><span class="line">my_msg.addr = <span class="number">0x01</span>;</span><br><span class="line">my_msg.data = <span class="number">0xef</span>;</span><br><span class="line">ioctl(fd, IOCWREG, &amp;my_msg);</span><br><span class="line"><span class="comment">/* 读寄存器0x01 */</span></span><br><span class="line"><span class="built_in">memset</span>(&amp;my_msg, <span class="number">0</span>, <span class="keyword">sizeof</span>(my_msg));</span><br><span class="line">my_msg.addr = <span class="number">0x01</span>;</span><br><span class="line">ret = ioctl(fd, IOCRREG, &amp;my_msg);</span><br></pre></td></tr></table></figure>
+<p>构造了<code>IOCINIT</code> <code>IOCRREG</code> <code>IOCWREG</code>3个命令。</p>
+<h2><span id="5-2-qu-dong-shi-li">5.2 驱动示例</span><a href="#5-2-qu-dong-shi-li" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> IOC_MAGIC <span class="string">&#x27;c&#x27;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOCINIT _IO(IOC_MAGIC, 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOCRREG _IOR(IOC_MAGIC, 1, int)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOCWREG _IOW(IOC_MAGIC, 2, int)<span class="comment">//定义3个cmd</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> IOC_MAXNR 3</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">msg</span> &#123;</span></span><br><span class="line">	<span class="type">int</span> addr;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> data;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="type">static</span> <span class="type">long</span> <span class="title function_">test_ioctl</span><span class="params">(<span class="keyword">struct</span> file *file, <span class="type">unsigned</span> <span class="type">int</span> cmd, <span class="type">unsigned</span> <span class="type">long</span> arg)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> ret;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">msg</span> <span class="title">my_msg</span>;</span></span><br><span class="line">	<span class="comment">/* 检查设备类型 */</span></span><br><span class="line">	<span class="keyword">if</span> (_IOC_TYPE(cmd) != IOC_MAGIC) &#123;</span><br><span class="line">		pr_err(<span class="string">&quot;[%s] command type [%c] error!\n&quot;</span>, __func__, _IOC_TYPE(cmd));</span><br><span class="line">		<span class="keyword">return</span> -ENOTTY; </span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/* 检查序数 */</span></span><br><span class="line">	<span class="keyword">if</span> (_IOC_NR(cmd) &gt; IOC_MAXNR) &#123;</span><br><span class="line">		pr_err(<span class="string">&quot;[%s] command numer [%d] exceeded!\n&quot;</span>, __func__, _IOC_NR(cmd));</span><br><span class="line">		<span class="keyword">return</span> -ENOTTY;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/* 检查访问模式 */</span></span><br><span class="line">	<span class="keyword">if</span> (_IOC_DIR(cmd) &amp; _IOC_READ)</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> (LINUX_VERSION_CODE &gt;= KERNEL_VERSION(5, 10, 0))</span></span><br><span class="line">		ret= !access_ok(VERIFY_WRITE, (<span class="type">void</span> __user *)arg, _IOC_SIZE(cmd));</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">		ret= !access_ok((<span class="type">void</span> __user *)arg, _IOC_SIZE(cmd));</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (_IOC_DIR(cmd) &amp; _IOC_WRITE)</span><br><span class="line"><span class="meta">#<span class="keyword">if</span> (LINUX_VERSION_CODE &gt;= KERNEL_VERSION(5, 10, 0))</span></span><br><span class="line">		ret= !access_ok(VERIFY_READ, (<span class="type">void</span> __user *)arg, _IOC_SIZE(cmd));</span><br><span class="line"><span class="meta">#<span class="keyword">else</span></span></span><br><span class="line">		ret= !access_ok((<span class="type">void</span> __user *)arg, _IOC_SIZE(cmd));</span><br><span class="line"><span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">	<span class="keyword">if</span> (ret)</span><br><span class="line">		<span class="keyword">return</span> -EFAULT;</span><br><span class="line">	<span class="keyword">switch</span>(cmd) &#123; </span><br><span class="line">	<span class="comment">/* 初始化设备 */</span></span><br><span class="line">	<span class="keyword">case</span> IOCINIT:</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="comment">/* 读寄存器 */</span></span><br><span class="line">	<span class="keyword">case</span> IOCRREG:</span><br><span class="line">		ret = copy_from_user(&amp;msg, (<span class="keyword">struct</span> msg __user *)arg, <span class="keyword">sizeof</span>(my_msg));</span><br><span class="line">		<span class="keyword">if</span> (ret) </span><br><span class="line">			<span class="keyword">return</span> -EFAULT;</span><br><span class="line">		msg-&gt;data = read_reg(msg-&gt;addr);</span><br><span class="line">		ret = copy_to_user((<span class="keyword">struct</span> msg __user *)arg, &amp;msg, <span class="keyword">sizeof</span>(my_msg));</span><br><span class="line">		<span class="keyword">if</span> (ret) </span><br><span class="line">			<span class="keyword">return</span> -EFAULT;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="comment">/* 写寄存器 */</span></span><br><span class="line">	<span class="keyword">case</span> IOCWREG:</span><br><span class="line">		ret = copy_from_user(&amp;msg, (<span class="keyword">struct</span> msg __user *)arg, <span class="keyword">sizeof</span>(my_msg));</span><br><span class="line">		<span class="keyword">if</span> (ret) </span><br><span class="line">			<span class="keyword">return</span> -EFAULT;</span><br><span class="line">		write_reg(msg-&gt;addr, msg-&gt;data);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		<span class="keyword">return</span> -ENOTTY;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/8.png" alt="image"><br>首先定好3个命令，通过<code>arg</code>传入要写入的地址和数据or 要读的地址。然后检查<code>type</code>是否为<code>‘c’</code>, 检查命令号是否超过最大值3，检查方向是读还是写，利用<code>access_ok</code>判断用户地址是否可以访问。<br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/9.png" alt="image"><br>最后将用户地址arg的数据透过<code>copy_from_user</code>和<code>copy_to_user</code>进行拷贝。然后进行寄存器读写。</p>
+<h2><span id="5-3-ioctl-guo-cheng-xiang-jie">5.3 ioctl过程详解</span><a href="#5-3-ioctl-guo-cheng-xiang-jie" class="header-anchor">#</a></h2><p>在系统调用中，是通过<code>SWI(Software Interrupt)</code>的方式陷入内核态的, 首先通过软中断方式切换到内核态，ioctl的系统调用位于<code>arch/arm/include/asm/unistd.h</code>：</p>
+<h3><span id="5-3-1-sys-ioctl">5.3.1 sys_ioctl</span><a href="#5-3-1-sys-ioctl" class="header-anchor">#</a></h3><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> __NR_ioctl	(__NR_SYSCALL_BASE+ 54)</span></span><br></pre></td></tr></table></figure>
+
+<p><code>arch/arm/kernel/calls.S</code></p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 55 */</span>	CALL(sys_ioctl);</span><br></pre></td></tr></table></figure>
+<p>调用<code>sys_ioctl()</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/include/linux.h</span><br><span class="line">	asmlinkage <span class="type">long</span> <span class="title function_">sys_ioctl</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> fd, <span class="type">unsigned</span> <span class="type">int</span> cmd, <span class="type">unsigned</span> <span class="type">long</span> arg)</span>;</span><br></pre></td></tr></table></figure>
+
+
+<p>然后调用<code>SYSCALL_DEFINE3(ioctl, unsigned int, fd, unsigned int, cmd, unsigned long, arg)</code></p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">/include/linux/syscalls.h</span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SYSCALL_DEFINE3(name, ...)  SYSCALL_DEFINEx(3, _##name, __VA_ARGS__)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> SYSCALL_DEFINEx(x, sname, ...)	__SYSCALL_DEFINEx(x, sname, __VA_ARGS__)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> __SYSCALL_DEFINEx(x, name, ...)	asmlinkage long sys##name(__SC_DECL##x(__VA_ARGS__))</span></span><br></pre></td></tr></table></figure>
+
+<p><code>SYSCALL_DEFINE3</code><br><code>SYSCALL_DEFINE3(ioctl, unsigned int, fd, unsigned int, cmd, unsigned long, arg)</code>就是<code>sys_ioctl</code>的定义:<br><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/10.png" alt="image"><br><code>fget_light() </code>以及 <code>security_file_ioctl() </code>就是检验可操作安全性，所以<code>sys_ioctl</code>更多是调用更深一层接口 <code>do_vfs_ioctl()</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">SYSCALL_DEFINE3(ioctl, <span class="type">unsigned</span> <span class="type">int</span>, fd, <span class="type">unsigned</span> <span class="type">int</span>, cmd, <span class="type">unsigned</span> <span class="type">long</span>, arg)&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">file</span> *<span class="title">filp</span>;</span></span><br><span class="line">	<span class="type">int</span> error = -EBADF;</span><br><span class="line">	<span class="type">int</span> fput_needed;</span><br><span class="line"></span><br><span class="line">	filp = fget_light(fd, &amp;fput_needed);<span class="comment">//由fd得带filp指针</span></span><br><span class="line">	<span class="keyword">if</span> (!filp)</span><br><span class="line">		<span class="keyword">goto</span> out;</span><br><span class="line">	error = security_file_ioctl(filp, cmd, arg);</span><br><span class="line">	<span class="keyword">if</span> (error)</span><br><span class="line">		<span class="keyword">goto</span> out_fput;</span><br><span class="line">	error = do_vfs_ioctl(filp, fd, cmd, arg);</span><br><span class="line"> out_fput:</span><br><span class="line">	fput_light(filp, fput_needed);</span><br><span class="line"> out:</span><br><span class="line">	<span class="keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="5-3-1-1-do-vfs-ioctl">5.3.1.1 do_vfs_ioctl</span><a href="#5-3-1-1-do-vfs-ioctl" class="header-anchor">#</a></h4><p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/11.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">do_vfs_ioctl</span><span class="params">(<span class="keyword">struct</span> file *filp, <span class="type">unsigned</span> <span class="type">int</span> fd, <span class="type">unsigned</span> <span class="type">int</span> cmd,</span></span><br><span class="line"><span class="params">		 <span class="type">unsigned</span> <span class="type">long</span> arg)</span> &#123;</span><br><span class="line">	<span class="type">int</span> error = <span class="number">0</span>;</span><br><span class="line">	<span class="type">int</span> __user *argp = (<span class="type">int</span> __user *)arg;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">inode</span> *<span class="title">inode</span> =</span> filp-&gt;f_path.dentry-&gt;d_inode;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">switch</span> (cmd) &#123;</span><br><span class="line">	<span class="keyword">case</span> FIOCLEX:</span><br><span class="line">		set_close_on_exec(fd, <span class="number">1</span>);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> FIONCLEX:</span><br><span class="line">		set_close_on_exec(fd, <span class="number">0</span>);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> FIONBIO:</span><br><span class="line">		error = ioctl_fionbio(filp, argp);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> FIOASYNC:</span><br><span class="line">		error = ioctl_fioasync(fd, filp, argp);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> FIOQSIZE:</span><br><span class="line">		<span class="keyword">if</span> (S_ISDIR(inode-&gt;i_mode) || S_ISREG(inode-&gt;i_mode) ||</span><br><span class="line">			S_ISLNK(inode-&gt;i_mode)) &#123;</span><br><span class="line">			<span class="type">loff_t</span> res = inode_get_bytes(inode);</span><br><span class="line">			error = copy_to_user(argp, &amp;res, <span class="keyword">sizeof</span>(res)) ?</span><br><span class="line">					-EFAULT : <span class="number">0</span>;</span><br><span class="line">		&#125; <span class="keyword">else</span></span><br><span class="line">			error = -ENOTTY;</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> FIFREEZE:</span><br><span class="line">		error = ioctl_fsfreeze(filp);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> FITHAW:</span><br><span class="line">		error = ioctl_fsthaw(filp);</span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> FS_IOC_FIEMAP:</span><br><span class="line">		<span class="keyword">return</span> ioctl_fiemap(filp, arg);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">case</span> FIGETBSZ:</span><br><span class="line">		<span class="keyword">return</span> put_user(inode-&gt;i_sb-&gt;s_blocksize, argp);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">default</span>:</span><br><span class="line">		<span class="keyword">if</span> (S_ISREG(inode-&gt;i_mode))<span class="comment">//是否为常规文件若是常规文件</span></span><br><span class="line">			error = file_ioctl(filp, cmd, arg);</span><br><span class="line">		<span class="keyword">else</span></span><br><span class="line">			error = vfs_ioctl(filp, cmd, arg);<span class="comment">//调用vfs_ioctl</span></span><br><span class="line">		<span class="keyword">break</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> error;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5><span id="5-3-1-1-1-vfs-ioctl">5.3.1.1.1 vfs_ioctl</span><a href="#5-3-1-1-1-vfs-ioctl" class="header-anchor">#</a></h5><p><img src="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/12.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">long</span> <span class="title function_">vfs_ioctl</span><span class="params">(<span class="keyword">struct</span> file *filp, <span class="type">unsigned</span> <span class="type">int</span> cmd,</span></span><br><span class="line"><span class="params">			  <span class="type">unsigned</span> <span class="type">long</span> arg)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> error = -ENOTTY;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!filp-&gt;f_op || !filp-&gt;f_op-&gt;unlocked_ioctl)</span><br><span class="line">		<span class="keyword">goto</span> out;</span><br><span class="line">unlocked_ioctl</span><br><span class="line">	error = filp-&gt;f_op-&gt;unlocked_ioctl(filp, cmd, arg);<span class="comment">//调用unlocked_ioctl()</span></span><br><span class="line">	<span class="keyword">if</span> (error == -ENOIOCTLCMD)</span><br><span class="line">		error = -EINVAL;</span><br><span class="line"> out:</span><br><span class="line">	<span class="keyword">return</span> error;</span><br><span class="line">&#125;	</span><br></pre></td></tr></table></figure>
+
+<p>最终调用对应驱动人员自己fops的unlocked_ioctl函数。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/" data-id="clzxrltbn000180uf0uhodbue" data-title="字符设备驱动-ioctl命令详解" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          字符设备驱动-用户态构造IP寄存器结构体和读写寄存器
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">字符设备驱动-misc杂项设备</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">linux内存管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13px;">通信协议</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">August 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">July 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/">字符设备驱动-用户态构造IP寄存器结构体和读写寄存器</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/">字符设备驱动-ioctl命令详解</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/">字符设备驱动-misc杂项设备</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-mmap%E9%A9%B1%E5%8A%A8%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B/">字符设备驱动-mmap驱动应用实例</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-mmap%E6%9C%BA%E5%88%B6/">字符设备驱动-mmap机制</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
