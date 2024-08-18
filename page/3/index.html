@@ -69,6 +69,403 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-字符设备驱动-4-设备树" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/" class="article-date">
+  <time class="dt-published" datetime="2024-07-28T11:23:03.000Z" itemprop="datePublished">2024-07-28</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/">字符设备驱动-4-设备树</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-yin-yong-she-bei-shu">1 引用设备树</a><ul>
+<li><a href="#1-1-gen-wen-jian-xi-tong-zhong-cha-kan-she-bei-shu">1.1 根文件系统中查看设备树</a></li>
+</ul>
+</li>
+<li><a href="#2-she-bei-shu-de-yu-fa">2 设备树的语法</a><ul>
+<li><a href="#2-1-dts-wen-jian">2.1 DTS 文件</a><ul>
+<li><a href="#2-1-1-dts-wen-jian-de-zong-ti-bu-ju">2.1.1 DTS文件的总体布局</a></li>
+<li><a href="#2-1-2-memory-reservations-de-ge-shi">2.1.2 memory reservations的格式</a></li>
+<li><a href="#2-1-3-shu-xing-de-ge-shi">2.1.3 属性的格式</a><ul>
+<li><a href="#2-1-3-1-you-guan-shu-xing-ming">2.1.3.1 有关属性名</a></li>
+<li><a href="#2-1-3-2-you-guan-shu-xing-zhi">2.1.3.2 有关属性值</a></li>
+</ul>
+</li>
+<li><a href="#2-1-4-yi-xie-te-ding-de-shu-xing">2.1.4 一些特定的属性</a><ul>
+<li><a href="#2-1-4-1-address-cells">2.1.4.1 #address-cells</a></li>
+<li><a href="#2-1-4-2-size-cells">2.1.4.2 #size-cells</a></li>
+<li><a href="#2-1-4-3-compatible">2.1.4.3 compatible</a></li>
+<li><a href="#2-1-4-4-model">2.1.4.4 model</a></li>
+<li><a href="#2-1-4-5-phandle">2.1.4.5 phandle</a></li>
+<li><a href="#2-1-4-6-interrupt-controller">2.1.4.6 interrupt-controller</a></li>
+<li><a href="#2-1-4-7-interrupt-parent">2.1.4.7 interrupt-parent</a></li>
+<li><a href="#2-1-4-8-reg">2.1.4.8 reg</a></li>
+<li><a href="#2-1-4-8-status">2.1.4.8 status</a></li>
+<li><a href="#2-1-4-9-ranges">2.1.4.9 ranges</a></li>
+<li><a href="#2-1-4-10-device-type">2.1.4.10 device_type</a></li>
+</ul>
+</li>
+<li><a href="#2-1-5-jie-dian-de-ge-shi">2.1.5 节点的格式</a><ul>
+<li><a href="#2-1-5-1-tui-jian-de-jie-dian-ming">2.1.5.1 推荐的节点名</a></li>
+<li><a href="#2-1-5-2-jie-dian-de-lu-jing-ming">2.1.5.2 节点的路径名</a></li>
+</ul>
+</li>
+<li><a href="#2-1-6-yi-xie-te-shu-de-jie-dian">2.1.6 一些特殊的节点</a><ul>
+<li><a href="#2-1-6-1-aliases-jie-dian">2.1.6.1 &#x2F;aliases节点</a></li>
+<li><a href="#2-1-6-2-chosen-jie-dian">2.1.6.2 &#x2F;chosen节点</a></li>
+<li><a href="#2-1-6-3-gen-jie-dian">2.1.6.3 &#x2F;根节点</a></li>
+</ul>
+</li>
+<li><a href="#2-1-7-bi-yao-de-jie-dian-he-bi-yao-de-shu-xing">2.1.7 必要的节点和必要的属性</a></li>
+<li><a href="#2-1-8-label-biao-qian-de-shi-yong">2.1.8 label（标签）的使用</a></li>
+<li><a href="#2-1-9-bian-xie-she-bei-shu-wen-jian">2.1.9 编写设备树文件</a><ul>
+<li><a href="#2-1-9-1-zai-dts-wen-jian-zhong-bao-han-qi-ta-wen-jian">2.1.9.1 在DTS文件中包含其他文件</a></li>
+<li><a href="#2-1-9-2-ru-he-zai-she-bei-shu-wen-jian-zhong-miao-shu-she-bei">2.1.9.2 如何在设备树文件中描述设备</a><ul>
+<li><a href="#2-1-9-2-1-documentation-devicetree-bindings">2.1.9.2.1 Documentation&#x2F;devicetree&#x2F;bindings</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-2-dtb-wen-jian">2.2 DTB文件</a><ul>
+<li><a href="#2-2-1-struct-ftd-header">2.2.1 struct ftd_header</a></li>
+<li><a href="#2-2-2-memory-reservation-block">2.2.2 memory reservation block</a></li>
+<li><a href="#2-2-3-structure-block">2.2.3 structure block</a></li>
+<li><a href="#2-2-4-strings-block">2.2.4 strings block</a></li>
+</ul>
+</li>
+<li><a href="#2-3-dtb-wen-jian-de-bian-yi">2.3 DTB文件的编译</a><ul>
+<li><a href="#2-3-1-zai-nei-he-zhong-zhi-jie-make">2.3.1 在内核中直接 make</a></li>
+<li><a href="#2-3-2-shou-gong-bian-yi">2.3.2 手工编译</a></li>
+<li><a href="#2-3-3-fan-bian-yi-dtb">2.3.3 反编译dtb</a></li>
+</ul>
+</li>
+<li><a href="#2-4-nei-he-dui-she-bei-shu-de-chu-li-guo-cheng">2.4 内核对设备树的处理过程</a><ul>
+<li><a href="#2-4-1-dtb-zhong-mei-yi-ge-jie-dian-du-bei-zhuan-huan-wei-device-node-jie-gou-ti">2.4.1 dtb 中每一个节点都被转换为 device_node 结构体</a></li>
+<li><a href="#2-4-2-na-xie-she-bei-shu-jie-dian-hui-bei-zhuan-huan-wei-platform-device">2.4.2 哪些设备树节点会被转换为 platform_device</a></li>
+<li><a href="#2-4-3-jie-dian-zen-me-zhuan-huan-wei-platform-device">2.4.3 节点怎么转换为 platform_device</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-wan-zheng-dts-shi-li">3 完整dts示例</a><ul>
+<li><a href="#3-1-tian-jia-cpus-jie-dian">3.1 添加 cpus节点</a></li>
+<li><a href="#3-2-tian-jia-soc-jie-dian">3.2 添加 soc节点</a><ul>
+<li><a href="#3-2-1-tian-jia-ocram-jie-dian">3.2.1 添加 ocram节点</a></li>
+<li><a href="#3-2-2-tian-jia-aips1-aips2-he-aips3-jie-dian">3.2.2 添加 aips1、 aips2和 aips3节点</a><ul>
+<li><a href="#3-2-2-1-tian-jia-ecspi1-usbotg1-he-rngb-jie-dian">3.2.2.1 添加 ecspi1、 usbotg1和 rngb节点</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+
+<h1><span id="1-yin-yong-she-bei-shu">1 引用设备树</span><a href="#1-yin-yong-she-bei-shu" class="header-anchor">#</a></h1><p>在内核中，使用同一个芯片的板子，它们所用的外设资源不一样，比如 A 板用 GPIO A，B 板用 GPIO B， 如果用<code>plateform_device</code>定义资源信息，那么每次单板硬件资源变动后，都要改驱动程序源码，重新编译驱动，重新加载驱动，非常麻烦。<br>随着 ARM 芯片的流行，内核中针对这些 ARM 板保存有大量的、没有技术含量的文件。 Linus 大发雷霆：<code>&quot;this whole ARM thing is a f*cking pain in the ass&quot;</code>。于是，Linux 内核开始引入设备树。 设备树并不是重新发明出来的，在 Linux 内核中其他平台如 <code>PowerPC</code>，早就使用设备树来描述硬件了。<br>设备树只是用来给内核里的驱动程序，指定硬件的信息。</p>
+<h2><span id="1-1-gen-wen-jian-xi-tong-zhong-cha-kan-she-bei-shu">1.1 根文件系统中查看设备树</span><a href="#1-1-gen-wen-jian-xi-tong-zhong-cha-kan-she-bei-shu" class="header-anchor">#</a></h2><p><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/1.png" alt="image"></p>
+<p>烧录的dtb文件,显然两者是完全相同的。<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/2.png" alt="image"></p>
+<p>除了原始的dtb文件，根文件系统还以目录结构的方式呈现dtb文件,在<code>devicetree</code>目录下，则有一个<code>base</code>目录，这个base目录，就对应着根节点。<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/3.png" alt="image"></p>
+<p>base目录下，每一个节点对应一个目录, 每一个属性对应一个文件. 这些属性的值如果是字符串，可以使用 cat 命令把它打印出来。对于数值，可以用 <code>hexdump</code> 把它打印出来。<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/4.png" alt="image-20240728192831389"></p>
+<p>进入<code>led</code>目录，里面一共有三个文件，除<code>name</code>外，分别对应着led节点的两个属性，cat属性如下：<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/5.png" alt="image"></p>
+<p><code>pin</code>属性的值为<code>0x00 05 00 05</code>，也就是<code>GPF5</code>.<br>如果节点没有设置<code>name</code>属性，那么转换为<code>device_node</code>时，会将节点自己的名称作为<code>name</code>属性值。 所以这里<code>name</code>是<code>led</code>.<br>根文件系统下也可以查看<code>platform_device</code>。系统中所有的<code>platform_device</code>，都可以在<code>/sys/devices/platform/</code>路径下查看。<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/6.png" alt="image"></p>
+<p>另外，系统中所有的<code>platform_device</code>，有来自设备树的，也有来自<code>.c</code>文件中注册的。那么，我们怎么知道哪些<code>platform_device</code>是来自设备树，哪些是来自.c文件中注册的？</p>
+<pre><code>答：可以查看该platform_device的相关目录下，是否有of_node，如果有of_node，那么这个platform_device就来自于设备树；否则，来自.c文件。
+</code></pre>
+<p>以<code>led</code>为例，进入led目录，可以看到有<code>of_node</code>，说明这个<code>platform_device</code>来自设备树。同时，可以看到这个<code>of_node</code>是一个链接文件，指向的是<code>/sys/firmware/devicetree/base/led</code>。也就是说，可以进入 <code>/sys/devices/platform/&lt;设备名&gt;/of_node</code> 查看它的设备树属性。<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/7.png" alt="image"></p>
+<p>在&#x2F;proc下有一个链接文件<code>device-tree</code>，它指向的是<code>/sys/firmware/devicetree/base</code><br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/8.png" alt="image"></p>
+<h1><span id="2-she-bei-shu-de-yu-fa">2 设备树的语法</span><a href="#2-she-bei-shu-de-yu-fa" class="header-anchor">#</a></h1><p>设备树文件(<code>dts: device tree source</code>)，它需要编译为<code> dtb(device tree blob)</code>文件，内核使用的是 dtb 文件。</p>
+<h2><span id="2-1-dts-wen-jian">2.1 DTS 文件</span><a href="#2-1-dts-wen-jian" class="header-anchor">#</a></h2><h3><span id="2-1-1-dts-wen-jian-de-zong-ti-bu-ju">2.1.1 DTS文件的总体布局</span><a href="#2-1-1-dts-wen-jian-de-zong-ti-bu-ju" class="header-anchor">#</a></h3><p>设备树源文件通常以dts为后缀，其总体布局如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">/dts-v1/;</span><br><span class="line">[memory reservations]</span><br><span class="line">/&#123;</span><br><span class="line">	[property definitions]</span><br><span class="line">	[child nodes]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上各项的含义分别为：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&#x2F;dts-v1&#x2F;</td>
+<td>设备树文件的版本</td>
+</tr>
+<tr>
+<td>memory reservations</td>
+<td>指定保留内存，内核不会使用保留内存</td>
+</tr>
+<tr>
+<td>&#x2F;</td>
+<td>根节点（使用花括号括出属于根节点的内容）</td>
+</tr>
+<tr>
+<td>property definitions</td>
+<td>根节点的属性，用来描述硬件</td>
+</tr>
+<tr>
+<td>child nodes</td>
+<td>孩子节点（使用花括号括出属于孩子节点的内容）</td>
+</tr>
+</tbody></table>
+<h3><span id="2-1-2-memory-reservations-de-ge-shi">2.1.2 memory reservations的格式</span><a href="#2-1-2-memory-reservations-de-ge-shi" class="header-anchor">#</a></h3><p>该项是可选项，如果想要保留一段内存不让内核使用，可用如下格式指定：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">	address    指定要保留的内存的起始地址</span></span><br><span class="line"><span class="comment">	length     指定要保留的内存的长度</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line">/memreserve/&lt;address&gt;&lt;length&gt;;</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是，<code>address</code>和&#96;length都是64位。</p>
+<h3><span id="2-1-3-shu-xing-de-ge-shi">2.1.3 属性的格式</span><a href="#2-1-3-shu-xing-de-ge-shi" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">• 属性有值 [label:] property-name = value;</span><br><span class="line">• 属性没有值 [label:] property-name;</span><br></pre></td></tr></table></figure>
+<p>其中各项的含义：</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>label</td>
+<td>标签</td>
+</tr>
+<tr>
+<td>property-name</td>
+<td>属性名</td>
+</tr>
+<tr>
+<td>value</td>
+<td>属性值</td>
+</tr>
+</tbody></table>
+<h4><span id="2-1-3-1-you-guan-shu-xing-ming">2.1.3.1 有关属性名</span><a href="#2-1-3-1-you-guan-shu-xing-ming" class="header-anchor">#</a></h4><p>属性名的长度为<code>1~31</code>个字符，可以自己取，只要能够提供可以解读该属性名的驱动即可。也有一些属性名有着特定的含义，比如<code>compatible</code>用于表示哪个或哪些驱动支持该设备。对于自己命名的属性，并非所有字符均可组成属性名，它需要由以下字符组成：<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/9.png" alt="image"></p>
+<h4><span id="2-1-3-2-you-guan-shu-xing-zhi">2.1.3.2 有关属性值</span><a href="#2-1-3-2-you-guan-shu-xing-zhi" class="header-anchor">#</a></h4><p>属性值有以下四种：</p>
+<ol>
+<li><p><code>array of cells</code> 一个cell就是一个u32类型的数据，一个或多个cell用尖括号括起来，并以空格隔开就可以作为一种合法的属性值，如</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">example = &lt;<span class="number">0x1</span> <span class="number">0x2</span> <span class="number">0x3</span>&gt;;。</span><br></pre></td></tr></table></figure></li>
+<li><p>含有结束符的<strong>字符串</strong> 如:</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">example = <span class="string">&quot;example value&quot;</span>;</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>字节序列</strong> 用方括号括起一个或多个字节，字节之间可用也可不用空格隔开，且字节以两位16进制数表示，如:</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">example = [<span class="number">12</span> <span class="number">34</span> <span class="number">56</span> <span class="number">78</span>];</span><br></pre></td></tr></table></figure></li>
+<li><p><strong>以上三种值的混合</strong>（以逗号隔开） 如:</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">compatible = <span class="string">&quot;fsl,mpc8641&quot;</span>, <span class="string">&quot;ns16550&quot;</span>;</span><br></pre></td></tr></table></figure>
+<p> ◆ 文本字符串（包含’\0’结束符）用双引号表示：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">string</span>-property=<span class="string">&quot;a string&quot;</span>;</span><br></pre></td></tr></table></figure>
+<p> ◆ Cells（32位无符号整数）用尖括号表示：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cell-property = &lt;<span class="number">0xbeef</span> <span class="number">123</span> <span class="number">0xabcd1234</span>&gt;;</span><br></pre></td></tr></table></figure>
+<p> ◆ 64bit 数据使用 2 个 cell 来表示：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">clock-frequency = &lt;<span class="number">0x00000001</span> <span class="number">0x00000000</span>&gt;; </span><br></pre></td></tr></table></figure>
+<p> ◆ 二进制数据用方括号表示：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">binary-property=[<span class="number">0x01</span> <span class="number">0x23</span> <span class="number">0x45</span> <span class="number">0x67</span>];</span><br></pre></td></tr></table></figure>
+<p> ◆ 类型不同的数据的组合也是可以的，但需要用逗号隔开：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mixed-property=<span class="string">&quot;a string&quot;</span>, [<span class="number">0x01</span> <span class="number">0x23</span> <span class="number">0x45</span> <span class="number">0x67</span>], &lt;<span class="number">0x12345678</span>&gt;;</span><br></pre></td></tr></table></figure>
+<p> ◆ 逗号同样用于创建字符串列表：</p>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">string</span>-<span class="built_in">list</span> = <span class="string">&quot;red fish&quot;</span>, <span class="string">&quot;blue fish&quot;</span>;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<p>举个例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">/ &#123;</span><br><span class="line">	node1 &#123;</span><br><span class="line">		a-<span class="built_in">string</span>-property = <span class="string">&quot;A string&quot;</span>;</span><br><span class="line">		a-<span class="built_in">string</span>-<span class="built_in">list</span>-property = <span class="string">&quot;first string&quot;</span>, <span class="string">&quot;second string&quot;</span>;</span><br><span class="line">		a-byte-data-property = [<span class="number">0x01</span> <span class="number">0x23</span> <span class="number">0x34</span> <span class="number">0x56</span>];</span><br><span class="line">		child-node1 &#123;</span><br><span class="line">			first-child-property;</span><br><span class="line">			second-child-property = &lt;<span class="number">1</span>&gt;;</span><br><span class="line">			a-<span class="built_in">string</span>-property = <span class="string">&quot;Hello, world&quot;</span>;</span><br><span class="line">		&#125;;</span><br><span class="line">		child-node2 &#123;</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;;</span><br><span class="line">	node2 &#123;</span><br><span class="line">		an-empty-property;</span><br><span class="line">		a-cell-property = &lt;<span class="number">1</span> <span class="number">2</span> <span class="number">3</span> <span class="number">4</span>&gt;; <span class="comment">/* each number (cell) is a uint32 */</span></span><br><span class="line">		child-node1 &#123;</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-1-4-yi-xie-te-ding-de-shu-xing">2.1.4 一些特定的属性</span><a href="#2-1-4-yi-xie-te-ding-de-shu-xing" class="header-anchor">#</a></h3><p>设备树文件中有一些特定的属性，他们拥有约定俗成的名称和含义，在<code>devicetree-specification</code>中，这些属性被称为<code>Standard Properties</code>，我们在使用这些属性时，应当遵守相应的约定。这些属性有很多，我将在下文中介绍它们中的一部分。</p>
+<h4><span id="2-1-4-1-address-cells">2.1.4.1 #address-cells</span><a href="#2-1-4-1-address-cells" class="header-anchor">#</a></h4><p>该属性的值表示在该节点的子节点的reg属性中，使用使用多少个cell，也即使用多少个u32整数来表示地址（对于32位系统，一个u32整数就够了；而对于64位系统，需要两个u32整数）。</p>
+<h4><span id="2-1-4-2-size-cells">2.1.4.2 #size-cells</span><a href="#2-1-4-2-size-cells" class="header-anchor">#</a></h4><p>该属性的值表示在该节点的子节点的reg属性中，使用多少个cell，也即使用多少个u32整数来表示大小（一段地址空间的长度）。<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/10.png" alt="image"></p>
+<h4><span id="2-1-4-3-compatible">2.1.4.3 compatible</span><a href="#2-1-4-3-compatible" class="header-anchor">#</a></h4><p>其值为一个或多个字符串，用来描述支持该设备的驱动程序。比如，该属性位于根节点时，用于指定内核中哪个<code>machine_desc</code>可以支持本设备，即当前设备与哪些平台兼容。其值的格式一般是<code>&quot;manufacturer, model&quot;</code>，其中<code>manufacturer</code>表示厂家，<code>model</code>表示型号（厂家的哪型产品）。<br>当该属性的值有多个字符串时，从左往右，从最特殊到最一般。举例来说</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">compatible = <span class="string">&quot;samsung,smdk2416&quot;</span></span><br></pre></td></tr></table></figure>
+<p><code>&quot;samsung, s3c2416&quot;</code> 作为根节点的属性时，第一个字符串指示了一个具体的开发板型号，而第二个字符串要更一般，只指示了SoC的型号。在linux初始化时，会优先找支持<code>&quot;samsung,smdk2416&quot;</code>的<code>machine_desc</code>用以初始化硬件，找不到时才退而求其次找到<code>&quot;samsung, s3c2416&quot;</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">led &#123; </span><br><span class="line">	compatible = “A”, “B”, “C”; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<p><code>“compatible”</code>表示“兼容”，对于某个 LED，内核中可能有 A、B、C 三个驱 动都支持它。</p>
+<h4><span id="2-1-4-4-model">2.1.4.4 model</span><a href="#2-1-4-4-model" class="header-anchor">#</a></h4><p>其值为一个字符串，用来描述当前设备的型号（单板的名字）。当多个设备的<code>compatible</code>相同时，可以通过model来进一步区分多个设备。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&#123; </span><br><span class="line">	compatible = <span class="string">&quot;samsung,smdk2440&quot;</span>, <span class="string">&quot;samsung,mini2440&quot;</span>; </span><br><span class="line">	model = <span class="string">&quot;jz2440_v3&quot;</span>; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<p>它表示<code>jz2440_v3</code>这个单板，可以兼容内核中的<code>“smdk2440”</code>，也兼容<code>“mini2440”</code>.</p>
+<h4><span id="2-1-4-5-phandle">2.1.4.5 phandle</span><a href="#2-1-4-5-phandle" class="header-anchor">#</a></h4><p>该属性可以为节点指定一个全局唯一的数字标识符。这个标识符可以被需要引用该节点的另一个节点使用。举例来说，现有一个中断控制器：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pic@<span class="number">10000000</span>&#123;</span><br><span class="line">	phandle =&lt;<span class="number">1</span>&gt;;</span><br><span class="line">	interrupt-controller;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>还有一个可以产生中断的设备，且这个设备的中断信号线连接到了上述中断控制器，为了描述清楚这种关系，该设备的设备节点就需要引用中断控制器的节点：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">another-device-node &#123;</span><br><span class="line">	interrupt-parent =&lt;<span class="number">1</span>&gt;;<span class="comment">/* 数字1就唯一标识了节点pic@10000000 */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h4><span id="2-1-4-6-interrupt-controller">2.1.4.6 interrupt-controller</span><a href="#2-1-4-6-interrupt-controller" class="header-anchor">#</a></h4><p>这是一个没有值的属性，用在中断控制器的设备节点中，以表明这个节点描述的是一个中断控制器。</p>
+<h4><span id="2-1-4-7-interrupt-parent">2.1.4.7 interrupt-parent</span><a href="#2-1-4-7-interrupt-parent" class="header-anchor">#</a></h4><p>该属性用于可以产生中断，且中断信号连接到某中断控制器的设备的设备节点，用于表示该设备的中断信号连接到了哪个中断控制器。该属性的值通常是中断控制器设备节点的数字标识（<code>phandle</code>），具体示例在上文已经出现过了。</p>
+<h4><span id="2-1-4-8-reg">2.1.4.8 reg</span><a href="#2-1-4-8-reg" class="header-anchor">#</a></h4><p>reg属性描述了设备资源在其父总线定义的地址空间内的地址。通俗的说，该属性使用一对或多对（地址，长度）来描述设备所占的地址空间。至于地址和长度使用多少个cell来表示呢？这取决于上文介绍的<code>#address-cells、#size-cells</code>属性的值。<br>举个例子，当：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#address-cells =<span class="string">&lt;1&gt;</span>;</span></span><br><span class="line"><span class="meta">#size-cells =<span class="string">&lt;1&gt;</span>;</span></span><br><span class="line">reg = &lt;<span class="number">0x3000</span> <span class="number">0x20</span> <span class="number">0xFE00</span> <span class="number">0x100</span>&gt;;</span><br></pre></td></tr></table></figure>
+
+<p>那么<code>reg = &lt;0x3000 0x20 0xFE00 0x100&gt;</code>，表示该属性所属的设备占据了两块内存空间，第一块是以0x3000为起始的32字节内存块；第二块是以0xFE00为起始的256字节内存块。</p>
+<h4><span id="2-1-4-8-status">2.1.4.8 status</span><a href="#2-1-4-8-status" class="header-anchor">#</a></h4><p><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/11.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&amp;uart1 &#123;</span><br><span class="line">	status = <span class="string">&quot;disabled&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h4><span id="2-1-4-9-ranges">2.1.4.9 ranges</span><a href="#2-1-4-9-ranges" class="header-anchor">#</a></h4><p><code>ranges</code>属性值可以为空或者按照 (<code>child-bus-address,parent-bus-address,length</code>)格式编写的数字组成：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">child-bus-address<span class="comment">//子总线地址空间的物理地址，由父节点的 #address-cells确定此物理地址所占用的字长。</span></span><br><span class="line">parent-bus-address<span class="comment">//父总线地址空间的物理地址，同样由父节点的 #address-cells确定此物理地址所占用的字长。</span></span><br><span class="line">length<span class="comment">//子地址空间的长度，由父节点的 #size-cells确定此地址长度所占用的字长。</span></span><br><span class="line"></span><br><span class="line">soc &#123; </span><br><span class="line">	<span class="meta">#address-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">	<span class="meta">#size-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">	compatible = <span class="string">&quot;simple-bus&quot;</span>; </span><br><span class="line">	interrupt-parent = &lt;&amp;gpc&gt;; </span><br><span class="line">	ranges; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>ranges</code>属性值为空值，说明子地址空间和父地址空间完全相同，不需要进行地址转换。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">soc &#123; </span><br><span class="line">	compatible = <span class="string">&quot;simple-bus&quot;</span>; </span><br><span class="line">	<span class="meta">#address-cells = <span class="string">&lt;1&gt;</span>;</span></span><br><span class="line">	<span class="meta">#size-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">	ranges = &lt;<span class="number">0x0</span> <span class="number">0xe0000000</span> <span class="number">0x00100000</span>&gt;; </span><br><span class="line">	serial &#123; </span><br><span class="line">		device_type = <span class="string">&quot;serial&quot;</span>; </span><br><span class="line">		compatible = <span class="string">&quot;ns16550&quot;</span>; </span><br><span class="line">		reg = &lt;<span class="number">0x4600</span> <span class="number">0x100</span>&gt;; </span><br><span class="line">	&#125;; </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>soc定义的 ranges属性，值为<code> &lt;0x0 0xe0000000 0x00100000&gt;</code>，此属性值指定了一个 <code>1024KB(0x00100000)</code>的地址范围，子地址空间的物理起始地址为 <code>0x0</code>，父地址空间的物理起始地址为<code> 0xe0000000</code>。</p>
+<p>serial是串口设备节点， reg属性定义了 serial设备寄存器的起始地址为 <code>0x4600</code>寄存器长度为<code> 0x100</code>。经过地址转换， serial设备可以从 <code>0xe0004600</code>开始进行读写操作，<code>0xe0004600=0x4600+0xe0000000</code>。</p>
+<h4><span id="2-1-4-10-device-type">2.1.4.10 device_type</span><a href="#2-1-4-10-device-type" class="header-anchor">#</a></h4><p>此属性也被抛弃了。此属性只能用于 cpu节点或者 memory节点。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">cpus &#123;</span><br><span class="line">    <span class="meta">#size-cells = <span class="string">&lt;0x0&gt;</span>;</span></span><br><span class="line">    <span class="meta">#address-cells = <span class="string">&lt;0x1&gt;</span>;</span></span><br><span class="line">    A53_0: cpu@<span class="number">0</span> &#123;</span><br><span class="line">        reg = &lt;<span class="number">0x0</span>&gt;;</span><br><span class="line">        enable-method = <span class="string">&quot;psci&quot;</span>;</span><br><span class="line">        compatible = <span class="string">&quot;arm,cortex-a53&quot;</span>;</span><br><span class="line">        device_type = <span class="string">&quot;cpu&quot;</span>;</span><br><span class="line">        next-level-cache = &lt;&amp;CA53_L2&gt;;</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3><span id="2-1-5-jie-dian-de-ge-shi">2.1.5 节点的格式</span><a href="#2-1-5-jie-dian-de-ge-shi" class="header-anchor">#</a></h3><p>节点的格式如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[label:]node-name[@unit-address]&#123;</span><br><span class="line">	[properties definitions]</span><br><span class="line">	[child nodes]</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>以uart节点为例：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">/ &#123; </span><br><span class="line">	uart0: uart@fe001000 &#123; </span><br><span class="line">		compatible=<span class="string">&quot;ns16550&quot;</span>; </span><br><span class="line">		reg=&lt;<span class="number">0xfe001000</span> <span class="number">0x100</span>&gt;; </span><br><span class="line">	&#125;; </span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<p>节点名(<code>node-name</code>)长为1~31个字符，这些字符可以是：<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/12.png" alt="image"></p>
+<p>每个设备节点代表一个设备，因此节点名的命名通常要和设备相应，比如以太网控制器，我们可以给其取名<code>ethernet</code>。考虑到一个SoC中可能有多个以太网控制器，为了做区分，我们通常在其<strong>节点名后面加上设备的地址</strong>，也就是上文中出现的可选部分<code>@unit-address</code>。仍以以太网控制器为例，假如两个以太网控制器的寄存器组的首地址分别为<code>0xfe002000</code>和<code>0xfe003000</code>，那么相应的节点名可以取为<code>ethernet@fe002000</code>和<code>ethernet@fe003000</code>。<br>不难看出，设备节点允许嵌套，假设节点b嵌套于节点a中，那么节点a是节点b的父节点。根节点的名字比较特殊，就是一个斜杠&#x2F;，其他的设备节点都是根节点的孩子，或者孩子的孩子…因此，所有的设备节点呈现出一个树状的层次结构（设备树因此得名），下图就是一个例子：<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/13.png" alt="image"></p>
+<h4><span id="2-1-5-1-tui-jian-de-jie-dian-ming">2.1.5.1 推荐的节点名</span><a href="#2-1-5-1-tui-jian-de-jie-dian-ming" class="header-anchor">#</a></h4><p>关于节点的命名，官方有一些推荐的命名，具体可见<code>devicetree-specification-v0.3</code>的2.2.2节。</p>
+<h4><span id="2-1-5-2-jie-dian-de-lu-jing-ming">2.1.5.2 节点的路径名</span><a href="#2-1-5-2-jie-dian-de-lu-jing-ming" class="header-anchor">#</a></h4><p>在文件系统中有个术语叫文件的路径名（<code>pathname</code>），在按照树状结构组织的众多文件中，用以唯一标识某个文件。类似的，节点也有路径名的概念。将根节点类比为根目录，以上图为例，其中cpu0节点的路径名为<code>/cpus/cpu@0</code>。我们在给节点命名时，必须<strong>保证每个节点拥有唯一的路径名</strong>（注意区别于每个节点拥有唯一的节点名）。</p>
+<h3><span id="2-1-6-yi-xie-te-shu-de-jie-dian">2.1.6 一些特殊的节点</span><a href="#2-1-6-yi-xie-te-shu-de-jie-dian" class="header-anchor">#</a></h3><p>有一些特殊的节点不代表任何设备，而是有着特定的用途，本节就将介绍一些这样的节点。</p>
+<h4><span id="2-1-6-1-x2f-aliases-jie-dian">2.1.6.1 &#x2F;aliases节点</span><a href="#2-1-6-1-x2f-aliases-jie-dian" class="header-anchor">#</a></h4><p><code>/aliases</code>节点应当作为根节点的孩子节点，用于定义一个或多个别名属性，每条别名属性会为一个设备节点的路径名设置一个别名，如下面这个例子所示：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">aliases &#123;</span><br><span class="line">	serial0 =<span class="string">&quot;/simple-bus@fe000000/serial@llc500&quot;</span>;</span><br><span class="line">	ethernet0 =<span class="string">&quot;/simple-bus@fe000000/ethernet@31c000&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>别名只能由<code>1~31</code>个下面的字符组成：<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/14.png" alt="image"><br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/15.png" alt="image"></p>
+<p><strong>别名通常以数字结尾</strong>，比如别名为<code>i2c1</code>，设备树的初始化程序在解析别名属性时，会将数字1记录在<code>struct alias_prop</code>结构的<code>id</code>成员中，使用<code>of_alias_get_id</code>可以获得这个数字。因为本文主要介绍设备树文件的格式，因此这里不再深究这部分内容。</p>
+<h4><span id="2-1-6-2-x2f-chosen-jie-dian">2.1.6.2 &#x2F;chosen节点</span><a href="#2-1-6-2-x2f-chosen-jie-dian" class="header-anchor">#</a></h4><p><code>/chosen</code>节点应当用作根节点的孩子节点，有以下可选属性：<br>    • <code>bootargs</code><br>    • <code>stdout-path</code><br>    • <code>stdin-path</code><br>顾名思义，该节点可以指定启动参数、标准输出和标准输入，一个例子如下：<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/16.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">/&#123;</span><br><span class="line">	......</span><br><span class="line">	chosen &#123;</span><br><span class="line">		bootargs =<span class="string">&quot;root=/dev/nfs rw nfsroot=192.168.1.1 console=ttyS0,115200&quot;</span>;</span><br><span class="line">		&#125;;</span><br><span class="line">	......</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>上图中<code>chosen</code>节点仅仅设置了属性<code>“ stdout-path”</code>，表示标准输出使用 uart0。但是当我们进入到 <code>/proc/device-tree/chosen</code>目录里面，会发现多了<code> bootargs</code>属性，原因如下:<br><code>do_bootm_linux </code>函数会通过一系列复杂的调用，最终通过<code>fdt_chosen </code>函数在<code>chosen </code>节点中加入<br>了<code>bootargs </code>属性。<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/17.png" alt="image"></p>
+<p><code>do_bootm_linux</code>细节见<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17960265">uboot-5_bootm&#x2F;bootz启动内核过程 - fuzidage - 博客园 (cnblogs.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/">uboot-bootm和bootz启动内核 | Hexo (fuzidage.github.io)</a></p>
+<h4><span id="2-1-6-3-x2f-gen-jie-dian">2.1.6.3 &#x2F;根节点</span><a href="#2-1-6-3-x2f-gen-jie-dian" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">/ &#123; </span><br><span class="line">	model = <span class="string">&quot;SMDK24440&quot;</span>; </span><br><span class="line">	compatible = <span class="string">&quot;samsung,smdk2440&quot;</span>; </span><br><span class="line">	<span class="meta">#address-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">	<span class="meta">#size-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">&#125;; </span><br></pre></td></tr></table></figure>
+<p>根节点中必须有这些属性： </p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#address-cells <span class="comment">// 在它的子节点的 reg 属性中, 使用多少个 u32 整数来描述地址(address) </span></span></span><br><span class="line"><span class="meta">#size-cells <span class="comment">// 在它的子节点的 reg 属性中, 使用多少个 u32 整数来描述大小(size) </span></span></span><br><span class="line">compatible <span class="comment">// 定义一系列的字符串, 用来指定内核中哪个 machine_desc 可以支持本设备 (即这个板子兼容哪些平台) </span></span><br><span class="line">model <span class="comment">// 咱这个板子是什么</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/18.png" alt="image"><br>Linux内核通过根节点<code> compatible</code>属性找到对应的设备的函数调用过程如下：<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/19.png" alt="image"></p>
+<h3><span id="2-1-7-bi-yao-de-jie-dian-he-bi-yao-de-shu-xing">2.1.7 必要的节点和必要的属性</span><a href="#2-1-7-bi-yao-de-jie-dian-he-bi-yao-de-shu-xing" class="header-anchor">#</a></h3><p>一个完整的设备树文件（DTS文件），有一些节点是必须要有的，这些必要的节点有：</p>
+<table>
+<thead>
+<tr>
+<th>节点名</th>
+<th>节点的必要属性</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>&#x2F;</td>
+<td>#address-cells、#size-cells、model、compatible</td>
+</tr>
+<tr>
+<td>&#x2F;memory</td>
+<td>device_type、reg</td>
+</tr>
+<tr>
+<td>&#x2F;cpus</td>
+<td>#address-cells、#size-cells</td>
+</tr>
+<tr>
+<td>&#x2F;cpus&#x2F;cpu*</td>
+<td>device_type、reg、clock-frequency、timebase-frequency</td>
+</tr>
+<tr>
+<td>&#x2F;cpus&#x2F;cpu*&#x2F;l?-cache</td>
+<td>compatible、cache-level</td>
+</tr>
+</tbody></table>
+<h3><span id="2-1-8-label-biao-qian-de-shi-yong">2.1.8 label（标签）的使用</span><a href="#2-1-8-label-biao-qian-de-shi-yong" class="header-anchor">#</a></h3><p>在上文就提到过标签，只是没有细说，这里就介绍一下标签的使用。首先，标签名可由<code>1~31</code>个字符组成，这些字符可以是：<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/20.png" alt="image"></p>
+<p>接下来仍以中断控制器的例子来说：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">pic@<span class="number">10000000</span>&#123;</span><br><span class="line">	phandle =&lt;<span class="number">1</span>&gt;;</span><br><span class="line">	interrupt-controller;</span><br><span class="line">	&#125;;</span><br><span class="line">......</span><br><span class="line">another-device-node &#123;</span><br><span class="line">	interrupt-parent =&lt;<span class="number">1</span>&gt;;<span class="comment">/* 数字1就唯一标识了节点pic@10000000 */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+<p>如果我们使用phandle来标识设备，当设备多了，数字标识符是比较难记忆的，可读性也差，此时可以使用标签：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">PIC:pic@<span class="number">10000000</span>&#123;</span><br><span class="line">	interrupt-controller;</span><br><span class="line">&#125;;</span><br><span class="line">......</span><br><span class="line">another-device-node &#123;</span><br><span class="line">	interrupt-parent =&lt;&amp;PIC&gt;;<span class="comment">/* 用标签来引用设备节点 */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>还有一种常见的标签的用法，当我们需要修改某设备节点的属性，但又不想直接在原地修改（保持原来的内容不被破坏），此时可以在设备树文件的末尾重写该设备节点的相应属性，从而覆盖之前的内容：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">/&#123;</span><br><span class="line">	device-node &#123;</span><br><span class="line">		p =<span class="string">&quot;xxx&quot;</span>;</span><br><span class="line">	&#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 重写device-node的属性p */</span></span><br><span class="line">/&#123;</span><br><span class="line">	device-node &#123;<span class="comment">/* 因此这样写比较麻烦（特别是在路径比较深的时候） */</span></span><br><span class="line">		p =<span class="string">&quot;yyy&quot;</span>;</span><br><span class="line">	&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>那么使用标签的写法就简单很多：标签名DN.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">/&#123;</span><br><span class="line">	DN:device-node &#123;</span><br><span class="line">		p =<span class="string">&quot;xxx&quot;</span>;</span><br><span class="line">	&#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* 重写device-node的属性p */</span></span><br><span class="line">&amp;DN&#123;</span><br><span class="line">	p =<span class="string">&quot;yyy&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+
+<p><strong>修改节点</strong>，节点追加内容：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">i2c0: i2c@<span class="number">29000000</span> &#123;</span><br><span class="line">	 compatible = <span class="string">&quot;snps,designware-i2c&quot;</span>;</span><br><span class="line">	 clocks = &lt;&amp;clk ATHENA2_CLK_I2C0&gt;;</span><br><span class="line">	 reg = &lt;<span class="number">0x0</span> <span class="number">0x29000000</span> <span class="number">0x0</span> <span class="number">0x1000</span>&gt;;</span><br><span class="line">	 clock-frequency = &lt;<span class="number">400000</span>&gt;;</span><br><span class="line">	 <span class="meta">#size-cells = <span class="string">&lt;0x0&gt;</span>;</span></span><br><span class="line">	 <span class="meta">#address-cells = <span class="string">&lt;0x1&gt;</span>;</span></span><br><span class="line">	 resets = &lt;&amp;rst RST_I2C0&gt;;</span><br><span class="line">	 reset-names = <span class="string">&quot;i2c0&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>再另一个dts中使用i2c0:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&amp;i2c0 &#123;</span><br><span class="line">		clock-frequency = &lt;<span class="number">100000</span>&gt;;</span><br><span class="line">	status = <span class="string">&quot;okay&quot;</span>;</span><br><span class="line"></span><br><span class="line">	mag3110@<span class="number">0</span>e &#123; </span><br><span class="line">			compatible = <span class="string">&quot;fsl,mag3110&quot;</span>; </span><br><span class="line">			reg = &lt;<span class="number">0x0e</span>&gt;; </span><br><span class="line">			position = &lt;<span class="number">2</span>&gt;; </span><br><span class="line">	&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-1-9-bian-xie-she-bei-shu-wen-jian">2.1.9 编写设备树文件</span><a href="#2-1-9-bian-xie-she-bei-shu-wen-jian" class="header-anchor">#</a></h3><h4><span id="2-1-9-1-zai-dts-wen-jian-zhong-bao-han-qi-ta-wen-jian">2.1.9.1 在DTS文件中包含其他文件</span><a href="#2-1-9-1-zai-dts-wen-jian-zhong-bao-han-qi-ta-wen-jian" class="header-anchor">#</a></h4><p>编写设备树文件时，我们通常会把多型设备的共性抽出来，写在<code>DTSI</code>文件（后缀为<code>.dtsi</code>）中，其语法与DTS文件一样。比如，多款使用了<code>am335x</code>的板子，因为使用了同一款SoC，描述设备时肯定会有一些相同的部分，可以把这部分抽出来，写到<code>am335x.dts</code>i中，然后在具体的某型板子的设备树中包含相应的DTSI文件，包含的方式有：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">/include/ “xxx.dtsi”</span><br><span class="line"><span class="meta">#<span class="keyword">include</span> “xxx.dtsi”</span></span><br></pre></td></tr></table></figure>
+
+<p>设备树编译器还支持c语言的头文件，因此，如果有需要可以定义一些宏并在设备树文件中使用。</p>
+<h4><span id="2-1-9-2-ru-he-zai-she-bei-shu-wen-jian-zhong-miao-shu-she-bei">2.1.9.2 如何在设备树文件中描述设备</span><a href="#2-1-9-2-ru-he-zai-she-bei-shu-wen-jian-zhong-miao-shu-she-bei" class="header-anchor">#</a></h4><h5><span id="2-1-9-2-1-documentation-x2f-devicetree-x2f-bindings">2.1.9.2.1 Documentation&#x2F;devicetree&#x2F;bindings</span><a href="#2-1-9-2-1-documentation-x2f-devicetree-x2f-bindings" class="header-anchor">#</a></h5><p>设备树写出来是给驱动程序看的，也就是说驱动程序怎么写的，相应的设备树就该怎么写；或者反过来，先约定好设备树怎么写，在相应的设计驱动。驱动和设备树有着对应的关系，这种对应关系也被称为<code>bindings</code>。具体的：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">对于上游芯片厂商，应当按照devicetree-specification推荐的设备树写法，遵守各种约定，确定好如何规范的描述设备，并提供相应的驱动程序。devicetree-specification-v0<span class="number">.3</span>的第四章给出了一些推荐的做法。</span><br><span class="line">对于下游产品厂商，当使用芯片厂商的芯片做产品时，芯片厂商通常会提供驱动程序和设备树文件编写的参考文档，这些文档位于linux内核源码树的Documentation/devicetree/bindings目录下。如果芯片厂商没提供相应文档的话，就要读驱动的源码，知道驱动怎么写的，自然也就知道如何写设备树了。</span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-2-dtb-wen-jian">2.2 DTB文件</span><a href="#2-2-dtb-wen-jian" class="header-anchor">#</a></h2><p>DTS文件只是文本文件，需要使用<strong>设备树编译器（DTC）将其编译为DTB文件（二进制文件）</strong>，然后才能传递给内核，内核解析的是DTB文件。dtb文件由四个部分组成：<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/21.png" alt="image"></p>
+<h3><span id="2-2-1-struct-ftd-header">2.2.1 struct ftd_header</span><a href="#2-2-1-struct-ftd-header" class="header-anchor">#</a></h3><p><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/22.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">fdt_header</span> &#123;</span></span><br><span class="line">    <span class="type">fdt32_t</span> magic;           <span class="comment">/* magic word FDT_MAGIC */</span></span><br><span class="line">    <span class="type">fdt32_t</span> totalsize;       <span class="comment">/* total size of DT block */</span></span><br><span class="line">    <span class="type">fdt32_t</span> off_dt_struct;       <span class="comment">/* offset to structure */</span></span><br><span class="line">    <span class="type">fdt32_t</span> off_dt_strings;      <span class="comment">/* offset to strings */</span></span><br><span class="line">    <span class="type">fdt32_t</span> off_mem_rsvmap;      <span class="comment">/* offset to memory reserve map */</span></span><br><span class="line">    <span class="type">fdt32_t</span> version;         <span class="comment">/* format version */</span></span><br><span class="line">    <span class="type">fdt32_t</span> last_comp_version;   <span class="comment">/* last compatible version */</span></span><br><span class="line">    <span class="comment">/* version 2 fields below */</span></span><br><span class="line">    <span class="type">fdt32_t</span> boot_cpuid_phys;     <span class="comment">/* Which physical CPU id we&#x27;re</span></span><br><span class="line"><span class="comment">    booting on */</span></span><br><span class="line">    <span class="comment">/* version 3 fields below */</span></span><br><span class="line">    <span class="type">fdt32_t</span> size_dt_strings;     <span class="comment">/* size of the strings block */</span></span><br><span class="line">    <span class="comment">/* version 17 fields below */</span></span><br><span class="line">    <span class="type">fdt32_t</span> size_dt_struct;      <span class="comment">/* size of the structure block */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p><strong>totalsize</strong>:<br>这个设备树的size，也可以理解为所占用的实际内存空间。<br><strong>off_dt_struct</strong>:<br><code>offset to dt_struct</code>，表示整个dtb中<code>structure</code>部分所在内存相对头部的偏移地址<br><strong>off_dt_strings</strong>:<br><code>offset to dt_string</code>，表示整个dtb中<code>string</code>部分所在内存相对头部的偏移地址<br><strong>off_mem_rsvmap</strong>:<br><code>offset to memory reserve map</code>，dtb中<code>memory reserve map</code>所在内存相对头部的偏移地址</p>
+<h3><span id="2-2-2-memory-reservation-block">2.2.2 memory reservation block</span><a href="#2-2-2-memory-reservation-block" class="header-anchor">#</a></h3><p>该部分由<code>memory reservations</code>编译得来，由一个或多个表项组成，每一项都描述了一块要保留的内存区域，每项由两个64位数值（起始地址、长度）组成：<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/23.png" alt="image"></p>
+<p>reserved memory作用：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17664807.html">设备驱动-15.内核kmalloc&#x2F;vmalloc及CMA内存介绍 - fuzidage - 博客园 (cnblogs.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/">Linux内核-kmalloc与vmalloc及CMA内存 | Hexo (fuzidage.github.io)</a></p>
+<h3><span id="2-2-3-structure-block">2.2.3 structure block</span><a href="#2-2-3-structure-block" class="header-anchor">#</a></h3><p><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/24.png" alt="image"></p>
+<h3><span id="2-2-4-strings-block">2.2.4 strings block</span><a href="#2-2-4-strings-block" class="header-anchor">#</a></h3><p>该部分类似于ELF文件中的字符串表，存储了所有属性名（字符串），考虑到很多节点拥有一些同名的属性，集中存放属性名可以有效的节约DTB文件的空间，存放有属性的<code>structure block</code>部分只需要保存一个32位的偏移值——属性名的起始位置在<code>strings block</code>中的偏移。</p>
+<h2><span id="2-3-dtb-wen-jian-de-bian-yi">2.3 DTB文件的编译</span><a href="#2-3-dtb-wen-jian-de-bian-yi" class="header-anchor">#</a></h2><h3><span id="2-3-1-zai-nei-he-zhong-zhi-jie-make">2.3.1 在内核中直接 make</span><a href="#2-3-1-zai-nei-he-zhong-zhi-jie-make" class="header-anchor">#</a></h3><p>进入内核源码的目录，执行如下命令即可编译 dtb 文件。<code>make all</code>命令是编译 Linux源码中的所有东西，包括 <code>zImage，dtb，.ko</code>驱动模块以及设备树，如果只是编译设备树的话建议使用<code>“ make dtbs”</code>命令。</p>
+<pre><code>make dtbs V=1
+</code></pre>
+<h3><span id="2-3-2-shou-gong-bian-yi">2.3.2 手工编译</span><a href="#2-3-2-shou-gong-bian-yi" class="header-anchor">#</a></h3><p>内核目录下 <code>scripts/dtc/dtc</code> 是设备树的编译工具，直接使用它的话，包含其他文件时不能使用<code>“#include”</code>，而必须使用<code>“/incldue”</code>。</p>
+<p><strong>编译</strong>、反编译的示例命令如下，<code>“-I”</code>指定输入格式，<code>“-O”</code>指定输出格式，<code>“-o”</code>指定输出文件：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">./scripts/dtc/dtc -I dts -O dtb -o tmp.dtb arch/arm/boot/dts/xxx.dts <span class="comment">// 编译 dts 为 dtb </span></span><br><span class="line">./scripts/dtc/dtc -I dtb -O dts -o tmp.dts arch/arm/boot/dts/xxx.dtb <span class="comment">// 反编译 dtb 为 dts </span></span><br></pre></td></tr></table></figure>
+
+<p>DTC工具源码在 Linux内核的 <code>scripts/dtc</code>目录下，<code>scripts/dtc/Makefile</code>文件内容如下：<br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/25.png" alt="image"></p>
+<h3><span id="2-3-3-fan-bian-yi-dtb">2.3.3 反编译dtb</span><a href="#2-3-3-fan-bian-yi-dtb" class="header-anchor">#</a></h3><p>cd 板子所用的内核源码目录</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">./scripts/dtc/dtc -I dtb -O dts /从板子上/复制出来的/fdt -o tmp.dts</span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-4-nei-he-dui-she-bei-shu-de-chu-li-guo-cheng">2.4 内核对设备树的处理过程</span><a href="#2-4-nei-he-dui-she-bei-shu-de-chu-li-guo-cheng" class="header-anchor">#</a></h2><p><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/26.png" alt="image"></p>
+<p>① dts 在 PC 机上被编译为 dtb 文件；<br>② u-boot 把 dtb 文件传给内核；<br>③ 内核解析 dtb 文件，把每一个节点都转换为 <code>device_node</code> 结构体；<br>④ 对于某些 <code>device_node</code> 结构体，会被<code>platform_device</code> 结构体获取资源信息<br><strong>dts解析过程:</strong><br><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/27.png" alt="image"><br>最终实际dts解析的函数为<code>unflatten_dt_node</code>。</p>
+<h3><span id="2-4-1-dtb-zhong-mei-yi-ge-jie-dian-du-bei-zhuan-huan-wei-device-node-jie-gou-ti">2.4.1 dtb 中每一个节点都被转换为 device_node 结构体</span><a href="#2-4-1-dtb-zhong-mei-yi-ge-jie-dian-du-bei-zhuan-huan-wei-device-node-jie-gou-ti" class="header-anchor">#</a></h3><p><img src="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/28.png" alt="image"></p>
+<p>根节点被保存在全局变量 <code>of_root</code> 中，从 <code>of_root </code>开始可以访问到任意节点。</p>
+<h3><span id="2-4-2-na-xie-she-bei-shu-jie-dian-hui-bei-zhuan-huan-wei-platform-device">2.4.2 哪些设备树节点会被转换为 platform_device</span><a href="#2-4-2-na-xie-she-bei-shu-jie-dian-hui-bei-zhuan-huan-wei-platform-device" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">/&#123; </span><br><span class="line">	mytest &#123;</span><br><span class="line">		compatile = <span class="string">&quot;mytest&quot;</span>, <span class="string">&quot;simple-bus&quot;</span>; </span><br><span class="line">		mytest@<span class="number">0</span> &#123; </span><br><span class="line">			compatile = <span class="string">&quot;mytest_0&quot;</span>; </span><br><span class="line">		&#125;; </span><br><span class="line">	&#125;; </span><br><span class="line"></span><br><span class="line">	i2c &#123; </span><br><span class="line">		compatile = <span class="string">&quot;samsung,i2c&quot;</span>; </span><br><span class="line">		at24c02 &#123; </span><br><span class="line">			compatile = <span class="string">&quot;at24c02&quot;</span>; </span><br><span class="line">		&#125;; </span><br><span class="line">	&#125;; </span><br><span class="line">	spi &#123; </span><br><span class="line">		compatile = <span class="string">&quot;samsung,spi&quot;</span>; </span><br><span class="line">		flash@<span class="number">0</span> &#123; </span><br><span class="line">			compatible = <span class="string">&quot;winbond,w25q32dw&quot;</span>; </span><br><span class="line">			spi-max-frequency = &lt;<span class="number">25000000</span>&gt;; </span><br><span class="line">			reg = &lt;<span class="number">0</span>&gt;; </span><br><span class="line">		&#125;; </span><br><span class="line">	&#125;; </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>①根节点下含有 <code>compatile</code> 属性的子节点<br>②含有特定 <code>compatile</code> 属性的节点的子节点 :</p>
+<pre><code>如果一个节点的 compatile 属性，它的值是这 4 者之一：&quot;simple-bus&quot;,&quot;simple-mfd&quot;,&quot;isa&quot;,&quot;arm,amba-bus&quot;, 那 么 它 的 子结点 ( 需 含compatile 属性)也可以转换为 platform_device。 
+</code></pre>
+<p>③总线 I2C、SPI 节点下的子节点：不转换为<code>platform_device</code><br>    某个总线下到子节点，应该交给对应的总线驱动程序来处理, 它们不应该被转换为<code> platform_device</code>。<br>    比如以下的节点中： </p>
+<pre><code>⚫ /mytest 会被转换为 platform_device, 因为它兼容&quot;simple-bus&quot;; 它的子节点/mytest/mytest@0 也会被转换为 platform_device 
+⚫ /i2c 节点一般表示 i2c 控制器, 它会被转换为 platform_device, 在内核 中有对应的 platform_driver; 
+⚫ /i2c/at24c02 节点不会被转换为 platform_device, 它被如何处理完全由父节点的 platform_driver 决定, 一般是被创建为一个 i2c_client。 
+⚫ 类似的也有/spi 节点, 它一般也是用来表示 SPI 控制器, 它会被转换为 platform_device, 在内核中有对应的 platform_driver; 
+⚫ /spi/flash@0 节点不会被转换为 platform_device, 它被如何处理完全由 父节点的 platform_driver 决定, 一般是被创建为一个 spi_device。 
+</code></pre>
+<h3><span id="2-4-3-jie-dian-zen-me-zhuan-huan-wei-platform-device">2.4.3 节点怎么转换为 platform_device</span><a href="#2-4-3-jie-dian-zen-me-zhuan-huan-wei-platform-device" class="header-anchor">#</a></h3><pre><code>⚫ platform_device 中含有 resource 数组, 它来自 device_node 的 reg, interrupts 属性; 
+⚫ platform_device.dev.of_node 指向 device_node, 可以通过它获得其他属性
+</code></pre>
+<h1><span id="3-wan-zheng-dts-shi-li">3 完整dts示例</span><a href="#3-wan-zheng-dts-shi-li" class="header-anchor">#</a></h1><p>编写设备树之前要先定义一个设备，我们就以<code> I.MX6ULL</code>这个 SOC为例，我们需要在设备树里面描述的内容如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">①、 I.MX6ULL这个 Cortex-A7架构的 <span class="number">32</span>位 CPU。</span><br><span class="line">②、 I.MX6ULL内部 ocram，起始地址 <span class="number">0x00900000</span>，大小为 <span class="number">128</span>KB(<span class="number">0x20000</span>)。</span><br><span class="line">③、 I.MX6ULL内部 aips1域下的 ecspi1外设控制器，寄存器起始地址为 <span class="number">0x02008000</span>，大小为 <span class="number">0x4000</span>。</span><br><span class="line">④、 I.MX6ULL内部 aips2域下的 usbotg1外设控制器，寄存器起始地址为 <span class="number">0x02184000</span>，大小为 <span class="number">0x4000</span>。</span><br><span class="line">⑤、 I.MX6ULL内部 aips3域下的 rngb外设控制器，寄存器起始地址为 <span class="number">0x02284000</span>，大小为 <span class="number">0x4000</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-1-tian-jia-cpus-jie-dian">3.1 添加 cpus节点</span><a href="#3-1-tian-jia-cpus-jie-dian" class="header-anchor">#</a></h2><p>cpu节点，<code> I.MX6ULL</code>采用<code> Cortex-A7</code>架构，而且只有一个 CPU，因此只有一个cpu0节点，如下所示：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">/ &#123; </span><br><span class="line">	compatible = <span class="string">&quot;fsl,imx6ull-alientek-evk&quot;</span>, <span class="string">&quot;fsl,imx6ull&quot;</span>;</span><br><span class="line">	cpus &#123; </span><br><span class="line">		<span class="meta">#address-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">		<span class="meta">#size-cells = <span class="string">&lt;0&gt;</span>; </span></span><br><span class="line">		<span class="comment">//CPU0节点 </span></span><br><span class="line">		cpu0: cpu@<span class="number">0</span> &#123; </span><br><span class="line">			compatible = <span class="string">&quot;arm,cortex-a7&quot;</span>; </span><br><span class="line">			device_type = <span class="string">&quot;cpu&quot;</span>; </span><br><span class="line">			reg = &lt;<span class="number">0</span>&gt;; </span><br><span class="line">		&#125;; </span><br><span class="line">	&#125;; </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-2-tian-jia-soc-jie-dian">3.2 添加 soc节点</span><a href="#3-2-tian-jia-soc-jie-dian" class="header-anchor">#</a></h2><p>像<code> uart iic</code>控制器等等这些都属于 SOC内部外设，因此一般会创建一个叫做 <code>soc</code>的父节点来管理这些 SOC内部外设的子节点:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">/ &#123; </span><br><span class="line">	<span class="comment">//soc节点 </span></span><br><span class="line">	soc &#123; </span><br><span class="line">		<span class="meta">#address-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">		<span class="meta">#size-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">		compatible = <span class="string">&quot;simple-bus&quot;</span>; </span><br><span class="line">		ranges; </span><br><span class="line">	&#125;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>soc节点设置 <code>#address-cells = &lt;1&gt;</code>，<code>#size-cells = &lt;1&gt;</code>，这样 soc子节点的 reg属性中起始地占用一个字长，地址空间长度也占用一个字长。<code>ranges</code>属性为空，说明子空间和父空间地址范围相同。</p>
+<h3><span id="3-2-1-tian-jia-ocram-jie-dian">3.2.1 添加 ocram节点</span><a href="#3-2-1-tian-jia-ocram-jie-dian" class="header-anchor">#</a></h3><p>根据第②点的要求，添加<code> ocram</code>节点，<code> ocram</code>是<code> I.MX6ULL</code>内部 RAM，因此 <code>ocram</code>节点应该是 soc节点的子节点。 <code>ocram</code>起始地址为 <code>0x00900000</code>，大小为<code>128KB(0x20000)</code>:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//soc节点 </span></span><br><span class="line">soc &#123; </span><br><span class="line">	<span class="meta">#address-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">	<span class="meta">#size-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">	compatible = <span class="string">&quot;simple-bus&quot;</span>; </span><br><span class="line">	ranges; </span><br><span class="line"></span><br><span class="line">	<span class="comment">//ocram节点 </span></span><br><span class="line">	ocram: sram@<span class="number">00900000</span> &#123; </span><br><span class="line">		compatible = <span class="string">&quot;fsl,lpm-sram&quot;</span>; </span><br><span class="line">		reg = &lt;<span class="number">0x00900000</span> <span class="number">0x20000</span>&gt;; </span><br><span class="line">	&#125;; </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3><span id="3-2-2-tian-jia-aips1-aips2-he-aips3-jie-dian">3.2.2 添加 aips1、 aips2和 aips3节点</span><a href="#3-2-2-tian-jia-aips1-aips2-he-aips3-jie-dian" class="header-anchor">#</a></h3><p><code>IMX6ULL</code>外设控制分为三个域： <code>aips1~3</code>，这三个域分管不同的外设控制器，<code>aips1~3</code>这三个域都属于 soc节点的子节点：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//aips1节点</span></span><br><span class="line">aips1: aips-bus@<span class="number">02000000</span> &#123; </span><br><span class="line">	compatible = <span class="string">&quot;fsl,aips-bus&quot;</span>, <span class="string">&quot;simple-bus&quot;</span>; </span><br><span class="line">	<span class="meta">#address-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">	<span class="meta">#size-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">	reg = &lt;<span class="number">0x02000000</span> <span class="number">0x100000</span>&gt;; </span><br><span class="line">	ranges; </span><br><span class="line">&#125;;</span><br><span class="line">aips2: aips-bus@<span class="number">02100000</span> &#123; </span><br><span class="line">	compatible = <span class="string">&quot;fsl,aips-bus&quot;</span>, <span class="string">&quot;simple-bus&quot;</span>; </span><br><span class="line">	<span class="meta">#address-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">	<span class="meta">#size-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">	reg = &lt;<span class="number">0x02100000</span> <span class="number">0x100000</span>&gt;; </span><br><span class="line">	ranges; </span><br><span class="line">&#125;;</span><br><span class="line">aips3: aips-bus@<span class="number">02200000</span> &#123; </span><br><span class="line">	compatible = <span class="string">&quot;fsl,aips-bus&quot;</span>, <span class="string">&quot;simple-bus&quot;</span>; </span><br><span class="line">	<span class="meta">#address-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">	<span class="meta">#size-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">	reg = &lt;<span class="number">0x02200000</span> <span class="number">0x100000</span>&gt;; </span><br><span class="line">	ranges; </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="3-2-2-1-tian-jia-ecspi1-usbotg1-he-rngb-jie-dian">3.2.2.1 添加 ecspi1、 usbotg1和 rngb节点</span><a href="#3-2-2-1-tian-jia-ecspi1-usbotg1-he-rngb-jie-dian" class="header-anchor">#</a></h4><p>每个域节点下都添加一个外设节点。<code>ecspi1</code>属于 <code>aips1</code>的子节点，<code> usbotg1</code>属于 <code>aips2</code>的子节点， <code>rngb</code>属于 <code>aips3</code>的子节点。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//ecspi1节点 </span></span><br><span class="line">ecspi1: ecspi@<span class="number">02008000</span> &#123; </span><br><span class="line">	<span class="meta">#address-cells = <span class="string">&lt;1&gt;</span>; </span></span><br><span class="line">	<span class="meta">#size-cells = <span class="string">&lt;0&gt;</span>; </span></span><br><span class="line">	compatible = <span class="string">&quot;fsl,imx6ul-ecspi&quot;</span>, <span class="string">&quot;fsl,imx51-ecspi&quot;</span>; </span><br><span class="line">	reg = &lt;<span class="number">0x02008000</span> <span class="number">0x4000</span>&gt;; </span><br><span class="line">	status = <span class="string">&quot;disabled&quot;</span>; </span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//usbotg1节点 </span></span><br><span class="line">usbotg1: usb@<span class="number">02184000</span> &#123; </span><br><span class="line">	compatible = <span class="string">&quot;fsl,imx6ul-usb&quot;</span>, <span class="string">&quot;fsl,imx27-usb&quot;</span>; </span><br><span class="line">	reg = &lt;<span class="number">0x02184000</span> <span class="number">0x4000</span>&gt;; </span><br><span class="line">	status = <span class="string">&quot;disabled&quot;</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">//rngb节点 </span></span><br><span class="line">rngb: rngb@<span class="number">02284000</span> &#123; </span><br><span class="line">	compatible = <span class="string">&quot;fsl,imx6sl-rng&quot;</span>, <span class="string">&quot;fsl,imx-rng&quot;</span>, <span class="string">&quot;imx-rng&quot;</span>; </span><br><span class="line">	reg = &lt;<span class="number">0x02284000</span> <span class="number">0x4000</span>&gt;; </span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-4-%E8%AE%BE%E5%A4%87%E6%A0%91/" data-id="clzp8uttd003f9ouf3hcaby7s" data-title="字符设备驱动-4-设备树" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-字符设备驱动-3-GPIO驱动KEY示例" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/07/28/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-3-GPIO%E9%A9%B1%E5%8A%A8KEY%E7%A4%BA%E4%BE%8B/" class="article-date">
@@ -2696,317 +3093,6 @@ messages    messages.0  messages.1  messages.2  messages.3
 
 
   
-    <article id="post-Linux内核Makefile编译过程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/" class="article-date">
-  <time class="dt-published" datetime="2024-07-18T15:43:23.000Z" itemprop="datePublished">2024-07-18</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/">Linux内核Makefile编译过程</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-zimage-bian-yi">1 zImage编译</a><ul>
-<li><a href="#1-1-vmlinux-bian-yi">1.1 vmlinux编译</a><ul>
-<li><a href="#1-1-1-head-y">1.1.1 head-y</a></li>
-<li><a href="#1-1-2-init-y-drivers-y-he-net-y">1.1.2 init-y&#x2F;drivers-y和net-y</a></li>
-<li><a href="#1-1-3-libs-y">1.1.3 libs-y</a></li>
-<li><a href="#1-1-4-core-y">1.1.4 core-y</a></li>
-<li><a href="#1-1-5-built-in-o-chan-sheng-guo-cheng">1.1.5 built-in.o产生过程</a><ul>
-<li><a href="#1-1-5-1-vmlinux-deps-zhan-kai">1.1.5.1 vmlinux-deps展开</a></li>
-<li><a href="#1-1-5-2-prepare-zhun-bei-gong-zuo">1.1.5.2 prepare准备工作</a><ul>
-<li><a href="#1-1-5-2-1-prepare-de-kuang-jia">1.1.5.2.1 prepare 的框架</a></li>
-</ul>
-</li>
-<li><a href="#1-1-5-3-vmlinux-dirs-zhan-kai">1.1.5.3 <code>vmlinux-dirs</code>展开</a></li>
-</ul>
-</li>
-<li><a href="#1-1-6-link-vmlinux">1.1.6 link-vmlinux</a></li>
-<li><a href="#1-1-7-xin-ban-de-link-vmlinux">1.1.7 新版的link-vmlinux</a><ul>
-<li><a href="#1-1-7-1-autoksyms-recursive">1.1.7.1 autoksyms_recursive</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#1-2-make-zimage-guo-cheng">1.2 make zImage过程</a><ul>
-<li><a href="#1-2-1-vmlinux-image-zimage-uimage-de-qu-bie">1.2.1 vmlinux、Image，zImage、uImage 的区别</a></li>
-<li><a href="#1-2-2-image-de-bian-yi-guo-cheng">1.2.2 Image的编译过程</a></li>
-<li><a href="#1-2-3-zimage-de-bian-yi-guo-cheng">1.2.3 zImage的编译过程</a></li>
-<li><a href="#1-2-4-objcopyflags">1.2.4 OBJCOPYFLAGS</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#2-sheng-cheng-de-wen-jian">2 生成的文件</a></li>
-<li><a href="#3-she-bei-shu-de-bian-yi-guo-cheng">3 设备树的编译过程</a><ul>
-<li><a href="#3-1-sheng-cheng-dtc-gong-ju">3.1 生成dtc工具</a></li>
-<li><a href="#3-2-sheng-cheng-dtb">3.2 生成dtb</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-zimage-bian-yi">1 zImage编译</span><a href="#1-zimage-bian-yi" class="header-anchor">#</a></h1><p><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/1.png" alt="image"><br><code>_all </code>是默认目标，如果使用命令make或者make all编译 Linux 的话此目标就会被匹配。<br><code>KBUILD_EXTMOD </code>为空的，因此194 行的代码成立, 因此<code>_all</code>依赖all。all又依赖vmlinux，开始编译vmlinux。</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- distclean</span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- imx_v7_defconfig</span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- menuconfig</span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- zImage -j16</span><br></pre></td></tr></table></figure>
-<h2><span id="1-1-vmlinux-bian-yi">1.1 vmlinux编译</span><a href="#1-1-vmlinux-bian-yi" class="header-anchor">#</a></h2><p>找到vmlinux目标开始分析：<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/2.png" alt="image"><br>目标 vmlinux 依赖 <code>scripts/link-vmlinux.sh</code> <code>$(vmlinux-deps)</code> <code>FORCE</code>。</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vmlinux-deps= <span class="variable">$(KBUILD_LDS)</span> <span class="variable">$(KBUILD_VMLINUX_INIT)</span> <span class="variable">$(KBUILD_VMLINUX_MAIN)</span></span><br></pre></td></tr></table></figure>
-<p>其中：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">KBUILD_VMLINUX_INIT= $(head-y) $(init-y)</span><br><span class="line">KBUILD_VMLINUX_MAIN = $(core-y) $(libs-y) $(drivers-y) $(net-y)</span><br><span class="line">KBUILD_LDS= arch/<span class="variable">$(SRCARCH)</span>/kernel/vmlinux.lds  //链接脚本</span><br></pre></td></tr></table></figure>
-
-<p>综上所述，vmlinux 的依赖为：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">scripts/link-vmlinux.sh</span><br><span class="line">$(head-y) 、$(init-y)、$(core-y) 、</span><br><span class="line">$(libs-y) 、$(drivers-y) 、$(net-y)、arch/arm/kernel/vmlinux.lds 和 FORCE</span><br></pre></td></tr></table></figure>
-<h3><span id="1-1-1-head-y">1.1.1 head-y</span><a href="#1-1-1-head-y" class="header-anchor">#</a></h3><p>head-y 定义在文件 arch&#x2F;arm&#x2F;Makefile 中:</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">135 head-y := arch/arm/kernel/head<span class="variable">$(MMUEXT)</span>.o</span><br></pre></td></tr></table></figure>
-<p>当不使能 MMU 的话 <code>MMUEXT=-nommu</code>，如果使能 MMU 的话为空，因此 head-y为：<br><code>head-y = arch/arm/kernel/head.o</code></p>
-<h3><span id="1-1-2-init-y-x2f-drivers-y-he-net-y">1.1.2 init-y&#x2F;drivers-y和net-y</span><a href="#1-1-2-init-y-x2f-drivers-y-he-net-y" class="header-anchor">#</a></h3><p>顶层Makefile内容如下：<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/3.png" alt="image"><br>展开后：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">init-y = init/built-in.o</span><br><span class="line">drivers-y = drivers/built-in.o sound/built-in.o firmware/built-in.o</span><br><span class="line">net-y = net/built-in.o</span><br></pre></td></tr></table></figure>
-<h3><span id="1-1-3-libs-y">1.1.3 libs-y</span><a href="#1-1-3-libs-y" class="header-anchor">#</a></h3><p>顶层Makefile中：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">561 libs-y := lib/</span><br></pre></td></tr></table></figure>
-
-<p>在arch&#x2F;arm&#x2F;Makefile中，对libs-y又追加了：<br><code>libs-y := arch/arm/lib/ $(libs-y)</code><br>展开后：<br><code>libs-y = arch/arm/lib lib/</code><br>回到顶层Makefile:</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">900 libs-y1 := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/lib.a, $(libs-y)</span>)</span><br><span class="line">901 libs-y2 := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.o, $(libs-y)</span>)</span><br><span class="line">902 libs-y := $(libs-y1) $(libs-y2)</span><br></pre></td></tr></table></figure>
-<p>展开后：<br><code>libs-y = arch/arm/lib/lib.a lib/lib.a arch/arm/lib/built-in.o lib/built-in.o</code></p>
-<h3><span id="1-1-4-core-y">1.1.4 core-y</span><a href="#1-1-4-core-y" class="header-anchor">#</a></h3><p>顶层Makefile中：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">532 core-y := usr/</span><br><span class="line">......</span><br><span class="line">887 core-y += kernel/ mm/ fs/ ipc/ security/ crypto/ block/</span><br></pre></td></tr></table></figure>
-<p>在 arch&#x2F;arm&#x2F;Makefile 中会对 core-y 进行追加，代码如下：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">269 core-<span class="variable">$(CONFIG_FPE_NWFPE)</span> += arch/arm/nwfpe/</span><br><span class="line">270 core-<span class="variable">$(CONFIG_FPE_FASTFPE)</span> += <span class="variable">$(FASTFPE_OBJ)</span></span><br><span class="line">271 core-<span class="variable">$(CONFIG_VFP)</span> += arch/arm/vfp/</span><br><span class="line">272 core-<span class="variable">$(CONFIG_XEN)</span> += arch/arm/xen/</span><br><span class="line">273 core-<span class="variable">$(CONFIG_KVM_ARM_HOST)</span> += arch/arm/kvm/</span><br><span class="line">274 core-<span class="variable">$(CONFIG_VDSO)</span> += arch/arm/vdso/</span><br><span class="line">275</span><br><span class="line">276 <span class="comment"># If we have a machine-specific directory, then include it in the build.</span></span><br><span class="line">277 core-y += arch/arm/kernel/ arch/arm/mm/ arch/arm/common/</span><br><span class="line">278 core-y += arch/arm/probes/</span><br><span class="line">279 core-y += arch/arm/net/</span><br><span class="line">280 core-y += arch/arm/crypto/</span><br><span class="line">281 core-y += arch/arm/firmware/</span><br><span class="line">282 core-y += <span class="variable">$(machdirs)</span> <span class="variable">$(platdirs)</span></span><br></pre></td></tr></table></figure>
-
-<p>比如使能 <code>VFP </code>的话就会在<code>.config</code>中有 CONFIG_VFP&#x3D;y 这一行，那么 core-y 就会追加<code>“arch/arm/vfp/”</code>。<br>顶层 Makefile 中还有：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">897 core-y := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.o, $(core-y)</span>)</span><br></pre></td></tr></table></figure>
-<p>最终 core-y 的值为：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">core-y = usr/built-in.o		arch/arm/vfp/built-in.o \</span><br><span class="line">arch/arm/vdso/built-in.o	arch/arm/kernel/built-in.o \</span><br><span class="line">arch/arm/mm/built-in.o 		arch/arm/common/built-in.o \</span><br><span class="line">arch/arm/probes/built-in.o 	arch/arm/net/built-in.o \</span><br><span class="line">arch/arm/crypto/built-in.o 	arch/arm/firmware/built-in.o \</span><br><span class="line">arch/arm/mach-imx/built-in.o 	kernel/built-in.o\</span><br><span class="line">mm/built-in.o 			fs/built-in.o \</span><br><span class="line">ipc/built-in.o 			security/built-in.o \</span><br><span class="line">crypto/built-in.o 		block/built-in.o</span><br></pre></td></tr></table></figure>
-
-<p>可以看到和 uboot 一样这些变量都是一些 built-in.o 或.a 等文件，都是将相应目录中的源码文件进行编译，然后在各自目录下生成 built-in.o 文件，有些生成了.a 库文件。最终将这些 built-in.o 和.a 文件进行链接即可形成 ELF 格式的可执行文件，也就是 vmlinux。但是链接是需要链接脚本的，vmlinux 的依赖 arch&#x2F;arm&#x2F;kernel&#x2F;vmlinux.lds 就是整个 Linux 的链接脚本。</p>
-<h3><span id="1-1-5-built-in-o-chan-sheng-guo-cheng">1.1.5 built-in.o产生过程</span><a href="#1-1-5-built-in-o-chan-sheng-guo-cheng" class="header-anchor">#</a></h3><h4><span id="1-1-5-1-vmlinux-deps-zhan-kai">1.1.5.1 vmlinux-deps展开</span><a href="#1-1-5-1-vmlinux-deps-zhan-kai" class="header-anchor">#</a></h4><p>vmliux 依赖 vmlinux-deps:<br><code>vmlinux-deps= $(KBUILD_LDS) $(KBUILD_VMLINUX_INIT) $(KBUILD_VMLINUX_MAIN)</code><br>这些变量进行展开：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$(head-y) 、$(init-y)、$(core-y) 、</span><br><span class="line">$(libs-y) 、$(drivers-y) 、$(net-y)、arch/arm/kernel/vmlinux.lds</span><br></pre></td></tr></table></figure>
-
-<p>展开：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">init-y      := init/</span><br><span class="line">drivers-y   := drivers/ sound/</span><br><span class="line">drivers-<span class="variable">$(CONFIG_SAMPLES)</span> += samples/</span><br><span class="line">net-y       := net/</span><br><span class="line">libs-y      := lib/</span><br><span class="line">core-y      := usr/</span><br><span class="line">virt-y      := virt/</span><br><span class="line"><span class="comment"># 每个变量的值原本是目录，将目录名后加上 built-in.a 后缀</span></span><br><span class="line">init-y      := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.a, $(init-y)</span>)</span><br><span class="line">core-y      := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.a, $(core-y)</span>)</span><br><span class="line">drivers-y   := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.a, $(drivers-y)</span>)</span><br><span class="line">net-y       := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.a, $(net-y)</span>)</span><br><span class="line">libs-y1     := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/lib.a, $(libs-y)</span>)</span><br><span class="line">libs-y2     := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.a, $(<span class="built_in">filter</span>-out %.a, $(libs-y)</span>))</span><br><span class="line">virt-y      := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.a, $(virt-y)</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># vmlinux 相关的目标文件</span></span><br><span class="line">KBUILD_VMLINUX_OBJS := $(head-y) $(init-y) $(core-y) $(libs-y2) \</span><br><span class="line">                  $(drivers-y) $(net-y) $(virt-y)</span><br><span class="line"><span class="comment"># vmlinux 的链接脚本</span></span><br><span class="line">KBUILD_LDS          := arch/<span class="variable">$(SRCARCH)</span>/kernel/vmlinux.lds</span><br><span class="line"><span class="comment"># vmlinux 相关的库</span></span><br><span class="line">KBUILD_VMLINUX_LIBS := $(libs-y1)</span><br><span class="line"></span><br><span class="line">vmlinux-deps := <span class="variable">$(KBUILD_LDS)</span> <span class="variable">$(KBUILD_VMLINUX_OBJS)</span> <span class="variable">$(KBUILD_VMLINUX_LIBS)</span></span><br></pre></td></tr></table></figure>
-
-<p>最后：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">vmlinux-deps = arch/arm/kernel/vmlinux.lds</span><br><span class="line">		arch/arm/kernel/head.o \</span><br><span class="line">		init/built-in.o              usr/built-in.o \</span><br><span class="line">		arch/arm/vfp/built-in.o      arch/arm/vdso/built-in.o \</span><br><span class="line">		arch/arm/kernel/built-in.o   arch/arm/mm/built-in.o \</span><br><span class="line">		arch/arm/common/built-in.o   arch/arm/probes/built-in.o \</span><br><span class="line">		arch/arm/net/built-in.o      arch/arm/crypto/built-in.o \</span><br><span class="line">		arch/arm/firmware/built-in.o arch/arm/mach-imx/built-in.o \</span><br><span class="line">		kernel/built-in.o            mm/built-in.o \</span><br><span class="line">		fs/built-in.o                ipc/built-in.o \</span><br><span class="line">		security/built-in.o          crypto/built-in.o\</span><br><span class="line">		block/built-in.o             arch/arm/lib/lib.a\</span><br><span class="line">		lib/lib.a                    arch/arm/lib/built-in.o\</span><br><span class="line">		lib/built-in.o               drivers/built-in.o \</span><br><span class="line">		sound/built-in.o             firmware/built-in.o \</span><br><span class="line">		net/built-in.o</span><br></pre></td></tr></table></figure>
-<p>除了 arch&#x2F;arm&#x2F;kernel&#x2F;vmlinux.lds 以外，其他都是要编译链接生成的。顶层 Makefile 中有如下代码：<br><code>937 $(sort $(vmlinux-deps)): $(vmlinux-dirs) ;</code><br>sort 是排序函数，用于对 vmlinux-deps 的字符串列表进行排序，并且去掉重复的单词。可以看出 <code>vmlinux-deps </code>依赖 <code>vmlinux-dirs</code>，&#96;&#96;vmlinux-dirs&#96; 也定义在顶层 Makefile 中，定义如下：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">889 vmlinux-dirs := <span class="variable">$(<span class="built_in">patsubst</span> %/,%,$(<span class="built_in">filter</span> %/, $(init-y)</span> $(init-m) \</span><br><span class="line">890 		$(core-y) $(core-m) $(drivers-y) $(drivers-m) \</span><br><span class="line">891 		$(net-y) $(net-m) $(libs-y) $(libs-m)))</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/4.png" alt="image"></p>
-<p>因此展开vmlinux-dirs为：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">vmlinux-dirs = init        usr             arch/arm/vfp \</span><br><span class="line">		arch/arm/vdso arch/arm/kernel      arch/arm/mm \</span><br><span class="line">		arch/arm/common arch/arm/probes    arch/arm/net \</span><br><span class="line">		arch/arm/crypto arch/arm/firmware  arch/arm/mach-imx\</span><br><span class="line">		kernel                             mm        fs \</span><br><span class="line">		ipc                                security  crypto \</span><br><span class="line">		block                              drivers   sound \</span><br><span class="line">		firmware                           net       arch/arm/lib \</span><br><span class="line">		lib</span><br></pre></td></tr></table></figure>
-
-<p>在顶层 Makefile 中有如下代码：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">946 $(vmlinux-dirs): prepare scripts</span><br><span class="line">947 	<span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=<span class="variable">$@</span></span><br></pre></td></tr></table></figure>
-<h4><span id="1-1-5-2-prepare-zhun-bei-gong-zuo">1.1.5.2 prepare准备工作</span><a href="#1-1-5-2-prepare-zhun-bei-gong-zuo" class="header-anchor">#</a></h4><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vmlinux-deps -&gt; vmlinux-dirs -&gt; prepare</span><br></pre></td></tr></table></figure>
-
-<h5><span id="1-1-5-2-1-prepare-de-kuang-jia">1.1.5.2.1 prepare 的框架</span><a href="#1-1-5-2-1-prepare-de-kuang-jia" class="header-anchor">#</a></h5><p><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/5.png" alt="image"></p>
-<p><code>prepare0</code>:</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1 prepare0: archprepare</span><br><span class="line">2   <span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=scripts/mod</span><br><span class="line">3   <span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=.</span><br></pre></td></tr></table></figure>
-
-<p>第2行，等于<code>make -f ./scripts/Makefile.build obj=scripts/mod</code></p>
-<p>首先进入到<code> scripts/Makefile.build</code> ,然后包含<code> scripts/mod/Makefile</code> 文件，执行<code>scripts/mod/Makefile</code>下的默认目标:</p>
-<p><code>scripts/mod/Makefile</code>内容如下：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">hostprogs-y := modpost mk_elfconfig</span><br><span class="line">always      := $(hostprogs-y) empty.o</span><br><span class="line"></span><br><span class="line">devicetable-offsets-file := devicetable-offsets.h</span><br><span class="line"></span><br><span class="line"><span class="variable">$(obj)</span>/$(devicetable-offsets-file): <span class="variable">$(obj)</span>/devicetable-offsets.s FORCE</span><br><span class="line">    <span class="variable">$(<span class="built_in">call</span> filechk,offsets,__DEVICETABLE_OFFSETS_H__)</span></span><br></pre></td></tr></table></figure>
-
-<p>这部分命令将生成 <code>scripts/mod/devicetable-offsets.h </code>这个全局偏移文件。</p>
-<p>同时，<code>modpost</code> 和 <code>mk_elfconfig </code>这两个目标(这是两个主机程序)被赋值给<code>always</code>变量，根据 <code>scripts/Makefile.build </code>中的规则，将在<code>Makefile.host</code>中被生成。<code>modpost</code> 和 <code>mk_elfconfig </code>是两个主机程序，负责处理模块与编译符号相关的内容。</p>
-<p><code>archprepare</code>：</p>
-<p>看到 arch 前缀就知道这是架构相关的，这部分的定义与 <code>arch/$(ARCH)/Makefile</code> 有非常大的关系.<code>archprepare </code>并没有命令部分，仅仅是四个依赖:</p>
-<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">archprepare: archheaders archscripts prepare1 scripts</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li><code>archheaders</code></li>
-</ol>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">archheaders:</span></span><br><span class="line">    <span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=arch/arm/tools uapi <span class="comment">#定义再arch/$(ARCH)/Makfile</span></span><br></pre></td></tr></table></figure>
-
-<p>进入<code>scripts/Makefile.build</code> 中，并包含 <code>arch/arm/tools/Makefile</code>,编译目标为<code> uapi</code>：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">uapi-hdrs-y := <span class="variable">$(uapi)</span>/unistd-common.h</span><br><span class="line">uapi-hdrs-y += <span class="variable">$(uapi)</span>/unistd-oabi.h</span><br><span class="line">uapi-hdrs-y += <span class="variable">$(uapi)</span>/unistd-eabi.h</span><br><span class="line"><span class="section">uapi:   $(uapi-hdrs-y)</span></span><br></pre></td></tr></table></figure>
-
-<p>uapi 为用户 API 的头文件，包含<code>unistd-common.h、unistd-oabi.h、unistd-eabi.h</code>等通用头文件。</p>
-<ol start="2">
-<li><p><code>archscripts</code></p>
-<p>archscripts 产生平台相关的支持脚本。</p>
-</li>
-<li><p><code>scripts</code></p>
-</li>
-</ol>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">scripts: scripts_basic scripts_dtc</span></span><br><span class="line">    <span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=$(@)</span><br></pre></td></tr></table></figure>
-
-<p>等于<code>make -f ./scripts/Makefile.build obj=scripts</code>, 找到找到<code> scripts</code>下的 Makefile，Makefile 下的内容是这样的：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">hostprogs-<span class="variable">$(CONFIG_BUILD_BIN2C)</span>  += bin2c</span><br><span class="line">hostprogs-<span class="variable">$(CONFIG_KALLSYMS)</span>     += kallsyms</span><br><span class="line">hostprogs-<span class="variable">$(CONFIG_LOGO)</span>         += pnmtologo</span><br><span class="line">hostprogs-<span class="variable">$(CONFIG_VT)</span>           += conmakehash</span><br><span class="line">hostprogs-<span class="variable">$(BUILD_C_RECORDMCOUNT)</span> += recordmcount</span><br><span class="line">hostprogs-<span class="variable">$(CONFIG_BUILDTIME_EXTABLE_SORT)</span> += sortextable</span><br><span class="line">hostprogs-<span class="variable">$(CONFIG_ASN1)</span>     += asn1_compiler</span><br><span class="line">...</span><br><span class="line">hostprogs-y += unifdef</span><br><span class="line"><span class="section">build_unifdef: <span class="variable">$(obj)</span>/unifdef</span></span><br><span class="line">    @:</span><br></pre></td></tr></table></figure>
-
-<p>编译了一系列的主机程序，包括<code> bin2c</code>、<code>kallsyms</code>、<code>pnmtologo</code>等。</p>
-<p><code>scripts_basic</code>前面讲过了，编译出<code>fixdep</code>。</p>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17859528.html">Uboot顶层Makefile解析-1. defconfig过程分析 - fuzidage - 博客园 (cnblogs.com)</a></p>
-<p><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/">uboot-编译defconfig分析 | Hexo (fuzidage.github.io)</a></p>
-<p><code>scripts_dtc</code>定义如下:</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">scripts_dtc: scripts_basic</span></span><br><span class="line">    <span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=scripts/dtc</span><br></pre></td></tr></table></figure>
-
-<p>同样的，进入 <code>scripts/dtc/Makefile</code>:</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hostprogs-<span class="variable">$(CONFIG_DTC)</span> := dtc</span><br><span class="line">always      := $(hostprogs-y)</span><br><span class="line">dtc-objs    := dtc.o flattree.o fstree.o data.o livetree.o treesource.o \</span><br><span class="line">           srcpos.o checks.o util.o</span><br><span class="line">dtc-objs    += dtc-lexer.lex.o dtc-parser.tab.o</span><br></pre></td></tr></table></figure>
-
-<p>可以看到，该目标的作用就是生成 dtc。</p>
-<ol start="4">
-<li><code>prepare1</code></li>
-</ol>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">prepare1: prepare3 outputMakefile asm-generic <span class="variable">$(version_h)</span> <span class="variable">$(autoksyms_h)</span> \</span></span><br><span class="line">                        <span class="keyword">include</span>/generated/utsrelease.h</span><br><span class="line">    <span class="variable">$(cmd_crmodverdir)</span></span><br></pre></td></tr></table></figure>
-
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">md_crmodverdir = <span class="variable">$(Q)</span>mkdir -p <span class="variable">$(MODVERDIR)</span> \</span><br><span class="line">                  <span class="variable">$(<span class="built_in">if</span> <span class="variable">$(KBUILD_MODULES)</span>,; rm -f <span class="variable">$(MODVERDIR)</span>/*)</span></span><br></pre></td></tr></table></figure>
-
-<p><code>$(MODVERDIR) </code>仅与编译外部模块相关，这里针对外部模块的处理，如果指定编译外部模块，则不做任何事，如果没有指定编译外部模块，清除<code>$(MODVERDIR)/</code>目录下所有内容。</p>
-<p>4.1 <code>prepare3</code></p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">prepare3: include/config/kernel.release</span></span><br><span class="line"><span class="keyword">ifneq</span> (<span class="variable">$(srctree)</span>,.)</span><br><span class="line">    @<span class="variable">$(kecho)</span> &#x27;  Using <span class="variable">$(srctree)</span> as source for kernel&#x27;</span><br><span class="line">    <span class="variable">$(Q)</span>if [ -f <span class="variable">$(srctree)</span>/.config -o \</span><br><span class="line">         -d <span class="variable">$(srctree)</span>/<span class="keyword">include</span>/config -o \</span><br><span class="line">         -d <span class="variable">$(srctree)</span>/arch/<span class="variable">$(SRCARCH)</span>/<span class="keyword">include</span>/generated ]; then \</span><br><span class="line">        echo &gt;&amp;2 <span class="string">&quot;  <span class="variable">$(srctree)</span> is not clean, please run &#x27;make mrproper&#x27;&quot;</span>; \</span><br><span class="line">        echo &gt;&amp;2 <span class="string">&quot;  in the &#x27;<span class="variable">$(srctree)</span>&#x27; directory.&quot;</span>;\</span><br><span class="line">        /bin/false; \</span><br><span class="line">    fi;</span><br><span class="line"><span class="keyword">endif</span></span><br></pre></td></tr></table></figure>
-
-<p>当我们指定了<code> O=DIR</code> 参数时，发现如果源代码中在之前的编译中有残留的之前编译过的中间文件，编译过程就会报错，系统会提示我们使用<code>make mrprope</code>将之前的所有编译中间文件清除，再重新编译。<code>prepare3</code>的作用就是起到检查内核源码是否干净。</p>
-<p>从源码中可以看出，<code>prepare3 </code>将会检查的文件有:</p>
-<p> <code>$(srctree)/include/config、$(srctree)/arch/$(SRCARCH)/include/generated、$(srctree)/.config</code>。</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">make help</span><br><span class="line">Cleaning targets:</span><br><span class="line">  clean           - Remove most generated files but keep the config and</span><br><span class="line">                    enough build support to build external modules</span><br><span class="line">  mrproper        - Remove all generated files + config + various backup files</span><br><span class="line">  distclean       - mrproper + remove editor backup and patch files</span><br></pre></td></tr></table></figure>
-
-<p>输入<code>make help</code>可以看到clean目标的程度。</p>
-<p>4.2 <code>outputMakefile</code></p>
-<p>前面讲过了。</p>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17859528.html">Uboot顶层Makefile解析-1. defconfig过程分析 - fuzidage - 博客园 (cnblogs.com)</a></p>
-<p><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/">uboot-编译defconfig分析 | Hexo (fuzidage.github.io)</a></p>
-<p>4.3 <code>asm-generic、version_h、autoksyms_h、 include/generated/utsrelease.h</code></p>
-<p>产生相关头文件。</p>
-<h4><span id="1-1-5-3-vmlinux-dirs-zhan-kai">1.1.5.3 <code>vmlinux-dirs</code>展开</span><a href="#1-1-5-3-vmlinux-dirs-zhan-kai" class="header-anchor">#</a></h4><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">946 $(vmlinux-dirs): prepare scripts</span><br><span class="line">947 	<span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=<span class="variable">$@</span></span><br></pre></td></tr></table></figure>
-
-<p>第947行内容进行展开:<br><code>@ make -f ./scripts/Makefile.build obj=$@</code><br>$@在makefile中表示target，因此就是为vmlinux-dirs 的值，将 vmlinux-dirs 中的这些目录全部带入到命令中：</p>
-<pre><code>@ make -f ./scripts/Makefile.build obj=init
-@ make -f ./scripts/Makefile.build obj=usr
-@ make -f ./scripts/Makefile.build obj=arch/arm/vfp
-@ make -f ./scripts/Makefile.build obj=arch/arm/vdso
-@ make -f ./scripts/Makefile.build obj=arch/arm/kernel
-@ make -f ./scripts/Makefile.build obj=arch/arm/mm
-@ make -f ./scripts/Makefile.build obj=arch/arm/common
-@ make -f ./scripts/Makefile.build obj=arch/arm/probes
-@ make -f ./scripts/Makefile.build obj=arch/arm/net
-@ make -f ./scripts/Makefile.build obj=arch/arm/crypto
-@ make -f ./scripts/Makefile.build obj=arch/arm/firmware
-@ make -f ./scripts/Makefile.build obj=arch/arm/mach-imx
-@ make -f ./scripts/Makefile.build obj=kernel
-@ make -f ./scripts/Makefile.build obj=mm
-@ make -f ./scripts/Makefile.build obj=fs
-@ make -f ./scripts/Makefile.build obj=ipc
-@ make -f ./scripts/Makefile.build obj=security
-@ make -f ./scripts/Makefile.build obj=crypto
-@ make -f ./scripts/Makefile.build obj=block
-@ make -f ./scripts/Makefile.build obj=drivers
-@ make -f ./scripts/Makefile.build obj=sound
-@ make -f ./scripts/Makefile.build obj=firmware
-@ make -f ./scripts/Makefile.build obj=net
-@ make -f ./scripts/Makefile.build obj=arch/arm/lib
-@ make -f ./scripts/Makefile.build obj=lib
-</code></pre>
-<p>以<code>@ make -f ./scripts/Makefile.build obj=init</code>这个命令为例，讲解一下详细的运行过程。可以看到这些命令运行过程其实都是一样的。再次打开scripts&#x2F;Makefile.build，这个在做xxx_defconfig时已经分析过了：<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/6.png" alt="image"><br>当 只 编 译 Linux 内 核 镜 像 文 件 ， 也 就 是 使 用 <code>“ make zImage ” </code>编 译 的 时 候 ，<code>KBUILD_BUILTIN=1，KBUILD_MODULES</code> 为空。<code>“make”</code>命令是会编译所有的东西，包括 Linux内核镜像文件和一些模块文件。如果只编译 Linux 内核镜像的话，<code>__build </code>目标简化为：<br><code>__build: $(builtin-target) $(lib-target) $(extra-y)) $(subdir-ym) $(always)</code><br> <code>@:</code><br>重点看下<code>builtin-target</code>这个依赖，同样定义在scripts&#x2F;Makefile.build如下：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">86 <span class="keyword">ifneq</span> (<span class="variable">$(<span class="built_in">strip</span> $(obj-y)</span> $(obj-m) $(obj-) $(subdir-m) $(lib-target)),)</span><br><span class="line">87 builtin-target := <span class="variable">$(obj)</span>/built-in.o</span><br><span class="line">88 <span class="keyword">endif</span></span><br></pre></td></tr></table></figure>
-<p>可以看到只要<code>obj-y、obj-m、obj-、subdir-m 和 lib-target </code>这些变量不能全部为空，<code>builtin-target </code>变量的值为：<code>“$(obj)/built-in.o”</code>， 这就是这些 built-in.o 的来源了。我们以<code>@ make -f ./scripts/Makefile.build obj=init</code>这个命令为例:<br>那么现在开始编译：<br><code>builtin-target := init/built-in.o</code></p>
-<p><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/7.png" alt="image"></p>
-<p>目标<code>builtin-target</code>依赖为 obj-y，命令为<code>$(call if_changed,link_o_target)</code>，也就是调用函数<code> if_changed</code>，参数为<code> link_o_target</code>，其返回值就是具体的命令。前面讲过了<code>if_changed</code> <a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17901135.html" title="uboot顶层makefile-2编译过程">uboot顶层makefile-2编译过程</a>，<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/8.png" alt="image"></p>
-<p>它会调用 <code>cmd_$(1)</code>所对应的命令<code>($(1)就是函数的第 1 个参数)</code>，因此这里就是调用：<br><code>cmd_link_o_target</code>，也就是:</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">331 cmd_link_o_target = <span class="variable">$(<span class="built_in">if</span> $(<span class="built_in">strip</span> $(obj-y)</span>),\</span><br><span class="line">	332 <span class="variable">$(LD)</span> <span class="variable">$(ld_flags)</span> -r -o <span class="variable">$@</span> <span class="variable">$(<span class="built_in">filter</span> $(obj-y)</span>, <span class="variable">$^</span>) \</span><br><span class="line">	333 <span class="variable">$(cmd_secanalysis)</span>,\</span><br><span class="line">	334 rm -f <span class="variable">$@</span>; <span class="variable">$(AR)</span> rcs<span class="variable">$(KBUILD_ARFLAGS)</span> <span class="variable">$@</span>)</span><br></pre></td></tr></table></figure>
-<p><code>cmd_link_o_target </code>就是使用 LD将某个目录下的所有.o 文件链接在一起，最终形成 built-in.o。<br>命令会记录到<code>.built-in.o.cmd</code>：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmd_init/built-in.o :=  arm-linux-gnueabihf-ld -EL    -r -o init/built-in.o init/main.o init/version.o init/mounts.o init/initramfs.o init/calibrate.o init/init_task.o</span><br></pre></td></tr></table></figure>
-
-<p>同理，其他的依赖项<code>built-in.o</code>也是同样的方式编译。</p>
-<h3><span id="1-1-6-link-vmlinux">1.1.6 link-vmlinux</span><a href="#1-1-6-link-vmlinux" class="header-anchor">#</a></h3><p>vmlinux的依赖产生完后，调用<code>+$(call if_changed,link-vmlinux)</code>链接生成 vmlinux。<br>命令<code>“+$(call if_changed,link-vmlinux)”</code>表示将<code>$(call if_changed,link-vmlinux)</code>的结果作为最终生成 vmlinux 的命令，前面的“+”表示该命令结果不可忽略。<code>$(call if_changed,link-vmlinux)</code>是调用函数<code> if_changed</code>，<code>link-vmlinux</code> 是函数<code>if_changed</code>的参数，函数<code> if_changed</code> 定义在文件 scripts&#x2F;Kbuild.include 中：<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/9.png" alt="image"></p>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17901135.html" title="uboot顶层makefile-2编译过程">uboot顶层makefile-2编译过程</a>有具体分析<code> if_changed</code>。</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">总结：当依赖比目标新的时候，或者命令有改变的时候，if_changed 就会执行一些命令</span><br><span class="line">“@set -e”告诉 bash，如果任何语句的执行结果不为 true(也就是执行出错)的话就直接退出。</span><br><span class="line">$(echo-cmd)用于打印命令执行过程，比如在链接 vmlinux 的时候就会输出“LINK vmlinux”。$(cmd_$(1))中的$(1)表示参数，也就是 link-vmlinux，因此$(cmd_$(1))表示执行 cmd_link-vmlinux 的内容。</span><br></pre></td></tr></table></figure>
-
-<p>打开<code>.vmlinux.cmd</code>文件内容如下：<br><code>cmd_vmlinux := /bin/bash scripts/link-vmlinux.sh arm-linux-gnueabihf-ld -EL  -p --no-undefined -X --pic-veneer --build-id</code><br><code>cmd_link-vmlinux </code>在顶层 Makefile 中定义如下：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">914 <span class="comment"># Final link of vmlinux</span></span><br><span class="line">915 cmd_link-vmlinux = <span class="variable">$(CONFIG_SHELL)</span> <span class="variable">$&lt;</span> <span class="variable">$(LD)</span> <span class="variable">$(LDFLAGS)</span> <span class="variable">$(LDFLAGS_vmlinux)</span></span><br><span class="line">916 quiet_cmd_link-vmlinux = LINK <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
-
-<p>第 915 行就是 <code>cmd_link-vmlinux</code> 的值，其中 <code>CONFIG_SHELL=/bin/bash</code>，<code>$&lt;</code>表示目标 vmlinux的第一个依赖文件，也就是 <code>scripts/link-vmlinux.sh</code>。<br><code>LD= arm-linux-gnueabihf-ld -EL</code>，<code>LDFLAGS </code>为空。<code>LDFLAGS_vmlinux </code>的值由顶层 Makefile 和arch&#x2F;arm&#x2F;Makefile 这两个文件共同决定，最终:<br><code>LDFLAGS_vmlinux=-p --no-undefined -X --pic-veneer --build-id</code><br>因此 <code>cmd_link-vmlinux </code>最终的值:<br><code>cmd_link-vmlinux = /bin/bash scripts/link-vmlinux.sh arm-linux-gnueabihf-ld -EL -p --no-undefined -X --pic-veneer --build-id</code><br><code>cmd_link-vmlinux </code>会调用<code>scripts/link-vmlinux.sh</code>这个脚本来链接出 vmlinux。脚本内容如下：<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/10.png" alt="image"><br><strong>vmliux_link</strong> 就是最终链接出 vmlinux 的函数，判断 <code>SRCARCH </code>是否不等于<code>“um”</code>，因为<code> SRCARCH=arm</code>，因此条件成立。执行：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$&#123;LD&#125; $&#123;LDFLAGS&#125; $&#123;LDFLAGS_vmlinux&#125; -o $&#123;2&#125; \</span><br><span class="line">	-T $&#123;lds&#125; $&#123;KBUILD_VMLINUX_INIT&#125; \</span><br><span class="line">	--start-group $&#123;KBUILD_VMLINUX_MAIN&#125; --end-group $&#123;1&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这三行代码应该很熟悉了！ 就是普通的链接操作，连接脚本为<code>lds= ./arch/arm/kernel/vmlinux.lds</code> ，需要链接的文件由变量<code>KBUILD_VMLINUX_INIT</code>和<code>KBUILD_VMLINUX_MAIN </code>来决定，这两个变量在前面讲过了：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">KBUILD_VMLINUX_INIT= $(head-y) $(init-y)</span><br><span class="line">KBUILD_VMLINUX_MAIN = $(core-y) $(libs-y) $(drivers-y) $(net-y)</span><br><span class="line">KBUILD_LDS= arch/<span class="variable">$(SRCARCH)</span>/kernel/vmlinux.lds  <span class="comment">#链接脚本</span></span><br></pre></td></tr></table></figure>
-
-<p>第 217 行调用 vmlinux_link 函数来链接出 vmlinux。<br>编译时V&#x3D;1即可看到详细LD链接过程如下：<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/11.png" alt="image"><br>总结：将各个子目录下的 built-in.o、.a 等文件链接在一起，最终生成 vmlinux 这个 ELF 格式的可执行文件。链接脚本为arch&#x2F;arm&#x2F;kernel&#x2F;vmlinux.lds，链接过程是由shell脚本scripts&#x2F;link-vmlinux.s来完成的。</p>
-<h3><span id="1-1-7-xin-ban-de-link-vmlinux">1.1.7 新版的link-vmlinux</span><a href="#1-1-7-xin-ban-de-link-vmlinux" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cmd_link-vmlinux =                                                 \</span><br><span class="line">    <span class="variable">$(CONFIG_SHELL)</span> <span class="variable">$&lt;</span> <span class="variable">$(LD)</span> <span class="variable">$(KBUILD_LDFLAGS)</span> <span class="variable">$(LDFLAGS_vmlinux)</span> ;    \</span><br><span class="line">    <span class="variable">$(<span class="built_in">if</span> <span class="variable">$(ARCH_POSTLINK)</span>, <span class="variable">$(MAKE)</span> -f <span class="variable">$(ARCH_POSTLINK)</span> <span class="variable">$@</span>, true)</span></span><br><span class="line">    </span><br><span class="line"><span class="section">vmlinux: scripts/link-vmlinux.sh autoksyms_recursive $(vmlinux-deps) FORCE</span></span><br><span class="line">    +<span class="variable">$(<span class="built_in">call</span> if_changed,link-vmlinux)</span></span><br></pre></td></tr></table></figure>
-
-<h4><span id="1-1-7-1-autoksyms-recursive">1.1.7.1 autoksyms_recursive</span><a href="#1-1-7-1-autoksyms-recursive" class="header-anchor">#</a></h4><p>内核的符号优化。</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">autoksyms_recursive: $(vmlinux-deps)</span></span><br><span class="line"><span class="keyword">ifdef</span> CONFIG_TRIM_UNUSED_KSYMS</span><br><span class="line">    <span class="variable">$(Q)</span><span class="variable">$(CONFIG_SHELL)</span> <span class="variable">$(srctree)</span>/scripts/adjust_autoksyms.sh \</span><br><span class="line">      <span class="string">&quot;<span class="variable">$(MAKE)</span> -f <span class="variable">$(srctree)</span>/Makefile vmlinux&quot;</span></span><br><span class="line"><span class="keyword">endif</span></span><br></pre></td></tr></table></figure>
-
-<p>如果在源码的配置阶段定义了<code>CONFIG_TRIM_UNUSED_KSYMS</code>这个变量，就执行：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(Q)</span><span class="variable">$(CONFIG_SHELL)</span> <span class="variable">$(srctree)</span>/scripts/adjust_autoksyms.sh \</span><br><span class="line">      <span class="string">&quot;<span class="variable">$(MAKE)</span> -f <span class="variable">$(srctree)</span>/Makefile vmlinux&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>默认情况下，这里的脚本并不会执行。</p>
-<p><code> if_changed</code>,执行<code>link-vmlinux</code>,也就是<code>cmd_link-vmlinux</code>.</p>
-<h2><span id="1-2-make-zimage-guo-cheng">1.2 make zImage过程</span><a href="#1-2-make-zimage-guo-cheng" class="header-anchor">#</a></h2><p>当我们输入：<br><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- all</code>会编译vmlinux, zImage,然后再编译dtb,编译ko。</p>
-<h3><span id="1-2-1-vmlinux-image-zimage-uimage-de-qu-bie">1.2.1 vmlinux、Image，zImage、uImage 的区别</span><a href="#1-2-1-vmlinux-image-zimage-uimage-de-qu-bie" class="header-anchor">#</a></h3><p>①、vmlinux 是编译出来的最原始的内核文件，是未压缩的，比如正点原子提供的 Linux 源码编译出来的 vmlinux 差不多有 16MB。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">ls</span> -lh vmlinux</span><br><span class="line">-rwxrwxr-x 1 robin.lee robin.lee 17M 1月  29 16:26 vmlinux</span><br></pre></td></tr></table></figure>
-<p>②、Image 是 Linux 内核镜像文件，但是 Image 仅包含可执行的二进制数据。Image 就是使用 objcopy 取消掉 vmlinux 中的一些其他信息，比如符号表什么的。但是 Image 是没有压缩过的，Image 保存在 arch&#x2F;arm&#x2F;boot 目录下，其大小大概在 12MB 左右。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">ls</span> -lh <span class="built_in">arch</span>/arm/boot/Image</span><br><span class="line">-rwxrwxr-x 1 robin.lee robin.lee 13M 1月  29 16:26 <span class="built_in">arch</span>/arm/boot/Image</span><br></pre></td></tr></table></figure>
-
-<p>③、zImage 是经过 gzip 压缩后的 Image，经过压缩以后其大小大概在 6MB 左右。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">ls</span> -lh <span class="built_in">arch</span>/arm/boot/zImage</span><br><span class="line">-rwxrwxr-x 1 robin.lee robin.lee 6.5M 1月  29 16:26 <span class="built_in">arch</span>/arm/boot/zImage</span><br></pre></td></tr></table></figure>
-<p>④、uImage 是老版本 uboot 专用的镜像文件，uImag 是在 zImage 前面加了一个长度为 64字节的“头”，这个头信息描述了该镜像文件的类型、加载位置、生成时间、大小等信息。但是新的 uboot 已经支持了 zImage 启动！所以已经很少用到 uImage 了，除非你用的很古老的 uboot。</p>
-<h3><span id="1-2-2-image-de-bian-yi-guo-cheng">1.2.2 Image的编译过程</span><a href="#1-2-2-image-de-bian-yi-guo-cheng" class="header-anchor">#</a></h3><p>使用<code>“make”、“make all”、“make zImage”</code>都可以编译出zImage, arch&#x2F;arm&#x2F;Makefile 中有如下代码:<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/12.png" alt="image"><br>all依赖<code>$(KBUILD_IMAGE) $(KBUILD_DTBS)</code>, <code>KBUILD_IMAGE</code>为zImage， <code>KBUILD_DTBS</code>为dtbs。</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#boot 对应目录</span></span><br><span class="line">boot := arch/arm/boot</span><br><span class="line"><span class="comment">#实际镜像</span></span><br><span class="line">BOOT_TARGETS    = zImage Image xipImage bootpImage uImage</span><br><span class="line"><span class="comment">#镜像生成规则</span></span><br><span class="line"><span class="variable">$(BOOT_TARGETS)</span>: vmlinux</span><br><span class="line">    <span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=<span class="variable">$(boot)</span> MACHINE=<span class="variable">$(MACHINE)</span> <span class="variable">$(boot)</span>/<span class="variable">$@</span></span><br></pre></td></tr></table></figure>
-<p>可以看到当vmlinux产生后，就会去继续产生zImage, 展开：<br><code>@ make -f ./scripts/Makefile.build obj=arch/arm/boot MACHINE=arch/arm/boot/zImage</code><br>可以看到又是通过scripts&#x2F;Makefile.build来完成的编译。进入<code>arch/arm/boot</code>的makefile:</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rm Image zImage</span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- Image V=1</span><br></pre></td></tr></table></figure>
-
-<p>Image生成过程:</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Image 生成的规则</span></span><br><span class="line"><span class="variable">$(obj)</span>/Image: vmlinux FORCE</span><br><span class="line">    <span class="variable">$(<span class="built_in">call</span> if_changed,objcopy)</span></span><br></pre></td></tr></table></figure>
-
-<p>执行<code>cmd_objcopy</code>,该命令定义在<code>scripts/Makefile.lib </code>中：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#在arch/$(ARCH)/boot/Makefile 下定义</span></span><br><span class="line">OBJCOPYFLAGS    :=-O binary -R .comment -S</span><br><span class="line"><span class="comment">#scripts/Makefile.lib</span></span><br><span class="line">cmd_objcopy = <span class="variable">$(OBJCOPY)</span> <span class="variable">$(OBJCOPYFLAGS)</span> $(OBJCOPYFLAGS_$(@F)) <span class="variable">$&lt;</span> <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
-
-<p>打印如下:</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make -f ./scripts/Makefile.build obj=arch/arm/boot MACHINE= arch/arm/boot/Image</span><br><span class="line">  arm-linux-gnueabihf-objcopy -O binary -R .comment -S  vmlinux arch/arm/boot/Image</span><br></pre></td></tr></table></figure>
-
-<h3><span id="1-2-3-zimage-de-bian-yi-guo-cheng">1.2.3 zImage的编译过程</span><a href="#1-2-3-zimage-de-bian-yi-guo-cheng" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- zImage V=1</span><br></pre></td></tr></table></figure>
-
-<p>zImage生成过程:</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(obj)</span>/zImage:  <span class="variable">$(obj)</span>/compressed/vmlinux FORCE</span><br><span class="line">    <span class="variable">$(<span class="built_in">call</span> if_changed,objcopy)</span></span><br></pre></td></tr></table></figure>
-
-<p>打印如下：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">make -f ./scripts/Makefile.build obj=arch/arm/boot MACHINE= arch/arm/boot/zImage</span><br><span class="line">make -f ./scripts/Makefile.build obj=arch/arm/boot/compressed arch/arm/boot/compressed/vmlinux</span><br><span class="line">  (cat arch/arm/boot/compressed/../Image | lzop -9 &amp;&amp; printf \000\100\303\000) &gt; arch/arm/boot/compressed/piggy.lzo || (rm -f arch/arm/boot/compressed/piggy.lzo ; false)</span><br><span class="line">  arm-linux-gnueabihf-gcc -Wp,-MD,arch/arm/boot/compressed/.piggy.lzo.o.d  -nostdinc -isystem /media/cvitek/robin.lee/my_test/study/openedv/toolchain/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/../lib/gcc/arm-linux-gnueabihf/4.9.4/<span class="keyword">include</span> -I./arch/arm/<span class="keyword">include</span> -Iarch/arm/<span class="keyword">include</span>/generated/uapi -Iarch/arm/<span class="keyword">include</span>/generated  -Iinclude -I./arch/arm/<span class="keyword">include</span>/uapi -Iarch/arm/<span class="keyword">include</span>/generated/uapi -I./<span class="keyword">include</span>/uapi -Iinclude/generated/uapi <span class="keyword">-include</span> ./<span class="keyword">include</span>/linux/kconfig.h -D__KERNEL__ -mlittle-endian   -D__ASSEMBLY__ -mabi=aapcs-linux -mno-thumb-interwork -mfpu=vfp -funwind-tables -marm -D__LINUX_ARM_ARCH__=7 -march=armv7-a  <span class="keyword">-include</span> asm/unified.h -msoft-float -DCC_HAVE_ASM_GOTO        -DZIMAGE     -c -o arch/arm/boot/compressed/piggy.lzo.o arch/arm/boot/compressed/piggy.lzo.S</span><br><span class="line">  arm-linux-gnueabihf-ld -EL    --defsym _kernel_bss_size=463520 -p --no-undefined -X -T arch/arm/boot/compressed/vmlinux.lds arch/arm/boot/compressed/head.o arch/arm/boot/compressed/piggy.lzo.o arch/arm/boot/compressed/misc.o arch/arm/boot/compressed/decompress.o arch/arm/boot/compressed/string.o arch/arm/boot/compressed/hyp-stub.o arch/arm/boot/compressed/lib1funcs.o arch/arm/boot/compressed/ashldi3.o arch/arm/boot/compressed/bswapsdi2.o -o arch/arm/boot/compressed/vmlinux</span><br><span class="line">  arm-linux-gnueabihf-objcopy -O binary -R .comment -S  arch/arm/boot/compressed/vmlinux arch/arm/boot/zImage</span><br></pre></td></tr></table></figure>
-
-<h3><span id="1-2-4-objcopyflags">1.2.4 OBJCOPYFLAGS</span><a href="#1-2-4-objcopyflags" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-O binary：表示输出格式为 binary，也就是二进制</span><br><span class="line">-R .comment：表示移除二进制文件中的 .comment 段，这个段主要用于 debug</span><br><span class="line">-S ： 表示移除所有的符号以及重定位信息</span><br></pre></td></tr></table></figure>
-
-<h1><span id="2-sheng-cheng-de-wen-jian">2 生成的文件</span><a href="#2-sheng-cheng-de-wen-jian" class="header-anchor">#</a></h1><p><code>System.map</code>： 内核镜像中所有的符号，符号表<br><code>.*.o.d 和 .*.o.cmd: </code>记录编译指令的内容，如：<code>.vmlinux.cmd</code><br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/13.png" alt="image"></p>
-<p><code>modules.order</code> 、 <code>modules.build</code> 和 <code>modules.builtin.modinfo :</code> 这两个文件主要负责记录编译的模块，<code>modules.builtin.modinfo</code>记录模块信息，以供 modprobe 使用<br><code>arch/$(ARCH)/boot</code> : 编译出的文件，一般包含这几部分：镜像、内核符号表、系统dtb。<br><code>include/generate/*</code> : 内核编译过程将会生成一些头文件，其中比较重要的是 autoconf.h，这是 .config 的头文件版本，以及uapi&#x2F;目录下的文件，这个目录下的保存着用户头文件。<br><code>include/config/* </code>： 为了解决 autoconf.h 牵一发而动全身的问题(即修改一个配置导致所有依赖 autoconf.h 的文件需要重新编译)，将 autoconf.h 分散为多个头文件放在 include&#x2F;config&#x2F; 下，以解决 autoconf.h 的依赖问题。</p>
-<h1><span id="3-she-bei-shu-de-bian-yi-guo-cheng">3 设备树的编译过程</span><a href="#3-she-bei-shu-de-bian-yi-guo-cheng" class="header-anchor">#</a></h1><p>Linux内核目录下<code>make all</code>会把dtb也编译出来。详见<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17363949.html">字符设备驱动-4.设备树</a> 第2.3 DTB文件的编译。</p>
-<p><code>make dtbs V=1</code>可查看详细编译过程。</p>
-<h2><span id="3-1-sheng-cheng-dtc-gong-ju">3.1 生成dtc工具</span><a href="#3-1-sheng-cheng-dtc-gong-ju" class="header-anchor">#</a></h2><p><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/14.png" alt="image-20240719001049071"></p>
-<h2><span id="3-2-sheng-cheng-dtb">3.2 生成dtb</span><a href="#3-2-sheng-cheng-dtb" class="header-anchor">#</a></h2><p><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/15.png" alt="image-20240719001248018"></p>
-<p>vmlinux和zImage产生后会继续编译设备树，用dtc编译dts得到dtb。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/" data-id="clzp8utsx000b9ouf7fxv26ql" data-title="Linux内核Makefile编译过程" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -3057,6 +3143,10 @@ messages    messages.0  messages.1  messages.2  messages.3
       <ul>
         
           <li>
+            <a href="/2024/08/18/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E5%86%85%E6%A0%B8led%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-内核led子系统</a>
+          </li>
+        
+          <li>
             <a href="/2024/08/18/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-pinctrl%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-pinctrl子系统</a>
           </li>
         
@@ -3070,10 +3160,6 @@ messages    messages.0  messages.1  messages.2  messages.3
         
           <li>
             <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/">字符设备驱动-ioctl命令详解</a>
-          </li>
-        
-          <li>
-            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/">字符设备驱动-misc杂项设备</a>
           </li>
         
       </ul>

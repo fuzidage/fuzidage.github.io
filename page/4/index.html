@@ -69,6 +69,317 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-Linux内核Makefile编译过程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/" class="article-date">
+  <time class="dt-published" datetime="2024-07-18T15:43:23.000Z" itemprop="datePublished">2024-07-18</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/">Linux内核Makefile编译过程</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-zimage-bian-yi">1 zImage编译</a><ul>
+<li><a href="#1-1-vmlinux-bian-yi">1.1 vmlinux编译</a><ul>
+<li><a href="#1-1-1-head-y">1.1.1 head-y</a></li>
+<li><a href="#1-1-2-init-y-drivers-y-he-net-y">1.1.2 init-y&#x2F;drivers-y和net-y</a></li>
+<li><a href="#1-1-3-libs-y">1.1.3 libs-y</a></li>
+<li><a href="#1-1-4-core-y">1.1.4 core-y</a></li>
+<li><a href="#1-1-5-built-in-o-chan-sheng-guo-cheng">1.1.5 built-in.o产生过程</a><ul>
+<li><a href="#1-1-5-1-vmlinux-deps-zhan-kai">1.1.5.1 vmlinux-deps展开</a></li>
+<li><a href="#1-1-5-2-prepare-zhun-bei-gong-zuo">1.1.5.2 prepare准备工作</a><ul>
+<li><a href="#1-1-5-2-1-prepare-de-kuang-jia">1.1.5.2.1 prepare 的框架</a></li>
+</ul>
+</li>
+<li><a href="#1-1-5-3-vmlinux-dirs-zhan-kai">1.1.5.3 <code>vmlinux-dirs</code>展开</a></li>
+</ul>
+</li>
+<li><a href="#1-1-6-link-vmlinux">1.1.6 link-vmlinux</a></li>
+<li><a href="#1-1-7-xin-ban-de-link-vmlinux">1.1.7 新版的link-vmlinux</a><ul>
+<li><a href="#1-1-7-1-autoksyms-recursive">1.1.7.1 autoksyms_recursive</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#1-2-make-zimage-guo-cheng">1.2 make zImage过程</a><ul>
+<li><a href="#1-2-1-vmlinux-image-zimage-uimage-de-qu-bie">1.2.1 vmlinux、Image，zImage、uImage 的区别</a></li>
+<li><a href="#1-2-2-image-de-bian-yi-guo-cheng">1.2.2 Image的编译过程</a></li>
+<li><a href="#1-2-3-zimage-de-bian-yi-guo-cheng">1.2.3 zImage的编译过程</a></li>
+<li><a href="#1-2-4-objcopyflags">1.2.4 OBJCOPYFLAGS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-sheng-cheng-de-wen-jian">2 生成的文件</a></li>
+<li><a href="#3-she-bei-shu-de-bian-yi-guo-cheng">3 设备树的编译过程</a><ul>
+<li><a href="#3-1-sheng-cheng-dtc-gong-ju">3.1 生成dtc工具</a></li>
+<li><a href="#3-2-sheng-cheng-dtb">3.2 生成dtb</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-zimage-bian-yi">1 zImage编译</span><a href="#1-zimage-bian-yi" class="header-anchor">#</a></h1><p><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/1.png" alt="image"><br><code>_all </code>是默认目标，如果使用命令make或者make all编译 Linux 的话此目标就会被匹配。<br><code>KBUILD_EXTMOD </code>为空的，因此194 行的代码成立, 因此<code>_all</code>依赖all。all又依赖vmlinux，开始编译vmlinux。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- distclean</span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- imx_v7_defconfig</span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- menuconfig</span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- zImage -j16</span><br></pre></td></tr></table></figure>
+<h2><span id="1-1-vmlinux-bian-yi">1.1 vmlinux编译</span><a href="#1-1-vmlinux-bian-yi" class="header-anchor">#</a></h2><p>找到vmlinux目标开始分析：<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/2.png" alt="image"><br>目标 vmlinux 依赖 <code>scripts/link-vmlinux.sh</code> <code>$(vmlinux-deps)</code> <code>FORCE</code>。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vmlinux-deps= <span class="variable">$(KBUILD_LDS)</span> <span class="variable">$(KBUILD_VMLINUX_INIT)</span> <span class="variable">$(KBUILD_VMLINUX_MAIN)</span></span><br></pre></td></tr></table></figure>
+<p>其中：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">KBUILD_VMLINUX_INIT= $(head-y) $(init-y)</span><br><span class="line">KBUILD_VMLINUX_MAIN = $(core-y) $(libs-y) $(drivers-y) $(net-y)</span><br><span class="line">KBUILD_LDS= arch/<span class="variable">$(SRCARCH)</span>/kernel/vmlinux.lds  //链接脚本</span><br></pre></td></tr></table></figure>
+
+<p>综上所述，vmlinux 的依赖为：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">scripts/link-vmlinux.sh</span><br><span class="line">$(head-y) 、$(init-y)、$(core-y) 、</span><br><span class="line">$(libs-y) 、$(drivers-y) 、$(net-y)、arch/arm/kernel/vmlinux.lds 和 FORCE</span><br></pre></td></tr></table></figure>
+<h3><span id="1-1-1-head-y">1.1.1 head-y</span><a href="#1-1-1-head-y" class="header-anchor">#</a></h3><p>head-y 定义在文件 arch&#x2F;arm&#x2F;Makefile 中:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">135 head-y := arch/arm/kernel/head<span class="variable">$(MMUEXT)</span>.o</span><br></pre></td></tr></table></figure>
+<p>当不使能 MMU 的话 <code>MMUEXT=-nommu</code>，如果使能 MMU 的话为空，因此 head-y为：<br><code>head-y = arch/arm/kernel/head.o</code></p>
+<h3><span id="1-1-2-init-y-x2f-drivers-y-he-net-y">1.1.2 init-y&#x2F;drivers-y和net-y</span><a href="#1-1-2-init-y-x2f-drivers-y-he-net-y" class="header-anchor">#</a></h3><p>顶层Makefile内容如下：<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/3.png" alt="image"><br>展开后：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">init-y = init/built-in.o</span><br><span class="line">drivers-y = drivers/built-in.o sound/built-in.o firmware/built-in.o</span><br><span class="line">net-y = net/built-in.o</span><br></pre></td></tr></table></figure>
+<h3><span id="1-1-3-libs-y">1.1.3 libs-y</span><a href="#1-1-3-libs-y" class="header-anchor">#</a></h3><p>顶层Makefile中：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">561 libs-y := lib/</span><br></pre></td></tr></table></figure>
+
+<p>在arch&#x2F;arm&#x2F;Makefile中，对libs-y又追加了：<br><code>libs-y := arch/arm/lib/ $(libs-y)</code><br>展开后：<br><code>libs-y = arch/arm/lib lib/</code><br>回到顶层Makefile:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">900 libs-y1 := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/lib.a, $(libs-y)</span>)</span><br><span class="line">901 libs-y2 := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.o, $(libs-y)</span>)</span><br><span class="line">902 libs-y := $(libs-y1) $(libs-y2)</span><br></pre></td></tr></table></figure>
+<p>展开后：<br><code>libs-y = arch/arm/lib/lib.a lib/lib.a arch/arm/lib/built-in.o lib/built-in.o</code></p>
+<h3><span id="1-1-4-core-y">1.1.4 core-y</span><a href="#1-1-4-core-y" class="header-anchor">#</a></h3><p>顶层Makefile中：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">532 core-y := usr/</span><br><span class="line">......</span><br><span class="line">887 core-y += kernel/ mm/ fs/ ipc/ security/ crypto/ block/</span><br></pre></td></tr></table></figure>
+<p>在 arch&#x2F;arm&#x2F;Makefile 中会对 core-y 进行追加，代码如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">269 core-<span class="variable">$(CONFIG_FPE_NWFPE)</span> += arch/arm/nwfpe/</span><br><span class="line">270 core-<span class="variable">$(CONFIG_FPE_FASTFPE)</span> += <span class="variable">$(FASTFPE_OBJ)</span></span><br><span class="line">271 core-<span class="variable">$(CONFIG_VFP)</span> += arch/arm/vfp/</span><br><span class="line">272 core-<span class="variable">$(CONFIG_XEN)</span> += arch/arm/xen/</span><br><span class="line">273 core-<span class="variable">$(CONFIG_KVM_ARM_HOST)</span> += arch/arm/kvm/</span><br><span class="line">274 core-<span class="variable">$(CONFIG_VDSO)</span> += arch/arm/vdso/</span><br><span class="line">275</span><br><span class="line">276 <span class="comment"># If we have a machine-specific directory, then include it in the build.</span></span><br><span class="line">277 core-y += arch/arm/kernel/ arch/arm/mm/ arch/arm/common/</span><br><span class="line">278 core-y += arch/arm/probes/</span><br><span class="line">279 core-y += arch/arm/net/</span><br><span class="line">280 core-y += arch/arm/crypto/</span><br><span class="line">281 core-y += arch/arm/firmware/</span><br><span class="line">282 core-y += <span class="variable">$(machdirs)</span> <span class="variable">$(platdirs)</span></span><br></pre></td></tr></table></figure>
+
+<p>比如使能 <code>VFP </code>的话就会在<code>.config</code>中有 CONFIG_VFP&#x3D;y 这一行，那么 core-y 就会追加<code>“arch/arm/vfp/”</code>。<br>顶层 Makefile 中还有：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">897 core-y := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.o, $(core-y)</span>)</span><br></pre></td></tr></table></figure>
+<p>最终 core-y 的值为：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">core-y = usr/built-in.o		arch/arm/vfp/built-in.o \</span><br><span class="line">arch/arm/vdso/built-in.o	arch/arm/kernel/built-in.o \</span><br><span class="line">arch/arm/mm/built-in.o 		arch/arm/common/built-in.o \</span><br><span class="line">arch/arm/probes/built-in.o 	arch/arm/net/built-in.o \</span><br><span class="line">arch/arm/crypto/built-in.o 	arch/arm/firmware/built-in.o \</span><br><span class="line">arch/arm/mach-imx/built-in.o 	kernel/built-in.o\</span><br><span class="line">mm/built-in.o 			fs/built-in.o \</span><br><span class="line">ipc/built-in.o 			security/built-in.o \</span><br><span class="line">crypto/built-in.o 		block/built-in.o</span><br></pre></td></tr></table></figure>
+
+<p>可以看到和 uboot 一样这些变量都是一些 built-in.o 或.a 等文件，都是将相应目录中的源码文件进行编译，然后在各自目录下生成 built-in.o 文件，有些生成了.a 库文件。最终将这些 built-in.o 和.a 文件进行链接即可形成 ELF 格式的可执行文件，也就是 vmlinux。但是链接是需要链接脚本的，vmlinux 的依赖 arch&#x2F;arm&#x2F;kernel&#x2F;vmlinux.lds 就是整个 Linux 的链接脚本。</p>
+<h3><span id="1-1-5-built-in-o-chan-sheng-guo-cheng">1.1.5 built-in.o产生过程</span><a href="#1-1-5-built-in-o-chan-sheng-guo-cheng" class="header-anchor">#</a></h3><h4><span id="1-1-5-1-vmlinux-deps-zhan-kai">1.1.5.1 vmlinux-deps展开</span><a href="#1-1-5-1-vmlinux-deps-zhan-kai" class="header-anchor">#</a></h4><p>vmliux 依赖 vmlinux-deps:<br><code>vmlinux-deps= $(KBUILD_LDS) $(KBUILD_VMLINUX_INIT) $(KBUILD_VMLINUX_MAIN)</code><br>这些变量进行展开：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$(head-y) 、$(init-y)、$(core-y) 、</span><br><span class="line">$(libs-y) 、$(drivers-y) 、$(net-y)、arch/arm/kernel/vmlinux.lds</span><br></pre></td></tr></table></figure>
+
+<p>展开：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">init-y      := init/</span><br><span class="line">drivers-y   := drivers/ sound/</span><br><span class="line">drivers-<span class="variable">$(CONFIG_SAMPLES)</span> += samples/</span><br><span class="line">net-y       := net/</span><br><span class="line">libs-y      := lib/</span><br><span class="line">core-y      := usr/</span><br><span class="line">virt-y      := virt/</span><br><span class="line"><span class="comment"># 每个变量的值原本是目录，将目录名后加上 built-in.a 后缀</span></span><br><span class="line">init-y      := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.a, $(init-y)</span>)</span><br><span class="line">core-y      := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.a, $(core-y)</span>)</span><br><span class="line">drivers-y   := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.a, $(drivers-y)</span>)</span><br><span class="line">net-y       := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.a, $(net-y)</span>)</span><br><span class="line">libs-y1     := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/lib.a, $(libs-y)</span>)</span><br><span class="line">libs-y2     := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.a, $(<span class="built_in">filter</span>-out %.a, $(libs-y)</span>))</span><br><span class="line">virt-y      := <span class="variable">$(<span class="built_in">patsubst</span> %/, %/built-in.a, $(virt-y)</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># vmlinux 相关的目标文件</span></span><br><span class="line">KBUILD_VMLINUX_OBJS := $(head-y) $(init-y) $(core-y) $(libs-y2) \</span><br><span class="line">                  $(drivers-y) $(net-y) $(virt-y)</span><br><span class="line"><span class="comment"># vmlinux 的链接脚本</span></span><br><span class="line">KBUILD_LDS          := arch/<span class="variable">$(SRCARCH)</span>/kernel/vmlinux.lds</span><br><span class="line"><span class="comment"># vmlinux 相关的库</span></span><br><span class="line">KBUILD_VMLINUX_LIBS := $(libs-y1)</span><br><span class="line"></span><br><span class="line">vmlinux-deps := <span class="variable">$(KBUILD_LDS)</span> <span class="variable">$(KBUILD_VMLINUX_OBJS)</span> <span class="variable">$(KBUILD_VMLINUX_LIBS)</span></span><br></pre></td></tr></table></figure>
+
+<p>最后：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">vmlinux-deps = arch/arm/kernel/vmlinux.lds</span><br><span class="line">		arch/arm/kernel/head.o \</span><br><span class="line">		init/built-in.o              usr/built-in.o \</span><br><span class="line">		arch/arm/vfp/built-in.o      arch/arm/vdso/built-in.o \</span><br><span class="line">		arch/arm/kernel/built-in.o   arch/arm/mm/built-in.o \</span><br><span class="line">		arch/arm/common/built-in.o   arch/arm/probes/built-in.o \</span><br><span class="line">		arch/arm/net/built-in.o      arch/arm/crypto/built-in.o \</span><br><span class="line">		arch/arm/firmware/built-in.o arch/arm/mach-imx/built-in.o \</span><br><span class="line">		kernel/built-in.o            mm/built-in.o \</span><br><span class="line">		fs/built-in.o                ipc/built-in.o \</span><br><span class="line">		security/built-in.o          crypto/built-in.o\</span><br><span class="line">		block/built-in.o             arch/arm/lib/lib.a\</span><br><span class="line">		lib/lib.a                    arch/arm/lib/built-in.o\</span><br><span class="line">		lib/built-in.o               drivers/built-in.o \</span><br><span class="line">		sound/built-in.o             firmware/built-in.o \</span><br><span class="line">		net/built-in.o</span><br></pre></td></tr></table></figure>
+<p>除了 arch&#x2F;arm&#x2F;kernel&#x2F;vmlinux.lds 以外，其他都是要编译链接生成的。顶层 Makefile 中有如下代码：<br><code>937 $(sort $(vmlinux-deps)): $(vmlinux-dirs) ;</code><br>sort 是排序函数，用于对 vmlinux-deps 的字符串列表进行排序，并且去掉重复的单词。可以看出 <code>vmlinux-deps </code>依赖 <code>vmlinux-dirs</code>，&#96;&#96;vmlinux-dirs&#96; 也定义在顶层 Makefile 中，定义如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">889 vmlinux-dirs := <span class="variable">$(<span class="built_in">patsubst</span> %/,%,$(<span class="built_in">filter</span> %/, $(init-y)</span> $(init-m) \</span><br><span class="line">890 		$(core-y) $(core-m) $(drivers-y) $(drivers-m) \</span><br><span class="line">891 		$(net-y) $(net-m) $(libs-y) $(libs-m)))</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/4.png" alt="image"></p>
+<p>因此展开vmlinux-dirs为：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">vmlinux-dirs = init        usr             arch/arm/vfp \</span><br><span class="line">		arch/arm/vdso arch/arm/kernel      arch/arm/mm \</span><br><span class="line">		arch/arm/common arch/arm/probes    arch/arm/net \</span><br><span class="line">		arch/arm/crypto arch/arm/firmware  arch/arm/mach-imx\</span><br><span class="line">		kernel                             mm        fs \</span><br><span class="line">		ipc                                security  crypto \</span><br><span class="line">		block                              drivers   sound \</span><br><span class="line">		firmware                           net       arch/arm/lib \</span><br><span class="line">		lib</span><br></pre></td></tr></table></figure>
+
+<p>在顶层 Makefile 中有如下代码：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">946 $(vmlinux-dirs): prepare scripts</span><br><span class="line">947 	<span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=<span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+<h4><span id="1-1-5-2-prepare-zhun-bei-gong-zuo">1.1.5.2 prepare准备工作</span><a href="#1-1-5-2-prepare-zhun-bei-gong-zuo" class="header-anchor">#</a></h4><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vmlinux-deps -&gt; vmlinux-dirs -&gt; prepare</span><br></pre></td></tr></table></figure>
+
+<h5><span id="1-1-5-2-1-prepare-de-kuang-jia">1.1.5.2.1 prepare 的框架</span><a href="#1-1-5-2-1-prepare-de-kuang-jia" class="header-anchor">#</a></h5><p><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/5.png" alt="image"></p>
+<p><code>prepare0</code>:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">1 prepare0: archprepare</span><br><span class="line">2   <span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=scripts/mod</span><br><span class="line">3   <span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=.</span><br></pre></td></tr></table></figure>
+
+<p>第2行，等于<code>make -f ./scripts/Makefile.build obj=scripts/mod</code></p>
+<p>首先进入到<code> scripts/Makefile.build</code> ,然后包含<code> scripts/mod/Makefile</code> 文件，执行<code>scripts/mod/Makefile</code>下的默认目标:</p>
+<p><code>scripts/mod/Makefile</code>内容如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">hostprogs-y := modpost mk_elfconfig</span><br><span class="line">always      := $(hostprogs-y) empty.o</span><br><span class="line"></span><br><span class="line">devicetable-offsets-file := devicetable-offsets.h</span><br><span class="line"></span><br><span class="line"><span class="variable">$(obj)</span>/$(devicetable-offsets-file): <span class="variable">$(obj)</span>/devicetable-offsets.s FORCE</span><br><span class="line">    <span class="variable">$(<span class="built_in">call</span> filechk,offsets,__DEVICETABLE_OFFSETS_H__)</span></span><br></pre></td></tr></table></figure>
+
+<p>这部分命令将生成 <code>scripts/mod/devicetable-offsets.h </code>这个全局偏移文件。</p>
+<p>同时，<code>modpost</code> 和 <code>mk_elfconfig </code>这两个目标(这是两个主机程序)被赋值给<code>always</code>变量，根据 <code>scripts/Makefile.build </code>中的规则，将在<code>Makefile.host</code>中被生成。<code>modpost</code> 和 <code>mk_elfconfig </code>是两个主机程序，负责处理模块与编译符号相关的内容。</p>
+<p><code>archprepare</code>：</p>
+<p>看到 arch 前缀就知道这是架构相关的，这部分的定义与 <code>arch/$(ARCH)/Makefile</code> 有非常大的关系.<code>archprepare </code>并没有命令部分，仅仅是四个依赖:</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">archprepare: archheaders archscripts prepare1 scripts</span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><code>archheaders</code></li>
+</ol>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">archheaders:</span></span><br><span class="line">    <span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=arch/arm/tools uapi <span class="comment">#定义再arch/$(ARCH)/Makfile</span></span><br></pre></td></tr></table></figure>
+
+<p>进入<code>scripts/Makefile.build</code> 中，并包含 <code>arch/arm/tools/Makefile</code>,编译目标为<code> uapi</code>：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">uapi-hdrs-y := <span class="variable">$(uapi)</span>/unistd-common.h</span><br><span class="line">uapi-hdrs-y += <span class="variable">$(uapi)</span>/unistd-oabi.h</span><br><span class="line">uapi-hdrs-y += <span class="variable">$(uapi)</span>/unistd-eabi.h</span><br><span class="line"><span class="section">uapi:   $(uapi-hdrs-y)</span></span><br></pre></td></tr></table></figure>
+
+<p>uapi 为用户 API 的头文件，包含<code>unistd-common.h、unistd-oabi.h、unistd-eabi.h</code>等通用头文件。</p>
+<ol start="2">
+<li><p><code>archscripts</code></p>
+<p>archscripts 产生平台相关的支持脚本。</p>
+</li>
+<li><p><code>scripts</code></p>
+</li>
+</ol>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">scripts: scripts_basic scripts_dtc</span></span><br><span class="line">    <span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=$(@)</span><br></pre></td></tr></table></figure>
+
+<p>等于<code>make -f ./scripts/Makefile.build obj=scripts</code>, 找到找到<code> scripts</code>下的 Makefile，Makefile 下的内容是这样的：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">hostprogs-<span class="variable">$(CONFIG_BUILD_BIN2C)</span>  += bin2c</span><br><span class="line">hostprogs-<span class="variable">$(CONFIG_KALLSYMS)</span>     += kallsyms</span><br><span class="line">hostprogs-<span class="variable">$(CONFIG_LOGO)</span>         += pnmtologo</span><br><span class="line">hostprogs-<span class="variable">$(CONFIG_VT)</span>           += conmakehash</span><br><span class="line">hostprogs-<span class="variable">$(BUILD_C_RECORDMCOUNT)</span> += recordmcount</span><br><span class="line">hostprogs-<span class="variable">$(CONFIG_BUILDTIME_EXTABLE_SORT)</span> += sortextable</span><br><span class="line">hostprogs-<span class="variable">$(CONFIG_ASN1)</span>     += asn1_compiler</span><br><span class="line">...</span><br><span class="line">hostprogs-y += unifdef</span><br><span class="line"><span class="section">build_unifdef: <span class="variable">$(obj)</span>/unifdef</span></span><br><span class="line">    @:</span><br></pre></td></tr></table></figure>
+
+<p>编译了一系列的主机程序，包括<code> bin2c</code>、<code>kallsyms</code>、<code>pnmtologo</code>等。</p>
+<p><code>scripts_basic</code>前面讲过了，编译出<code>fixdep</code>。</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17859528.html">Uboot顶层Makefile解析-1. defconfig过程分析 - fuzidage - 博客园 (cnblogs.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/">uboot-编译defconfig分析 | Hexo (fuzidage.github.io)</a></p>
+<p><code>scripts_dtc</code>定义如下:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">scripts_dtc: scripts_basic</span></span><br><span class="line">    <span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=scripts/dtc</span><br></pre></td></tr></table></figure>
+
+<p>同样的，进入 <code>scripts/dtc/Makefile</code>:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">hostprogs-<span class="variable">$(CONFIG_DTC)</span> := dtc</span><br><span class="line">always      := $(hostprogs-y)</span><br><span class="line">dtc-objs    := dtc.o flattree.o fstree.o data.o livetree.o treesource.o \</span><br><span class="line">           srcpos.o checks.o util.o</span><br><span class="line">dtc-objs    += dtc-lexer.lex.o dtc-parser.tab.o</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，该目标的作用就是生成 dtc。</p>
+<ol start="4">
+<li><code>prepare1</code></li>
+</ol>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">prepare1: prepare3 outputMakefile asm-generic <span class="variable">$(version_h)</span> <span class="variable">$(autoksyms_h)</span> \</span></span><br><span class="line">                        <span class="keyword">include</span>/generated/utsrelease.h</span><br><span class="line">    <span class="variable">$(cmd_crmodverdir)</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">md_crmodverdir = <span class="variable">$(Q)</span>mkdir -p <span class="variable">$(MODVERDIR)</span> \</span><br><span class="line">                  <span class="variable">$(<span class="built_in">if</span> <span class="variable">$(KBUILD_MODULES)</span>,; rm -f <span class="variable">$(MODVERDIR)</span>/*)</span></span><br></pre></td></tr></table></figure>
+
+<p><code>$(MODVERDIR) </code>仅与编译外部模块相关，这里针对外部模块的处理，如果指定编译外部模块，则不做任何事，如果没有指定编译外部模块，清除<code>$(MODVERDIR)/</code>目录下所有内容。</p>
+<p>4.1 <code>prepare3</code></p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">prepare3: include/config/kernel.release</span></span><br><span class="line"><span class="keyword">ifneq</span> (<span class="variable">$(srctree)</span>,.)</span><br><span class="line">    @<span class="variable">$(kecho)</span> &#x27;  Using <span class="variable">$(srctree)</span> as source for kernel&#x27;</span><br><span class="line">    <span class="variable">$(Q)</span>if [ -f <span class="variable">$(srctree)</span>/.config -o \</span><br><span class="line">         -d <span class="variable">$(srctree)</span>/<span class="keyword">include</span>/config -o \</span><br><span class="line">         -d <span class="variable">$(srctree)</span>/arch/<span class="variable">$(SRCARCH)</span>/<span class="keyword">include</span>/generated ]; then \</span><br><span class="line">        echo &gt;&amp;2 <span class="string">&quot;  <span class="variable">$(srctree)</span> is not clean, please run &#x27;make mrproper&#x27;&quot;</span>; \</span><br><span class="line">        echo &gt;&amp;2 <span class="string">&quot;  in the &#x27;<span class="variable">$(srctree)</span>&#x27; directory.&quot;</span>;\</span><br><span class="line">        /bin/false; \</span><br><span class="line">    fi;</span><br><span class="line"><span class="keyword">endif</span></span><br></pre></td></tr></table></figure>
+
+<p>当我们指定了<code> O=DIR</code> 参数时，发现如果源代码中在之前的编译中有残留的之前编译过的中间文件，编译过程就会报错，系统会提示我们使用<code>make mrprope</code>将之前的所有编译中间文件清除，再重新编译。<code>prepare3</code>的作用就是起到检查内核源码是否干净。</p>
+<p>从源码中可以看出，<code>prepare3 </code>将会检查的文件有:</p>
+<p> <code>$(srctree)/include/config、$(srctree)/arch/$(SRCARCH)/include/generated、$(srctree)/.config</code>。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">make help</span><br><span class="line">Cleaning targets:</span><br><span class="line">  clean           - Remove most generated files but keep the config and</span><br><span class="line">                    enough build support to build external modules</span><br><span class="line">  mrproper        - Remove all generated files + config + various backup files</span><br><span class="line">  distclean       - mrproper + remove editor backup and patch files</span><br></pre></td></tr></table></figure>
+
+<p>输入<code>make help</code>可以看到clean目标的程度。</p>
+<p>4.2 <code>outputMakefile</code></p>
+<p>前面讲过了。</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17859528.html">Uboot顶层Makefile解析-1. defconfig过程分析 - fuzidage - 博客园 (cnblogs.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/">uboot-编译defconfig分析 | Hexo (fuzidage.github.io)</a></p>
+<p>4.3 <code>asm-generic、version_h、autoksyms_h、 include/generated/utsrelease.h</code></p>
+<p>产生相关头文件。</p>
+<h4><span id="1-1-5-3-vmlinux-dirs-zhan-kai">1.1.5.3 <code>vmlinux-dirs</code>展开</span><a href="#1-1-5-3-vmlinux-dirs-zhan-kai" class="header-anchor">#</a></h4><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">946 $(vmlinux-dirs): prepare scripts</span><br><span class="line">947 	<span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=<span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+
+<p>第947行内容进行展开:<br><code>@ make -f ./scripts/Makefile.build obj=$@</code><br>$@在makefile中表示target，因此就是为vmlinux-dirs 的值，将 vmlinux-dirs 中的这些目录全部带入到命令中：</p>
+<pre><code>@ make -f ./scripts/Makefile.build obj=init
+@ make -f ./scripts/Makefile.build obj=usr
+@ make -f ./scripts/Makefile.build obj=arch/arm/vfp
+@ make -f ./scripts/Makefile.build obj=arch/arm/vdso
+@ make -f ./scripts/Makefile.build obj=arch/arm/kernel
+@ make -f ./scripts/Makefile.build obj=arch/arm/mm
+@ make -f ./scripts/Makefile.build obj=arch/arm/common
+@ make -f ./scripts/Makefile.build obj=arch/arm/probes
+@ make -f ./scripts/Makefile.build obj=arch/arm/net
+@ make -f ./scripts/Makefile.build obj=arch/arm/crypto
+@ make -f ./scripts/Makefile.build obj=arch/arm/firmware
+@ make -f ./scripts/Makefile.build obj=arch/arm/mach-imx
+@ make -f ./scripts/Makefile.build obj=kernel
+@ make -f ./scripts/Makefile.build obj=mm
+@ make -f ./scripts/Makefile.build obj=fs
+@ make -f ./scripts/Makefile.build obj=ipc
+@ make -f ./scripts/Makefile.build obj=security
+@ make -f ./scripts/Makefile.build obj=crypto
+@ make -f ./scripts/Makefile.build obj=block
+@ make -f ./scripts/Makefile.build obj=drivers
+@ make -f ./scripts/Makefile.build obj=sound
+@ make -f ./scripts/Makefile.build obj=firmware
+@ make -f ./scripts/Makefile.build obj=net
+@ make -f ./scripts/Makefile.build obj=arch/arm/lib
+@ make -f ./scripts/Makefile.build obj=lib
+</code></pre>
+<p>以<code>@ make -f ./scripts/Makefile.build obj=init</code>这个命令为例，讲解一下详细的运行过程。可以看到这些命令运行过程其实都是一样的。再次打开scripts&#x2F;Makefile.build，这个在做xxx_defconfig时已经分析过了：<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/6.png" alt="image"><br>当 只 编 译 Linux 内 核 镜 像 文 件 ， 也 就 是 使 用 <code>“ make zImage ” </code>编 译 的 时 候 ，<code>KBUILD_BUILTIN=1，KBUILD_MODULES</code> 为空。<code>“make”</code>命令是会编译所有的东西，包括 Linux内核镜像文件和一些模块文件。如果只编译 Linux 内核镜像的话，<code>__build </code>目标简化为：<br><code>__build: $(builtin-target) $(lib-target) $(extra-y)) $(subdir-ym) $(always)</code><br> <code>@:</code><br>重点看下<code>builtin-target</code>这个依赖，同样定义在scripts&#x2F;Makefile.build如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">86 <span class="keyword">ifneq</span> (<span class="variable">$(<span class="built_in">strip</span> $(obj-y)</span> $(obj-m) $(obj-) $(subdir-m) $(lib-target)),)</span><br><span class="line">87 builtin-target := <span class="variable">$(obj)</span>/built-in.o</span><br><span class="line">88 <span class="keyword">endif</span></span><br></pre></td></tr></table></figure>
+<p>可以看到只要<code>obj-y、obj-m、obj-、subdir-m 和 lib-target </code>这些变量不能全部为空，<code>builtin-target </code>变量的值为：<code>“$(obj)/built-in.o”</code>， 这就是这些 built-in.o 的来源了。我们以<code>@ make -f ./scripts/Makefile.build obj=init</code>这个命令为例:<br>那么现在开始编译：<br><code>builtin-target := init/built-in.o</code></p>
+<p><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/7.png" alt="image"></p>
+<p>目标<code>builtin-target</code>依赖为 obj-y，命令为<code>$(call if_changed,link_o_target)</code>，也就是调用函数<code> if_changed</code>，参数为<code> link_o_target</code>，其返回值就是具体的命令。前面讲过了<code>if_changed</code> <a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17901135.html" title="uboot顶层makefile-2编译过程">uboot顶层makefile-2编译过程</a>，<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/8.png" alt="image"></p>
+<p>它会调用 <code>cmd_$(1)</code>所对应的命令<code>($(1)就是函数的第 1 个参数)</code>，因此这里就是调用：<br><code>cmd_link_o_target</code>，也就是:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">331 cmd_link_o_target = <span class="variable">$(<span class="built_in">if</span> $(<span class="built_in">strip</span> $(obj-y)</span>),\</span><br><span class="line">	332 <span class="variable">$(LD)</span> <span class="variable">$(ld_flags)</span> -r -o <span class="variable">$@</span> <span class="variable">$(<span class="built_in">filter</span> $(obj-y)</span>, <span class="variable">$^</span>) \</span><br><span class="line">	333 <span class="variable">$(cmd_secanalysis)</span>,\</span><br><span class="line">	334 rm -f <span class="variable">$@</span>; <span class="variable">$(AR)</span> rcs<span class="variable">$(KBUILD_ARFLAGS)</span> <span class="variable">$@</span>)</span><br></pre></td></tr></table></figure>
+<p><code>cmd_link_o_target </code>就是使用 LD将某个目录下的所有.o 文件链接在一起，最终形成 built-in.o。<br>命令会记录到<code>.built-in.o.cmd</code>：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cmd_init/built-in.o :=  arm-linux-gnueabihf-ld -EL    -r -o init/built-in.o init/main.o init/version.o init/mounts.o init/initramfs.o init/calibrate.o init/init_task.o</span><br></pre></td></tr></table></figure>
+
+<p>同理，其他的依赖项<code>built-in.o</code>也是同样的方式编译。</p>
+<h3><span id="1-1-6-link-vmlinux">1.1.6 link-vmlinux</span><a href="#1-1-6-link-vmlinux" class="header-anchor">#</a></h3><p>vmlinux的依赖产生完后，调用<code>+$(call if_changed,link-vmlinux)</code>链接生成 vmlinux。<br>命令<code>“+$(call if_changed,link-vmlinux)”</code>表示将<code>$(call if_changed,link-vmlinux)</code>的结果作为最终生成 vmlinux 的命令，前面的“+”表示该命令结果不可忽略。<code>$(call if_changed,link-vmlinux)</code>是调用函数<code> if_changed</code>，<code>link-vmlinux</code> 是函数<code>if_changed</code>的参数，函数<code> if_changed</code> 定义在文件 scripts&#x2F;Kbuild.include 中：<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/9.png" alt="image"></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17901135.html" title="uboot顶层makefile-2编译过程">uboot顶层makefile-2编译过程</a>有具体分析<code> if_changed</code>。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">总结：当依赖比目标新的时候，或者命令有改变的时候，if_changed 就会执行一些命令</span><br><span class="line">“@set -e”告诉 bash，如果任何语句的执行结果不为 true(也就是执行出错)的话就直接退出。</span><br><span class="line">$(echo-cmd)用于打印命令执行过程，比如在链接 vmlinux 的时候就会输出“LINK vmlinux”。$(cmd_$(1))中的$(1)表示参数，也就是 link-vmlinux，因此$(cmd_$(1))表示执行 cmd_link-vmlinux 的内容。</span><br></pre></td></tr></table></figure>
+
+<p>打开<code>.vmlinux.cmd</code>文件内容如下：<br><code>cmd_vmlinux := /bin/bash scripts/link-vmlinux.sh arm-linux-gnueabihf-ld -EL  -p --no-undefined -X --pic-veneer --build-id</code><br><code>cmd_link-vmlinux </code>在顶层 Makefile 中定义如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">914 <span class="comment"># Final link of vmlinux</span></span><br><span class="line">915 cmd_link-vmlinux = <span class="variable">$(CONFIG_SHELL)</span> <span class="variable">$&lt;</span> <span class="variable">$(LD)</span> <span class="variable">$(LDFLAGS)</span> <span class="variable">$(LDFLAGS_vmlinux)</span></span><br><span class="line">916 quiet_cmd_link-vmlinux = LINK <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+
+<p>第 915 行就是 <code>cmd_link-vmlinux</code> 的值，其中 <code>CONFIG_SHELL=/bin/bash</code>，<code>$&lt;</code>表示目标 vmlinux的第一个依赖文件，也就是 <code>scripts/link-vmlinux.sh</code>。<br><code>LD= arm-linux-gnueabihf-ld -EL</code>，<code>LDFLAGS </code>为空。<code>LDFLAGS_vmlinux </code>的值由顶层 Makefile 和arch&#x2F;arm&#x2F;Makefile 这两个文件共同决定，最终:<br><code>LDFLAGS_vmlinux=-p --no-undefined -X --pic-veneer --build-id</code><br>因此 <code>cmd_link-vmlinux </code>最终的值:<br><code>cmd_link-vmlinux = /bin/bash scripts/link-vmlinux.sh arm-linux-gnueabihf-ld -EL -p --no-undefined -X --pic-veneer --build-id</code><br><code>cmd_link-vmlinux </code>会调用<code>scripts/link-vmlinux.sh</code>这个脚本来链接出 vmlinux。脚本内容如下：<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/10.png" alt="image"><br><strong>vmliux_link</strong> 就是最终链接出 vmlinux 的函数，判断 <code>SRCARCH </code>是否不等于<code>“um”</code>，因为<code> SRCARCH=arm</code>，因此条件成立。执行：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$&#123;LD&#125; $&#123;LDFLAGS&#125; $&#123;LDFLAGS_vmlinux&#125; -o $&#123;2&#125; \</span><br><span class="line">	-T $&#123;lds&#125; $&#123;KBUILD_VMLINUX_INIT&#125; \</span><br><span class="line">	--start-group $&#123;KBUILD_VMLINUX_MAIN&#125; --end-group $&#123;1&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这三行代码应该很熟悉了！ 就是普通的链接操作，连接脚本为<code>lds= ./arch/arm/kernel/vmlinux.lds</code> ，需要链接的文件由变量<code>KBUILD_VMLINUX_INIT</code>和<code>KBUILD_VMLINUX_MAIN </code>来决定，这两个变量在前面讲过了：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">KBUILD_VMLINUX_INIT= $(head-y) $(init-y)</span><br><span class="line">KBUILD_VMLINUX_MAIN = $(core-y) $(libs-y) $(drivers-y) $(net-y)</span><br><span class="line">KBUILD_LDS= arch/<span class="variable">$(SRCARCH)</span>/kernel/vmlinux.lds  <span class="comment">#链接脚本</span></span><br></pre></td></tr></table></figure>
+
+<p>第 217 行调用 vmlinux_link 函数来链接出 vmlinux。<br>编译时V&#x3D;1即可看到详细LD链接过程如下：<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/11.png" alt="image"><br>总结：将各个子目录下的 built-in.o、.a 等文件链接在一起，最终生成 vmlinux 这个 ELF 格式的可执行文件。链接脚本为arch&#x2F;arm&#x2F;kernel&#x2F;vmlinux.lds，链接过程是由shell脚本scripts&#x2F;link-vmlinux.s来完成的。</p>
+<h3><span id="1-1-7-xin-ban-de-link-vmlinux">1.1.7 新版的link-vmlinux</span><a href="#1-1-7-xin-ban-de-link-vmlinux" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">cmd_link-vmlinux =                                                 \</span><br><span class="line">    <span class="variable">$(CONFIG_SHELL)</span> <span class="variable">$&lt;</span> <span class="variable">$(LD)</span> <span class="variable">$(KBUILD_LDFLAGS)</span> <span class="variable">$(LDFLAGS_vmlinux)</span> ;    \</span><br><span class="line">    <span class="variable">$(<span class="built_in">if</span> <span class="variable">$(ARCH_POSTLINK)</span>, <span class="variable">$(MAKE)</span> -f <span class="variable">$(ARCH_POSTLINK)</span> <span class="variable">$@</span>, true)</span></span><br><span class="line">    </span><br><span class="line"><span class="section">vmlinux: scripts/link-vmlinux.sh autoksyms_recursive $(vmlinux-deps) FORCE</span></span><br><span class="line">    +<span class="variable">$(<span class="built_in">call</span> if_changed,link-vmlinux)</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="1-1-7-1-autoksyms-recursive">1.1.7.1 autoksyms_recursive</span><a href="#1-1-7-1-autoksyms-recursive" class="header-anchor">#</a></h4><p>内核的符号优化。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">autoksyms_recursive: $(vmlinux-deps)</span></span><br><span class="line"><span class="keyword">ifdef</span> CONFIG_TRIM_UNUSED_KSYMS</span><br><span class="line">    <span class="variable">$(Q)</span><span class="variable">$(CONFIG_SHELL)</span> <span class="variable">$(srctree)</span>/scripts/adjust_autoksyms.sh \</span><br><span class="line">      <span class="string">&quot;<span class="variable">$(MAKE)</span> -f <span class="variable">$(srctree)</span>/Makefile vmlinux&quot;</span></span><br><span class="line"><span class="keyword">endif</span></span><br></pre></td></tr></table></figure>
+
+<p>如果在源码的配置阶段定义了<code>CONFIG_TRIM_UNUSED_KSYMS</code>这个变量，就执行：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(Q)</span><span class="variable">$(CONFIG_SHELL)</span> <span class="variable">$(srctree)</span>/scripts/adjust_autoksyms.sh \</span><br><span class="line">      <span class="string">&quot;<span class="variable">$(MAKE)</span> -f <span class="variable">$(srctree)</span>/Makefile vmlinux&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>默认情况下，这里的脚本并不会执行。</p>
+<p><code> if_changed</code>,执行<code>link-vmlinux</code>,也就是<code>cmd_link-vmlinux</code>.</p>
+<h2><span id="1-2-make-zimage-guo-cheng">1.2 make zImage过程</span><a href="#1-2-make-zimage-guo-cheng" class="header-anchor">#</a></h2><p>当我们输入：<br><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- all</code>会编译vmlinux, zImage,然后再编译dtb,编译ko。</p>
+<h3><span id="1-2-1-vmlinux-image-zimage-uimage-de-qu-bie">1.2.1 vmlinux、Image，zImage、uImage 的区别</span><a href="#1-2-1-vmlinux-image-zimage-uimage-de-qu-bie" class="header-anchor">#</a></h3><p>①、vmlinux 是编译出来的最原始的内核文件，是未压缩的，比如正点原子提供的 Linux 源码编译出来的 vmlinux 差不多有 16MB。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">ls</span> -lh vmlinux</span><br><span class="line">-rwxrwxr-x 1 robin.lee robin.lee 17M 1月  29 16:26 vmlinux</span><br></pre></td></tr></table></figure>
+<p>②、Image 是 Linux 内核镜像文件，但是 Image 仅包含可执行的二进制数据。Image 就是使用 objcopy 取消掉 vmlinux 中的一些其他信息，比如符号表什么的。但是 Image 是没有压缩过的，Image 保存在 arch&#x2F;arm&#x2F;boot 目录下，其大小大概在 12MB 左右。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">ls</span> -lh <span class="built_in">arch</span>/arm/boot/Image</span><br><span class="line">-rwxrwxr-x 1 robin.lee robin.lee 13M 1月  29 16:26 <span class="built_in">arch</span>/arm/boot/Image</span><br></pre></td></tr></table></figure>
+
+<p>③、zImage 是经过 gzip 压缩后的 Image，经过压缩以后其大小大概在 6MB 左右。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ <span class="built_in">ls</span> -lh <span class="built_in">arch</span>/arm/boot/zImage</span><br><span class="line">-rwxrwxr-x 1 robin.lee robin.lee 6.5M 1月  29 16:26 <span class="built_in">arch</span>/arm/boot/zImage</span><br></pre></td></tr></table></figure>
+<p>④、uImage 是老版本 uboot 专用的镜像文件，uImag 是在 zImage 前面加了一个长度为 64字节的“头”，这个头信息描述了该镜像文件的类型、加载位置、生成时间、大小等信息。但是新的 uboot 已经支持了 zImage 启动！所以已经很少用到 uImage 了，除非你用的很古老的 uboot。</p>
+<h3><span id="1-2-2-image-de-bian-yi-guo-cheng">1.2.2 Image的编译过程</span><a href="#1-2-2-image-de-bian-yi-guo-cheng" class="header-anchor">#</a></h3><p>使用<code>“make”、“make all”、“make zImage”</code>都可以编译出zImage, arch&#x2F;arm&#x2F;Makefile 中有如下代码:<br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/12.png" alt="image"><br>all依赖<code>$(KBUILD_IMAGE) $(KBUILD_DTBS)</code>, <code>KBUILD_IMAGE</code>为zImage， <code>KBUILD_DTBS</code>为dtbs。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#boot 对应目录</span></span><br><span class="line">boot := arch/arm/boot</span><br><span class="line"><span class="comment">#实际镜像</span></span><br><span class="line">BOOT_TARGETS    = zImage Image xipImage bootpImage uImage</span><br><span class="line"><span class="comment">#镜像生成规则</span></span><br><span class="line"><span class="variable">$(BOOT_TARGETS)</span>: vmlinux</span><br><span class="line">    <span class="variable">$(Q)</span><span class="variable">$(MAKE)</span> <span class="variable">$(build)</span>=<span class="variable">$(boot)</span> MACHINE=<span class="variable">$(MACHINE)</span> <span class="variable">$(boot)</span>/<span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+<p>可以看到当vmlinux产生后，就会去继续产生zImage, 展开：<br><code>@ make -f ./scripts/Makefile.build obj=arch/arm/boot MACHINE=arch/arm/boot/zImage</code><br>可以看到又是通过scripts&#x2F;Makefile.build来完成的编译。进入<code>arch/arm/boot</code>的makefile:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">rm Image zImage</span><br><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- Image V=1</span><br></pre></td></tr></table></figure>
+
+<p>Image生成过程:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Image 生成的规则</span></span><br><span class="line"><span class="variable">$(obj)</span>/Image: vmlinux FORCE</span><br><span class="line">    <span class="variable">$(<span class="built_in">call</span> if_changed,objcopy)</span></span><br></pre></td></tr></table></figure>
+
+<p>执行<code>cmd_objcopy</code>,该命令定义在<code>scripts/Makefile.lib </code>中：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#在arch/$(ARCH)/boot/Makefile 下定义</span></span><br><span class="line">OBJCOPYFLAGS    :=-O binary -R .comment -S</span><br><span class="line"><span class="comment">#scripts/Makefile.lib</span></span><br><span class="line">cmd_objcopy = <span class="variable">$(OBJCOPY)</span> <span class="variable">$(OBJCOPYFLAGS)</span> $(OBJCOPYFLAGS_$(@F)) <span class="variable">$&lt;</span> <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+
+<p>打印如下:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make -f ./scripts/Makefile.build obj=arch/arm/boot MACHINE= arch/arm/boot/Image</span><br><span class="line">  arm-linux-gnueabihf-objcopy -O binary -R .comment -S  vmlinux arch/arm/boot/Image</span><br></pre></td></tr></table></figure>
+
+<h3><span id="1-2-3-zimage-de-bian-yi-guo-cheng">1.2.3 zImage的编译过程</span><a href="#1-2-3-zimage-de-bian-yi-guo-cheng" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- zImage V=1</span><br></pre></td></tr></table></figure>
+
+<p>zImage生成过程:</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$(obj)</span>/zImage:  <span class="variable">$(obj)</span>/compressed/vmlinux FORCE</span><br><span class="line">    <span class="variable">$(<span class="built_in">call</span> if_changed,objcopy)</span></span><br></pre></td></tr></table></figure>
+
+<p>打印如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">make -f ./scripts/Makefile.build obj=arch/arm/boot MACHINE= arch/arm/boot/zImage</span><br><span class="line">make -f ./scripts/Makefile.build obj=arch/arm/boot/compressed arch/arm/boot/compressed/vmlinux</span><br><span class="line">  (cat arch/arm/boot/compressed/../Image | lzop -9 &amp;&amp; printf \000\100\303\000) &gt; arch/arm/boot/compressed/piggy.lzo || (rm -f arch/arm/boot/compressed/piggy.lzo ; false)</span><br><span class="line">  arm-linux-gnueabihf-gcc -Wp,-MD,arch/arm/boot/compressed/.piggy.lzo.o.d  -nostdinc -isystem /media/cvitek/robin.lee/my_test/study/openedv/toolchain/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/../lib/gcc/arm-linux-gnueabihf/4.9.4/<span class="keyword">include</span> -I./arch/arm/<span class="keyword">include</span> -Iarch/arm/<span class="keyword">include</span>/generated/uapi -Iarch/arm/<span class="keyword">include</span>/generated  -Iinclude -I./arch/arm/<span class="keyword">include</span>/uapi -Iarch/arm/<span class="keyword">include</span>/generated/uapi -I./<span class="keyword">include</span>/uapi -Iinclude/generated/uapi <span class="keyword">-include</span> ./<span class="keyword">include</span>/linux/kconfig.h -D__KERNEL__ -mlittle-endian   -D__ASSEMBLY__ -mabi=aapcs-linux -mno-thumb-interwork -mfpu=vfp -funwind-tables -marm -D__LINUX_ARM_ARCH__=7 -march=armv7-a  <span class="keyword">-include</span> asm/unified.h -msoft-float -DCC_HAVE_ASM_GOTO        -DZIMAGE     -c -o arch/arm/boot/compressed/piggy.lzo.o arch/arm/boot/compressed/piggy.lzo.S</span><br><span class="line">  arm-linux-gnueabihf-ld -EL    --defsym _kernel_bss_size=463520 -p --no-undefined -X -T arch/arm/boot/compressed/vmlinux.lds arch/arm/boot/compressed/head.o arch/arm/boot/compressed/piggy.lzo.o arch/arm/boot/compressed/misc.o arch/arm/boot/compressed/decompress.o arch/arm/boot/compressed/string.o arch/arm/boot/compressed/hyp-stub.o arch/arm/boot/compressed/lib1funcs.o arch/arm/boot/compressed/ashldi3.o arch/arm/boot/compressed/bswapsdi2.o -o arch/arm/boot/compressed/vmlinux</span><br><span class="line">  arm-linux-gnueabihf-objcopy -O binary -R .comment -S  arch/arm/boot/compressed/vmlinux arch/arm/boot/zImage</span><br></pre></td></tr></table></figure>
+
+<h3><span id="1-2-4-objcopyflags">1.2.4 OBJCOPYFLAGS</span><a href="#1-2-4-objcopyflags" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-O binary：表示输出格式为 binary，也就是二进制</span><br><span class="line">-R .comment：表示移除二进制文件中的 .comment 段，这个段主要用于 debug</span><br><span class="line">-S ： 表示移除所有的符号以及重定位信息</span><br></pre></td></tr></table></figure>
+
+<h1><span id="2-sheng-cheng-de-wen-jian">2 生成的文件</span><a href="#2-sheng-cheng-de-wen-jian" class="header-anchor">#</a></h1><p><code>System.map</code>： 内核镜像中所有的符号，符号表<br><code>.*.o.d 和 .*.o.cmd: </code>记录编译指令的内容，如：<code>.vmlinux.cmd</code><br><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/13.png" alt="image"></p>
+<p><code>modules.order</code> 、 <code>modules.build</code> 和 <code>modules.builtin.modinfo :</code> 这两个文件主要负责记录编译的模块，<code>modules.builtin.modinfo</code>记录模块信息，以供 modprobe 使用<br><code>arch/$(ARCH)/boot</code> : 编译出的文件，一般包含这几部分：镜像、内核符号表、系统dtb。<br><code>include/generate/*</code> : 内核编译过程将会生成一些头文件，其中比较重要的是 autoconf.h，这是 .config 的头文件版本，以及uapi&#x2F;目录下的文件，这个目录下的保存着用户头文件。<br><code>include/config/* </code>： 为了解决 autoconf.h 牵一发而动全身的问题(即修改一个配置导致所有依赖 autoconf.h 的文件需要重新编译)，将 autoconf.h 分散为多个头文件放在 include&#x2F;config&#x2F; 下，以解决 autoconf.h 的依赖问题。</p>
+<h1><span id="3-she-bei-shu-de-bian-yi-guo-cheng">3 设备树的编译过程</span><a href="#3-she-bei-shu-de-bian-yi-guo-cheng" class="header-anchor">#</a></h1><p>Linux内核目录下<code>make all</code>会把dtb也编译出来。详见<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17363949.html">字符设备驱动-4.设备树</a> 第2.3 DTB文件的编译。</p>
+<p><code>make dtbs V=1</code>可查看详细编译过程。</p>
+<h2><span id="3-1-sheng-cheng-dtc-gong-ju">3.1 生成dtc工具</span><a href="#3-1-sheng-cheng-dtc-gong-ju" class="header-anchor">#</a></h2><p><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/14.png" alt="image-20240719001049071"></p>
+<h2><span id="3-2-sheng-cheng-dtb">3.2 生成dtb</span><a href="#3-2-sheng-cheng-dtb" class="header-anchor">#</a></h2><p><img src="/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/15.png" alt="image-20240719001248018"></p>
+<p>vmlinux和zImage产生后会继续编译设备树，用dtc编译dts得到dtb。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/" data-id="clzp8utsx000b9ouf7fxv26ql" data-title="Linux内核Makefile编译过程" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Linux内核顶层Makefile详解" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/07/18/Linux%E5%86%85%E6%A0%B8%E9%A1%B6%E5%B1%82Makefile%E8%AF%A6%E8%A7%A3/" class="article-date">
@@ -2677,455 +2988,6 @@ Entry Point:  87800000
 
 
   
-    <article id="post-uboot-命令和环境变量" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/" class="article-date">
-  <time class="dt-published" datetime="2024-06-22T11:13:19.000Z" itemprop="datePublished">2024-06-22</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/">uboot-命令和环境变量</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-1-help-huo-zhe">1.1 help或者？</a><ul>
-<li><a href="#1-1-1-help-ju-ti-ming-ling">1.1.1 help+具体命令</a></li>
-</ul>
-</li>
-<li><a href="#1-2-xin-xi-cha-xun">1.2 信息查询</a><ul>
-<li><a href="#1-2-1-bdinfo">1.2.1 bdinfo</a></li>
-<li><a href="#1-2-2-printenv">1.2.2 printenv</a></li>
-<li><a href="#1-2-3-version">1.2.3 version</a></li>
-</ul>
-</li>
-<li><a href="#1-3-huan-jing-bian-liang">1.3 环境变量</a><ul>
-<li><a href="#1-3-1-setenv-she-ding-huan-jing-bian-liang">1.3.1 setenv设定环境变量</a></li>
-<li><a href="#1-3-2-saveenv-bao-cun-huan-jing-bian-liang">1.3.2 saveenv保存环境变量</a></li>
-<li><a href="#1-3-3-setenv-shan-chu-huan-jing-bian-liang">1.3.3 setenv删除环境变量</a></li>
-<li><a href="#1-3-4-huan-jing-bian-liang-yuan-li">1.3.4 环境变量原理</a><ul>
-<li><a href="#1-3-4-1-bootcmd-zhan-kai">1.3.4.1 bootcmd展开</a></li>
-<li><a href="#1-3-4-2-bootargs-zhan-kai">1.3.4.2 bootargs展开</a></li>
-<li><a href="#1-3-4-3-bootdlelay">1.3.4.3 bootdlelay</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#1-4-nei-cun-cao-zuo">1.4 内存操作</a><ul>
-<li><a href="#1-4-1-md">1.4.1 md</a></li>
-<li><a href="#1-4-2-nm-ming-ling">1.4.2 nm命令</a></li>
-<li><a href="#1-4-3-mm-ming-ling">1.4.3 mm命令</a></li>
-<li><a href="#1-4-4-mw-ming-ling">1.4.4 mw命令</a></li>
-<li><a href="#1-4-5-cp-ming-ling">1.4.5 cp命令</a></li>
-<li><a href="#1-4-6-cmp-ming-ling">1.4.6 cmp命令</a></li>
-</ul>
-</li>
-<li><a href="#1-5-wang-luo-cao-zuo-ming-ling">1.5 网络操作命令</a><ul>
-<li><a href="#1-5-1-ping-ming-ling">1.5.1 ping命令</a></li>
-<li><a href="#1-5-2-dhcp-ming-ling-zi-dong-ip-huo-qu">1.5.2 dhcp命令（自动ip获取）</a></li>
-<li><a href="#1-5-3-nfs-ming-ling">1.5.3 nfs命令</a></li>
-<li><a href="#1-5-4-tftp-ming-ling">1.5.4 tftp命令</a></li>
-</ul>
-</li>
-<li><a href="#1-6-emmc-he-sd-qia-zhi-ling">1.6 emmc和sd卡指令</a><ul>
-<li><a href="#1-6-1-mmc-info">1.6.1 mmc info</a></li>
-<li><a href="#1-6-2-mmc-rescan">1.6.2 mmc rescan</a></li>
-<li><a href="#1-6-3-mmc-list">1.6.3 mmc list</a></li>
-<li><a href="#1-6-4-mmc-dev">1.6.4 mmc dev</a></li>
-<li><a href="#1-6-5-mmc-part">1.6.5 mmc part</a></li>
-<li><a href="#1-6-6-mmc-read">1.6.6 mmc read</a></li>
-<li><a href="#1-6-7-mmc-write">1.6.7 mmc write</a></li>
-<li><a href="#1-6-7-mmc-erase">1.6.7 mmc erase</a></li>
-</ul>
-</li>
-<li><a href="#1-7-wen-jian-cao-zuo-ming-ling-fat-wen-jian-xi-tong">1.7 文件操作命令（fat文件系统）</a><ul>
-<li><a href="#1-7-1-fatinfo">1.7.1 fatinfo</a></li>
-<li><a href="#1-7-1-fatls">1.7.1 fatls</a></li>
-<li><a href="#1-7-3-fstype">1.7.3 fstype</a></li>
-<li><a href="#1-7-4-fatload">1.7.4 fatload</a></li>
-<li><a href="#1-7-5-fatwrite">1.7.5 fatwrite</a></li>
-</ul>
-</li>
-<li><a href="#1-8-wen-jian-cao-zuo-ming-ling-ext-wen-jian-xi-tong">1.8 文件操作命令（ext文件系统）</a></li>
-<li><a href="#1-9-nandflash-cao-zuo-ming-ling">1.9 nandflash操作命令</a><ul>
-<li><a href="#1-9-1-nand-info">1.9.1 nand info</a></li>
-<li><a href="#1-9-2-nand-device">1.9.2 nand device</a></li>
-<li><a href="#1-9-3-nand-erase">1.9.3 nand erase</a></li>
-<li><a href="#1-9-3-nand-write">1.9.3 nand write</a></li>
-<li><a href="#1-9-4-nand-read">1.9.4 nand read</a></li>
-</ul>
-</li>
-<li><a href="#1-10-she-bei-shu-xiang-guan">1.10 设备树相关</a><ul>
-<li><a href="#1-10-1-fdt-addr">1.10.1 fdt addr</a></li>
-<li><a href="#1-10-2-fdt-header">1.10.2 fdt header</a></li>
-<li><a href="#1-10-3-fdt-print">1.10.3 fdt print</a></li>
-</ul>
-</li>
-<li><a href="#1-11-qi-dong-xiang-guan">1.11 启动相关</a><ul>
-<li><a href="#1-11-1-bootz-qi-dong-zimage">1.11.1 bootz (启动zImage)</a></li>
-<li><a href="#1-11-1-bootm-qi-dong-uimage">1.11.1 bootm (启动uImage)</a></li>
-<li><a href="#1-11-3-boot">1.11.3 boot</a></li>
-<li><a href="#1-11-4-go-ming-ling">1.11.4 go命令</a></li>
-<li><a href="#1-11-5-run">1.11.5 run</a></li>
-</ul>
-</li>
-<li><a href="#1-12-nei-cun-ce-shi-mtest">1.12 内存测试mtest</a></li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h2><span id="1-1-help-huo-zhe">1.1 help或者？</span><a href="#1-1-help-huo-zhe" class="header-anchor">#</a></h2><p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/1.png" alt="image"></p>
-<h3><span id="1-1-1-help-ju-ti-ming-ling">1.1.1 help+具体命令</span><a href="#1-1-1-help-ju-ti-ming-ling" class="header-anchor">#</a></h3><p><code>? bootz 或 help bootz</code><br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/2.png" alt="image"></p>
-<h2><span id="1-2-xin-xi-cha-xun">1.2 信息查询</span><a href="#1-2-xin-xi-cha-xun" class="header-anchor">#</a></h2><h3><span id="1-2-1-bdinfo">1.2.1 bdinfo</span><a href="#1-2-1-bdinfo" class="header-anchor">#</a></h3><p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/3.png" alt="image"></p>
-<h3><span id="1-2-2-printenv">1.2.2 printenv</span><a href="#1-2-2-printenv" class="header-anchor">#</a></h3><p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/4.png" alt="image"><br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/5.png" alt="image"><br>前确保 uboot 中的环境变量 bootargs 内容如下:<br><code>console=ttymxc0,115200 root=/dev/mmcblk1p2 rootwait rw</code></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cp</span> <span class="built_in">arch</span>/arm/boot/zImage /home/zuozhongkai/linux/tftpboot/ -f</span><br><span class="line"><span class="built_in">cp</span> <span class="built_in">arch</span>/arm/boot/dts/imx6ull-14x14-evk.dtb /home/zuozhongkai/linux/tftpboot/ -f</span><br><span class="line">tftp 80800000 zImage </span><br><span class="line">tftp 83000000 imx6ull-14x14-evk.dtb</span><br><span class="line">bootz 80800000 - 83000000</span><br></pre></td></tr></table></figure>
-<h3><span id="1-2-3-version">1.2.3 version</span><a href="#1-2-3-version" class="header-anchor">#</a></h3><p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/6.png" alt="image"></p>
-<h2><span id="1-3-huan-jing-bian-liang">1.3 环境变量</span><a href="#1-3-huan-jing-bian-liang" class="header-anchor">#</a></h2><h3><span id="1-3-1-setenv-she-ding-huan-jing-bian-liang">1.3.1 setenv设定环境变量</span><a href="#1-3-1-setenv-she-ding-huan-jing-bian-liang" class="header-anchor">#</a></h3><p>设置<code>bootdelay</code>时间为5s.</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">setenv bootdelay 5</span><br><span class="line">saveenv</span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/7.png" alt="image"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">setenv author zuozhongkai</span><br><span class="line">saveenv</span><br></pre></td></tr></table></figure>
-<p>新建环境变量也是用setenv。</p>
-<h3><span id="1-3-2-saveenv-bao-cun-huan-jing-bian-liang">1.3.2 saveenv保存环境变量</span><a href="#1-3-2-saveenv-bao-cun-huan-jing-bian-liang" class="header-anchor">#</a></h3><h3><span id="1-3-3-setenv-shan-chu-huan-jing-bian-liang">1.3.3 setenv删除环境变量</span><a href="#1-3-3-setenv-shan-chu-huan-jing-bian-liang" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">setenv author</span><br><span class="line">saveenv</span><br></pre></td></tr></table></figure>
-<p>设置变量为空表示删除掉该环境变量，重启该环境变量就不会存在了。</p>
-<h3><span id="1-3-4-huan-jing-bian-liang-yuan-li">1.3.4 环境变量原理</span><a href="#1-3-4-huan-jing-bian-liang-yuan-li" class="header-anchor">#</a></h3><p><code>include/env_default.h</code>定义了很多环境变量，如<code>bootargs,bootdelay,bootcmd等</code>：<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/8.png" alt="image"><br>由 于 没 有 定 义<code>DEFAULT_ENV_INSTANCE_EMBEDDED和CONFIG_SYS_REDUNDAND_ENVIRONMENT</code>，因此 <code>uchar default_environment[]</code>数组保存环境变量。</p>
-<h4><span id="1-3-4-1-bootcmd-zhan-kai">1.3.4.1 bootcmd展开</span><a href="#1-3-4-1-bootcmd-zhan-kai" class="header-anchor">#</a></h4><p>如<code>CONFIG_BOOTCOMMAND</code>等一系列宏都是定义在<code>include/configs/mx6ull_alientek_emmc.h</code>:<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/9.png" alt="image"><br> uboot 使用了类似 shell 脚本语言的方式来编写的,首先<code>run findfdt</code>， findfdt 是用来查找开发板对应的设备树文件(.dtb)，IMX6ULL EVK 的设备树文件为<code>imx6ull-14x14-evk.dtb，findfdt</code>内容如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;findfdt=&quot;</span>\</span><br><span class="line"><span class="string">&quot;if test $fdt_file = undefined; then &quot;</span> \</span><br><span class="line"><span class="string">&quot;if test $board_name = EVK &amp;&amp; test $board_rev = 9X9; then &quot;</span> \</span><br><span class="line"><span class="string">&quot;setenv fdt_file imx6ull-9x9-evk.dtb; fi; &quot;</span> \</span><br><span class="line"><span class="string">&quot;if test $board_name = EVK &amp;&amp; test $board_rev = 14X14; then &quot;</span> \</span><br><span class="line"><span class="string">&quot;setenv fdt_file imx6ull-14x14-evk.dtb; fi; &quot;</span> \</span><br><span class="line"><span class="string">&quot;if test $fdt_file = undefined; then &quot;</span> \</span><br><span class="line"><span class="string">&quot;echo WARNING: Could not determine dtb to use; fi; &quot;</span> \</span><br><span class="line"><span class="string">&quot;fi;\0&quot;</span> \</span><br></pre></td></tr></table></figure>
-
-<p>那么<code>run findfdt</code>就等同于执行<code>setenv fdt_file imx6ull-14x14-evk.dtb</code>。设置fdt_file环境变量等于imx6ull-14x14-evk.dtb。<br><code>mmc dev $&#123;mmcdev&#125;</code>用于切换 mmc 设备，mmcdev 为 1，因此这行代码就是：mmc dev 1，也就是切换到 EMMC 上。<br>先执行<code> mmc dev $&#123;mmcdev&#125;</code>切换到 EMMC 上，然后使用命令<code> mmc rescan</code> 扫描看有没有 SD 卡或者 EMMC 存在，如果没有的话就直接跳到else，执行<code> run netboot</code>，netboot也是一个自定义的环境变量，这个变量是从网络启动 Linux 的。<br>扫描到EMMC后，<code>run loadbootscript</code>：<br>    <code>loadbootscript=fatload mmc $&#123;mmcdev&#125;:$&#123;mmcpart&#125; $&#123;loadaddr&#125; $&#123;script&#125;;</code><br>其中 mmcdev&#x3D;1，mmcpart&#x3D;1，loadaddr&#x3D;0x80800000，script&#x3D; boot.scr，因此展开以后就是：<br>    <code>loadbootscript=fatload mmc 1:1 0x80800000 boot.scr;</code><br>loadbootscript 就是从 mmc1 的分区 1 中读取文件 boot.src 到 DRAM 的 0X80800000 处。但是 mmc1 的分区 1 中没有 boot.src 这个文件，可以使用命令<code>ls mmc 1:1</code>查看一下 mmc1 分区1 中的所有文件，看看有没有 boot.src 这个文件。再展开bootscript：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">bootscript=<span class="built_in">echo</span> Running bootscript from mmc ...;</span><br><span class="line"><span class="built_in">source</span></span><br></pre></td></tr></table></figure>
-<p>由于boot.src 文件不存在，所以 bootscript 也就不会运行。就运行环境变量 loadimage:<br><code>loadimage=fatload mmc $&#123;mmcdev&#125;:$&#123;mmcpart&#125; $&#123;loadaddr&#125; $&#123;image&#125;</code><br>loadimage展开：<br><code>loadimage=fatload mmc 1:1 0x80800000 zImage</code><br>fatload就是从 mmc1 的分区中读取 zImage 到内存的 0X80800000 处，而 mmc1的分区 1 中存在 zImage。<br>loadimage执行完，执行mmcboot环境变量，run mmcboot：<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/10.png" alt="image"><br>①打印Booting from mmc …<br>②运行环境变量 mmcargs，mmcargs 用来设置 bootargs，后面分析 bootargs 的时候在学习。<br>③判断boot_fdt是否为yes或者try，根据uboot输出的环境变量信息可知boot_fdt&#x3D;try。因此执行loadfdt。<br>④执行loadfdt环境变量,如下：<br><code>loadfdt=fatload mmc $&#123;mmcdev&#125;:$&#123;mmcpart&#125; $&#123;fdt_addr&#125; $&#123;fdt_file&#125;</code><br>展开以后就是:<br><code>loadfdt=fatload mmc 1:1 0x83000000 imx6ull-14x14-evk.dtb</code><br>因此 loadfdt 的作用就是从 mmc1 的分区 1 中读取 imx6ull-14x14-evk.dtb 文件并放到 0x83000000处。<br>⑤loadfdt加载dtb成功后，调用命令 bootz 启动 linux：<br>    <code>bootz $&#123;loadaddr&#125; - $&#123;fdt_addr&#125;;</code><br>展开：<br>    <code>bootz 0x80800000 - 0x83000000 (注意‘-’前后要有空格)</code></p>
-<p>总结一下bootcmd展开：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mmc dev <span class="number">1</span> <span class="comment">//切换到 EMMC</span></span><br><span class="line">fatload mmc <span class="number">1</span>:<span class="number">1</span> <span class="number">0x80800000</span> zImage <span class="comment">//读取 zImage 到 0x80800000 处</span></span><br><span class="line">fatload mmc <span class="number">1</span>:<span class="number">1</span> <span class="number">0x83000000</span> imx6ull<span class="number">-14</span>x14-evk.dtb <span class="comment">//读取设备树到 0x83000000 处</span></span><br><span class="line">bootz <span class="number">0x80800000</span> - <span class="number">0x83000000</span> <span class="comment">//启动 Linux</span></span><br></pre></td></tr></table></figure>
-
-<p>我们可以将bootcmd环境变量进行简化：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#define CONFIG_BOOTCOMMAND \</span></span><br><span class="line"> <span class="string">&quot;mmc dev 1;&quot;</span> \</span><br><span class="line"> <span class="string">&quot;fatload mmc 1:1 0x80800000 zImage;&quot;</span> \</span><br><span class="line"> <span class="string">&quot;fatload mmc 1:1 0x83000000 imx6ull-alientek-emmc.dtb;&quot;</span> \</span><br><span class="line"> <span class="string">&quot;bootz 0x80800000 - 0x83000000;&quot;</span></span><br></pre></td></tr></table></figure>
-<p>或者：<br><code>setenv bootcmd &#39;mmc dev 1; fatload mmc 1:1 80800000 zImage; fatload mmc 1:1 83000000 imx6ullalientek-emmc.dtb; bootz 80800000 - 83000000;&#39;</code></p>
-<h4><span id="1-3-4-2-bootargs-zhan-kai">1.3.4.2 bootargs展开</span><a href="#1-3-4-2-bootargs-zhan-kai" class="header-anchor">#</a></h4><p>bootargs 保存着 uboot 传递给 Linux 内核的参数。从emmc启动时，bootargs 环境变量是由 mmcargs 设置的：<br><code>mmcargs=setenv bootargs console=$&#123;console&#125;,$&#123;baudrate&#125; root=$&#123;mmcroot&#125;</code><br>其中：<br><code>console=ttymxc0，baudrate=115200，mmcroot=/dev/mmcblk1p2 rootwait rw</code><br>mmcargs展开以后就是:<br><code>mmcargs=setenv bootargs console= ttymxc0, 115200 root= /dev/mmcblk1p2 rootwait rw</code></p>
-<p>可以看出环境变量 mmcargs 就是设置 bootargs 的值为<code>console= ttymxc0, 115200 root= /dev/mmcblk1p2 rootwait rw</code>。<br>①<code>console=ttymxc0,115200 </code>综合起来就是设置 ttymxc0（也就是串口 1）作为 Linux 的终端，并且串口波特率设置为 115200。<br>②<code>root=/dev/mmcblk1p2 </code>用于指明根文件系统存放在mmcblk1 设备的分区 2 中。在 I.MX6U-ALPHA 开发板中&#x2F;dev&#x2F;mmcblk1 表示 EMMC，而&#x2F;dev&#x2F;mmcblk1p2 表示EMMC 的分区 2。<br>③root 后面有<code>rootwait rw</code>，rootwait 表示等待 mmc 设备初始化完成以后再挂载，否则的话mmc 设备还没初始化完成就挂载根文件系统会出错的。rw 表示根文件系统是可以读写的，不加rw 的话可能无法在根文件系统中进行写操作，只能进行读操作。</p>
-<h4><span id="1-3-4-3-bootdlelay">1.3.4.3 bootdlelay</span><a href="#1-3-4-3-bootdlelay" class="header-anchor">#</a></h4><p>uboot命令行倒计时</p>
-<h2><span id="1-4-nei-cun-cao-zuo">1.4 内存操作</span><a href="#1-4-nei-cun-cao-zuo" class="header-anchor">#</a></h2><h3><span id="1-4-1-md">1.4.1 md</span><a href="#1-4-1-md" class="header-anchor">#</a></h3><pre><code>md[.b, .w, .l] address [# of objects]
-</code></pre>
-<p>注意：uboot 命令中的数字都是十六进制的</p>
-<ol>
-<li>命令中的<code>[.b .w .l]对应 byte、word 和 long</code>，也就是分别以 1 个字节、2 个字节、4 个字节来显示内存值.</li>
-<li>address 就是要查看的内存起始地址.</li>
-<li><code>[# of objects]</code>表示要查看的数据长度:</li>
-</ol>
-<p>这个数据长度单位不是字节，而是跟你所选择的显示格式有关。比如你设置要查看的内存长度为20(十六进制为 0x14)，如果显示格式为.b 的话那就表示 20 个字节；如果显示格式为.w 的话就表示 20 个 word，也就是<code> 20*2=40 个字节</code>；如果显示格式为.l 的话就表示 20 个 long，也就是<code>20*4=80 </code>个字节</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">md.b <span class="number">80000000</span> <span class="number">10</span> <span class="comment">//读16字节</span></span><br><span class="line">md.w <span class="number">80000000</span> <span class="number">10</span> <span class="comment">//读32字节</span></span><br><span class="line">md.l <span class="number">80000000</span> <span class="number">10</span> <span class="comment">//读64字节</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/11.png" alt="image"></p>
-<h3><span id="1-4-2-nm-ming-ling">1.4.2 nm命令</span><a href="#1-4-2-nm-ming-ling" class="header-anchor">#</a></h3><p>写内存，写成功后地址不会自增。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nm [.b, .w, .l] address</span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/12.png" alt="image"><br>0500e031 表示地址 0x80000000 现在的数据，<code>？</code>后面就可以输入要修改后的数据 0x12345678，输入完成以后按下回车，然后再输入‘q’即可退出。<br>退出后输入md.l查看。<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/13.png" alt="image"></p>
-<h3><span id="1-4-3-mm-ming-ling">1.4.3 mm命令</span><a href="#1-4-3-mm-ming-ling" class="header-anchor">#</a></h3><p>写内存，写成功后地址会自增。<br>比如以.l 格式修改从地址 0x80000000 开始的连续 3 个内存块<code>(3*4=12个字节)</code>的数据为 0X05050505.<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/14.png" alt="image"><br>输入md命令查看一下：<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/15.png" alt="image"></p>
-<h3><span id="1-4-4-mw-ming-ling">1.4.4 mw命令</span><a href="#1-4-4-mw-ming-ling" class="header-anchor">#</a></h3><p>写一段连续的内存。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mw [.b, .w, .l] address value [count]</span><br></pre></td></tr></table></figure>
-
-<p>比如使用.l 格式将以 0X80000000 为起始地址的 0x10 个内存块<code>(0x10 * 4=64 字节)</code>填充为 0X0A0A0A0A</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mw.l 80000000 0A0A0A0A 10</span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/16.png" alt="image"></p>
-<h3><span id="1-4-5-cp-ming-ling">1.4.5 cp命令</span><a href="#1-4-5-cp-ming-ling" class="header-anchor">#</a></h3><p>数据拷贝命令，用于将 DRAM 中的数据从一段内存拷贝到另一段内存中，或者把 Nor Flash 中的数据拷贝到 DRAM 中。</p>
-<pre><code>cp [.b, .w, .l] source target count
-</code></pre>
-<p>我们使用.l 格式将 0x80000000 处的地址拷贝到 0X80000100 处，长度为 0x10 个内存块<code>(0x10 * 4=64 个字节).</code></p>
-<pre><code>cp.l 80000000 80000100 10
-</code></pre>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/17.png" alt="image"></p>
-<h3><span id="1-4-6-cmp-ming-ling">1.4.6 cmp命令</span><a href="#1-4-6-cmp-ming-ling" class="header-anchor">#</a></h3><p>比较两段内存的数据是否相等。</p>
-<pre><code>cmp [.b, .w, .l] addr1 addr2 count
-</code></pre>
-<p>比较 0x80000000 和 0X80000100 这两个地址数据是否相等，比较长度为 0x10 个内存块<code>(16 * 4=64 个字节)</code></p>
-<pre><code>cmp.l 80000000 80000100 10
-</code></pre>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/18.png" alt="image"><br>我们再随便挑两段内存比较一下，比如地址0x80002000 和 0x800003000，长度为 0X10.<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/19.png" alt="image"><br>可以看出，0x80002000 处的数据和 0x80003000 处的数据就不一样.</p>
-<h2><span id="1-5-wang-luo-cao-zuo-ming-ling">1.5 网络操作命令</span><a href="#1-5-wang-luo-cao-zuo-ming-ling" class="header-anchor">#</a></h2><table>
-<thead>
-<tr>
-<th>环境变量</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>ipaddr</td>
-<td>开发板 ip 地址，可以不设置，使用 dhcp 命令来从路由器获取 IP 地址</td>
-</tr>
-<tr>
-<td>ethaddr</td>
-<td>开发板的 MAC 地址，一定要设置</td>
-</tr>
-<tr>
-<td>gatewayip</td>
-<td>网关地址</td>
-</tr>
-<tr>
-<td>netmask</td>
-<td>子网掩码</td>
-</tr>
-<tr>
-<td>serverip</td>
-<td>服务器 IP 地址，也就是 Ubuntu 主机 IP 地址，用于调试代码</td>
-</tr>
-</tbody></table>
-<p>预先设置号网络相关环境变量：</p>
-<pre><code>setenv ipaddr 192.168.1.50
-setenv ethaddr b8:ae:1d:01:00:00
-setenv gatewayip 192.168.1.1
-setenv netmask 255.255.255.0
-setenv serverip 192.168.1.253
-saveenv
-</code></pre>
-<h3><span id="1-5-1-ping-ming-ling">1.5.1 ping命令</span><a href="#1-5-1-ping-ming-ling" class="header-anchor">#</a></h3><pre><code>ping 192.168.1.100
-</code></pre>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/20.png" alt="image"></p>
-<h3><span id="1-5-2-dhcp-ming-ling-zi-dong-ip-huo-qu">1.5.2 dhcp命令（自动ip获取）</span><a href="#1-5-2-dhcp-ming-ling-zi-dong-ip-huo-qu" class="header-anchor">#</a></h3><p>dhcp 用于从路由器获取 IP 地址，前提得开发板连接到路由器上的，如果开发板是和电脑<br>直连的，那么 dhcp 命令就会失效。直接输入 dhcp 命令即可通过路由器获取到 IP 地址。</p>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/21.png" alt="image"><br>DHCP 不单单是获取 IP 地址，其还会通过 TFTP 来启动 linux 内核，输入<code>? dhcp</code>即<br>可查看 dhcp 命令详细的信息：<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/22.png" alt="image"></p>
-<h3><span id="1-5-3-nfs-ming-ling">1.5.3 nfs命令</span><a href="#1-5-3-nfs-ming-ling" class="header-anchor">#</a></h3><p>nfs(Network File System)网络文件系统,通过网络将编译好的 linux 镜像和设备树文件下载<br>到 DRAM 中，然后就可以直接运行。<br>虚拟机Ubuntu先搭建好nfs服务，详见：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/16694496.html" title="nfs服务搭建">nfs服务搭建</a> <a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/">linux搭建nfs服务 | Hexo (fuzidage.github.io)</a></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nfs [loadAddress] [[hostIPaddr:]bootfilename]</span><br></pre></td></tr></table></figure>
-
-<p>loadAddress 是要保存的 DRAM 地址，<code>[[hostIPaddr:]bootfilename]</code>是要下载的文件地址,<br>我们将正点原子官方编译出来的 Linux 镜像文件 zImage 下载到开发板 DRAM 的 0x80800000这个地址处。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nfs 80800000 192.168.1.253:/home/zuozhongkai/linux/nfs/zImage</span><br></pre></td></tr></table></figure>
-<p>下载过程如图下：<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/23.png" alt="image"></p>
-<p>下载完成以后查看 0x80800000 地址处的数据，使用命令 md.b 来查看前 0x100 个字节的数据。<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/24.png" alt="image"><br>我们再用UE打开编译出的zImage，对比一下说明 nfs 命令下载到的zImage 是正确的。<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/25.png" alt="image"></p>
-<h3><span id="1-5-4-tftp-ming-ling">1.5.4 tftp命令</span><a href="#1-5-4-tftp-ming-ling" class="header-anchor">#</a></h3><p>tftp 命令的作用和 nfs 命令一样，都是用于通过网络下载东西到 DRAM 中。tftp服务搭建参考：<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/11997775.html" title="tftp服务搭建">tftp服务搭建</a> <a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/">linux搭建tftp和ftp服务 | Hexo (fuzidage.github.io)</a></p>
-<pre><code>tftpboot [loadAddress] [[hostIPaddr:]bootfilename]
-</code></pre>
-<p> loadAddress 是文 件在 DRAM 中的 存放 地址 ，<br><code>[[hostIPaddr:]bootfilename]</code>是要从 Ubuntu 中下载的文件。但是和 nfs 命令的区别在于，tftp 命令不需要输入文件在 Ubuntu 中的完整路径，只需要输入文件名即可。比如我们现在将 tftpboot 文件夹里面的 zImage 文件下载到开发板 DRAM 的 0X80800000 地址处。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">tftp 80800000 zImage</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/26.png" alt="image"></p>
-<h2><span id="1-6-emmc-he-sd-qia-zhi-ling">1.6 emmc和sd卡指令</span><a href="#1-6-emmc-he-sd-qia-zhi-ling" class="header-anchor">#</a></h2><p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/27.png" alt="image"></p>
-<p>mmc相关命令：</p>
-<table>
-<thead>
-<tr>
-<th>命令</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>mmc info</td>
-<td>输出 MMC 设备信息</td>
-</tr>
-<tr>
-<td>mmc read</td>
-<td>读取 MMC 中的数据</td>
-</tr>
-<tr>
-<td>mmc wirte</td>
-<td>向 MMC 设备写入数据</td>
-</tr>
-<tr>
-<td>mmc rescan</td>
-<td>扫描 MMC 设备</td>
-</tr>
-<tr>
-<td>mmc part</td>
-<td>列出 MMC 设备的分区</td>
-</tr>
-<tr>
-<td>mmc dev</td>
-<td>切换 MMC 设备</td>
-</tr>
-<tr>
-<td>mmc list</td>
-<td>列出当前有效的所有 MMC 设备</td>
-</tr>
-<tr>
-<td>mmc hwpartition</td>
-<td>设置 MMC 设备的分区</td>
-</tr>
-<tr>
-<td>mmc bootbus……</td>
-<td>设置指定 MMC 设备的 BOOT_BUS_WIDTH 域的值</td>
-</tr>
-<tr>
-<td>mmc bootpart……</td>
-<td>设置指定 MMC 设备的 boot 和 RPMB 分区的大小</td>
-</tr>
-<tr>
-<td>mmc partconf……</td>
-<td>设置指定 MMC 设备的 PARTITION_CONFG 域的值</td>
-</tr>
-<tr>
-<td>mmc rst</td>
-<td>复位 MMC 设备</td>
-</tr>
-<tr>
-<td>mmc setdsr</td>
-<td>设置 DSR 寄存器的值</td>
-</tr>
-</tbody></table>
-<h3><span id="1-6-1-mmc-info">1.6.1 mmc info</span><a href="#1-6-1-mmc-info" class="header-anchor">#</a></h3><p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/28.png" alt="image"></p>
-<p>当前选中的 MMC 设备是EMMC，版本为 5.0，容量为 7.1GiB(EMMC为 8GB)，速度为 52000000Hz&#x3D;52MHz，8 位宽的总线。还有一个与 mmc info 命令相同功能的命令：mmcinfo，“mmc”和“info”之间没有空格。</p>
-<h3><span id="1-6-2-mmc-rescan">1.6.2 mmc rescan</span><a href="#1-6-2-mmc-rescan" class="header-anchor">#</a></h3><p>mmc rescan 命令用于扫描当前开发板上所有的 MMC 设备，包括 EMMC 和 SD 卡。</p>
-<h3><span id="1-6-3-mmc-list">1.6.3 mmc list</span><a href="#1-6-3-mmc-list" class="header-anchor">#</a></h3><p>查看当前开发板一共有几个 MMC 设备.<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/29.png" alt="image"></p>
-<p>可以看出当前开发板有两个 MMC 设备：<code>FSL_SDHC:0 和 FSL_SDHC:1 (eMMC)</code>，这是因为我现在用的是 EMMC 版本的核心板，加上 SD 卡一共有两个 MMC 设备，<code>FSL_SDHC:0 是 SD卡，FSL_SDHC:1(eMMC)是 EMMC</code>。默认会将 EMMC 设置为当前 MMC 设备，这就是为什么输入<code>mmc info</code>查询到的是 EMMC 设备信息，而不是 SD 卡。要想查看 SD 卡信息，就要使用命令<code>mmc dev</code>来将 SD 卡设置为当前的 MMC 设备。</p>
-<h3><span id="1-6-4-mmc-dev">1.6.4 mmc dev</span><a href="#1-6-4-mmc-dev" class="header-anchor">#</a></h3><p>选择切换当前emmc设备。</p>
-<pre><code>mmc dev [dev] [part]
-</code></pre>
-<p>[dev]用来设置要切换的 MMC 设备号，[part]是分区号。如果不写分区号的话默认为分区 0。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mmc dev <span class="number">0</span> <span class="comment">//切换到 SD 卡，0 为 SD 卡，1 为 eMMC</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/30.png" alt="image"><br>切换到sd这个mmc后，输入mmc info命令既可以查看sd信息：<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/31.png" alt="image"></p>
-<p>可以看到当前 SD 卡为 3.0 版本的，容量为 14.8GiB(16GB 的 SD 卡)，4 位宽的总线。</p>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/32.png" alt="image"></p>
-<h3><span id="1-6-5-mmc-part">1.6.5 mmc part</span><a href="#1-6-5-mmc-part" class="header-anchor">#</a></h3><p>查看mmc分区</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mmc dev <span class="number">1</span> <span class="comment">//切换到 EMMC</span></span><br><span class="line">mmc part <span class="comment">//查看 EMMC 分区</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/33.png" alt="image"></p>
-<p>切到核心板的emmc后，<code>mmc part</code>显示分区信息，此时 EMMC 有两个分区，第一个分区起始扇区为 20480，长度为 262144 个扇区；第二个分区起始扇区为 282624，长度为 14594048 个扇区。<br>如果 EMMC 里面烧写了 Linux 系统的话，EMMC 是有 3 个分区的，第 0 个分区存放 uboot，第 1 个分区存放Linux 镜像文件和设备树，第 2 个分区存放根文件系统。但是在上图中只有两个分区，那是因为第 0 个分区没有格式化，所以识别不出来，实际上第 0 个分区是存在的。一个新的 SD卡默认只有一个分区，那就是分区 0，所以前面讲解的 uboot 烧写到 SD 卡，其实就是将 u-boot.bin烧写到了 SD 卡的分区 0 里面.</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mmc dev <span class="number">1</span> <span class="number">2</span> <span class="comment">//将 EMMC 的分区 2 设置为当前 MMC 设备</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/34.png" alt="image"></p>
-<h3><span id="1-6-6-mmc-read">1.6.6 mmc read</span><a href="#1-6-6-mmc-read" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mmc <span class="built_in">read</span> addr blk<span class="comment"># cnt</span></span><br></pre></td></tr></table></figure>
-<p>读mmc设备中的数据。addr 是数据读取到 DRAM 中的地址，blk 是要读取的块起始地址(十六进制)，一个块是 512字节，这里的块和扇区是一个意思，在 MMC 设备中我们通常说扇区，cnt 是要读取的块数量(十六进制)。比如从 EMMC 的第 1536(0x600)个块开始，读取 16(0x10)个块的数据到 DRAM 的0X80800000 地址处</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mmc dev <span class="number">1</span> <span class="number">0</span> <span class="comment">//切换到 MMC 分区 0</span></span><br><span class="line">mmc read <span class="number">80800000</span> <span class="number">600</span> <span class="number">10</span> <span class="comment">//读取数据</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/35.png" alt="image"><br>这里我们还看不出来读取是否正确，通过 md.b 命令查看 0x80800000 处的数据就行了，查看<code> 16*512=8192(0x2000)</code>个字节的数据。<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/36.png" alt="image"></p>
-<p>可以看到<code>baudrate=115200.board_name=EVK.board_rev=14X14</code>等字样，<br>这个就是 uboot 中的环境变量。EMMC 核心板 uboot 环境变量的存储起始地址就是<code>1536*512=786432</code>。</p>
-<h3><span id="1-6-7-mmc-write">1.6.7 mmc write</span><a href="#1-6-7-mmc-write" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mmc write addr blk<span class="comment"># cnt</span></span><br></pre></td></tr></table></figure>
-<p>从DRAM写数据到mmc设备。<br>比如通过 nfs 或者 tftp 命令将新的 u-boot.bin 下载到开发板的 DRAM 中，然后再使用命令<code>mmc write</code>将其写入到 MMC设备中。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mmc dev <span class="number">0</span> <span class="comment">//切换到 SD 卡</span></span><br><span class="line">version <span class="comment">//查看uboot版本号</span></span><br><span class="line">tftp <span class="number">80800000</span> u-boot.imx</span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/37.png" alt="image"><br>可以看出，u-boot.imx 大小为 <code>379904 字节，379904/512=742</code>，所以我们要向 SD 卡中写入742 个块，如果有小数的话就要加 1 个块。使用命令<code>mmc write</code>从 SD 卡分区 0 第 2 个块(扇区)开始烧写，一共烧写 742(0x2E6)个块</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">mmc dev <span class="number">0</span> <span class="number">0</span></span><br><span class="line">mmc write <span class="number">80800000</span> <span class="number">2</span> <span class="number">2E6</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/38.png" alt="image"></p>
-<p>烧写成功，重启开发板(从 SD 卡启动)，重启以后再输入 version 来查看版本号：<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/39.png" alt="image"><br>这样就给mmc0也就是sd卡烧录了uboot, 同理要烧录emmc也是同理，切到mmc1即可：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mmc dev <span class="number">1</span> <span class="number">0</span> <span class="comment">//切换到 EMMC 分区 0</span></span><br><span class="line">tftp <span class="number">80800000</span> u-boot.imx <span class="comment">//下载 u-boot.imx 到 DRAM</span></span><br><span class="line">mmc write <span class="number">80800000</span> <span class="number">2</span> <span class="number">32</span>E <span class="comment">//烧写 u-boot.imx 到 EMMC 中</span></span><br><span class="line">mmc partconf <span class="number">1</span> <span class="number">1</span> <span class="number">0</span> <span class="number">0</span> <span class="comment">//分区配置，EMMC 需要这一步！</span></span><br></pre></td></tr></table></figure>
-
-<p><strong>注意：千万不要写 SD 卡或者 EMMC 的前两个块(扇区)，里面保存着分区表！</strong></p>
-<h3><span id="1-6-7-mmc-erase">1.6.7 mmc erase</span><a href="#1-6-7-mmc-erase" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mmc erase blk<span class="comment"># cnt</span></span><br></pre></td></tr></table></figure>
-<p>擦除 MMC 设备的指定块, blk 为要擦除的起始块，cnt 是要擦除的数量。</p>
-<h2><span id="1-7-wen-jian-cao-zuo-ming-ling-fat-wen-jian-xi-tong">1.7 文件操作命令（fat文件系统）</span><a href="#1-7-wen-jian-cao-zuo-ming-ling-fat-wen-jian-xi-tong" class="header-anchor">#</a></h2><h3><span id="1-7-1-fatinfo">1.7.1 fatinfo</span><a href="#1-7-1-fatinfo" class="header-anchor">#</a></h3><pre><code>fatinfo &lt;interface&gt; [&lt;dev[:part]&gt;]
-</code></pre>
-<p>于查询指定 MMC 设备分区的文件系统信息，interface 表示接口，比如 mmc，dev 是查询的设备号，part 是要查询的分区。比如我们要查询 EMMC 分区 1 的文件系统信息：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fatinfo mmc <span class="number">1</span>:<span class="number">1</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/40.png" alt="image"><br>上图显示mmc1也就是emmc设备的分区1的文件系统为fat32格式。</p>
-<h3><span id="1-7-1-fatls">1.7.1 fatls</span><a href="#1-7-1-fatls" class="header-anchor">#</a></h3><pre><code>fatls &lt;interface&gt; [&lt;dev[:part]&gt;] [directory]
-</code></pre>
-<p>查询设备分区的目录和文件信息。interface 是要查询的接口，比如 mmc，dev 是要查询的设备号，part 是要查询的分区，directory是要查询的目录。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fatls mmc <span class="number">1</span>:<span class="number">1</span>   <span class="comment">//查询 mmc1设备（EMMC 设备）中分区 1 中的所有的目录和文件</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/41.png" alt="image"></p>
-<h3><span id="1-7-3-fstype">1.7.3 fstype</span><a href="#1-7-3-fstype" class="header-anchor">#</a></h3><pre><code>fstype &lt;interface&gt; &lt;dev&gt;:&lt;part&gt;
-</code></pre>
-<p>查看 MMC 设备某个分区的文件系统格式.正点原子 EMMC 核心板上的 EMMC 默认有 3 个分区, 分区 0 格式未知，因为分区 0 存放的 uboot，并且分区 0 没有格式化，所以文件系统格式未知。分区 1 的格式为 fat，分区 1 用于存放 linux 镜像和设备树。分区 2 的格式为 ext4，用于存放 Linux 的根文件系统(rootfs)。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fstype mmc <span class="number">1</span>:<span class="number">0</span></span><br><span class="line">fstype mmc <span class="number">1</span>:<span class="number">1</span></span><br><span class="line">fstype mmc <span class="number">1</span>:<span class="number">2</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/42.png" alt="image"></p>
-<h3><span id="1-7-4-fatload">1.7.4 fatload</span><a href="#1-7-4-fatload" class="header-anchor">#</a></h3><pre><code>fatload &lt;interface&gt; [&lt;dev[:part]&gt; [&lt;addr&gt; [&lt;filename&gt; [bytes [pos]]]]]
-</code></pre>
-<p>将指定的文件读取到 DRAM.<br>interface 为接口，比如 mmc，dev 是设备号，part 是分区，addr 是保存在 DRAM 中的起始地址，filename 是要读取的文件名字。bytes 表示读取多少字节的数据，如果 bytes 为 0 或者省略的话表示读取整个文件。pos 是要读的文件相对于文件首地址的偏移，如果为 0 或者省略的话表示从文件首地址开始读取.</p>
-<pre><code>fatload mmc 1:1 80800000 zImage  //将 EMMC 分区 1 中的 zImage 文件读取到 DRAM 中的0X80800000 地址处
-</code></pre>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/43.png" alt="image"></p>
-<p> 225ms 内读取了 6785272 个字节的数据，速度为 28.8MiB&#x2F;s，速度是非常快的，因为这是从 EMMC 里面读取的，而 EMMC 是 8 位的，速度肯定会很快的。</p>
-<h3><span id="1-7-5-fatwrite">1.7.5 fatwrite</span><a href="#1-7-5-fatwrite" class="header-anchor">#</a></h3><p>将 DRAM 中的数据写入到 MMC 设备。<br>uboot 默认没有使能<code> fatwrite</code> 命令，需要修改板子配置头文件，比如 <code>mx6ullevk.h、 mx6ull_alientek_emmc.h </code>等,需要开启宏：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> CONFIG_FAT_WRITE <span class="comment">/* 使能 fatwrite 命令 */</span></span></span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/44.png" alt="image"></p>
-<pre><code>fatwrite &lt;interface&gt; &lt;dev[:part]&gt; &lt;addr&gt; &lt;filename&gt; &lt;bytes&gt;
-</code></pre>
-<p>interface 为接口，比如 mmc，dev 是设备号，part 是分区，addr 是要写入的数据在 DRAM中的起始地址，filename 是写入的数据文件名字，bytes 表示要写入多少字节的数据。</p>
-<p>比如我们通过nfs or tftp命令下载镜像到DRAM后，通过fatwrite去烧写image：<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/45.png" alt="image"><br>zImage 大小为<code>6785272(0X6788f8)</code>个字节(注意，由于开发板系统在不断的更新中，因此zImage 大小不是固定的，一切以实际大小为准)，接下来使用命令<code>fatwrite</code>将其写入到 EMMC 的分区 1 中，文件名字为 zImage：</p>
-<pre><code>fatwrite mmc 1:1 80800000 zImage 6788f8
-</code></pre>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/46.png" alt="image"></p>
-<p>完成以后使用<code>fatls</code>命令查看一下 EMMC 分区 1 里面的文件：<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/47.png" alt="image"></p>
-<h2><span id="1-8-wen-jian-cao-zuo-ming-ling-ext-wen-jian-xi-tong">1.8 文件操作命令（ext文件系统）</span><a href="#1-8-wen-jian-cao-zuo-ming-ling-ext-wen-jian-xi-tong" class="header-anchor">#</a></h2><p>ext文件系统是linux常用的文件系统，一般rootfs就是典型的ext2文件系统。<br><code>ext2load、ext2ls、ext4load、ext4ls 和 ext4write</code>。这些命令的含义和使用与<code> fatload、fatls 和 fatwrite</code>一样，只是 ext2 和 ext4 都是针对 ext 文件系统的。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ext4ls mmc <span class="number">1</span>:<span class="number">2</span>	<span class="comment">//emmc设备分区2就是ext4文件系统，存放了rootfs</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/48.png" alt="image"></p>
-<h2><span id="1-9-nandflash-cao-zuo-ming-ling">1.9 nandflash操作命令</span><a href="#1-9-nandflash-cao-zuo-ming-ling" class="header-anchor">#</a></h2><p>输入<code>? nand</code>即可查看NAND 相关命令：<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/49.png" alt="image"></p>
-<h3><span id="1-9-1-nand-info">1.9.1 nand info</span><a href="#1-9-1-nand-info" class="header-anchor">#</a></h3><p>打印 NAND Flash 信息:<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/50.png" alt="image"></p>
-<h3><span id="1-9-2-nand-device">1.9.2 nand device</span><a href="#1-9-2-nand-device" class="header-anchor">#</a></h3><p>用于切换 NAND Flash，如果你的板子支持多片 NAND 的话就可以使用此命令来设置当前所使用的 NAND。</p>
-<h3><span id="1-9-3-nand-erase">1.9.3 nand erase</span><a href="#1-9-3-nand-erase" class="header-anchor">#</a></h3><p><code>nand erase </code>命令用于擦除 NAND Flash，NAND Flash 的特性(位翻转，只能由1变成0,而不能由0变成1)决定了在向 NAND Flash 写数据之前一定要先对要写入的区域进行擦除.</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">nand erase[.spread] [clean] off size <span class="comment">//从指定地址开始(off)开始，擦除指定大小(size)的区域。</span></span><br><span class="line">nand erase.part [clean] partition <span class="comment">//擦除指定的分区</span></span><br><span class="line">nand erase.chip [clean] <span class="comment">//全篇擦除</span></span><br></pre></td></tr></table></figure>
-
-<h3><span id="1-9-3-nand-write">1.9.3 nand write</span><a href="#1-9-3-nand-write" class="header-anchor">#</a></h3><pre><code>nand write addr off size
-</code></pre>
-<p>addr 是要写入的数据首地址，off 是 NAND 中的目的地址，size 是要写入的数据大小。</p>
-<p>编译出来 NAND版本的 kernel 和 dtb 文件，在烧写之前要先对 NAND 进行分区，也就是规划好 uboot、linux kernel、设备树和根文件系统的存储区域，I.MX6U-ALPHA 开发板出厂系统 NAND 分区如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0x000000000000</span><span class="number">-0x0000003FFFFF</span> : <span class="string">&quot;boot&quot;</span></span><br><span class="line"><span class="number">0x000000400000</span><span class="number">-0x00000041FFFF</span> : <span class="string">&quot;env&quot;</span></span><br><span class="line"><span class="number">0x000000420000</span><span class="number">-0x00000051FFFF</span> : <span class="string">&quot;logo&quot;</span></span><br><span class="line"><span class="number">0x000000520000</span><span class="number">-0x00000061FFFF</span> : <span class="string">&quot;dtb&quot;</span></span><br><span class="line"><span class="number">0x000000620000</span><span class="number">-0x000000E1FFFF</span> : <span class="string">&quot;kernel&quot;</span></span><br><span class="line"><span class="number">0x000000E20000</span><span class="number">-0x000020000000</span> : <span class="string">&quot;rootfs&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>一共有六个分区，第一个分区存放 uboot，地址范围为<code> 0x0~0x3FFFFF(共 4MB)</code>；第二个分区存放 env（环境变量），地址范围为 <code>0x400000~0x420000(共 128KB)</code>；第三个分区存放 logo(启动图标)，地址范围为<code> 0x420000~0x51FFFF(共 1MB)</code>；第四个分区存放 dtb(设备树)，地址范围为<code>0x520000~0x61FFFF(共 1MB)</code>；第五个分区存放 kernel(也就是 linux kernel)，地址范围为<code>0x620000~0xE1FFFF(共 8MB)</code>；剩下的所有存储空间全部作为最后一个分区，存放 rootfs(根文件系统)。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tftp <span class="number">0x87800000</span> zImage <span class="comment">//下载 zImage 到 DRAM 中</span></span><br><span class="line">nand erase <span class="number">0x620000</span> <span class="number">0x800000</span> <span class="comment">//从地址 0x620000 开始擦除 8MB 的空间</span></span><br><span class="line">nand write <span class="number">0x87800000</span> <span class="number">0x620000</span> <span class="number">0x800000</span> <span class="comment">//将接收到的 zImage 写到 NAND 中</span></span><br></pre></td></tr></table></figure>
-
-<p>这里我们擦除了 8MB 的空间，因为一般 zImage 就是 6,7MB 左右，8MB 肯定够了，如果不够的话就再多擦除一点就行了。同理烧录dtb:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tftp <span class="number">0x87800000</span> imx6ull<span class="number">-14</span>x14-emmc<span class="number">-7</span><span class="number">-1024</span>x600-c.dtb <span class="comment">//下载 dtb 到 DRAM 中</span></span><br><span class="line">nand erase <span class="number">0x520000</span> <span class="number">0x100000</span> <span class="comment">//从地址 0x520000 开始擦除 1MB 的空间</span></span><br><span class="line">nand write <span class="number">0x87800000</span> <span class="number">0x520000</span> <span class="number">0x100000</span> <span class="comment">//将接收到的 dtb 写到 NAND 中</span></span><br></pre></td></tr></table></figure>
-
-<h3><span id="1-9-4-nand-read">1.9.4 nand read</span><a href="#1-9-4-nand-read" class="header-anchor">#</a></h3><pre><code>nand read addr off size
-</code></pre>
-<p>从 NAND 中的指定地址读取指定大小的数据到 DRAM.<br>addr 是目的地址，off 是要读取的 NAND 中的数据源地址，size 是要读取的数据大小。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nand read <span class="number">0x83000000</span> <span class="number">0x520000</span> <span class="number">0x19000</span>  <span class="comment">//读取设备树(dtb)文件到 0x83000000 地址处</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/51.png" alt="image"></p>
-<h2><span id="1-10-she-bei-shu-xiang-guan">1.10 设备树相关</span><a href="#1-10-she-bei-shu-xiang-guan" class="header-anchor">#</a></h2><h3><span id="1-10-1-fdt-addr">1.10.1 fdt addr</span><a href="#1-10-1-fdt-addr" class="header-anchor">#</a></h3><p>设置设备树起始地址：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">nand read <span class="number">0x83000000</span> <span class="number">0x520000</span> <span class="number">0x19000</span> <span class="comment">//比如把nand中dtb分区数据读到dram</span></span><br><span class="line">fdt addr <span class="number">83000000</span>	<span class="comment">//设置好设备树起始地址</span></span><br></pre></td></tr></table></figure>
-<h3><span id="1-10-2-fdt-header">1.10.2 fdt header</span><a href="#1-10-2-fdt-header" class="header-anchor">#</a></h3><p>查看设备树头部信息：</p>
-<pre><code>fdt header
-</code></pre>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/52.png" alt="image"></p>
-<h3><span id="1-10-3-fdt-print">1.10.3 fdt print</span><a href="#1-10-3-fdt-print" class="header-anchor">#</a></h3><p>解析出dts内容：<br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/53.png" alt="image"></p>
-<h2><span id="1-11-qi-dong-xiang-guan">1.11 启动相关</span><a href="#1-11-qi-dong-xiang-guan" class="header-anchor">#</a></h2><h3><span id="1-11-1-bootz-qi-dong-zimage">1.11.1 bootz (启动zImage)</span><a href="#1-11-1-bootz-qi-dong-zimage" class="header-anchor">#</a></h3><pre><code>bootz [addr [initrd[:size]] [fdt]]
-</code></pre>
-<p>addr 是 Linux 镜像文件在 DRAM 中的位置，initrd 是 initrd 文件在DRAM 中的地址，如果不使用 initrd 的话使用‘-’代替即可，fdt 就是设备树文件在 DRAM 中的地址.</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tftp <span class="number">80800000</span> zImage</span><br><span class="line">tftp <span class="number">83000000</span> imx6ull<span class="number">-14</span>x14-emmc<span class="number">-7</span><span class="number">-1024</span>x600-c.dtb</span><br><span class="line">bootz <span class="number">80800000</span> - <span class="number">83000000</span></span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/54.png" alt="image"><br>换一张启动方式：从mmc1也就是emmc启动：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">fatload mmc <span class="number">1</span>:<span class="number">1</span> <span class="number">80800000</span> zImage</span><br><span class="line">fatload mmc <span class="number">1</span>:<span class="number">1</span> <span class="number">83000000</span> imx6ull<span class="number">-14</span>x14-emmc<span class="number">-7</span><span class="number">-1024</span>x600-c.dtb</span><br><span class="line">bootz <span class="number">80800000</span> - <span class="number">83000000</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/55.png" alt="image"></p>
-<h3><span id="1-11-1-bootm-qi-dong-uimage">1.11.1 bootm (启动uImage)</span><a href="#1-11-1-bootm-qi-dong-uimage" class="header-anchor">#</a></h3><pre><code>bootm [addr [initrd[:size]] [fdt]]
-</code></pre>
-<p>bootm 命令和 bootz 类似，它是启动 uImage 镜像。uImage是U-boot专用的映像文件，它是在zImage之前加上一个长度为0x40的“头”，说明这个映像文件的类型、加载位置、生成时间、大小等信息。<br>bootm如果不需要启动设备树：</p>
-<pre><code>bootm addr
-</code></pre>
-<h3><span id="1-11-3-boot">1.11.3 boot</span><a href="#1-11-3-boot" class="header-anchor">#</a></h3><p>boot 会读取环境变量 bootcmd 来启动 Linux 系统：<br>比如设置bootcmd如下，从网络启动linux：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">setenv bootcmd <span class="string">&#x27;tftp 80800000 zImage; tftp 83000000 imx6ull-14x14-emmc-7-1024x600-c.dtb; bootz 80800000 - 83000000&#x27;</span></span><br><span class="line">saveenv</span><br><span class="line">boot</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/56.png" alt="image"></p>
-<p>同理，如果想从emmc启动linux,设置bootcmd如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">setenv bootcmd <span class="string">&#x27;fatload mmc 1:1 80800000 zImage; fatload mmc 1:1 83000000 imx6ull-14x14-emmc-7-1024x600-c.dtb; bootz 80800000 - 83000000&#x27;</span></span><br><span class="line">savenev</span><br><span class="line">boot</span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/57.png" alt="image"></p>
-<h3><span id="1-11-4-go-ming-ling">1.11.4 go命令</span><a href="#1-11-4-go-ming-ling" class="header-anchor">#</a></h3><pre><code>go addr
-</code></pre>
-<p>跳到指定的地址处执行, addr表示DRAM地址</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">tftp <span class="number">87800000</span> <span class="built_in">printf</span>.bin	<span class="comment">//一个裸机程序，打印输入的按键，将两个整数相加</span></span><br><span class="line">go <span class="number">87800000</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/58.png" alt="image"></p>
-<h3><span id="1-11-5-run">1.11.5 run</span><a href="#1-11-5-run" class="header-anchor">#</a></h3><p>run 命令用于运行环境变量中定义的命令，比如可以通过<code>run bootcmd</code>来运行 bootcmd 中的启动命令:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">setenv mybootemmc <span class="string">&#x27;fatload mmc 1:1 80800000 zImage; fatload mmc 1:1 83000000 imx6ull-14x14-emmc-7-1024x600-c.dtb;bootz 80800000 - 83000000&#x27;</span></span><br><span class="line">setenv mybootnand <span class="string">&#x27;nand read 80800000 4000000 800000;nand read 83000000 6000000 100000;bootz 80800000 - 83000000&#x27;</span></span><br><span class="line">setenv mybootnet <span class="string">&#x27;tftp 80800000 zImage; tftp 83000000imx6ull-14x14-emmc-7-1024x600-c.dtb;</span></span><br><span class="line"><span class="string">bootz 80800000 - 83000000&#x27;</span></span><br><span class="line">saveenv</span><br></pre></td></tr></table></figure>
-
-<p>设置了3个环境变量，可以<code>run mybootemmc或者run mybootnand或者run mybootnet</code>来分别从emmc启动，从nand启动，从网络启动。</p>
-<h2><span id="1-12-nei-cun-ce-shi-mtest">1.12 内存测试mtest</span><a href="#1-12-nei-cun-ce-shi-mtest" class="header-anchor">#</a></h2><pre><code>mtest [start [end [pattern [iterations]]]]
-</code></pre>
-<p>start 是要测试的 DRAM 开始地址，end 是结束地址，比如我们测试<code> 0X80000000~0X80001000</code>这段内存，输入<code>mtest 80000000 80001000</code><br><img src="/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/59.png" alt="image"><br> 可以看出，测试范围为<code> 0X80000000~0X80001000</code>，已经测试了 486 次，如果要结束测试就按下键盘上的“Ctrl+C”键。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/06/22/uboot-%E5%91%BD%E4%BB%A4%E5%92%8C%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/" data-id="clzp8utta002p9oufbco8afen" data-title="uboot-命令和环境变量" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -3176,6 +3038,10 @@ saveenv
       <ul>
         
           <li>
+            <a href="/2024/08/18/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E5%86%85%E6%A0%B8led%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-内核led子系统</a>
+          </li>
+        
+          <li>
             <a href="/2024/08/18/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-pinctrl%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-pinctrl子系统</a>
           </li>
         
@@ -3189,10 +3055,6 @@ saveenv
         
           <li>
             <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/">字符设备驱动-ioctl命令详解</a>
-          </li>
-        
-          <li>
-            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/">字符设备驱动-misc杂项设备</a>
           </li>
         
       </ul>
