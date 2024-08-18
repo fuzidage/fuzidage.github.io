@@ -69,6 +69,222 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-s3c2440裸机编程-代码重定位和清bss" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/" class="article-date">
+  <time class="dt-published" datetime="2024-04-15T07:28:42.000Z" itemprop="datePublished">2024-04-15</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/">s3c2440裸机编程-代码重定位和清bss</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-yin-ru-dai-ma-chong-ding-wei">1 引入代码重定位</a><ul>
+<li><a href="#1-1-cheng-xu-di-zhi-kong-jian">1.1 程序地址空间</a></li>
+<li><a href="#1-2-lian-jie-jiao-ben">1.2 链接脚本</a><ul>
+<li><a href="#1-2-1-chong-ding-wei-data-duan">1.2.1 重定位data段</a><ul>
+<li><a href="#1-2-1-1-lian-jie-jiao-ben-ge-shi">1.2.1.1 链接脚本格式</a></li>
+<li><a href="#1-2-1-2-chong-ding-wei-data-duan-li-zi">1.2.1.2 重定位data段例子</a></li>
+</ul>
+</li>
+<li><a href="#1-2-2-chong-ding-wei-zheng-ge-cheng-xu-duan">1.2.2 重定位整个程序段</a></li>
+<li><a href="#1-2-3-chong-ding-wei-dai-ma-you-hua">1.2.3 重定位代码优化</a><ul>
+<li><a href="#1-2-3-1-strb-ldrb-ti-huan-cheng-str-ldr">1.2.3.1 strb&#x2F;ldrb替换成str&#x2F;ldr</a></li>
+<li><a href="#1-2-3-2-gai-cheng-c-dai-ma-chong-ding-wei">1.2.3.2 改成c代码重定位</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-qing-chu-bss">2 清除bss</a><ul>
+<li><a href="#2-1-bss-duan-jie-shao">2.1 bss段介绍</a></li>
+<li><a href="#2-2-qing-bss">2.2 清bss</a></li>
+<li><a href="#2-3-qing-bss-you-hua">2.3 清bss优化</a><ul>
+<li><a href="#2-3-1-strb-ldrb-ti-huan-cheng-str-ldr">2.3.1 strb&#x2F;ldrb替换成str&#x2F;ldr</a></li>
+<li><a href="#2-3-2-gai-cheng-c-dai-ma-qing-bss">2.3.2 改成c代码清bss</a></li>
+<li><a href="#2-3-3-mei-ge-duan-di-zhi-4-zi-jie-dui-qi">2.3.3 每个段地址4字节对齐</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-wei-zhi-wu-guan-ma">3 位置无关码</a><ul>
+<li><a href="#3-1-jue-dui-tiao-zhuan-yu-xiang-dui-tiao-zhuan-zhi-ling">3.1 绝对跳转与相对跳转指令</a><ul>
+<li><a href="#3-1-1-xiang-dui-tiao-zhuan">3.1.1 相对跳转</a></li>
+<li><a href="#3-1-2-jue-dui-tiao-zhuan">3.1.2 绝对跳转</a></li>
+<li><a href="#3-1-3-xiang-dui-tiao-zhuan-yu-jue-ding-tiao-zhuan-bi-jiao">3.1.3 相对跳转与决定跳转比较</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-yin-ru-dai-ma-chong-ding-wei">1 引入代码重定位</span><a href="#1-yin-ru-dai-ma-chong-ding-wei" class="header-anchor">#</a></h1><p>s3c2440的cpu默认是从0地址开始取指令执行，当从nor启动时,0地址对应nor, nor可以像内存一样读，但不能像内存一样写，前面<a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/">s3c2440裸机编程-内存控制器</a> 讲过，写入norflash要进行按照spec进行命令表写入。因此我们能够从nor上取指令执行。</p>
+<p>当nand启动的时候，我们nand中的前4K指令会变自动加载到sram中去，这时的0地址对应sram。那么我们的程序如果大于4K,要从nand启动，sram只拷贝了nand中的前4K代码，那么如何解决这个问题呢？</p>
+<p>就需要重定位代码到dram(ddr)中去，dram的容量较大，又可以直接被cpu访问。</p>
+<h2><span id="1-1-cheng-xu-di-zhi-kong-jian">1.1 程序地址空间</span><a href="#1-1-cheng-xu-di-zhi-kong-jian" class="header-anchor">#</a></h2><p>我们知道，程序包含：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">代码段（.text）</span><br><span class="line">数据段(.data):存放初始值不为<span class="number">0</span>的全局变量/静态变量</span><br><span class="line">rodata段(.rodata)：<span class="type">const</span>修饰的全局变量或静态变量</span><br><span class="line">bss段(.bss)：存放初始值为<span class="number">0</span>或者未初始化的全局变量/静态变量</span><br><span class="line">commen段(.commen):注释</span><br></pre></td></tr></table></figure>
+
+<p>下面展开一个实验引入为什么要代码重定位。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;s3c2440_soc.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;uart.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;init.h&quot;</span></span></span><br><span class="line"><span class="type">int</span> g_Char = <span class="string">&#x27;A&#x27;</span>; <span class="comment">//.data</span></span><br><span class="line"><span class="type">int</span> g_CharB = <span class="string">&#x27;B&#x27;</span>; <span class="comment">//.data</span></span><br><span class="line"><span class="type">int</span> g_CharC = <span class="string">&#x27;C&#x27;</span>; <span class="comment">//.data</span></span><br><span class="line"><span class="type">int</span> g_CharD = <span class="string">&#x27;D&#x27;</span>; <span class="comment">//.data</span></span><br><span class="line"><span class="type">const</span> <span class="type">int</span> g_roval = <span class="string">&#x27;C&#x27;</span>; <span class="comment">//.rodata</span></span><br><span class="line"><span class="type">int</span> g_A = <span class="number">0</span>; <span class="comment">//bss</span></span><br><span class="line"><span class="type">int</span> g_B; <span class="comment">//bss</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	uart0_init();</span><br><span class="line">	<span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">		<span class="built_in">putchar</span>(g_Char);</span><br><span class="line">		g_Char++;         <span class="comment">/* nor启动时, 此代码无效，由于nor启动，nor上不可写 */</span></span><br><span class="line">		delay(<span class="number">1000000</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们将上面的代码编译出的裸机程序分别烧录到nand和nor flash，看看结果：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1. 烧录到nor flash, 程序一直输出`AAAA`。</span><br><span class="line">2. 烧录到nand flash,程序无任何输出。</span><br></pre></td></tr></table></figure>
+
+<p>我们发现nor启动时, 对全局变量g_char++无效, nand启动程序无任何输出。我们对程序进行反汇编处理：<br><img src="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/1.png"></p>
+<p>可以看到.text段是从0地址开始的，证明cpu的确从0地址取指令进行译码、执行。<br>当从nor启动时，0地址对应nor；当从nand启动时，0地址对应sram，所以无论从nand还是从nor启动cpu都能取指令执行。</p>
+<p>再进一步分析反汇编：<br><img src="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/2.png"></p>
+<p>可以看到.data段的起始地址是0x8474(即g_Char变量的地址为0x8474）。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> 当把程序烧录进nor,  .data段在nor上的某一段区域, 由于nor能像内存一样读，但不能像内存一样直接写，因此对<span class="string">&#x27;g_Char&#x27;</span>修改无效。</span><br><span class="line"><span class="number">2.</span> 当把程序烧录进nand, .data段在nand的某一区域，nand启动时硬件会自动把nand上的前<span class="number">4</span>K数据copy到SRAM,然后cpu从sram取指令执行。但是.data段的起始地址<span class="number">0x8474</span>&gt;<span class="number">0x1000</span>，超过了<span class="number">4</span>K, cpu没法把.data段也copy到SRAM,所以当访问<span class="string">&#x27;g_Char&#x27;</span>时，发生了异常（abt数据访问终止，这个异常后面有在下一节“异常与中断”里面专门讲解)，因此程序卡死。</span><br></pre></td></tr></table></figure>
+
+<p>再仔细看看反汇编，发现.rodata段和.text段是连续的,但是.rodata段和.data段中间有一段”空洞”。用图形表示更形象，bin文件的内容分布如下所示：</p>
+<p><img src="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/3.png"><br>那么我们怎么去掉空洞，让.data段了紧接着.rodata段呢？</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1. 链接脚本(后面1.2有专门讲)</span><br><span class="line">2. 直接在编译的时候用 &quot;-Tdata 0x800&quot;，这样指定.data段基地址为0x800,这样nand启动时.data就能自动copy到SRAM了。</span><br></pre></td></tr></table></figure>
+
+<p>我们现在使用<code>-Tdata 0x800</code>编译出裸机程序，对应反汇编如下：</p>
+<p><img src="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/4.png"></p>
+<p>这时我们烧录程序到nand，从nand启动，发现能输出<code>ABCDEFG</code>了，这就对了，因为.data段数据从nand自动拷贝到了sram。</p>
+<p>有人说为什么不吧.data段指向到dram呢，这样无论时nor启动还是nand启动不就都能对全局变量写了？<br>当然这个没错，我做了这个尝试，编译时用<code>-Tdata 0x30000000</code>, 发现编译出来的bin文件有800多M,为什么有这么大呢？由于我们指定.data段存放在0x30000000(sdram的基地址)，这时bin文件的内部结构如下所示：</p>
+<p><img src="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/5.png"></p>
+<p>这么大的bin文件根本无法烧录。通过上面的例子，现在总结下为什么要代码重定位:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1.nand启动，前4K代码被自动copy到sram，当程序大于4K的时候需要重定位代码到sdram。</span><br><span class="line">2.nor启动， 全局变量在nor上，不能像内存一样直接写该全局变量，那么也需要重定位到sdram。</span><br></pre></td></tr></table></figure>
+
+<h2><span id="1-2-lian-jie-jiao-ben">1.2 链接脚本</span><a href="#1-2-lian-jie-jiao-ben" class="header-anchor">#</a></h2><h3><span id="1-2-1-chong-ding-wei-data-duan">1.2.1 重定位data段</span><a href="#1-2-1-chong-ding-wei-data-duan" class="header-anchor">#</a></h3><p>我们发现<code>arm-linux-ld -Ttext 0 -Tdata 0x30000000</code>这种方式编译出来的bin文件有800多M,这肯定是不行的。可以通过AT参数指定.data段在编译时的存放位置，我们发现这样指定太不方便了，而且不好确定要放在bin文件的哪个位置。这里就要引入链接脚本，它可以帮我们解决这个不必要的麻烦。</p>
+<h4><span id="1-2-1-1-lian-jie-jiao-ben-ge-shi">1.2.1.1 链接脚本格式</span><a href="#1-2-1-1-lian-jie-jiao-ben-ge-shi" class="header-anchor">#</a></h4><p><img src="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/6.png"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">SECTIONS &#123;</span><br><span class="line">	. = <span class="number">0x00000000</span>; <span class="comment">//表示当前地址为0</span></span><br><span class="line">	. = ALIGN(<span class="number">4</span>);  <span class="comment">//设置当前位置让4字节对齐</span></span><br><span class="line">	.text  :   </span><br><span class="line">	&#123;</span><br><span class="line">	  cpu/arm920t/start.o	(.text)</span><br><span class="line">	  board/lyb2440/boot_init.o (.text)</span><br><span class="line">	  *(.text)</span><br><span class="line">	&#125;	<span class="comment">//表示.text段从0x4开始存放,其中可以手动调整代码段的位置，</span></span><br><span class="line">	    <span class="comment">//比如让start.o，boot_init.o中的函数放在最前面,然后存放剩余的代码段</span></span><br><span class="line"></span><br><span class="line">	. = ALIGN(<span class="number">4</span>); <span class="comment">//设置当前位置让4字节对齐</span></span><br><span class="line">	.rodata : &#123; *(.rodata) &#125; <span class="comment">//从该位置开始存放所有的.rodata段</span></span><br><span class="line"></span><br><span class="line">	. = ALIGN(<span class="number">4</span>); <span class="comment">//设置当前位置让4字节对齐</span></span><br><span class="line">	.data : <span class="number">0x30000000</span> : AT(<span class="number">0x800</span>) &#123; *(.data) &#125; <span class="comment">//从该位置开始存放所有的.data段 设置运行</span></span><br><span class="line"></span><br><span class="line">	__bss_start = .; <span class="comment">//设置.bss段的起始位置</span></span><br><span class="line">	.bss : &#123; *(.bss) &#125; <span class="comment">//从该位置开始存放所有的.bss段</span></span><br><span class="line">	_end = .;<span class="comment">//设置.bss段的结束位置（也就是整个链接脚本的结束为止）</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这是从uboot中裁剪过来的链接脚本，注释已经链接脚本的结构讲解的差不多了。这里.data段指定了程序的<strong>运行（链接）地址为sdram的base_addr（0x30000000）</strong>，通过<strong>AT指定加载（在bin文件的存放）地址0x800</strong>。</p>
+<h4><span id="1-2-1-2-chong-ding-wei-data-duan-li-zi">1.2.1.2 重定位data段例子</span><a href="#1-2-1-2-chong-ding-wei-data-duan-li-zi" class="header-anchor">#</a></h4><p>对于nor启动时，我们可以直接从nor上取指令执行，所以可以只进行数据段的重定位（数据段需要写入），我们编写链接脚本sdram.lds如下所示：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">SECTIONS &#123;</span><br><span class="line">    .text   <span class="number">0</span>  : &#123; *(.text) &#125;<span class="comment">//所有文件的.text</span></span><br><span class="line">    .rodata  : &#123; *(.rodata) &#125; <span class="comment">//只读数据段</span></span><br><span class="line">    .data <span class="number">0x30000000</span> : AT(<span class="number">0x800</span>) &#123; *(.data) &#125; <span class="comment">//放在0x800,但运行时在0x3000000</span></span><br><span class="line">    .bss  : &#123; *(.bss) *(.COMMON) &#125;<span class="comment">//所有文件的bss段，所有文件的.COMMON段</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将程序烧录进nor flash，程序运行时会将.data拷贝到0x0x30000000也就是sdram中去。只重定位数据段的过程用下图更直观:</p>
+<p><img src="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/7.png"></p>
+<p>因此就可以对g_char进行写入了。Makefile如下：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">all:</span></span><br><span class="line">       arm-linux-gcc -c -o led.o led.c</span><br><span class="line">       arm-linux-gcc -c -o uart.o uart.c</span><br><span class="line">       arm-linux-gcc -c -o init.o init.c</span><br><span class="line">       arm-linux-gcc -c -o main.o main.c</span><br><span class="line">       arm-linux-gcc -c -o start.o start.S</span><br><span class="line">       <span class="comment">#arm-linux-ld -Ttext 0 -Tdata 0x30000000  start.o led.o uart.o init.o main.o -o sdram.elf</span></span><br><span class="line">       arm-linux-ld -T sdram.lds start.o led.o uart.o init.o main.o -o sdram.elf</span><br><span class="line">       arm-linux-objcopy -O binary -S sdram.elf sdram.bin</span><br><span class="line">       arm-linux-objdump -D sdram.elf &gt; sdram.dis</span><br></pre></td></tr></table></figure>
+
+<p>修改start.s进行.data段的重定位。我们需要将以0x800为.data段基地址的整个数据段copy到0x30000000处:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">.text</span><br><span class="line">	.global _start</span><br><span class="line">	_start:</span><br><span class="line">		/* 关闭看门狗 */</span><br><span class="line">		/* 初始化时钟 */</span><br><span class="line">		/* 设置栈 */</span><br><span class="line">		/*初始化sdram*/</span><br><span class="line">	...</span><br><span class="line">		/* 重定位data段，把加载地址0x800（bin文件中在nor中）的数据段的内容重定位到sdram的baseaddr */</span><br><span class="line">		mov r1, #0x800</span><br><span class="line">		ldr r0, [r1]</span><br><span class="line">		mov r1, #0x30000000</span><br><span class="line">		str r0, [r1]</span><br><span class="line">	</span><br><span class="line">		bl main</span><br><span class="line">	halt:</span><br><span class="line">		b halt</span><br></pre></td></tr></table></figure>
+
+<p>用几行简单的数据加载存储指令即可实现数据段的重定位，这里是用的相对跳转指令bl main，因为还没有重定位整个完整的代码，所以不能用ldr绝对跳转。前面的初始化时钟、sdram我就不写了，参考<a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/">s3c2440裸机编程-时钟体系</a> , <a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/">s3c2440裸机编程-内存控制器</a>。</p>
+<p>缺点：<br>这里只是人为的对.data段写死了,那么当我有多个全局变量时，还要计算重定位的次数,而且我们也不知道有多少个全局变量，所以这重定位方式有缺陷。那么我们对这种重定位.data断的方法做一个改进，将链接脚本修改如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">SECTIONS&#123;</span><br><span class="line">    .text   0  : &#123; *(.text) &#125;</span><br><span class="line">    .rodata  : &#123; *(.rodata) &#125;</span><br><span class="line">    .data 0x30000000 : AT(0x800) </span><br><span class="line">    &#123; </span><br><span class="line">    data_load_addr = LOADADDR(.data);	/* data段在bin文件中的地址, 加载地址 */</span><br><span class="line">    data_start = . ;			/* data段在重定位地址, 运行时的地址 */</span><br><span class="line">    *(.data) 				</span><br><span class="line">    data_end = . ;			/* data段结束地址 */</span><br><span class="line">    &#125;</span><br><span class="line">    .bss  : &#123; *(.bss) *(.COMMON) &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>链接脚本用一个变量data_load_addr指定了加载地址(data段在bin文件中的地址，即0x800），用变量data_start指定了运行地址（即为0x30000000），那么用data_end - data_start就是我们数据段的总长度。</p>
+<p>对start.s重定位过程做出如下修改：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">/* 重定位data段 */</span><br><span class="line">    ldr r1, =data_load_addr  /* data段在bin文件中的地址, 加载地址 */</span><br><span class="line">    ldr r2, =data_start 	 /* data段在重定位地址, 运行时的地址 */</span><br><span class="line">    ldr r3, =data_end 	     /* data段结束地址 */</span><br><span class="line">cpy:</span><br><span class="line">    ldrb r4, [r1]</span><br><span class="line">    strb r4, [r2] /*r2存入data_load_addr 0x400, 然后，r2,r1依次自加*/</span><br><span class="line">    add r1, r1, #1</span><br><span class="line">    add r2, r2, #1</span><br><span class="line">    cmp r2, r3</span><br><span class="line">    ble cpy</span><br><span class="line"></span><br><span class="line">    bl main</span><br><span class="line">halt:</span><br><span class="line">    b halt</span><br></pre></td></tr></table></figure>
+
+<p>这里start.s中用到了链接脚本中的label地址。</p>
+<h3><span id="1-2-2-chong-ding-wei-zheng-ge-cheng-xu-duan">1.2.2 重定位整个程序段</span><a href="#1-2-2-chong-ding-wei-zheng-ge-cheng-xu-duan" class="header-anchor">#</a></h3><p>由于我们的程序可能会大于SRAM或者nor的容量，那么就必须连代码段也一起进行重定位，这种重定位方式更好，在实际应用中也是用的这种方式去做的重定位。</p>
+<p><img src="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/8.png"></p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">SECTIONS &#123;</span><br><span class="line">    . = <span class="number">0x30000000</span>;</span><br><span class="line">    . = <span class="built_in">ALIGN</span>(<span class="number">4</span>);</span><br><span class="line">    .text : &#123; *(.text) &#125;</span><br><span class="line">    . = <span class="built_in">ALIGN</span>(<span class="number">4</span>);</span><br><span class="line">    .rodata : &#123; *(.rodata) &#125;</span><br><span class="line">    . = <span class="built_in">ALIGN</span>(<span class="number">4</span>);</span><br><span class="line">    .data : &#123; *(.data) &#125;</span><br><span class="line">    . = <span class="built_in">ALIGN</span>(<span class="number">4</span>);</span><br><span class="line">    __bss_start = .;</span><br><span class="line">    .bss : &#123; *(.bss) *(.COMMON) &#125;</span><br><span class="line">    _end = .;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们将代码段的地址设置为0x3000_0004，然后紧接着放.rodata段，然后再紧接着放.data段。这样我们的bin文件就不再有“空洞”了。再来看重定位代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">.text</span><br><span class="line">	.global _start</span><br><span class="line">	_start:</span><br><span class="line">		...</span><br><span class="line">		/* 重定位text, rodata, data段整个程序 */</span><br><span class="line">		mov r1, #0</span><br><span class="line">		ldr r2, =_start 	    /* 第1条指令运行时的地址，也就是.text段的runtime addr，在这里是0x3000_0004*/</span><br><span class="line">		ldr r3, =__bss_start    /* bss段的起始地址,也就是整个程序的结束地址  */</span><br><span class="line">	cpy:</span><br><span class="line">		ldrb r4, [r1]</span><br><span class="line">		strb r4, [r2]</span><br><span class="line">		add r1, r1, #1</span><br><span class="line">		add r2, r2, #1</span><br><span class="line">		cmp r2, r3</span><br><span class="line">		ble cpy</span><br><span class="line">	</span><br><span class="line">		bl main  	</span><br><span class="line">	halt:</span><br><span class="line">		b halt</span><br></pre></td></tr></table></figure>
+
+<p>整个bin文件程序的长度（.text + .rodata + .data）为__bss_start - _start,那么我们是把bin文件从存储介质的0地址copy到程序的运行地址0x3000_0004，这样我们访问.data段时就是访问sdram中重定位后的数据段了。</p>
+<h3><span id="1-2-3-chong-ding-wei-dai-ma-you-hua">1.2.3 重定位代码优化</span><a href="#1-2-3-chong-ding-wei-dai-ma-you-hua" class="header-anchor">#</a></h3><h4><span id="1-2-3-1-strb-x2f-ldrb-ti-huan-cheng-str-x2f-ldr">1.2.3.1 strb&#x2F;ldrb替换成str&#x2F;ldr</span><a href="#1-2-3-1-strb-x2f-ldrb-ti-huan-cheng-str-x2f-ldr" class="header-anchor">#</a></h4><p>前面重定位时，我们使用的是ldrb命令从的Nor Flash读取1字节数据，再用strb命令将1字节数据写到SDRAM里面。<br>我们开发板的Nor Flash是16位，SDRAM是32位。 假设现在需要复制16byte数据。</p>
+<table>
+<thead>
+<tr>
+<th>不同的读写指令</th>
+<th>cpu读取nor的次数</th>
+<th>cpu写入sdram的次数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ldrb、strb</td>
+<td>16</td>
+<td>16</td>
+</tr>
+<tr>
+<td>ldr、str</td>
+<td>8</td>
+<td>4</td>
+</tr>
+</tbody></table>
+<p>可以看出我们更换读写指令后读写次数变少了，提升了cpu的访问效率。修改如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">cpy:</span><br><span class="line">    ldr r4, [r1]</span><br><span class="line">    str r4, [r2]</span><br><span class="line">    add r1, r1, #4 //r1加4</span><br><span class="line">    add r2, r2, #4 //r2加4</span><br><span class="line">    cmp r2, r3 //如果r2 =&lt; r3继续拷贝</span><br><span class="line">    ble cpy</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<h4><span id="1-2-3-2-gai-cheng-c-dai-ma-chong-ding-wei">1.2.3.2 改成c代码重定位</span><a href="#1-2-3-2-gai-cheng-c-dai-ma-chong-ding-wei" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">SECTIONS &#123;</span><br><span class="line">	. = <span class="number">0x30000000</span>;</span><br><span class="line">    __code_start = .;</span><br><span class="line">    . = ALIGN(<span class="number">4</span>);</span><br><span class="line">    .text : &#123; *(.text) &#125;</span><br><span class="line">    . = ALIGN(<span class="number">4</span>);</span><br><span class="line">    .rodata : &#123; *(.rodata) &#125;</span><br><span class="line">    . = ALIGN(<span class="number">4</span>);</span><br><span class="line">    .data : &#123; *(.data) &#125;</span><br><span class="line">    . = ALIGN(<span class="number">4</span>);</span><br><span class="line">    __bss_start = .;</span><br><span class="line">    .bss : &#123; *(.bss) *(.COMMON) &#125;</span><br><span class="line">    _end = .;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">copy2sdram</span><span class="params">(<span class="type">void</span>)</span> 	&#123;</span><br><span class="line">    <span class="comment">//要从lds文件中获得 __code_start, __bss_start</span></span><br><span class="line">    <span class="comment">//然后从0地址把数据复制到__code_start</span></span><br><span class="line">    <span class="keyword">extern</span> <span class="type">int</span> __code_start, __bss_start;</span><br><span class="line">    <span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *dest = (<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *)&amp;__code_start;</span><br><span class="line">    <span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *end = (<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *)&amp;__bss_start;</span><br><span class="line">    <span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *src = (<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *)<span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> (dest &lt; end) &#123;</span><br><span class="line">        *dest++ = *src++; <span class="comment">//从0地址依次copy到__code_start(代码段的运行地址)</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在start.s中设置栈指针sp后，即可执行bl copy2sdram进行重定位代码。如何设置栈指针参考<a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/">s3c2440裸机编程-时钟体系</a> 有实现，重复代码我就不贴上来了。</p>
+<h1><span id="2-qing-chu-bss">2 清除bss</span><a href="#2-qing-chu-bss" class="header-anchor">#</a></h1><h2><span id="2-1-bss-duan-jie-shao">2.1 bss段介绍</span><a href="#2-1-bss-duan-jie-shao" class="header-anchor">#</a></h2><p>bss段是什么？</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;s3c2440_soc.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;uart.h&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="type">char</span> g_Char = <span class="string">&#x27;A&#x27;</span>; <span class="comment">//.data</span></span><br><span class="line"><span class="type">char</span> g_Char3 = <span class="string">&#x27;a&#x27;</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">char</span> g_Char2 = <span class="string">&#x27;B&#x27;</span>; <span class="comment">//.rodata</span></span><br><span class="line"><span class="type">int</span> g_A = <span class="number">0</span>; <span class="comment">//bss</span></span><br><span class="line"><span class="type">int</span> g_B; <span class="comment">//bss</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	uart0_init();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;\n\rg_A = &quot;</span>);</span><br><span class="line">	printHex(g_A);</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;\n\r&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">		<span class="built_in">putchar</span>(g_Char);</span><br><span class="line">		g_Char++;         <span class="comment">/* nor启动时, 此代码无效 ，重定位到sdram的baseaddr后有效*/</span></span><br><span class="line">		<span class="built_in">putchar</span>(g_Char3);</span><br><span class="line">		g_Char3++;</span><br><span class="line">		delay(<span class="number">1000000</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>把程序烧进去，然后打印g_A，但是发现g_A这个值并不是0，而是一个随机值。我们学习linux时知道全局变量g_A, g_B输出肯定是0，裸机输出不是0，为什么呢？</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">原因：程序执行汇编过程做完了重定位后把代码copy到了sdram上，然后sdram上紧接着的地址就是.bss的基地址了，这时候bss段的这块内存没有经过任何处理，所以是随机的。</span><br><span class="line">那么我们重定位完代码后需要进行清除sdram上.bss段的数据，因为我们知道bss是未初始化和初始值为<span class="number">0</span>的全局变量。</span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-2-qing-bss">2.2 清bss</span><a href="#2-2-qing-bss" class="header-anchor">#</a></h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">SECTIONS &#123;</span><br><span class="line">    . = 0x30000000;</span><br><span class="line">    . = ALIGN(4);</span><br><span class="line">    .text      :&#123; *(.text) &#125;</span><br><span class="line">    . = ALIGN(4);</span><br><span class="line">    .rodata : &#123; *(.rodata) &#125;</span><br><span class="line">    . = ALIGN(4);</span><br><span class="line">    .data : &#123; *(.data) &#125;</span><br><span class="line">    . = ALIGN(4);</span><br><span class="line">    __bss_start = .;</span><br><span class="line">    .bss : &#123; *(.bss) *(.COMMON) &#125;</span><br><span class="line">    _end = .;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>清除bss段的代码如下:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">/* 清除BSS段 */</span><br><span class="line">	ldr r1, =__bss_start</span><br><span class="line">	ldr r2, =_end</span><br><span class="line">	mov r3, #0</span><br><span class="line">clean:</span><br><span class="line">	strb r3, [r1]</span><br><span class="line">	add r1, r1, #1</span><br><span class="line">	cmp r1, r2</span><br><span class="line">	ble clean</span><br><span class="line"></span><br><span class="line">	bl main</span><br><span class="line">halt:</span><br><span class="line">	b halt</span><br></pre></td></tr></table></figure>
+
+<p>我们把程序再烧进去，然后打印g_A，但是发现g_A的值是0了。本质上就是对重定位后的bss段数据清0。</p>
+<h2><span id="2-3-qing-bss-you-hua">2.3 清bss优化</span><a href="#2-3-qing-bss-you-hua" class="header-anchor">#</a></h2><h3><span id="2-3-1-strb-x2f-ldrb-ti-huan-cheng-str-x2f-ldr">2.3.1 strb&#x2F;ldrb替换成str&#x2F;ldr</span><a href="#2-3-1-strb-x2f-ldrb-ti-huan-cheng-str-x2f-ldr" class="header-anchor">#</a></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">    ldr r1, =__bss_start</span><br><span class="line">    ldr r2, =_end</span><br><span class="line">    mov r3, #0</span><br><span class="line">clean:</span><br><span class="line">    str r3, [r1]</span><br><span class="line">    add r1, r1, #4</span><br><span class="line">    cmp r1, r2</span><br><span class="line">    ble clean</span><br><span class="line">    bl main</span><br><span class="line">halt:</span><br><span class="line">	b halt</span><br></pre></td></tr></table></figure>
+<h3><span id="2-3-2-gai-cheng-c-dai-ma-qing-bss">2.3.2 改成c代码清bss</span><a href="#2-3-2-gai-cheng-c-dai-ma-qing-bss" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">clean_bss</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="comment">/* 从lds文件中获得 __bss_start, _end*/</span></span><br><span class="line">	<span class="keyword">extern</span> <span class="type">int</span> _end, __bss_start;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *start = (<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *)&amp;__bss_start;</span><br><span class="line">	<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *end = (<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *)&amp;_end;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> (start &lt;= end)</span><br><span class="line">		*start++ = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：汇编代码获取的是链接脚本中的变量的地址，而C语言代码中获取的是链接脚本中的变量的值</strong>，所以这里的用C语言改进重定位还是清bss都是要加取址符。</p>
+<h3><span id="2-3-3-mei-ge-duan-di-zhi-4-zi-jie-dui-qi">2.3.3 每个段地址4字节对齐</span><a href="#2-3-3-mei-ge-duan-di-zhi-4-zi-jie-dui-qi" class="header-anchor">#</a></h3><p>前面为了加快重定位和清bss的速度,用到了ldr,str这样以4字节为单位进行读写，但是还可能导致一个问题，假设现在链接脚本没有进行用ALIGN(4)让不同的段以4字节对齐，那么就会出现访问错乱的情况。举个例子：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;s3c2440_soc.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;uart.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;init.h&quot;</span></span></span><br><span class="line"><span class="type">char</span> g_Char = <span class="string">&#x27;A&#x27;</span>; <span class="comment">//.data</span></span><br><span class="line"><span class="type">char</span> g_Char3 = <span class="string">&#x27;a&#x27;</span>;</span><br><span class="line"><span class="type">const</span> <span class="type">char</span> g_Char2 = <span class="string">&#x27;B&#x27;</span>; <span class="comment">//.rodata</span></span><br><span class="line"><span class="type">int</span> g_A = <span class="number">0</span>; <span class="comment">//bss</span></span><br><span class="line"><span class="type">int</span> g_B; <span class="comment">//bss</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	uart0_init();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;\n\rg_A = &quot;</span>);</span><br><span class="line">	printHex(g_A);</span><br><span class="line">	<span class="built_in">puts</span>(<span class="string">&quot;\n\r&quot;</span>);</span><br><span class="line">	<span class="built_in">putchar</span>(g_Char);</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>将链接脚本中.data段和.bss之间的**ALIGN(4)**去掉。那么我们会发现程序执行的时候输出的g_A&#x3D;0，为什么呢，我们明明初始化g_A&#x3D;‘A’呀？</p>
+<p>打开反汇编分析：<br><img src="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/9.png"></p>
+<p>我们的.bss段紧接着.data段后面，可知在对bss段进行清除的时候，由于我们是以4字节为单位操作的，所以我们清除g_A的时候，连带g_Char,g_Char的值也一起清除了。</p>
+<p>所以data段和数据段之间添加ALIGN(4)。修改后就会发现bss段的地址以0x30000248开始了，如下图：</p>
+<p><img src="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/10.png"></p>
+<h1><span id="3-wei-zhi-wu-guan-ma">3 位置无关码</span><a href="#3-wei-zhi-wu-guan-ma" class="header-anchor">#</a></h1><h2><span id="3-1-jue-dui-tiao-zhuan-yu-xiang-dui-tiao-zhuan-zhi-ling">3.1 绝对跳转与相对跳转指令</span><a href="#3-1-jue-dui-tiao-zhuan-yu-xiang-dui-tiao-zhuan-zhi-ling" class="header-anchor">#</a></h2><h3><span id="3-1-1-xiang-dui-tiao-zhuan">3.1.1 相对跳转</span><a href="#3-1-1-xiang-dui-tiao-zhuan" class="header-anchor">#</a></h3><p>使用b, bl跳转指令。</p>
+<p>对<code>bl sdram_test</code>指令进行分析，查看反汇编, 代码段的链接地址为0x3000,0000。</p>
+<p><img src="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/11.png"><br><code>这里的bl 3000036c不是跳转到3000036c，这个时候sdram并未初始化,那么这个物理地址是无法访问的.</code></p>
+<p>为了验证，我们做另一个实验，修改连接脚本sdram.lds, 链接地址改为0x3000,0800，编译查看反汇编：<br><img src="/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/12.png"><br><code>可以看到现在变成了bl 300003ec,但两个的机器码e1a0c00d都是一样的，机器码一样，执行的内容肯定都是一样的。 因此这里并不是跳转到显示的地址，而是跳转到: pc + offset，这个由链接器决定。</code></p>
+<p>假设程序从0x30000000执行，当前指令地址：0x3000005c ,那么就是跳到0x3000036c；如果程序从0运行，当前指令地址:0x5c 跳到：0x000003ec。<br>因此：跳转到某个地址并不是由bl指令所决定，而是由当前pc值和offset偏移量决定。反汇编显示这个值只是为了方便读代码。</p>
+<p>结论： 反汇编文件里， B或BL 某个值，只是起到方便查看的作用，并不是真的跳转。</p>
+<h3><span id="3-1-2-jue-dui-tiao-zhuan">3.1.2 绝对跳转</span><a href="#3-1-2-jue-dui-tiao-zhuan" class="header-anchor">#</a></h3><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//bl main  /*bl相对跳转，程序仍在NOR/sram执行*/</span><br><span class="line">ldr pc, =main/*绝对跳转，跳到SDRAM*/</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-1-3-xiang-dui-tiao-zhuan-yu-jue-ding-tiao-zhuan-bi-jiao">3.1.3 相对跳转与决定跳转比较</span><a href="#3-1-3-xiang-dui-tiao-zhuan-yu-jue-ding-tiao-zhuan-bi-jiao" class="header-anchor">#</a></h3><p>怎么写位置无关码？</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">使用相对跳转命令 b或bl;</span><br><span class="line">重定位之前，不可使用绝对地址(因为你sdram还没初始化，没有重定位代码过去，跳转过去不就死机了)，也不可访问有初始值的数组(因为初始值放在rodata里，使用绝对地址来访问)；</span><br><span class="line">重定位之后，使用ldr pc = xxx，跳转到/runtime地址；</span><br><span class="line">写位置无关码，其实就是不使用绝对地址</span><br></pre></td></tr></table></figure>
+
+<p>因此，前面的重定位和清bss例子，程序使用bl命令相对跳转，程序仍在NOR&#x2F;sram执行，要想让main函数在SDRAM执行，需要修改代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">//bl main  /*bl相对跳转，程序仍在NOR/sram执行*/</span><br><span class="line">ldr pc, =main/*绝对跳转，跳到SDRAM*/</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/" data-id="clzp8utt800289ouf4bpd0v5k" data-title="s3c2440裸机编程-代码重定位和清bss" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Linux内核-内核链表" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/" class="article-date">
@@ -2219,250 +2435,6 @@ DIV:用分频器进行分频
 
 
   
-    <article id="post-mipi-csi硬件篇" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/" class="article-date">
-  <time class="dt-published" datetime="2024-04-02T06:28:07.000Z" itemprop="datePublished">2024-04-02</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/">mipi-csi硬件篇</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-mipi-csi-ying-jian">1 mipi-csi硬件</a><ul>
-<li><a href="#1-1-mipi-csi-gai-nian">1.1 mipi-csi概念</a></li>
-<li><a href="#1-2-mipi-vs-dvp">1.2 MIPI vs DVP</a></li>
-<li><a href="#1-3-csi-gui-ge">1.3 CSI规格</a></li>
-<li><a href="#1-4-csi-jie-kou-lei-xing">1.4 CSI接口類型</a></li>
-<li><a href="#1-5-csi-ying-jian-yin-jiao-ji-jie-xian">1.5 CSI 硬件引脚及接线</a><ul>
-<li><a href="#1-5-1-mipi-sensor-yin-jiao-miao-shu">1.5.1 mipi sensor引脚描述:</a></li>
-<li><a href="#1-5-2-dian-lu-tu-xian-lu-jie-gou">1.5.2 电路图线路结构</a></li>
-</ul>
-</li>
-<li><a href="#1-6-chai-fen-xin-hao-jie-shao">1.6 差分信号介绍</a></li>
-<li><a href="#1-7-mipi-sensor-de-power-on-shi-xu">1.7 MIPI sensor的 power on时序</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-# 1 mipi-csi硬件
-
-<h2><span id="1-1-mipi-csi-gai-nian">1.1 mipi-csi概念</span><a href="#1-1-mipi-csi-gai-nian" class="header-anchor">#</a></h2><p><strong>DSI （Display serial interface）</strong>定义了一个位于处理器和显示模组之间的高速串行接口,对应MIPI-TX.<br><strong>CSI(Camera Serial Interface）</strong>定义了一个位于处理器和摄像模组之间的高速串行接口,也就是接下来要讲的MIPI-RX。</p>
-<p>MIPI Rx (Mobile Industry Processor Interface Receiver) 模塊主要功能為接收由 CMOS sensor 所傳送的視頻數據， 支持 MIPI D-PHY、 sub-LVDS (Low-Voltage Differential Signal)、 HiSPi (High-Speed Serial Pixel Interface) 等不同的串行視頻信號輸入， 並將其處理轉化為內部視頻時序，傳遞給下一級的視頻處理模塊 (ISP)。MIPI Rx 模塊中可細分為 PHY 和 Controller 兩部分，其中 PHY 模塊集成了模擬和數字兩個部分，主要將串行信號轉換為並行信號，而 Controller 模塊則負責解碼不同的視頻數據格式，傳送給後端的視頻處理模塊 (ISP)。功能框圖及在系統中的位置如下图所示:</p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/1.png" alt="img"></p>
-<h2><span id="1-2-mipi-vs-dvp">1.2 MIPI vs DVP</span><a href="#1-2-mipi-vs-dvp" class="header-anchor">#</a></h2><p><strong>DVP:</strong></p>
-<p>并口传输数据需要帧同步信号（Vsync）、行同步信号（Hsync）和八条数据线，共十根数据线, DVP 接口在信号完整性方面受限制，速率也受限制。</p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/2.png" alt="img"></p>
-<p><strong>MIPI:</strong></p>
-<p>MIPI 传输只需要帧同步信号（Vsync）、行同步信号（Hsync）、mipi 时钟（mipi_clk）、mipi 数据（mipi_data）和像素时钟（PCLK）5 根数据线。对比MIPI 接口比 DVP 的接口信号线少，由于是低压差分信号，产生的干扰小，抗干扰能力也强。</p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/3.png" alt="img"></p>
-<h2><span id="1-3-csi-gui-ge">1.3 CSI规格</span><a href="#1-3-csi-gui-ge" class="header-anchor">#</a></h2><p>可同時支持 2 路 sensor 輸入（2组D-PHY， 每组5对差分线（1C4D））</p>
-<p>• sensor 0 最大支持 4K2K @60fps HDR or @30fps 線性輸入</p>
-<p>• sensor 1 最大支持 3M(2304x1296) @60fps HDR or linear 輸入</p>
-<p>• 單路最多支持 4-Lane MIPI D-PHY 接口，最大支持 2.5Gbps&#x2F;Lane</p>
-<p>• 單路最多支持 4-Lane sub-LVDS&#x2F; HiSPi 接口，最大支持 1.5Gbps&#x2F;Lane</p>
-<p>• 支持 RAW8&#x2F; RAW10&#x2F; RAW12 數據類型的解析</p>
-<p>• 支持 YUV422 8-bit&#x2F; YUV422 10-bit 數據類型的解析</p>
-<p>• 最多支持 2 幀 WDR，支持多種 WDR 時序</p>
-<p>• 支持 sub-LVDS&#x2F; HiSPi 模式像素&#x2F;同步碼大小端配置</p>
-<p>• 支持 Lane 數和 Lane 順序可配置</p>
-<p>MIPI Rx 的帶寬有兩部分限制： PHY 的接口數據率和內部處理速度。</p>
-<p>輸入接口最大支持 2.5Gbps&#x2F;Lane，內部處理速度最大為 600M*1pixels&#x2F;s（MAC clk）</p>
-<h2><span id="1-4-csi-jie-kou-lei-xing">1.4 CSI接口類型</span><a href="#1-4-csi-jie-kou-lei-xing" class="header-anchor">#</a></h2><table>
-<thead>
-<tr>
-<th>Common modevoltage</th>
-<th>Differential modevoltage</th>
-<th>Maximum clockfrequency</th>
-<th>Maximum datarate per lane</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><strong>MIPI DPHY</strong> 200mV</td>
-<td>200mV</td>
-<td>1.25GHz</td>
-<td>2.5Gbps</td>
-</tr>
-<tr>
-<td>Sub-LVDS 900mV</td>
-<td>150mV</td>
-<td>750MHz</td>
-<td>1.5Gbps</td>
-</tr>
-<tr>
-<td>HiSPi(HiVCM) 900mV</td>
-<td>280mV</td>
-<td>750MHz</td>
-<td>1.5Gbps</td>
-</tr>
-<tr>
-<td>HiSPi(SLVDS) 200mV</td>
-<td>200mV</td>
-<td>750MHz</td>
-<td>1.5Gbps</td>
-</tr>
-</tbody></table>
-<h2><span id="1-5-csi-ying-jian-yin-jiao-ji-jie-xian">1.5 CSI 硬件引脚及接线</span><a href="#1-5-csi-ying-jian-yin-jiao-ji-jie-xian" class="header-anchor">#</a></h2><p>常用的电脑摄像头是USB接口, 主流的智能手机摄像头是MIPI接口, 下面讲解常用的智能手机 camera MIPI接口。</p>
-<p>MIPI CSI一般会有1对I2C通信引脚，1对MIPI差分时钟引脚和1~4对MIPI差分数据信号引脚, 也就是1CD4(1 clk lane &amp; 4 data lane)。</p>
-<h3><span id="1-5-1-mipi-sensor-yin-jiao-miao-shu">1.5.1 mipi sensor引脚描述:</span><a href="#1-5-1-mipi-sensor-yin-jiao-miao-shu" class="header-anchor">#</a></h3><table>
-<thead>
-<tr>
-<th>信号名</th>
-<th>引脚类型</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>DOVDD</td>
-<td>电源</td>
-<td>1.8V IO 电源</td>
-</tr>
-<tr>
-<td>DVDD</td>
-<td>电源</td>
-<td>1.2V 数字电源</td>
-</tr>
-<tr>
-<td>AVDD</td>
-<td>电源</td>
-<td>2.8V 模拟电源</td>
-</tr>
-<tr>
-<td>SCL</td>
-<td>输入</td>
-<td>I2C 时钟线</td>
-</tr>
-<tr>
-<td>SDA</td>
-<td>输入&#x2F;输出</td>
-<td>I2C 数据线(open drain)</td>
-</tr>
-<tr>
-<td>SID0</td>
-<td>输入</td>
-<td>I2C Device ID 的选择 0 (内置下拉电阻，默认Device ID 是 7’h30)</td>
-</tr>
-<tr>
-<td>SID1</td>
-<td>输入</td>
-<td>I2C Device ID 的选择 1 (内置下拉电阻，默认Device ID 是 7’h30)</td>
-</tr>
-<tr>
-<td>XSHUTDN （RST）</td>
-<td>输入</td>
-<td>复位信号输入(内置上拉电阻，低电位有效)</td>
-</tr>
-<tr>
-<td>EXTCLK</td>
-<td>输入</td>
-<td>时钟输入</td>
-</tr>
-<tr>
-<td>PWDNB</td>
-<td>输入</td>
-<td>Power Down 信号输入(内置上拉电阻， 低电位有效)</td>
-</tr>
-<tr>
-<td>D&lt;3&gt;(MD3P)</td>
-<td>输出</td>
-<td>DVP 输出 bit[3]&#x2F;MIPI 数据 3 正极信号</td>
-</tr>
-<tr>
-<td>D&lt;5&gt;(MD1P)</td>
-<td>输出</td>
-<td>DVP 输出 bit[5]&#x2F;MIPI 数据 1 正极信号</td>
-</tr>
-<tr>
-<td>D&lt;7&gt;(MCP)</td>
-<td>输出</td>
-<td>DVP 输出 bit[7]&#x2F;MIPI 时钟正极信号</td>
-</tr>
-<tr>
-<td>D&lt;8&gt;(MD0P)</td>
-<td>输出</td>
-<td>DVP 输出 bit[8]&#x2F;MIPI 数据 0 正极信号</td>
-</tr>
-<tr>
-<td>D&lt;10&gt;(MD2P)</td>
-<td>输出</td>
-<td>DVP 输出 bit[10]&#x2F;MIPI 数据 2 正极信号</td>
-</tr>
-<tr>
-<td>D&lt;4&gt;(MD3N)</td>
-<td>输出</td>
-<td>DVP 输出 bit[4]&#x2F;MIPI 数据 3 负极信号</td>
-</tr>
-<tr>
-<td>D&lt;6&gt;(MD1N)</td>
-<td>输出</td>
-<td>DVP 输出 bit[6]&#x2F;MIPI 数据 1 负极信号</td>
-</tr>
-<tr>
-<td>PCLK(MCN)</td>
-<td>输出</td>
-<td>DVP 输出时钟&#x2F;MIPI 时钟负极信号</td>
-</tr>
-<tr>
-<td>D&lt;9&gt;(MD0N)</td>
-<td>输出</td>
-<td>DVP 输出 bit[9]&#x2F;MIPI 数据 0 负极信号</td>
-</tr>
-<tr>
-<td>D&lt;11&gt;(MD2N)</td>
-<td>输出</td>
-<td>DVP 输出 bit[11]&#x2F;MIPI 数据 2 负极信号</td>
-</tr>
-</tbody></table>
-<h3><span id="1-5-2-dian-lu-tu-xian-lu-jie-gou">1.5.2 电路图线路结构</span><a href="#1-5-2-dian-lu-tu-xian-lu-jie-gou" class="header-anchor">#</a></h3><p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/4.png" alt="img"></p>
-<p>一般mipi接口的sensor支持4 lane，2 lane，1 lane等数据传输方式。上图硬件上的连接了1组clk lane, 4组data lane。这幅图只连接了i2c和lane总线，还有EXTCLK ，PWDN, RST, VDD等引脚的连线需要外部soc去提供。这里就需要驱动人员会看原理图，知道lane id和pn swap的接线。clk lane, data lane等。</p>
-<h2><span id="1-6-chai-fen-xin-hao-jie-shao">1.6 差分信号介绍</span><a href="#1-6-chai-fen-xin-hao-jie-shao" class="header-anchor">#</a></h2><p>我们用一个方法对差分信号做一下比喻，差分信号就好比是跷跷板上的两个人，当一个人被跷上去的时候，另一个人被跷下来了 - 但是他们的平均位置是不变的。继续跷跷板的类推，正值可以表示左边的人比右边的人高，而负值表示右边的人比左边的人高。0 表示两个人都是同一水平。</p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/5.png" alt="img"></p>
-<p>下图，应用到电学上，这两个跷跷板用一对标识为V+和V-的导线来表示。当V+ &gt; V-时，信号定义成正极信号，V+ &lt; V-时，信号定义成负极信号。 差分对的平均电压设置成 2.5V。</p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/6.png" alt="img"></p>
-<h2><span id="1-7-mipi-sensor-de-power-on-shi-xu">1.7 MIPI sensor的 power on时序</span><a href="#1-7-mipi-sensor-de-power-on-shi-xu" class="header-anchor">#</a></h2><p><strong>Sony imx334：</strong></p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/7.png" alt="img"></p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/8.png" alt="img"></p>
-<p><strong>SC4210：</strong></p>
-<p><img src="/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/9.png" alt="img"></p>
-<p>这里列举了sony imx334和格科微gc2093, sc4210的上电时序，现在市面上大部分的mipi接口sensor都可以让VDD，PWDN, RST，EXTCLK讯号同时发出，然后过一段时间后就可以进行I2c通信了。</p>
-<p>在HW交接到SW后，要确保最基本的power on时序是ok的，最好是用示波器对VDD，PWDN, RST，EXTCLK，I2c等波形进行测量无误后再porting到SW手上。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/02/mipi-csi%E7%A1%AC%E4%BB%B6%E7%AF%87/" data-id="clzp8utt6001m9oufexaea0xu" data-title="mipi-csi硬件篇" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -2513,6 +2485,10 @@ DIV:用分频器进行分频
       <ul>
         
           <li>
+            <a href="/2024/08/18/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-pinctrl%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-pinctrl子系统</a>
+          </li>
+        
+          <li>
             <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-gpio%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-gpio子系统</a>
           </li>
         
@@ -2526,10 +2502,6 @@ DIV:用分频器进行分频
         
           <li>
             <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-misc%E6%9D%82%E9%A1%B9%E8%AE%BE%E5%A4%87/">字符设备驱动-misc杂项设备</a>
-          </li>
-        
-          <li>
-            <a href="/2024/08/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-mmap%E9%A9%B1%E5%8A%A8%E5%BA%94%E7%94%A8%E5%AE%9E%E4%BE%8B/">字符设备驱动-mmap驱动应用实例</a>
           </li>
         
       </ul>
