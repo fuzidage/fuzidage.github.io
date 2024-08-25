@@ -69,6 +69,242 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-ini-parse配置解析功能移植" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/" class="article-date">
+  <time class="dt-published" datetime="2024-05-25T08:08:09.000Z" itemprop="datePublished">2024-05-25</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/">ini_parse配置解析功能移植</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-ini-parse-yi-zhi">1 ini_parse移植</a><ul>
+<li><a href="#1-1-xia-zai-ini-jie-xi-yuan-ma">1.1 下载ini解析源码</a></li>
+<li><a href="#1-2-shi-yong-ini-parse-gong-neng">1.2 使用ini_parse功能</a><ul>
+<li><a href="#1-2-1-zi-ding-yi-ini-wen-jian">1.2.1 自定义ini文件</a></li>
+<li><a href="#1-2-2-zhi-chi-yu-fa-jian-ce">1.2.2 支持语法检测</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-minini-yi-zhi-shi-yong">2 minIni移植使用</a><ul>
+<li><a href="#2-1-xia-zai-minini">2.1 下载minIni</a></li>
+<li><a href="#2-2-te-zheng">2.2 特征</a></li>
+<li><a href="#2-3-ini-wen-jian-yu-fa">2.3 INI 文件语法</a></li>
+<li><a href="#2-4-minini-zhi-chi-wen-jian-xi-tong">2.4 minIni支持文件系统</a></li>
+<li><a href="#2-5-minini-de-api-jie-shao">2.5 minIni的API介绍</a><ul>
+<li><a href="#2-5-1-ini-gets">2.5.1 ini_gets()</a><ul>
+<li><a href="#2-5-1-1-getkeystring">2.5.1.1 getkeystring</a></li>
+</ul>
+</li>
+<li><a href="#2-5-2-ini-getl">2.5.2 ini_getl()</a></li>
+<li><a href="#2-5-3-ini-puts">2.5.3 ini_puts()</a></li>
+<li><a href="#2-5-4-ini-putl">2.5.4 ini_putl()</a></li>
+<li><a href="#2-5-5-section-key-enumeration">2.5.5 section&#x2F;key enumeration</a></li>
+<li><a href="#2-5-6-section-key-cun-zai-xing-jian-cha">2.5.6 section&#x2F;key存在性检查</a></li>
+<li><a href="#2-5-7-pei-zhi-wen-jian-yue-du-da-yin">2.5.7 配置文件阅读打印</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-ini-parse-yi-zhi">1 ini_parse移植</span><a href="#1-ini-parse-yi-zhi" class="header-anchor">#</a></h1><h2><span id="1-1-xia-zai-ini-jie-xi-yuan-ma">1.1 下载ini解析源码</span><a href="#1-1-xia-zai-ini-jie-xi-yuan-ma" class="header-anchor">#</a></h2><p>源码的github地址<a target="_blank" rel="noopener" href="https://github.com/benhoyt/inih">https://github.com/benhoyt/ini</a>。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/benhoyt/inih.git</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/1.png" alt="img"></p>
+<h2><span id="1-2-shi-yong-ini-parse-gong-neng">1.2 使用ini_parse功能</span><a href="#1-2-shi-yong-ini-parse-gong-neng" class="header-anchor">#</a></h2><p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/2.png" alt="img"></p>
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/3.png" alt="img"></p>
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/4.png" alt="img"></p>
+<p>可以看到核心就是一个ini_parse函数。用户自定义一个callback函数去解析自己的配置ini。测试代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;ini.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">SAMPLE_INI_CFG_S</span> &#123;</span></span><br><span class="line">        <span class="type">char</span> name[<span class="number">100</span>];</span><br><span class="line">        <span class="type">int</span> bus_id;</span><br><span class="line">        <span class="type">int</span> age;</span><br><span class="line">        <span class="type">char</span> name2[<span class="number">100</span>];</span><br><span class="line">        <span class="type">int</span> bus_id2;</span><br><span class="line">        <span class="type">int</span> age2;</span><br><span class="line">&#125; SAMPLE_INI_CFG_S;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">parse_handler</span><span class="params">(<span class="type">void</span> *user, <span class="type">const</span> <span class="type">char</span> *section, <span class="type">const</span> <span class="type">char</span> *name, <span class="type">const</span> <span class="type">char</span> *value)</span> &#123;</span><br><span class="line">        SAMPLE_INI_CFG_S *cfg = (SAMPLE_INI_CFG_S *)user;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">strcmp</span>(section, <span class="string">&quot;person1&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (<span class="built_in">strcmp</span>(name, <span class="string">&quot;name&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">                        <span class="built_in">strcpy</span>(cfg-&gt;name, value);</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(name, <span class="string">&quot;bus_id&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">                        cfg-&gt;bus_id = atoi(value);</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(name, <span class="string">&quot;age&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">                        cfg-&gt;age = atoi(value);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                        <span class="comment">/* unknown section/name */</span></span><br><span class="line">                &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(section, <span class="string">&quot;person2&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="keyword">if</span> (<span class="built_in">strcmp</span>(name, <span class="string">&quot;name&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">                        <span class="built_in">strcpy</span>(cfg-&gt;name2, value);</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(name, <span class="string">&quot;bus_id&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">                        cfg-&gt;bus_id2 = atoi(value);</span><br><span class="line">                &#125; <span class="keyword">else</span> <span class="keyword">if</span> (<span class="built_in">strcmp</span>(name, <span class="string">&quot;age&quot;</span>) == <span class="number">0</span>) &#123;</span><br><span class="line">                        cfg-&gt;age2 = atoi(value);</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                       <span class="comment">/* unknown section/name */</span></span><br><span class="line">                &#125;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="comment">/* unknown section/name */</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span> &#123;</span><br><span class="line">        SAMPLE_INI_CFG_S ini_cfg;</span><br><span class="line">        <span class="type">int</span> ret = ini_parse(<span class="string">&quot;./sensor_cfg.ini&quot;</span>, parse_handler, &amp;ini_cfg);</span><br><span class="line">        <span class="keyword">if</span> (ret &gt; <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;Parse err in %d line.\n&quot;</span>, ret);</span><br><span class="line">                <span class="keyword">return</span> ret;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (ret == <span class="number">0</span>) &#123;</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;Parse incomplete, use default cfg ./sensor_cfg.ini\n&quot;</span>);</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;%s, %d, %d\n&quot;</span>, ini_cfg.name, ini_cfg.bus_id, ini_cfg.age);</span><br><span class="line">                <span class="built_in">printf</span>(<span class="string">&quot;%s, %d, %d\n&quot;</span>, ini_cfg.name2, ini_cfg.bus_id2, ini_cfg.age2);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="1-2-1-zi-ding-yi-ini-wen-jian">1.2.1 自定义ini文件</span><a href="#1-2-1-zi-ding-yi-ini-wen-jian" class="header-anchor">#</a></h3><p>ini配置文件sensor_cfg.ini如下：</p>
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/5.png" alt="img"></p>
+<p><code>gcc test.c ini.c</code>。我的callback定义是<code>parse_handler</code>，从ini中解析section，每个section会调用一次callback，解析出所有的section。</p>
+<p>运行代码:</p>
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/6.png" alt="img"></p>
+<h3><span id="1-2-2-zhi-chi-yu-fa-jian-ce">1.2.2 支持语法检测</span><a href="#1-2-2-zhi-chi-yu-fa-jian-ce" class="header-anchor">#</a></h3><p>ini_parse还支持语法检测。但ini写的不和语法规范会报错。手工制造ini语法错误，测试结果如下：</p>
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/7.png" alt="img"></p>
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/8.png" alt="img"></p>
+<h1><span id="2-minini-yi-zhi-shi-yong">2 minIni移植使用</span><a href="#2-minini-yi-zhi-shi-yong" class="header-anchor">#</a></h1><p>MiniINI 是一个用来解析 INI&#x2F;CFG 配置文件的 C++ 库，主要特点是可移植性、性能和小体积。支持上千种 INI 格式配置，易用简单。</p>
+<h2><span id="2-1-xia-zai-minini">2.1 下载minIni</span><a href="#2-1-xia-zai-minini" class="header-anchor">#</a></h2><p><a target="_blank" rel="noopener" href="https://github.com/compuphase/minIni">GitHub - compuphase&#x2F;minIni: A small and portable INI file library with read&#x2F;write support</a></p>
+<h2><span id="2-2-te-zheng">2.2 特征</span><a href="#2-2-te-zheng" class="header-anchor">#</a></h2><ul>
+<li>minIni 支持读取senction外部的key，因此它支持不使用section的配置文件（但在其他方面与 INI 文件兼容）。</li>
+<li>可以使用冒号分隔键和值;冒号等价于等号。也就是说，字符串“Name： Value”和“Name&#x3D;Value”具有相同的含义。</li>
+<li>minIni 不需要标准 C&#x2F;C++ 库中的 文件 I&#x2F;O 函数，且允许通过宏配置要选择文件 I&#x2F;O 接口。</li>
+<li>哈希字符 （“#”） 是分号开始注释的替代方法。允许尾随注释（即在一行上的键&#x2F;值对后面）。</li>
+<li>key名称和val周围的前导和尾随空格将被忽略。</li>
+<li>当写入包含注释字符（“;”或“#”）的值时，该值将自动放在双引号之间;读取值时，将删除这些引号。当设置中出现双引号本身时，这些字符将被转义。</li>
+<li>支持section和key枚举。</li>
+<li>您可以选择设置 minIni 将使用的行终止符（对于文本文件）。（这是编译时设置，而不是运行时设置)。</li>
+<li>由于写入速度远低于闪存（SD&#x2F;MMC 卡、U 盘）中的读取速度，因此 minIni 以双倍“文件读取”为代价将“文件写入”降至最低。</li>
+<li>内存占用是确定性的。没有动态内存分配。</li>
+</ul>
+<h2><span id="2-3-ini-wen-jian-yu-fa">2.3 INI 文件语法</span><a href="#2-3-ini-wen-jian-yu-fa" class="header-anchor">#</a></h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">[Network]  <span class="comment">#section</span></span><br><span class="line">hostname=My Computer  <span class="comment">#key = val</span></span><br><span class="line">address=dhcp</span><br><span class="line">dns = <span class="number">192.168</span><span class="number">.1</span><span class="number">.1</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-4-minini-zhi-chi-wen-jian-xi-tong">2.4 minIni支持文件系统</span><a href="#2-4-minini-zhi-chi-wen-jian-xi-tong" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INI_FILETYPE                  FILE*</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_openread(filename,file)   ((*(file) = fopen((filename),<span class="string">&quot;r&quot;</span>)) != NULL)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_openwrite(filename,file)  ((*(file) = fopen((filename),<span class="string">&quot;w&quot;</span>)) != NULL)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_close(file)               (fclose(*(file)) == 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_read(buffer,size,file)    (fgets((buffer),(size),*(file)) != NULL)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_write(buffer,file)        (fputs((buffer),*(file)) &gt;= 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_rename(source,dest)       (rename((source), (dest)) == 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_remove(filename)          (remove(filename) == 0)</span></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> INI_FILEPOS                   fpos_t</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_tell(file,pos)            (fgetpos(*(file), (pos)) == 0)</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> ini_seek(file,pos)            (fsetpos(*(file), (pos)) == 0)</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-5-minini-de-api-jie-shao">2.5 minIni的API介绍</span><a href="#2-5-minini-de-api-jie-shao" class="header-anchor">#</a></h2><p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/9.png" alt="image-20240602144015881"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;assert.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;minIni.h&quot;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> sizearray(a)  (sizeof(a) / sizeof((a)[0]))</span></span><br><span class="line"><span class="type">const</span> <span class="type">char</span> inifile[] = <span class="string">&quot;example.ini&quot;</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">    <span class="type">char</span> str[<span class="number">100</span>];</span><br><span class="line">    <span class="type">char</span> section[<span class="number">50</span>];</span><br><span class="line">    <span class="type">long</span> n;</span><br><span class="line"></span><br><span class="line">    n = ini_gets(<span class="string">&quot;Network&quot;</span>, <span class="string">&quot;address&quot;</span>, <span class="string">&quot;dummy&quot;</span>, str, sizearray(str), inifile);</span><br><span class="line">    <span class="keyword">if</span> (n &gt;= <span class="number">0</span>) <span class="built_in">printf</span>(<span class="string">&quot;Network/address=%s&quot;</span>, str);</span><br><span class="line"></span><br><span class="line">    n = ini_getl(<span class="string">&quot;Network&quot;</span>, <span class="string">&quot;timeout&quot;</span>, <span class="number">-1</span>, inifile);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;Network/timeout=%ld\n&quot;</span>, n);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>example.ini如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">[Network]</span><br><span class="line">hostname=My Computer</span><br><span class="line">address=dhcp</span><br><span class="line">dns=<span class="number">192.168</span><span class="number">.1</span><span class="number">.1</span></span><br><span class="line">timeout=<span class="number">10</span></span><br></pre></td></tr></table></figure>
+
+<p>运行结果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Network/address=dhcp</span><br><span class="line">Network/timeout=10</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-5-1-ini-gets">2.5.1 ini_gets()</span><a href="#2-5-1-ini-gets" class="header-anchor">#</a></h3><p>获取字符串类型的值.</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span>   <span class="title function_">ini_gets</span><span class="params">(<span class="type">const</span> mTCHAR *Section, <span class="type">const</span> mTCHAR *Key, <span class="type">const</span> mTCHAR *DefValue, mTCHAR *Buffer, <span class="type">int</span> BufferSize, <span class="type">const</span> mTCHAR *Filename)</span>;</span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">参数 1 是 Section;</span></span><br><span class="line"><span class="comment">参数 2 是 Key;</span></span><br><span class="line"><span class="comment">参数 3 是获取不到值时的默认值;</span></span><br><span class="line"><span class="comment">参数 4 是用于保存目标键值的 Buffer;</span></span><br><span class="line"><span class="comment">参数 5 是 Buffer 的长度;</span></span><br><span class="line"><span class="comment">参数 6 是 INI 文件的路径;</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/10.png" alt="image-20240602144722018"></p>
+<p>先打开文件，然后用 <code>getkeystring() </code>找到目标键值，最后拷贝给调用者。</p>
+<h4><span id="2-5-1-1-getkeystring">2.5.1.1 getkeystring</span><a href="#2-5-1-1-getkeystring" class="header-anchor">#</a></h4><p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/11.png" alt="image-20240602150058567"></p>
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/12.png" alt="image-20240602145619533"></p>
+<ol>
+<li>用 fgets 进行逐行读取，用 strrchr 找到包含 ‘[‘ 和 ‘]’ 的行，然后再用 strncasecmp 找到目标 Section 所在的行。</li>
+<li>继续用 fgets 进行逐行读取，用 strrchr 找到包含 ‘&#x3D;’ 的行，然后再用 strncasecmp 找到目标 Key 所在的行。</li>
+<li>用 strncpy 将目标 Key 的值拷贝给调用者。</li>
+</ol>
+<p>大致就是这3个关键步骤，当然还有很多其他异常处理，语法检测和边界判断的逻辑，这里不做展示。</p>
+<h3><span id="2-5-2-ini-getl">2.5.2 ini_getl()</span><a href="#2-5-2-ini-getl" class="header-anchor">#</a></h3><p><code>ini_getl() </code>用于获取整型类型的值，也是间接调用<code>int_gets</code>， 最后将字符串转换成数字。</p>
+<h3><span id="2-5-3-ini-puts">2.5.3 ini_puts()</span><a href="#2-5-3-ini-puts" class="header-anchor">#</a></h3><p>写出参数到ini,保存到ini。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/** ini_puts()</span></span><br><span class="line"><span class="comment"> * \param Section     the name of the section to write the string in</span></span><br><span class="line"><span class="comment"> * \param Key         the name of the entry to write, or NULL to erase all keys in the section</span></span><br><span class="line"><span class="comment"> * \param Value       a pointer to the buffer the string, or NULL to erase the key</span></span><br><span class="line"><span class="comment"> * \param Filename    the name and full path of the .ini file to write to</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * \return            1 if successful, otherwise 0</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">ini_puts</span><span class="params">(<span class="type">const</span> TCHAR *Section, <span class="type">const</span> TCHAR *Key, <span class="type">const</span> TCHAR *Value, <span class="type">const</span> TCHAR *Filename)</span></span><br><span class="line"><span class="comment">//eg:</span></span><br><span class="line"><span class="title function_">ini_putl</span><span class="params">(<span class="string">&quot;second&quot;</span>, <span class="string">&quot;age&quot;</span>, <span class="number">20</span>, inifile)</span>;</span><br><span class="line">n = ini_puts(<span class="string">&quot;first&quot;</span>, <span class="string">&quot;alt&quot;</span>, <span class="literal">NULL</span>, inifile);<span class="comment">//当val等于NULL表示删除该key</span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-5-4-ini-putl">2.5.4 ini_putl()</span><a href="#2-5-4-ini-putl" class="header-anchor">#</a></h3><p><code>ini_putl() </code>用于写出整型类型的值，也是间接调用<code>int_puts</code>， 将数字转换成字符串,然后保存字符串到ini。</p>
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/13.png" alt="image-20240602171648913"></p>
+<h3><span id="2-5-5-section-x2f-key-enumeration">2.5.5 section&#x2F;key enumeration</span><a href="#2-5-5-section-x2f-key-enumeration" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;4. Section/key enumeration, file structure follows\n&quot;</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> (s = <span class="number">0</span>; ini_getsection(s, section, sizearray(section), inifile) &gt; <span class="number">0</span>; s++) &#123;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;    [%s]\n&quot;</span>, section);</span><br><span class="line">    <span class="keyword">for</span> (k = <span class="number">0</span>; ini_getkey(section, k, str, sizearray(str), inifile) &gt; <span class="number">0</span>; k++) &#123;</span><br><span class="line">    	<span class="built_in">printf</span>(<span class="string">&quot;\t%s\n&quot;</span>, str);</span><br><span class="line">    &#125; </span><br><span class="line">&#125;<span class="comment">//对section和key进行枚举</span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-5-6-section-x2f-key-cun-zai-xing-jian-cha">2.5.6 section&#x2F;key存在性检查</span><a href="#2-5-6-section-x2f-key-cun-zai-xing-jian-cha" class="header-anchor">#</a></h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* section/key presence check */</span></span><br><span class="line">assert(ini_hassection(<span class="string">&quot;first&quot;</span>, inifile));<span class="comment">//检查是否有first 段</span></span><br><span class="line">assert(!ini_hassection(<span class="string">&quot;fourth&quot;</span>, inifile));</span><br><span class="line">assert(ini_haskey(<span class="string">&quot;first&quot;</span>, <span class="string">&quot;val&quot;</span>, inifile));<span class="comment">//检查first段是否有val这个key</span></span><br><span class="line">assert(!ini_haskey(<span class="string">&quot;first&quot;</span>, <span class="string">&quot;test&quot;</span>, inifile));</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;5. checking presence of sections and keys passed\n&quot;</span>);</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-5-7-pei-zhi-wen-jian-yue-du-da-yin">2.5.7 配置文件阅读打印</span><a href="#2-5-7-pei-zhi-wen-jian-yue-du-da-yin" class="header-anchor">#</a></h3><p><code>ini_browse</code>用来打印出每个段的每个key的内容。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">Callback</span><span class="params">(<span class="type">const</span> <span class="type">char</span> *section, <span class="type">const</span> <span class="type">char</span> *key, <span class="type">const</span> <span class="type">char</span> *value, <span class="type">void</span> *userdata)</span> &#123;</span><br><span class="line">	(<span class="type">void</span>)userdata; <span class="comment">/* this parameter is not used in this example */</span></span><br><span class="line">  	<span class="built_in">printf</span>(<span class="string">&quot;    [%s]\t%s=%s\n&quot;</span>, section, key, value);</span><br><span class="line">  	<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/* browsing through the file */</span></span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;6. browse through all settings, file field list follows\n&quot;</span>);</span><br><span class="line">ini_browse(Callback, <span class="literal">NULL</span>, inifile);</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (access(filename, F_OK) != <span class="number">0</span>) &#123;</span><br><span class="line">	perror(<span class="string">&quot;open %s fail&quot;</span>, filename);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/14.png" alt="image-20240602173647362"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/" data-id="clzp8utt400159ouf7gto8t17" data-title="ini_parse配置解析功能移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-通用裸机-传感器" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/" class="article-date">
+  <time class="dt-published" datetime="2024-05-12T06:59:31.000Z" itemprop="datePublished">2024-05-12</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/">通用裸机-传感器</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-dht11-wen-shi-du-chuan-gan-qi">1 DHT11温湿度传感器</a><ul>
+<li><a href="#1-1-shi-xu-jie-xi">1.1 时序解析</a><ul>
+<li><a href="#1-1-1-shu-ju-ge-shi">1.1.1 数据格式</a></li>
+<li><a href="#1-1-2-shi-xu-can-shu">1.1.2 时序参数</a></li>
+<li><a href="#1-1-3-shu-ju-chuan-shu">1.1.3 数据传输</a></li>
+</ul>
+</li>
+<li><a href="#1-1-4-dai-ma-shi-xian">1.1.4 代码实现</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-dht11-wen-shi-du-chuan-gan-qi">1 DHT11温湿度传感器</span><a href="#1-dht11-wen-shi-du-chuan-gan-qi" class="header-anchor">#</a></h1><p><img src="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/1.png" alt="img"></p>
+<p>MCU通过一条数据线与DH11连接，MCU通过这条线发命令给DH11，DH11再通过这条线把数据发送给MCU。只需要一根GPIO就OK了。</p>
+<p>核心就是MCU发给DH11的命令格式和DH11返回的数据格式。</p>
+<h2><span id="1-1-shi-xu-jie-xi">1.1 时序解析</span><a href="#1-1-shi-xu-jie-xi" class="header-anchor">#</a></h2><p><img src="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/2.png" alt="img"></p>
+<ol>
+<li><p>MCU发送一个开始信号S，这个开始信号是一个低脉冲，然后再拉高。等待DHT11应答。</p>
+</li>
+<li><p>DH11拉低，做出一个响应信号，再拉高，准备发送数据。</p>
+</li>
+<li><p>接着就是DH11返回的数据。</p>
+</li>
+</ol>
+<h3><span id="1-1-1-shu-ju-ge-shi">1.1.1 数据格式</span><a href="#1-1-1-shu-ju-ge-shi" class="header-anchor">#</a></h3><p>这些数据一共有40bit,高位先出。（8bit湿度整数数据+8bit湿度小数数据+8bi温度整数数据+8bit温度小数数据+8bit校验和）</p>
+<p>数据有40bit: 8bit湿度整数数据+8bit湿度小数数据+8bit温度整数数据+8bit温度小数数据+8bit校验和</p>
+<h3><span id="1-1-2-shi-xu-can-shu">1.1.2 时序参数</span><a href="#1-1-2-shi-xu-can-shu" class="header-anchor">#</a></h3><p><img src="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/3.png" alt="img"></p>
+<p>MCU必须先拉低至少18ms, 然后再拉高20-40us, DH11再拉低80us以响应,最后再拉高80us。</p>
+<h3><span id="1-1-3-shu-ju-chuan-shu">1.1.3 数据传输</span><a href="#1-1-3-shu-ju-chuan-shu" class="header-anchor">#</a></h3><p><img src="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/4.png" alt="img"></p>
+<p><strong>Bit0</strong>：1bit 50us开始后，DHT11拉低数据时间为30us以内。</p>
+<p><img src="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/5.png" alt="img"></p>
+<p><strong>Bit1</strong>: 1bit 50us开始后，DHT11拉低数据时间为超过70us。</p>
+<h2><span id="1-1-4-dai-ma-shi-xian">1.1.4 代码实现</span><a href="#1-1-4-dai-ma-shi-xian" class="header-anchor">#</a></h2><p><img src="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/6.png" alt="img"></p>
+<p><img src="/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/7.png" alt="img"></p>
+<p>使用GPG5引脚:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">dht11_data_cfg_as_output</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">        GPGCON &amp;= ~(<span class="number">3</span>&lt;&lt;<span class="number">10</span>);</span><br><span class="line">        GPGCON |= (<span class="number">1</span>&lt;&lt;<span class="number">10</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">dht11_data_cfg_as_input</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">        GPGCON &amp;= ~(<span class="number">3</span>&lt;&lt;<span class="number">10</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">dht11_data_set</span><span class="params">(<span class="type">int</span> val)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (val)</span><br><span class="line">                GPGDAT |= (<span class="number">1</span>&lt;&lt;<span class="number">5</span>);</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">                GPGDAT &amp;= ~(<span class="number">1</span>&lt;&lt;<span class="number">5</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">dht11_data_get</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (GPGDAT &amp; (<span class="number">1</span>&lt;&lt;<span class="number">5</span>))</span><br><span class="line">                <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">                <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//DHT11操作：</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">dht11_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    dht11_data_cfg_as_output();</span><br><span class="line">    dht11_data_set(<span class="number">1</span>);</span><br><span class="line">    mdelay(<span class="number">2000</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">void</span> <span class="title function_">dht11_start</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    dht11_data_set(<span class="number">0</span>);</span><br><span class="line">    mdelay(<span class="number">20</span>);</span><br><span class="line">    dht11_data_cfg_as_input();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">dht11_wait_ack</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    udelay(<span class="number">60</span>);</span><br><span class="line">    <span class="keyword">return</span> dht11_data_get();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">dht11_recv_byte</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="type">int</span> i;</span><br><span class="line">    <span class="type">int</span> data = <span class="number">0</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">8</span>; i++) &#123;</span><br><span class="line">        <span class="keyword">if</span> (dht11_wait_for_val(<span class="number">1</span>, <span class="number">1000</span>)) &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;dht11 wait for high data err!\n\r&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        udelay(<span class="number">40</span>);</span><br><span class="line">        data &lt;&lt;= <span class="number">1</span>;</span><br><span class="line">        <span class="keyword">if</span> (dht11_data_get() == <span class="number">1</span>)</span><br><span class="line">            data |= <span class="number">1</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (dht11_wait_for_val(<span class="number">0</span>, <span class="number">1000</span>)) &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;dht11 wait for low data err!\n\r&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> data;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">dht11_wait_for_val</span><span class="params">(<span class="type">int</span> val, <span class="type">int</span> timeout_us)</span> &#123;</span><br><span class="line">    <span class="keyword">while</span> (timeout_us--) &#123;</span><br><span class="line">        <span class="keyword">if</span> (dht11_data_get() == val)</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>; <span class="comment">/* ok */</span></span><br><span class="line">        udelay(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>; <span class="comment">/* err */</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">dht11_read</span><span class="params">(<span class="type">int</span> *hum, <span class="type">int</span> *temp)</span> &#123;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> hum_m, hum_n;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> temp_m, temp_n;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">char</span> check;        </span><br><span class="line">    </span><br><span class="line">    dht11_start();</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> (<span class="number">0</span> != dht11_wait_ack()) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;dht11 not ack, err!\n\r&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="number">0</span> != dht11_wait_for_val(<span class="number">1</span>, <span class="number">1000</span>)) &#123; <span class="comment">/* 等待ACK变为高电平, 超时时间是1000us */</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;dht11 wait for ack high err!\n\r&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="number">0</span> != dht11_wait_for_val(<span class="number">0</span>, <span class="number">1000</span>)) &#123; <span class="comment">/* 数据阶段: 等待低电平, 超时时间是1000us */</span></span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;dht11 wait for data low err!\n\r&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    hum_m  = dht11_recv_byte();</span><br><span class="line">    hum_n  = dht11_recv_byte();</span><br><span class="line">    temp_m = dht11_recv_byte();</span><br><span class="line">    temp_n = dht11_recv_byte();</span><br><span class="line">    check  = dht11_recv_byte();</span><br><span class="line"></span><br><span class="line">    dht11_data_cfg_as_output();</span><br><span class="line">    dht11_data_set(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (hum_m + hum_n + temp_m + temp_n == check) &#123;</span><br><span class="line">        *hum  = hum_m;</span><br><span class="line">        *temp = temp_m;</span><br><span class="line">        mdelay(<span class="number">2000</span>);  <span class="comment">/* 读取周期是2S, 不能读太频繁 */</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;dht11 checksum err!\n\r&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">dht11_test</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="type">int</span> hum, temp;</span><br><span class="line">    dht11_init();</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">        <span class="keyword">if</span> (dht11_read(&amp;hum, &amp;temp) != <span class="number">0</span>) &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;\n\rdht11 read err!\n\r&quot;</span>);</span><br><span class="line">            dht11_init();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">printf</span>(<span class="string">&quot;\n\rDHT11 : %d humidity, %d temperature\n\r&quot;</span>, hum, temp);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/" data-id="clzp8uttn007t9ouf6uduc3gd" data-title="通用裸机-传感器" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-通用裸机-arm汇编" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/05/03/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-arm%E6%B1%87%E7%BC%96/" class="article-date">
@@ -2020,428 +2256,11 @@ LINE：有些地方叫做 tvd，显示一帧有效数据所需的时间，假如
 
 
   
-    <article id="post-s3c2440裸机编程-nandflash" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/" class="article-date">
-  <time class="dt-published" datetime="2024-04-17T12:10:39.000Z" itemprop="datePublished">2024-04-17</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/">s3c2440裸机编程-nandflash</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-nandflash-yuan-li">1 nandflash原理</a><ul>
-<li><a href="#1-1-yuan-li-tu">1.1 原理图</a></li>
-<li><a href="#1-2-yin-jiao-miao-shu">1.2 引脚描述</a></li>
-<li><a href="#1-3-nand-cun-chu-jie-gou">1.3 nand存储结构</a><ul>
-<li><a href="#1-3-1-block-kuai">1.3.1 Block块</a></li>
-<li><a href="#1-3-2-page-ye">1.3.2 Page页</a></li>
-<li><a href="#1-3-3-oob-qu-yu">1.3.3 oob区域</a></li>
-<li><a href="#1-3-4-cun-chu-dan-wei-guan-xi">1.3.4 存储单位关系</a></li>
-</ul>
-</li>
-<li><a href="#1-4-feature-te-xing">1.4 Feature特性</a></li>
-<li><a href="#1-5-chang-jian-de-flash-han-shang">1.5 常见的flash厂商</a></li>
-</ul>
-</li>
-<li><a href="#2-nand-kong-zhi-qi">2 Nand控制器</a><ul>
-<li><a href="#2-1-om-qi-dong-jie-zhi-xuan-ze">2.1 OM启动介质选择</a></li>
-<li><a href="#2-2-nand-kong-zhi-qi-yin-jiao-pei-zhi">2.2 nand控制器引脚配置</a></li>
-</ul>
-</li>
-<li><a href="#3-nand-kong-zhi-qi-fang-wen-shi-xu">3 Nand控制器访问时序</a><ul>
-<li><a href="#3-1-ming-ling-di-zhi-suo-cun-shi-xu-xie-ming-ling-di-zhi">3.1 命令&#x2F;地址锁存时序(写命令&#x2F;地址)</a><ul>
-<li><a href="#3-1-1-k9f2g08u0c-ming-ling-di-zhi-suo-cun-shi-xu">3.1.1 K9F2G08U0C命令&#x2F;地址锁存时序</a></li>
-</ul>
-</li>
-<li><a href="#3-2-shu-ju-suo-cun-shi-xu-xie-shu-ju">3.2 数据锁存时序(写数据)</a></li>
-<li><a href="#3-3-shu-ju-shun-xu-du-shi-xu-du-shu-ju">3.3 数据顺序读时序(读数据)</a></li>
-</ul>
-</li>
-<li><a href="#4-nandflash-chu-shi-hua-he-shi-bie">4 nandFlash初始化和识别</a><ul>
-<li><a href="#4-1-nandflash-ming-ling-biao">4.1 nandFlash命令表</a></li>
-<li><a href="#4-2-du-id-shi-xu">4.2 读ID时序</a></li>
-<li><a href="#4-3-chu-shi-hua">4.3 初始化</a><ul>
-<li><a href="#4-3-1-chu-shi-hua-nand-kong-zhi-qi">4.3.1 初始化nand控制器</a><ul>
-<li><a href="#4-3-1-1-nfconf-pei-zhi-ji-cun-qi">4.3.1.1 NFCONF-配置寄存器</a></li>
-<li><a href="#4-3-1-2-nfcont-kong-zhi-ji-cun-qi">4.3.1.2 NFCONT-控制寄存器</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#4-4-shi-bie-nandflash">4.4 识别nandflash</a><ul>
-<li><a href="#4-4-1-nfcmmd-ming-ling-ji-cun-qi">4.4.1 NFCMMD-命令寄存器</a></li>
-<li><a href="#4-4-2-nfdata-shu-ju-ji-cun-qi">4.4.2 NFDATA-数据寄存器</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#5-nandflash-shu-ju-cao-zuo">5 NandFlash数据操作</a><ul>
-<li><a href="#5-1-du-shu-ju">5.1 读数据</a><ul>
-<li><a href="#5-1-1-nfstat-zhuang-tai-ji-cun-qi">5.1.1 NFSTAT-状态寄存器</a></li>
-<li><a href="#5-1-2-zi-dong-shi-bie-shi-nor-huan-shi-nand-qi-dong">5.1.2 自动识别是nor还是nand启动</a></li>
-</ul>
-</li>
-<li><a href="#5-2-ca-shu-ju">5.2 擦数据</a></li>
-<li><a href="#5-3-xie-shu-ju">5.3 写数据</a></li>
-<li><a href="#5-4-ce-shi">5.4 测试</a></li>
-<li><a href="#5-5-pi-kuai-de-biao-ji-he-jie-chu">5.5 坏快的标记和解除</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-nandflash-yuan-li">1 nandflash原理</span><a href="#1-nandflash-yuan-li" class="header-anchor">#</a></h1><h2><span id="1-1-yuan-li-tu">1.1 原理图</span><a href="#1-1-yuan-li-tu" class="header-anchor">#</a></h2><p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/1.png"></p>
-<h2><span id="1-2-yin-jiao-miao-shu">1.2 引脚描述</span><a href="#1-2-yin-jiao-miao-shu" class="header-anchor">#</a></h2><p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/2.png"></p>
-<table>
-<thead>
-<tr>
-<th>引脚名称</th>
-<th>引脚功能</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>IO0~IO7</td>
-<td>数据输入输出（命令、地址、数据共用数据总线）</td>
-</tr>
-<tr>
-<td>CLE</td>
-<td>命令使能</td>
-</tr>
-<tr>
-<td>ALE</td>
-<td>地址使能</td>
-</tr>
-<tr>
-<td>&#x2F;CE</td>
-<td>芯片使能（片选）</td>
-</tr>
-<tr>
-<td>&#x2F;RE</td>
-<td>读使能</td>
-</tr>
-<tr>
-<td>&#x2F;WE</td>
-<td>写使能</td>
-</tr>
-<tr>
-<td>R&#x2F;B</td>
-<td>就绪&#x2F;忙输出信号（低电平表示操作还在进行中，高电平表示操作完成）</td>
-</tr>
-</tbody></table>
-<h2><span id="1-3-nand-cun-chu-jie-gou">1.3 nand存储结构</span><a href="#1-3-nand-cun-chu-jie-gou" class="header-anchor">#</a></h2><p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/3.png"></p>
-<p>我们常见的Nand Flash，内部只有一个chip，每个chip只有一个plane。但也有些复杂的，容量更大的Nand Flash，内部有多个chip，每个chip有多个plane，这类的Nand Flash，其实就是多了一个主控将多块flash叠加在一起，如下图：</p>
-<p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/4.png"></p>
-<h3><span id="1-3-1-block-kuai">1.3.1 Block块</span><a href="#1-3-1-block-kuai" class="header-anchor">#</a></h3><p>一个Nand Flash由很多个块（Block）组成，块的大小一般有64K，128KB，256KB，512KB，<strong>Block是Nand Flash的擦除操作的基本&#x2F;最小单位</strong>。Nand Flash中，一个块中含有1个或多个位是坏的，就称为其为<strong>坏块Bad Block</strong>。</p>
-<h3><span id="1-3-2-page-ye">1.3.2 Page页</span><a href="#1-3-2-page-ye" class="header-anchor">#</a></h3><p>每个块里面又包含了很多页（page）。每个页的大小，对于现在常见的Nand Flash多数是2KB，当然也有的nand flash的页大小为4KB、8KB等。<strong>页Page，是读写操作的基本单位</strong>。</p>
-<h3><span id="1-3-3-oob-qu-yu">1.3.3 oob区域</span><a href="#1-3-3-oob-qu-yu" class="header-anchor">#</a></h3><p>每一个page页，对应还附加了一块区域，一般为64byte，叫做空闲区域（spare area）&#x2F;oob区域（Out Of Band），由于nandflash在操作过程中容易产生位反转，这是nandflash的物理特性决定的，所以必须要有对应的检测和纠错机制，这种机制被叫做Error Checking and Correcting，所以设计了多余的oob区域，<strong>用于放置数据的校验值</strong>。oob的读写操作，一般是随着页的操作一起完成的，即读写页的时候，对应地就读写了oob。</p>
-<p>关于oob具体用途，总结起来有：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">标记是否是坏快</span><br><span class="line">存储ECC数据</span><br><span class="line">存储一些和文件系统相关的数据。如jffs2就会用到这些空间存储一些特定信息</span><br></pre></td></tr></table></figure>
-
-<h3><span id="1-3-4-cun-chu-dan-wei-guan-xi">1.3.4 存储单位关系</span><a href="#1-3-4-cun-chu-dan-wei-guan-xi" class="header-anchor">#</a></h3><p>一般情况下：1block &#x3D; 64page &#x3D; 64 * (2K+64B) &#x3D; 128K + 4K， 一个page包含2K数据和64B的oob。</p>
-<h2><span id="1-4-feature-te-xing">1.4 Feature特性</span><a href="#1-4-feature-te-xing" class="header-anchor">#</a></h2><p>以<strong>K9F2G08U0C</strong>这款nandflash为例：</p>
-<p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/5.png"></p>
-<p>可以看出此款nandflash特性如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> 容量为<span class="number">256</span>M，外加<span class="number">8</span>M的冗余oob存储区。</span><br><span class="line"><span class="number">2.</span> page大小为<span class="number">2</span>K，block大小为<span class="number">128</span>K</span><br><span class="line"><span class="number">3.</span> 读一个page时顺序读取至少<span class="number">25</span>*<span class="number">2048</span>ns(数据可以每字节<span class="number">25</span>ns的循环时间读出)，随机读取不超过<span class="number">40u</span>s</span><br><span class="line"><span class="number">4.</span> 写一个page一般为<span class="number">250u</span>s</span><br><span class="line"><span class="number">5.</span> 擦除一个block一般为<span class="number">2</span>ms</span><br><span class="line"><span class="number">6.</span> 封装上分为TSOP分装和FBGA封装（TSOP是指引脚在侧面，FBGA是引脚封在芯片底部，更能保障数据安全，有些客户为了保障数据安全性，防止被飞线进行数据破解，会要求用FBGA封装的flash）</span><br></pre></td></tr></table></figure>
-
-<h2><span id="1-5-chang-jian-de-flash-han-shang">1.5 常见的flash厂商</span><a href="#1-5-chang-jian-de-flash-han-shang" class="header-anchor">#</a></h2><p>常见的flash厂商有：Micron（镁光）、Toshiba（东芝）、Samsung（三星）、MXIC(旺宏)、dosilicon(东芯)，（Winbond）华邦、ESMT等。</p>
-<h1><span id="2-nand-kong-zhi-qi">2 Nand控制器</span><a href="#2-nand-kong-zhi-qi" class="header-anchor">#</a></h1><p>前面<a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/">s3c2440裸机编程-内存控制器</a>介绍讲到，我们知道nand没有独立地址线，cpu无法直接访问nand上的指令，所以nand不能片上执行。那么为何程序还能支持nand启动的呢？</p>
-<p>为了支持NAND启动，S3C2440A配备了一个称为“ Steppingstone”的内部SRAM缓冲区,容量为4K。 开机时，Nandflash中的前4K数据将被加载到Steppingstone中，而引导代码将被加载到SRAM中将被执行，如下图所示：</p>
-<p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/6.png"></p>
-<h2><span id="2-1-om-qi-dong-jie-zhi-xuan-ze">2.1 OM启动介质选择</span><a href="#2-1-om-qi-dong-jie-zhi-xuan-ze" class="header-anchor">#</a></h2><p>我们知道s3c2440支持2种boot方式，nand或者nor，那么需要配置OM引脚来设置引导方式，如下图：</p>
-<p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/7.png"></p>
-<p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/8.png"></p>
-<p>内存控制器的地址映射表如下：</p>
-<p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/9.png"></p>
-<p>当SW2闭合,OM0&#x3D;1, OM[1:0]&#x3D;01, 0地址对应nor，那么从nor启动。<br>当SW2断开,OM0&#x3D;0, OM[1:0]&#x3D;00, 0地址对应bootSRAM(4K)，那么0地址对应该SRAM, 那么从nand启动。</p>
-<h2><span id="2-2-nand-kong-zhi-qi-yin-jiao-pei-zhi">2.2 nand控制器引脚配置</span><a href="#2-2-nand-kong-zhi-qi-yin-jiao-pei-zhi" class="header-anchor">#</a></h2><p>当上电启动时，NAND Flash 控制器将通过下面的引脚配置来获取连接的 NAND Flash 的信息。</p>
-<p><strong>NCON</strong>：NAND Flash 存储器选择（普通&#x2F;先进）</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0</span>：普通 NAND Flash（<span class="number">256</span> 字或 <span class="number">512</span> 字节页大小，<span class="number">3</span> 或 <span class="number">4</span> 个地址周期）</span><br><span class="line"><span class="number">1</span>：先进 NAND Flash（<span class="number">1</span>K 字或 <span class="number">2</span>K 字节页大小，<span class="number">4</span> 或 <span class="number">5</span> 个地址周期）</span><br></pre></td></tr></table></figure>
-
-<p><strong>GPG13</strong>：NAND Flash 存储器page size选择</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0</span>：页=<span class="number">256</span> 字（NCON=<span class="number">0</span>）或页=<span class="number">1</span>K 字（NCON=<span class="number">1</span>）</span><br><span class="line"><span class="number">1</span>：页=<span class="number">512</span> 字节（NCON=<span class="number">0</span>）或页=<span class="number">2</span>K 字节（NCON=<span class="number">1</span>）</span><br></pre></td></tr></table></figure>
-
-<p><strong>GPG14</strong>：NAND Flash 存储器地址周期选择</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0</span>：<span class="number">3</span> 个地址周期（NCON=<span class="number">0</span>）或 <span class="number">4</span> 个地址周期（NCON=<span class="number">1</span>）</span><br><span class="line"><span class="number">1</span>：<span class="number">4</span> 个地址周期（NCON=<span class="number">0</span>）或 <span class="number">5</span> 个地址周期（NCON=<span class="number">1</span>）</span><br></pre></td></tr></table></figure>
-<p><strong>GPG15</strong>：NAND Flash 存储器总线宽度选择</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0</span>：<span class="number">8</span> 位宽度</span><br><span class="line"><span class="number">1</span>：<span class="number">16</span> 位宽度</span><br></pre></td></tr></table></figure>
-<p>如下表所示更直观:<br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/10.png"></p>
-<h1><span id="3-nand-kong-zhi-qi-fang-wen-shi-xu">3 Nand控制器访问时序</span><a href="#3-nand-kong-zhi-qi-fang-wen-shi-xu" class="header-anchor">#</a></h1><p>nandflash访问时需要遵循一定的时序才能完成命令、地址、数据的发送。nandflash有8bit位宽数据总线，那么没有地址线它是怎么和cpu通信的呢？</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span>nandflash是DATA0～DATA7上既传输数据，又传输地址，又传输命令；</span><br><span class="line">	①当ALE为高电平时传输的是地址；</span><br><span class="line">	②当CLE为高电平时传输的是命令；</span><br><span class="line">	③当ALE，CLE都为低电平表示传输的是数据</span><br><span class="line"></span><br><span class="line"> <span class="number">2.</span> 先发送片选CS和WE/RE信号</span><br><span class="line"> <span class="number">3.</span> 再发送CLE</span><br><span class="line"> <span class="number">4.</span> 再发送ALE</span><br><span class="line"> <span class="number">5.</span> 最后发送数据</span><br></pre></td></tr></table></figure>
-
-<p>下面分别介绍命令、地址、数据的发送过程。</p>
-<h2><span id="3-1-ming-ling-x2f-di-zhi-suo-cun-shi-xu-xie-ming-ling-x2f-di-zhi">3.1 命令&#x2F;地址锁存时序(写命令&#x2F;地址)</span><a href="#3-1-ming-ling-x2f-di-zhi-suo-cun-shi-xu-xie-ming-ling-x2f-di-zhi" class="header-anchor">#</a></h2><p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/11.png"></p>
-<ol>
-<li>首先看时钟，nand控制器的时钟源采用的是HCLK, 也就是AHB高速总线模式，可以参考<a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/">s3c2440裸机编程-时钟体系</a>那么HCLK&#x3D;100Mhz, T&#x3D;1&#x2F;HCLK&#x3D;10ns。</li>
-<li>从上图可知命令、地址锁存的时序是一样的，复用一个时序图，当到达①的位置时，CLE&#x2F;ALE&#x3D;0; </li>
-<li>当到达位置②时，CLE&#x2F;ALE&#x3D;1,表示命令&#x2F;地址信号拉高，命令&#x2F;地址开始使能，然后往数据总线DATA上放入命令或地址;</li>
-<li>经过TACLS时间，到达位置③时，拉低nWE引脚，这时数据总线DATA上的命令&#x2F;地址开始被锁存，锁存需要一定的时间，所以经过TWRPH0时间后，数据总线DATA上的命令&#x2F;地址锁存完成；</li>
-<li>到达位置④，此时释放nWE信号，nWE&#x3D;1，这时还需要经过TWRPH1时间后，释放CLE&#x2F;ALE，此时一个完整的命令&#x2F;地址锁存过程完成。</li>
-</ol>
-<p>上面分析了命令&#x2F;地址的锁存时序过程，下面详细解释下上面几个时间参数的含义：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TACLS：CLE/ALE使能信号发送多久后才可以发送nWE信号</span><br><span class="line">TWRPH0:nWE信号发送多久后数据（commamd/addr）才会被锁存成功</span><br><span class="line">TWRPH1：nWE信号释放多久后才能释放CLE/ALE</span><br></pre></td></tr></table></figure>
-
-<p>这些时间参数要根据我们实际使用的具体nandflash型号和性能来配置我们的nand控制器。</p>
-<h3><span id="3-1-1-k9f2g08u0c-ming-ling-x2f-di-zhi-suo-cun-shi-xu">3.1.1 K9F2G08U0C命令&#x2F;地址锁存时序</span><a href="#3-1-1-k9f2g08u0c-ming-ling-x2f-di-zhi-suo-cun-shi-xu" class="header-anchor">#</a></h3><p>以K9F2G08U0C这款nandflash为例进行讲解，规格书上命令和地址锁存周期如下：</p>
-<p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/12.png"></p>
-<p>和nand控制器的命令&#x2F;地址锁存时序图对比发现:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">TACLS = max(tCLS,tALS) - tWP;</span><br><span class="line">TWRPH0 = tWP;</span><br><span class="line">TWRPH0 = max(tCLH,tALH);</span><br></pre></td></tr></table></figure>
-
-<p>nand控制器把命令、地址锁存时序复用成了一个时序图，其实命令和地址锁存时序参数基本一致，只不过发命令只需要一个周期就OK了，发地址需要5个时钟周期，为什么？</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">你想，命令多简单，无非就是读写擦，像我们这款nand数据位宽8bit，一个周期绰绰有余。但地址就不一样了，比如此款nandflash容量256M = 2^28，那么需要28根数据线来传输才能一个周期传输完，但这款nandflash的数据总线位宽只有8bit, 只有8根数据线，所以需要把地址拆分成多次发送，先发送col地址，再发送row地址，此款nandflash是用了5个周期发送地址。</span><br></pre></td></tr></table></figure>
-
-<h2><span id="3-2-shu-ju-suo-cun-shi-xu-xie-shu-ju">3.2 数据锁存时序(写数据)</span><a href="#3-2-shu-ju-suo-cun-shi-xu-xie-shu-ju" class="header-anchor">#</a></h2><p>从前面的命令地址锁存时序图中我们得知：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CLE信号拉高，ALE信号拉低时，表示发送的命令；</span><br><span class="line">CLE信号拉低，ALE信号拉高时，表示发送的地址；</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/13.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CLE信号拉低, ALE信号拉低时，表示发送的数据;</span><br></pre></td></tr></table></figure>
-
-<ol>
-<li>当到达①时，nWE还是高电平，写使能没有开启；</li>
-<li>当到达②,③时，那么经过了tWP时间（TDS时间），数据开始被锁存；</li>
-<li>到达④，经过tDH时间，数据锁存完成;</li>
-<li>到达⑤，也就是数据开始锁存后再过了tWH时间后释放nWE信号；</li>
-<li>重复②③④⑤过程,得到DIN0, DIN1, DIN final。</li>
-</ol>
-<p>根据上面这三个图（手册上的命令、地址、数据锁存时序图），下面详细解释各个时间参数的含义：</p>
-<p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/14.png"></p>
-<h2><span id="3-3-shu-ju-shun-xu-du-shi-xu-du-shu-ju">3.3 数据顺序读时序(读数据)</span><a href="#3-3-shu-ju-shun-xu-du-shi-xu-du-shu-ju" class="header-anchor">#</a></h2><p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/15.png"></p>
-<ol>
-<li>①处，表示要过tRR后才能发送读使能信号nRE进行访问（上一次的访问结束后，需要等待ready状态稳定后才可以进行下一次访问）；</li>
-<li>当到达②，需要经过rREA时间后nRE信号才有效（待nRE稳定）；</li>
-<li>当到达③，DATA总线上的读取被读取；</li>
-<li>当到达④，nRE释放tREH时间后才允许下一次读使能；</li>
-</ol>
-<p>我们看到连续顺序访问时，单次访问的时间为tRC，那么这些时间参数的值也可以从K9F2G08U0C datasheet中找到：为25ns</p>
-<p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/16.png"></p>
-<h1><span id="4-nandflash-chu-shi-hua-he-shi-bie">4 nandFlash初始化和识别</span><a href="#4-nandflash-chu-shi-hua-he-shi-bie" class="header-anchor">#</a></h1><h2><span id="4-1-nandflash-ming-ling-biao">4.1 nandFlash命令表</span><a href="#4-1-nandflash-ming-ling-biao" class="header-anchor">#</a></h2><p>找到K9F2G08U0C datasheet，对NAND FLASH的操作需要发出命令，下面有个NAND FLASH的命令表格，用此表格上的命令来访问我们的nandflash：<br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/17.png"></p>
-<h2><span id="4-2-du-id-shi-xu">4.2 读ID时序</span><a href="#4-2-du-id-shi-xu" class="header-anchor">#</a></h2><p>命令表中的读id还不太直观，下图是从nand芯片手册中截取出的读id时序图：<br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/18.png"></p>
-<ol>
-<li>第一条竖线位置，发送了nCE,CLE,nWE信号，所以90命令被锁存（readID命令）；</li>
-<li>第二条竖线位置，发送了nCE,ALE,nWE信号，所以地址00被锁存；继续往后，命令、地址都发完了，要read数据了，所以释放nWE，ALE，这里tAR表示ALE释放多久后才可以发送nRE信号，tREA表示nRE信号的建立时间；</li>
-<li>第三条竖线位置，发送了nCE,nRE信号，所以数据被锁存，第一个访问周期锁存的数据为marker code，值为0xEC，第二个访问周期的数据为device code，值为0xDA。读id时读5个周期含义对应如下表：<br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/19.png"></li>
-</ol>
-<p>该款nandflash的5个周期读出来的值对应如下：<br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/20.png"></p>
-<p>第四个访问周期含义如下表：<br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/21.png"></p>
-<p>第五个访问周期含义如下表：<br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/22.png"></p>
-<p>根据第4、5个访问周期的结果0x15、0x44我们得知该flash的block_size&#x3D;128K，page_size&#x3D;2k, 有2个plane，plane_size&#x3D;1Gb &#x3D; 128M, 共256M。</p>
-<h2><span id="4-3-chu-shi-hua">4.3 初始化</span><a href="#4-3-chu-shi-hua" class="header-anchor">#</a></h2><h3><span id="4-3-1-chu-shi-hua-nand-kong-zhi-qi">4.3.1 初始化nand控制器</span><a href="#4-3-1-chu-shi-hua-nand-kong-zhi-qi" class="header-anchor">#</a></h3><h4><span id="4-3-1-1-nfconf-pei-zhi-ji-cun-qi">4.3.1.1 NFCONF-配置寄存器</span><a href="#4-3-1-1-nfconf-pei-zhi-ji-cun-qi" class="header-anchor">#</a></h4><p>nand控制器要按照我们nandflash的实际型号和性能来设置初始值。NFCONF寄存器，也叫nand配置寄存器：<br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/23.png"></p>
-<p>以K9F2G08U0C这款nandflash为例：</p>
-<p>前面<strong>第3.1.1小节</strong>分析了TACLS &#x3D; max(tCLS,tALS) - tWP，我们得知tCLS、tALS、tWP最小都可以取到12ns, 所以我们可以取TACLS&#x3D;0；</p>
-<p>TWRPH0 &#x3D; tWP，我们的nand手册上要求tWP最少12ns, 那么取TWRPH0 &#x3D;1， Duration &#x3D; HCLK*(TWRPH0+1)&#x3D;20ns&gt;12ns，满足要求；</p>
-<p>TWRPH0 &#x3D; max(tCLH,tALH), 我们的nand手册上要求tCLH、tALH最少5ns， 那么取TWRPH1 &#x3D;0， Duration &#x3D; HCLK*(TWRPH1+1)&#x3D;10ns&gt;5ns，满足要求。</p>
-<p>再配置BusWidth总线位宽为8bit；<br>所以NFCONF寄存器设置如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span>  TACLS   0</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>  TWRPH0  1</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span>  TWRPH1  0</span></span><br><span class="line"><span class="comment">/*设置NAND FLASH的时序*/</span></span><br><span class="line">NFCONF = (TACLS&lt;&lt;<span class="number">12</span>) | (TWRPH0&lt;&lt;<span class="number">8</span>) | (TWRPH1&lt;&lt;<span class="number">4</span>);</span><br></pre></td></tr></table></figure>
-
-<h4><span id="4-3-1-2-nfcont-kong-zhi-ji-cun-qi">4.3.1.2 NFCONT-控制寄存器</span><a href="#4-3-1-2-nfcont-kong-zhi-ji-cun-qi" class="header-anchor">#</a></h4><p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/24.png"><br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/25.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MODE [<span class="number">0</span>]: 设置为<span class="number">1</span>，使能NAND控制器。</span><br><span class="line">Reg_nCE [<span class="number">1</span>]: 设置为<span class="number">1</span>，禁止片选（等要使用的时候再使能片选信号）</span><br></pre></td></tr></table></figure>
-
-<p>所以NFCONF寄存器设置如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*使能NAND FLASH控制器，禁止片选*/</span></span><br><span class="line">NFCONT = (<span class="number">1</span>&lt;&lt;<span class="number">1</span>) | (<span class="number">1</span>&lt;&lt;<span class="number">0</span>);</span><br></pre></td></tr></table></figure>
-
-<h2><span id="4-4-shi-bie-nandflash">4.4 识别nandflash</span><a href="#4-4-shi-bie-nandflash" class="header-anchor">#</a></h2><h3><span id="4-4-1-nfcmmd-ming-ling-ji-cun-qi">4.4.1 NFCMMD-命令寄存器</span><a href="#4-4-1-nfcmmd-ming-ling-ji-cun-qi" class="header-anchor">#</a></h3><p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/26.png"></p>
-<p>我们可以使用2440上的NAND FLASH控制器简化操作，只需要往NFCMMD寄存器写入要传输的命令就可以了，NAND FLASH控制器默认把上面复杂的时序发出来。</p>
-<p>NFADDR-地址寄存器<br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/27.png"><br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/28.png"></p>
-<p>发命令后，后面就需要发送地址了，当nWE和ALE有效的时候，表示锁存的是地址，往NFADDR寄存器中写值就可以了，比如：NFADDR&#x3D;0x00。<br>我们得知地址需要用5个周期来发送，前2个周期为col地址，后三个周期为row(page)地址。前面<strong>第3小节</strong>已详细分析过了命令、地址、数据锁存时序过程。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> column: 列地址A0~A10，就是页内地址，地址范围是从<span class="number">0</span>到<span class="number">2047</span>。（A11用来确定oob的地址，即<span class="number">2048</span><span class="number">-2111</span>这<span class="number">64</span>个字节的范围）</span><br><span class="line"><span class="number">2.</span> page：A12～A30，称作页号，page(row)编号。</span><br></pre></td></tr></table></figure>
-
-<h3><span id="4-4-2-nfdata-shu-ju-ji-cun-qi">4.4.2 NFDATA-数据寄存器</span><a href="#4-4-2-nfdata-shu-ju-ji-cun-qi" class="header-anchor">#</a></h3><p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/29.png"></p>
-<p>当命令、地址都发送完后就可以从数据总线上DATA[7:0]获取数据或者写入数据。同样往NFDATA寄存器中写值或者读值就可以了，如unsigned char buf&#x3D;NFDATA,由于是数据位宽是8位的，所以访问时数据组织形式如下：</p>
-<p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/30.png"></p>
-<p>从上图可以看出，当byte access时，只需一个时钟周期；当wold access的时候，需要4个时钟周期，小端模式下第一个时钟周期对应低字节，第四个时钟周期对应高字节。</p>
-<p>识别nandflash代码如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*初始化nand控制器*/</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">nand_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="meta">#<span class="keyword">define</span>  TACLS   0</span></span><br><span class="line">	<span class="meta">#<span class="keyword">define</span>  TWRPH0  1</span></span><br><span class="line">	<span class="meta">#<span class="keyword">define</span>  TWRPH1  0</span></span><br><span class="line">	NFCONF = (TACLS&lt;&lt;<span class="number">12</span>) | (TWRPH0&lt;&lt;<span class="number">8</span>) | (TWRPH1&lt;&lt;<span class="number">4</span>);</span><br><span class="line"></span><br><span class="line">	NFCONT = (<span class="number">1</span>&lt;&lt;<span class="number">1</span>) | (<span class="number">1</span>&lt;&lt;<span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*使能片选*/</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">nand_select</span><span class="params">(<span class="type">void</span>)</span> &#123;		</span><br><span class="line">	NFCONT &amp;=~(<span class="number">1</span>&lt;&lt;<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*禁止片选*/</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">nand_deselect</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	NFCONT |= (<span class="number">1</span>&lt;&lt;<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*发命令*/</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">nand_cmd</span><span class="params">(<span class="type">unsigned</span> <span class="type">char</span> cmd)</span> &#123;</span><br><span class="line">	<span class="keyword">volatile</span> <span class="type">int</span> i;</span><br><span class="line">	NFCCMD = cmd;</span><br><span class="line">	<span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;<span class="number">10</span>; i++);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/*发地址*/</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">nand_addr_byte</span><span class="params">(<span class="type">unsigned</span> <span class="type">char</span> addr)</span> &#123;</span><br><span class="line">	<span class="keyword">volatile</span> <span class="type">int</span> i;</span><br><span class="line">	NFADDR = addr;</span><br><span class="line">	<span class="keyword">for</span>(i=<span class="number">0</span>; i&lt;<span class="number">10</span>; i++);</span><br><span class="line">&#125;</span><br><span class="line">  <span class="comment">/*读数据*/</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> <span class="title function_">nand_data</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">      <span class="keyword">return</span>	NFDATA;</span><br><span class="line">  &#125;</span><br><span class="line"><span class="comment">/*识别nandflash*/</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">nand_chip_probe</span><span class="params">(<span class="type">void</span>)</span> &#123; </span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> buf[<span class="number">5</span>]=&#123;<span class="number">0</span>&#125;;</span><br><span class="line">	</span><br><span class="line">	nand_select(); </span><br><span class="line">	nand_cmd(<span class="number">0x90</span>);</span><br><span class="line">	nand_addr_byte(<span class="number">0x00</span>);</span><br><span class="line"></span><br><span class="line">	buf[<span class="number">0</span>] = nand_data();</span><br><span class="line">	buf[<span class="number">1</span>] = nand_data();	</span><br><span class="line">	buf[<span class="number">2</span>] = nand_data();</span><br><span class="line">	buf[<span class="number">3</span>] = nand_data();</span><br><span class="line">	buf[<span class="number">4</span>] = nand_data();	</span><br><span class="line">	nand_deselect(); 	</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;maker   id  = 0x%x\n\r&quot;</span>,buf[<span class="number">0</span>]);</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;device  id  = 0x%x\n\r&quot;</span>,buf[<span class="number">1</span>]);	</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;3rd byte    = 0x%x\n\r&quot;</span>,buf[<span class="number">2</span>]);		</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;4th byte    = 0x%x\n\r&quot;</span>,buf[<span class="number">3</span>]);			</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;page  size  = %d kb\n\r&quot;</span>,<span class="number">1</span>  &lt;&lt;  (buf[<span class="number">3</span>] &amp; <span class="number">0x03</span>));	</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;block size  = %d kb\n\r&quot;</span>,<span class="number">64</span> &lt;&lt; ((buf[<span class="number">3</span>] &gt;&gt; <span class="number">4</span>) &amp; <span class="number">0x03</span>));	</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;5th byte    = 0x%x\n\r&quot;</span>,buf[<span class="number">4</span>]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1><span id="5-nandflash-shu-ju-cao-zuo">5 NandFlash数据操作</span><a href="#5-nandflash-shu-ju-cao-zuo" class="header-anchor">#</a></h1><h2><span id="5-1-du-shu-ju">5.1 读数据</span><a href="#5-1-du-shu-ju" class="header-anchor">#</a></h2><p>读数据以page为单位的。下图的表格，来说明NAND FLASH内部结构，前面2K(0<del>2047)表示页数据，后边64字节(2048</del>2111)表示oob。</p>
-<p><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/31.png"></p>
-<p>CPU想读取，第2048个数据，它是哪以一个？</p>
-<pre><code>是Page1的第0个字节。CPU使用某个地址访问数据的时候，是在页数据空间来寻址的。
-</code></pre>
-<p>下图为读NAND FLASH的read时序操作：<br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/32.png"></p>
-<ol>
-<li>首先需要锁存00命令，nCE、CLE、nWE有效，0x00命令被锁存；</li>
-<li>此时CLE无效，ALE开始有效,地址被锁存（从NAND FLASH的地址周期中可以看出来，先发出2个周期的col列地址，再发出3个周期的Row行地址）；</li>
-<li>锁存0x30命令；</li>
-<li>然后会有一个busy时间段，R&#x2F;nB为低电平。tRR表示busy状态的持续时间（手册上最小为20ns）。</li>
-<li>开始锁存数据，nRE使能，nand上的数据被同步到数据nand控制器上。我们的nand是8bit数据位宽，所以每隔一个read时钟周期（tRC），传输1byte数据。每传输1byte数据，地址会自动往后偏移1byte，一般我们会连续读取1page数据。</li>
-</ol>
-<p>下面开始写代码：</p>
-<h3><span id="5-1-1-nfstat-zhuang-tai-ji-cun-qi">5.1.1 NFSTAT-状态寄存器</span><a href="#5-1-1-nfstat-zhuang-tai-ji-cun-qi" class="header-anchor">#</a></h3><p>当发完命令、地址后再进行读数据前我们知道有一段时间tRR处于busy状态，我们可以通过查询NFSTAT寄存器来确定busy状态有没有结束，是不是已经ready了。<br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/33.png"></p>
-<p>wait_ready函数等待NAND FLASH空闲，从上图可以看出当NFSTAT寄存器[0]的值为1时NAND FLASH是空闲的，我们可以通过该位来判断NAND FLASH是否繁忙。代码如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">wait_ready</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	 <span class="keyword">while</span> (!(NFSTAT &amp; <span class="number">1</span>));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>nand_read函数为NAND FLASH的读函数，代码如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">nand_read</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> addr, <span class="type">unsigned</span> <span class="type">char</span> *buf, <span class="type">unsigned</span> <span class="type">int</span> len)</span> &#123;</span><br><span class="line">	<span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line">	<span class="type">int</span> page = addr / <span class="number">2048</span>;</span><br><span class="line">	<span class="type">int</span> col  = addr &amp; (<span class="number">2048</span> - <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">	nand_select(); </span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> (i &lt; len) &#123;</span><br><span class="line">		<span class="comment">/* 发出00h命令 */</span></span><br><span class="line">		nand_cmd(<span class="number">00</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">/* 发出地址 */</span></span><br><span class="line">		<span class="comment">/* col addr */</span></span><br><span class="line">		nand_addr_byte(col &amp; <span class="number">0xff</span>);</span><br><span class="line">		nand_addr_byte((col&gt;&gt;<span class="number">8</span>) &amp; <span class="number">0xff</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">/* row/page addr */</span></span><br><span class="line">		nand_addr_byte(page &amp; <span class="number">0xff</span>);</span><br><span class="line">		nand_addr_byte((page&gt;&gt;<span class="number">8</span>) &amp; <span class="number">0xff</span>);</span><br><span class="line">		nand_addr_byte((page&gt;&gt;<span class="number">16</span>) &amp; <span class="number">0xff</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">/* 发出30h命令 */</span></span><br><span class="line">		nand_cmd(<span class="number">0x30</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">/* 等待就绪 */</span></span><br><span class="line">		wait_ready();</span><br><span class="line">		</span><br><span class="line">		<span class="comment">/* 读数据 */</span></span><br><span class="line">		<span class="keyword">for</span> (; (col &lt; <span class="number">2048</span>) &amp;&amp; (i &lt; len); col++)</span><br><span class="line">			buf[i++] = nand_data();			</span><br><span class="line">		</span><br><span class="line">		col = <span class="number">0</span>;</span><br><span class="line">		page++;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	nand_deselect(); 	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>我们看到每read一个page，都要重新发送命令地址，因为这里是顺序访问，flash的读写都是以page为单位的。</p>
-<h3><span id="5-1-2-zi-dong-shi-bie-shi-nor-huan-shi-nand-qi-dong">5.1.2 自动识别是nor还是nand启动</span><a href="#5-1-2-zi-dong-shi-bie-shi-nor-huan-shi-nand-qi-dong" class="header-anchor">#</a></h3><p>在init.c文件中，加上如下代码，用来判断所使用的FLASH是NOR FLASH还是NAND FLASH。代码如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*我们知道nand启动0地址对应片内SRAM，可以像内存一样的写0地址；nor启动，0地址对应nor,nor不能像内存一样的写地址，</span></span><br><span class="line"><span class="comment">**所以往0地址写入数据成功表示nand启动，写不成功表示nor启动</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">isBootFromNorFlash</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *p = (<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *)<span class="number">0</span>;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> val = *p;</span><br><span class="line"></span><br><span class="line">	*p = <span class="number">0x12345678</span>;</span><br><span class="line">	<span class="keyword">if</span> (*p == <span class="number">0x12345678</span>) &#123;</span><br><span class="line">		<span class="comment">/* 写成功, 对应nand启动 */</span></span><br><span class="line">		*p = val;</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	&#125; <span class="keyword">else</span></span><br><span class="line">		<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>下面是代码重定位时可以自动区分nand和nor启动，无论是nand启动还是nor启动，都能将程序重定位到sdram中去。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">copy2sdram</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">            <span class="comment">/* 要从lds文件中获得 __code_start, __bss_start</span></span><br><span class="line"><span class="comment">            * 然后从0地址把数据复制到__code_start</span></span><br><span class="line"><span class="comment">        */</span></span><br><span class="line">    </span><br><span class="line">        <span class="keyword">extern</span> <span class="type">int</span> __code_start, __bss_start;</span><br><span class="line">    </span><br><span class="line">        <span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *dest = (<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *)&amp;__code_start;</span><br><span class="line">        <span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *end = (<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *)&amp;__bss_start;</span><br><span class="line">        <span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *src = (<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">int</span> *)<span class="number">0</span>;</span><br><span class="line">        <span class="type">unsigned</span> <span class="type">int</span> len = (<span class="type">unsigned</span> <span class="type">int</span>)(&amp;__bss_start) - (<span class="type">unsigned</span> <span class="type">int</span>)(&amp;__code_start);</span><br><span class="line">    </span><br><span class="line">        <span class="keyword">if</span> (isBootFromNorFlash()) &#123;</span><br><span class="line">              <span class="keyword">while</span> (dest &lt; end)</span><br><span class="line">                    *dest++ = *src++;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    	    nand_init();</span><br><span class="line">    	    nand_read((<span class="type">unsigned</span> <span class="type">int</span>)src, dest, len);</span><br><span class="line">        &#125;</span><br><span class="line"> &#125;</span><br></pre></td></tr></table></figure>
-<h2><span id="5-2-ca-shu-ju">5.2 擦数据</span><a href="#5-2-ca-shu-ju" class="header-anchor">#</a></h2><p>擦除数据以block为单位的。block erase时序图的过程大致如下：<br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/34.png"></p>
-<pre><code>1.首先发送0x60命令
-2.发送row地址（由于擦除是以block为单位的，所以无需知道页内地址，只需要知道要擦除哪个page、哪个block即可）
-3.发送0xd0,执行擦除动作
-4.然后会有一个busy时间段，R/nB为低电平
-5.发送0x70命令，用来读取状态
-6.判断NFDATA寄存器的第0位是否擦除成功
-</code></pre>
-<p>代码实现如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">nand_erase</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> addr, <span class="type">unsigned</span> <span class="type">int</span> len)</span> &#123;</span><br><span class="line">		<span class="type">int</span> page = addr / <span class="number">2048</span>;</span><br><span class="line">	</span><br><span class="line">		<span class="keyword">if</span> (addr &amp; (<span class="number">0x1FFFF</span>)) &#123;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;nand_erase err, addr is not block align\n\r&quot;</span>);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		<span class="keyword">if</span> (len &amp; (<span class="number">0x1FFFF</span>)) &#123;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;nand_erase err, len is not block align\n\r&quot;</span>);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		nand_select(); </span><br><span class="line">	</span><br><span class="line">		<span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">			page = addr / <span class="number">2048</span>;</span><br><span class="line">			</span><br><span class="line">			nand_cmd(<span class="number">0x60</span>);</span><br><span class="line">			</span><br><span class="line">			<span class="comment">/* page addr */</span></span><br><span class="line">			nand_addr_byte(page &amp; <span class="number">0xff</span>);</span><br><span class="line">			nand_addr_byte((page&gt;&gt;<span class="number">8</span>) &amp; <span class="number">0xff</span>);</span><br><span class="line">			nand_addr_byte((page&gt;&gt;<span class="number">16</span>) &amp; <span class="number">0xff</span>);</span><br><span class="line">	</span><br><span class="line">			nand_cmd(<span class="number">0xD0</span>);</span><br><span class="line">	</span><br><span class="line">			wait_ready();</span><br><span class="line">	</span><br><span class="line">			nand_cmd(<span class="number">0x70</span>);</span><br><span class="line">			<span class="keyword">if</span> (nand_data()&amp;<span class="number">0x1</span>) &#123;</span><br><span class="line">				<span class="built_in">printf</span>(<span class="string">&quot;nand_erase err, at addr:0x%x\n\r&quot;</span>, addr);</span><br><span class="line">				<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">			&#125;</span><br><span class="line">	</span><br><span class="line">			len -= (<span class="number">128</span>*<span class="number">1024</span>);</span><br><span class="line">			<span class="keyword">if</span> (len == <span class="number">0</span>)</span><br><span class="line">				<span class="keyword">break</span>;</span><br><span class="line">			addr += (<span class="number">128</span>*<span class="number">1024</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		nand_deselect(); 	</span><br><span class="line">		<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2><span id="5-3-xie-shu-ju">5.3 写数据</span><a href="#5-3-xie-shu-ju" class="header-anchor">#</a></h2><p>写数据以page为单位。往NAND FLASH写数据时，只需要把要写的数据复制给NFDATA寄存器即可。代码如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">nand_w_data</span><span class="params">(<span class="type">unsigned</span> <span class="type">char</span> val)</span> &#123;</span><br><span class="line">	NFDATA = val;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>page write的写时序图如下：<br><img src="/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/35.png"></p>
-<pre><code>1.首先发送0x80命令
-2.发送地址（5个周期）
-3.发送数据
-4.发送0x10命令，执行烧写动作
-4.然后会有一个busy时间段，R/nB为低电平
-5.发送0x70命令，用来读取状态
-6.判断NFDATA寄存器的第0位是否烧写成功
-</code></pre>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">nand_write</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> addr, <span class="type">unsigned</span> <span class="type">char</span> *buf, <span class="type">unsigned</span> <span class="type">int</span> len)</span> &#123;</span><br><span class="line">	<span class="type">int</span> page = addr / <span class="number">2048</span>;</span><br><span class="line">	<span class="type">int</span> col  = addr &amp; (<span class="number">2048</span> - <span class="number">1</span>);</span><br><span class="line">	<span class="type">int</span> i = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	nand_select(); </span><br><span class="line"></span><br><span class="line">	<span class="keyword">while</span> (<span class="number">1</span>) &#123;</span><br><span class="line">		nand_cmd(<span class="number">0x80</span>);</span><br><span class="line"></span><br><span class="line">		<span class="comment">/* 发出地址 */</span></span><br><span class="line">		<span class="comment">/* col addr */</span></span><br><span class="line">		nand_addr_byte(col &amp; <span class="number">0xff</span>);</span><br><span class="line">		nand_addr_byte((col&gt;&gt;<span class="number">8</span>) &amp; <span class="number">0xff</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">/* row/page addr */</span></span><br><span class="line">		nand_addr_byte(page &amp; <span class="number">0xff</span>);</span><br><span class="line">		nand_addr_byte((page&gt;&gt;<span class="number">8</span>) &amp; <span class="number">0xff</span>);</span><br><span class="line">		nand_addr_byte((page&gt;&gt;<span class="number">16</span>) &amp; <span class="number">0xff</span>);</span><br><span class="line"></span><br><span class="line">		<span class="comment">/* 发出数据 */</span></span><br><span class="line">		<span class="keyword">for</span> (; (col &lt; <span class="number">2048</span>) &amp;&amp; (i &lt; len); col++)  <span class="comment">//还需确认</span></span><br><span class="line">			nand_w_data(buf[i++]);</span><br><span class="line">		</span><br><span class="line">		nand_cmd(<span class="number">0x10</span>);</span><br><span class="line">		wait_ready();</span><br><span class="line">        </span><br><span class="line">		nand_cmd(<span class="number">0x70</span>);</span><br><span class="line">		<span class="keyword">if</span> (nand_data() &amp; <span class="number">0x1</span>) &#123;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;nand_write err, at page:0x%x, addr:0x%x\n\r&quot;</span>, page, page&lt;&lt;<span class="number">11</span>);</span><br><span class="line">			<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (i == len)</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line"></span><br><span class="line">		<span class="comment">/* 开始下一个循环page */</span></span><br><span class="line">		col = <span class="number">0</span>;</span><br><span class="line">		page++;	</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	nand_deselect(); 	</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>我们看到每写一个page，都要重新发送命令地址，因为这里是顺序访问，flash的读写都是以page为单位的。</p>
-<h2><span id="5-4-ce-shi">5.4 测试</span><a href="#5-4-ce-shi" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">do_erase_nand_flash</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> addr;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 获得地址 */</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Enter the address of sector to erase: &quot;</span>);</span><br><span class="line">	addr = get_uint();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;erasing ...\n\r&quot;</span>);</span><br><span class="line">	nand_erase(addr, <span class="number">128</span>*<span class="number">1024</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">do_read_nand_flash</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> addr;</span><br><span class="line">	<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">char</span> *p;</span><br><span class="line">	<span class="type">int</span> i, j;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> c;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> str[<span class="number">16</span>];</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> buf[<span class="number">64</span>];</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 获得地址 */</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Enter the address to read: &quot;</span>);</span><br><span class="line">	addr = get_uint();</span><br><span class="line"></span><br><span class="line">	nand_read(addr, buf, <span class="number">64</span>);</span><br><span class="line">	p = (<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">char</span> *)buf;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Data : \n\r&quot;</span>);</span><br><span class="line">	<span class="comment">/* 长度固定为64 */</span></span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">4</span>; i++) &#123;</span><br><span class="line">		<span class="comment">/* 每行打印16个数据 */</span></span><br><span class="line">		<span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; <span class="number">16</span>; j++) &#123;</span><br><span class="line">			<span class="comment">/* 先打印数值 */</span></span><br><span class="line">			c = *p++;</span><br><span class="line">			str[j] = c;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;%02x &quot;</span>, c);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;   ; &quot;</span>);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; <span class="number">16</span>; j++) &#123;</span><br><span class="line">			<span class="comment">/* 后打印字符 */</span></span><br><span class="line">			<span class="keyword">if</span> (str[j] &lt; <span class="number">0x20</span> || str[j] &gt; <span class="number">0x7e</span>)  <span class="comment">/* 不可视字符 */</span></span><br><span class="line">				<span class="built_in">putchar</span>(<span class="string">&#x27;.&#x27;</span>);</span><br><span class="line">			<span class="keyword">else</span></span><br><span class="line">				<span class="built_in">putchar</span>(str[j]);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;\n\r&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> <span class="title function_">do_write_nand_flash</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> addr;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> str[<span class="number">100</span>];</span><br><span class="line">	<span class="type">int</span> i, j;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> val;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 获得地址 */</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Enter the address of sector to write: &quot;</span>);</span><br><span class="line">	addr = get_uint();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Enter the string to write: &quot;</span>);</span><br><span class="line">	gets(str);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;writing ...\n\r&quot;</span>);</span><br><span class="line">	nand_write(addr, str, <span class="built_in">strlen</span>(str)+<span class="number">1</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><strong>说明：本节的读、写、擦都只涉及到页数据区，不涉及到oob区的操作。</strong></p>
-<h2><span id="5-5-pi-kuai-de-biao-ji-he-jie-chu">5.5 坏快的标记和解除</span><a href="#5-5-pi-kuai-de-biao-ji-he-jie-chu" class="header-anchor">#</a></h2><p>Nand Flash怎么标记某一个BLOCK是坏的? 如何识别一个flash中的坏快？ </p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">它使用该BLOCK中第<span class="number">1</span>个扇区的OOB数据中某一个字节来标记: 其值为<span class="number">0xff</span>表示该BLOCK是好的， 其值为非<span class="number">0xff</span>表示该BLOCK是坏的。</span><br><span class="line">在uboot中直接输入“nand bad ”命令即可识别某一个块是否为坏快，在linux用户态的情况下，需要用ioctl(MEMGETBADBLOCK)来获取该block是否为坏快。</span><br><span class="line">有时候我们会误写这个OOB区的值导致有些BLOCK被误认为是<span class="string">&quot;坏块&quot;</span>,可以在u-boot中执行<span class="string">&quot;nand scrub&quot;</span>后, 根据提示信息输入小写字母<span class="string">&#x27;y&#x27;</span>并回车, 它会强制擦除整个Nand <span class="title function_">Flash</span><span class="params">(包括把OOB擦除为<span class="number">0xff</span>)</span>, 这样就可以恢复被误标为坏块的区域了。</span><br></pre></td></tr></table></figure>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/" data-id="clzp8utt800269ouffeeq8zbv" data-title="s3c2440裸机编程-nandflash" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-s3c2440裸机编程-ADC" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-ADC/" class="article-date">
-  <time class="dt-published" datetime="2024-04-16T11:57:19.000Z" itemprop="datePublished">2024-04-16</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-ADC/">s3c2440裸机编程-ADC</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-adc-ying-jian-yuan-li">1 ADC硬件原理</a><ul>
-<li><a href="#1-1-adc-shu-xing">1.1 ADC属性</a></li>
-<li><a href="#1-2-adc-kuang-tu">1.2 ADC框图</a></li>
-</ul>
-</li>
-<li><a href="#2-adc-ji-cun-qi">2 ADC寄存器</a><ul>
-<li><a href="#2-1-kong-zhi-ji-cun-qi-adccon">2.1 控制寄存器（ADCCON）</a></li>
-<li><a href="#2-2-qi-dong-yan-shi-ji-cun-qi-adcdly">2.2 启动延时寄存器（ADCDLY）</a></li>
-<li><a href="#2-3-shu-ju-ji-cun-qi-adcdat0">2.3 数据寄存器（ADCDAT0）</a></li>
-</ul>
-</li>
-<li><a href="#3-bian-cheng-ce-shi">3 编程测试</a></li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-adc-ying-jian-yuan-li">1 ADC硬件原理</span><a href="#1-adc-ying-jian-yuan-li" class="header-anchor">#</a></h1><p>模数转换器即A&#x2F;D转换器，或简称ADC，通常是指一个将模拟信号转变为数字信号的电子元件。</p>
-<p>如图，把可变电阻上的电压值变换的模拟信号通过ADC转换，输出数字信号。以s3c2440为例：<br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-ADC/1.jpg"></p>
-<h2><span id="1-1-adc-shu-xing">1.1  ADC属性</span><a href="#1-1-adc-shu-xing" class="header-anchor">#</a></h2><p>对于数字信号我们需要得到它的2个属性：</p>
-<ol>
-<li><p>转换精度：<br>用多少位来存储这个数据（假如是10 bit）。那么最大值0b111111111对应3.3v， 0b0对应0v。</p>
-</li>
-<li><p>采样&#x2F;转换速度：</p>
-</li>
-</ol>
-<p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-ADC/2.png"><br>可以看出s3c2440的转换精度可达10 bit, 转换速率可达 500ksps.</p>
-<h2><span id="1-2-adc-kuang-tu">1.2 ADC框图</span><a href="#1-2-adc-kuang-tu" class="header-anchor">#</a></h2><p>下图是s3c2440芯片的ADC转换框图：<br><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-ADC/3.png"></p>
-<p>可以看出AD converter前有一个MUX选择器，用来选择模拟输入源，这里选择A[3:0]作为输入源。</p>
-<p>下面是编写程序要做的步骤：</p>
-<pre><code>1.确定是哪一路信号：设置8：1MUX
-2.设置工作时钟
-3.启动ADC
-4.读状态，判断ADC转换是否成功。
-5.读数据
-</code></pre>
-<h1><span id="2-adc-ji-cun-qi">2 ADC寄存器</span><a href="#2-adc-ji-cun-qi" class="header-anchor">#</a></h1><h2><span id="2-1-kong-zhi-ji-cun-qi-adccon">2.1 控制寄存器（ADCCON）</span><a href="#2-1-kong-zhi-ji-cun-qi-adccon" class="header-anchor">#</a></h2><p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-ADC/4.png"></p>
-<pre><code>bit[15]：只读，用来表示转换是否完成
-bit[14:6]:用来设置adc频率（如果是auto TSC则不用设置该位）
-bit[5：3]:用来选择模拟输入源
-bit[2]:用来设置是否待机
-bit[0]:用来启动adc
-</code></pre>
-<h2><span id="2-2-qi-dong-yan-shi-ji-cun-qi-adcdly">2.2 启动延时寄存器（ADCDLY）</span><a href="#2-2-qi-dong-yan-shi-ji-cun-qi-adcdly" class="header-anchor">#</a></h2><p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-ADC/5.png"></p>
-<h2><span id="2-3-shu-ju-ji-cun-qi-adcdat0">2.3 数据寄存器（ADCDAT0）</span><a href="#2-3-shu-ju-ji-cun-qi-adcdat0" class="header-anchor">#</a></h2><p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-ADC/6.png"></p>
-<pre><code>bit[9:0]表示转换后的数据
-</code></pre>
-<h1><span id="3-bian-cheng-ce-shi">3 编程测试</span><a href="#3-bian-cheng-ce-shi" class="header-anchor">#</a></h1><p><img src="/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-ADC/7.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">adc_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	ADCCON = (<span class="number">1</span>&lt;&lt;<span class="number">14</span>) | (<span class="number">49</span>&lt;&lt;<span class="number">6</span>) | (<span class="number">0</span>&lt;&lt;<span class="number">3</span>); <span class="comment">//设置输入源AIN0, ADC时钟为1Mhz,并且使能预分频</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="type">int</span> <span class="title function_">adc_read_ain0</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">		<span class="comment">/* 启动ADC */</span></span><br><span class="line">	ADCCON |= (<span class="number">1</span>&lt;&lt;<span class="number">0</span>);</span><br><span class="line">	<span class="keyword">while</span> (!(ADCCON &amp; (<span class="number">1</span>&lt;&lt;<span class="number">15</span>)));  <span class="comment">/* 等待ADC结束 */</span></span><br><span class="line">	<span class="keyword">return</span> ADCDAT0 &amp; <span class="number">0x3ff</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-ADC/" data-id="clzp8utt6001o9oufgwra5u3e" data-title="s3c2440裸机编程-ADC" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
     
-    <a class="extend prev" rel="prev" href="/page/5/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/7/">Next &raquo;</a>
+    <a class="extend prev" rel="prev" href="/page/5/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/7/">Next &raquo;</a>
   </nav>
 
 </section>
@@ -2465,7 +2284,7 @@ bit[0]:用来启动adc
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13px;">通信协议</a>
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 11px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13px;">通信协议</a>
     </div>
   </div>
 
@@ -2487,6 +2306,14 @@ bit[0]:用来启动adc
       <ul>
         
           <li>
+            <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-input%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-input子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-I2C%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-I2C子系统</a>
+          </li>
+        
+          <li>
             <a href="/2024/08/18/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E5%86%85%E6%A0%B8led%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-内核led子系统</a>
           </li>
         
@@ -2496,14 +2323,6 @@ bit[0]:用来启动adc
         
           <li>
             <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-gpio%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-gpio子系统</a>
-          </li>
-        
-          <li>
-            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/">字符设备驱动-用户态构造IP寄存器结构体和读写寄存器</a>
-          </li>
-        
-          <li>
-            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/">字符设备驱动-ioctl命令详解</a>
           </li>
         
       </ul>

@@ -47,7 +47,7 @@
 <meta property="og:image" content="http://example.com/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/30.png">
 <meta property="og:image" content="http://example.com/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/31.png">
 <meta property="article:published_time" content="2024-05-26T11:03:01.000Z">
-<meta property="article:modified_time" content="2024-08-17T12:12:03.329Z">
+<meta property="article:modified_time" content="2024-08-24T15:43:30.176Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="linux嵌入式环境搭建">
 <meta name="twitter:card" content="summary">
@@ -171,9 +171,15 @@
 <li><a href="#3-10-typeset-huo-zhe-declare">3.10 typeset或者declare</a></li>
 <li><a href="#3-11-unset">3.11 unset</a></li>
 <li><a href="#3-12-readonly">3.12 readonly</a></li>
-<li><a href="#3-13-sed">3.13 sed</a></li>
+<li><a href="#3-13-sed">3.13 sed</a><ul>
+<li><a href="#3-13-1-mu-lu-di-gui-ti-huan-zi-fu">3.13.1 目录递归替换字符</a></li>
+<li><a href="#3-13-2-qu-diao-yi-xing-zhong-duo-yu-de-kong-ge">3.13.2 去掉一行中多余的空格</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li><a href="#4-shell-jiao-ben-ru-he-cha-kan-jiang-yao-zhi-xing-de-ming-ling">4 shell脚本如何查看将要执行的命令</a></li>
+<li><a href="#5-bao-cun-log-dao-wen-ben">5 保存log到文本</a></li>
 </ul>
 <!-- tocstop -->
 
@@ -253,9 +259,14 @@
 
 <h2><span id="3-11-unset">3.11 unset</span><a href="#3-11-unset" class="header-anchor">#</a></h2><p>清除变量值.</p>
 <h2><span id="3-12-readonly">3.12 readonly</span><a href="#3-12-readonly" class="header-anchor">#</a></h2><p>只读变量.</p>
-<h2><span id="3-13-sed">3.13 sed</span><a href="#3-13-sed" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">find /path/to/dir -<span class="built_in">type</span> f -name <span class="string">&quot;*.[c-h]&quot;</span> -<span class="built_in">exec</span> sed -i <span class="string">&#x27;s/oldstring/newstring/g&#x27;</span> &#123;&#125; +</span><br></pre></td></tr></table></figure>
-
+<h2><span id="3-13-sed">3.13 sed</span><a href="#3-13-sed" class="header-anchor">#</a></h2><h3><span id="3-13-1-mu-lu-di-gui-ti-huan-zi-fu">3.13.1 目录递归替换字符</span><a href="#3-13-1-mu-lu-di-gui-ti-huan-zi-fu" class="header-anchor">#</a></h3><p><code>find /path/to/dir -type f -name &quot;*.[c-h]&quot; -exec sed -i &#39;s/oldstring/newstring/g&#39; &#123;&#125; +</code></p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">find /path/to/dir：找到指定目录/path/to/dir下的所有文件。</span><br><span class="line">-<span class="built_in">type</span> f：仅查找文件。</span><br><span class="line">-name <span class="string">&quot;*.txt&quot;</span>：限制文件名以.txt结尾。</span><br><span class="line">-<span class="built_in">exec</span>：对找到的每个文件执行后面的命令。</span><br><span class="line">sed -i：使用sed进行替换，-i表示直接修改文件内容。</span><br><span class="line"><span class="string">&#x27;s/oldstring/newstring/g&#x27;</span>：sed的替换表达式，g表示全局替换。</span><br><span class="line">&#123;&#125;：表示find找到的文件名。</span><br><span class="line">+：结束-<span class="built_in">exec</span>命令，批量处理匹配到的文件。</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-13-2-qu-diao-yi-xing-zhong-duo-yu-de-kong-ge">3.13.2 去掉一行中多余的空格</span><a href="#3-13-2-qu-diao-yi-xing-zhong-duo-yu-de-kong-ge" class="header-anchor">#</a></h3><p><code>sed -i &#39;s/[[:space:]]\+/ /g&#39; array.sh</code><br><code>s/[[:space:]]\+/ /g</code> 是替换命令，它会将一个或多个空白字符（包括空格、制表符等）替换为单个空格.</p>
+<h1><span id="4-shell-jiao-ben-ru-he-cha-kan-jiang-yao-zhi-xing-de-ming-ling">4 shell脚本如何查看将要执行的命令</span><a href="#4-shell-jiao-ben-ru-he-cha-kan-jiang-yao-zhi-xing-de-ming-ling" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">set</span> -x</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Hello, World!&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h1><span id="5-bao-cun-log-dao-wen-ben">5 保存log到文本</span><a href="#5-bao-cun-log-dao-wen-ben" class="header-anchor">#</a></h1><p><code>make all &gt; build_osdrv.log 2&gt;&amp;1</code></p>
+
       
     </div>
     <footer class="article-footer">
@@ -313,7 +324,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 12px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13px;">通信协议</a>
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 11px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13px;">通信协议</a>
     </div>
   </div>
 
@@ -335,6 +346,14 @@
       <ul>
         
           <li>
+            <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-input%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-input子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-I2C%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-I2C子系统</a>
+          </li>
+        
+          <li>
             <a href="/2024/08/18/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E5%86%85%E6%A0%B8led%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-内核led子系统</a>
           </li>
         
@@ -344,14 +363,6 @@
         
           <li>
             <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-gpio%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-gpio子系统</a>
-          </li>
-        
-          <li>
-            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E7%94%A8%E6%88%B7%E6%80%81%E6%9E%84%E9%80%A0IP%E5%AF%84%E5%AD%98%E5%99%A8%E7%BB%93%E6%9E%84%E4%BD%93%E5%92%8C%E8%AF%BB%E5%86%99%E5%AF%84%E5%AD%98%E5%99%A8/">字符设备驱动-用户态构造IP寄存器结构体和读写寄存器</a>
-          </li>
-        
-          <li>
-            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-ioctl%E5%91%BD%E4%BB%A4%E8%AF%A6%E8%A7%A3/">字符设备驱动-ioctl命令详解</a>
           </li>
         
       </ul>
