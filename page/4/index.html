@@ -276,7 +276,7 @@ messages    messages.0  messages.1  messages.2  messages.3
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/" data-id="clzp8utsw00069ouf2g340fbd" data-title="Linux内核-rootfs构建移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/" data-id="cm0dxg1430006dsuf72vd9ksr" data-title="Linux内核-rootfs构建移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -503,7 +503,7 @@ messages    messages.0  messages.1  messages.2  messages.3
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" data-id="clzp8utsy000e9oufe83h6ohz" data-title="Linux内核启动流程" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" data-id="cm0dxg145000ddsuf45tpfqo0" data-title="Linux内核启动流程" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -814,7 +814,7 @@ messages    messages.0  messages.1  messages.2  messages.3
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/" data-id="clzp8utsx000b9ouf7fxv26ql" data-title="Linux内核Makefile编译过程" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/" data-id="cm0dxg1440008dsufcq2fa7qf" data-title="Linux内核Makefile编译过程" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1179,7 +1179,7 @@ messages    messages.0  messages.1  messages.2  messages.3
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/18/Linux%E5%86%85%E6%A0%B8%E9%A1%B6%E5%B1%82Makefile%E8%AF%A6%E8%A7%A3/" data-id="clzp8utt6001r9ouf6cnue8v6" data-title="Linux内核顶层Makefile详解" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/07/18/Linux%E5%86%85%E6%A0%B8%E9%A1%B6%E5%B1%82Makefile%E8%AF%A6%E8%A7%A3/" data-id="cm0dxg14e0029dsuf8vh8hyce" data-title="Linux内核顶层Makefile详解" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1232,7 +1232,7 @@ messages    messages.0  messages.1  messages.2  messages.3
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/06/29/hello-world/" data-id="clzp8utt2000y9oufemn17ko6" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/06/29/hello-world/" data-id="cm0dxg148000zdsufaqx1glto" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1317,6 +1317,7 @@ messages    messages.0  messages.1  messages.2  messages.3
 <li><a href="#3-3-5-words">3.3.5 <code>words</code></a></li>
 <li><a href="#3-3-6-firstword-lastword">3.3.6 <code>firstword/lastword </code></a></li>
 <li><a href="#3-3-7-call">3.3.7 <code>call</code></a></li>
+<li><a href="#3-3-8-info">3.3.8 <code>info</code></a></li>
 </ul>
 </li>
 <li><a href="#3-4-vpath-xuan-xiang">3.4 VPATH选项</a></li>
@@ -1538,6 +1539,9 @@ messages    messages.0  messages.1  messages.2  messages.3
 <h3><span id="3-3-7-call">3.3.7  <code>call</code></span><a href="#3-3-7-call" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">func = $1.$2</span><br><span class="line">foo = <span class="variable">$(<span class="built_in">call</span> func,a,b)</span></span><br><span class="line"><span class="section">all:</span></span><br><span class="line">    @echo <span class="variable">$(foo)</span></span><br></pre></td></tr></table></figure>
 
 <p>结果：<code>a.b</code>, 子函数调用，数的参数会被赋值给临时参数·&#x3D;<code>\$1,\$2,\$0</code>则代表函数名本身.</p>
+<h3><span id="3-3-8-info">3.3.8 <code>info</code></span><a href="#3-3-8-info" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ifeq</span> (<span class="variable">$(KERNEL_DIR)</span>, )</span><br><span class="line"><span class="variable">$(info Please set KERNEL_DIR global variable!!)</span></span><br><span class="line"><span class="keyword">endif</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ifeq</span> (<span class="variable">$(INSTALL_DIR)</span>, )</span><br><span class="line">INSTALL_DIR = ko</span><br><span class="line"><span class="keyword">endif</span></span><br><span class="line">CUR_DIR = <span class="variable">$(PWD)</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$(info ** [ KERNEL_DIR ] ** = <span class="variable">$(KERNEL_DIR)</span>)</span></span><br><span class="line"><span class="variable">$(info ** [ INSTALL_DIR ] ** = <span class="variable">$(INSTALL_DIR)</span>)</span></span><br></pre></td></tr></table></figure>
+
+<p>可以执行目标前先打印信息。</p>
 <h2><span id="3-4-vpath-xuan-xiang">3.4 VPATH选项</span><a href="#3-4-vpath-xuan-xiang" class="header-anchor">#</a></h2><p>VPATH中添加的目录，即使是文件处于其他目录，我们也可以像操作当前目录一样操作其他目录的文件，例如：</p>
 <figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">VPATH += src</span><br><span class="line"><span class="section">all:foo.c</span></span><br><span class="line">cc <span class="variable">$^</span> -o <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
 
@@ -1738,7 +1742,7 @@ test has been built!
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/" data-id="clzp8utt0000q9oufatsdh30d" data-title="Makefile-常用函数和通用模板" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/" data-id="cm0dxg146000pdsufazvdbxdd" data-title="Makefile-常用函数和通用模板" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1838,7 +1842,7 @@ test has been built!
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/" data-id="clzp8utta002n9oufc85lgodp" data-title="uboot-menuconfig和Kconfig图像化配置" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/" data-id="cm0dxg14g002sdsuf5dd4h2m2" data-title="uboot-menuconfig和Kconfig图像化配置" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -2046,7 +2050,7 @@ test has been built!
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/" data-id="clzp8utta002i9ouf8rq7gdvx" data-title="uboot-bootm和bootz启动内核" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/06/23/uboot-bootm%E5%92%8Cbootz%E5%90%AF%E5%8A%A8%E5%86%85%E6%A0%B8/" data-id="cm0dxg14f002ndsuf8vaegnz2" data-title="uboot-bootm和bootz启动内核" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -2258,7 +2262,7 @@ test has been built!
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" data-id="clzp8uttb002s9oufe9wt9sac" data-title="uboot-启动流程" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/06/23/uboot-%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" data-id="cm0dxg14f002pdsuf17aj3tmw" data-title="uboot-启动流程" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -2363,7 +2367,7 @@ test has been built!
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/06/23/uboot-%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AClds%E5%88%86%E6%9E%90/" data-id="clzp8uttb002u9oufcrfygopr" data-title="uboot-链接脚本lds分析" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/06/23/uboot-%E9%93%BE%E6%8E%A5%E8%84%9A%E6%9C%AClds%E5%88%86%E6%9E%90/" data-id="cm0dxg14g0031dsuff89nbo5b" data-title="uboot-链接脚本lds分析" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       

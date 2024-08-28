@@ -123,7 +123,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" data-id="clzp8utt4001a9ouf7fnnbpok" data-title="linux搭建nfs服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" data-id="cm0dxg14a001bdsufgir3eqnk" data-title="linux搭建nfs服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -183,9 +183,10 @@
 
 </div>
 
-<h1><span id="1-an-zhuang-tftp-fu-wu-he-ke-hu-duan">1 安装tftp服务和客户端</span><a href="#1-an-zhuang-tftp-fu-wu-he-ke-hu-duan" class="header-anchor">#</a></h1><pre><code>sudo apt-get install xinetd tftp tftpd
-</code></pre>
-<h2><span id="1-1-pei-zhi">1.1 配置</span><a href="#1-1-pei-zhi" class="header-anchor">#</a></h2><p>vim &#x2F;etc&#x2F;xinetd.d&#x2F;tftp<br>内容如下：</p>
+<h1><span id="1-an-zhuang-tftp-fu-wu-he-ke-hu-duan">1 安装tftp服务和客户端</span><a href="#1-an-zhuang-tftp-fu-wu-he-ke-hu-duan" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install xinetd tftp tftpd</span><br></pre></td></tr></table></figure>
+
+
+<h2><span id="1-1-pei-zhi">1.1 配置</span><a href="#1-1-pei-zhi" class="header-anchor">#</a></h2><p><code>vim /etc/xinetd.d/tftp</code><br>内容如下：</p>
 <pre><code>service tftp
 &#123;
         socket_type     		= dgram
@@ -231,7 +232,7 @@ sudo /etc/init.d/vsftpd restart
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" data-id="clzp8utt5001f9ouf3hfpa0ir" data-title="linux搭建tftp和ftp服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" data-id="cm0dxg14b001ndsufhziebpho" data-title="linux搭建tftp和ftp服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       

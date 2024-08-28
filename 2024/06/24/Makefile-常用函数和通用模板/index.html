@@ -19,7 +19,7 @@
 <meta property="og:image" content="http://example.com/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/4.png">
 <meta property="og:image" content="http://example.com/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/5.png">
 <meta property="article:published_time" content="2024-06-24T14:19:55.000Z">
-<meta property="article:modified_time" content="2024-06-29T11:28:31.565Z">
+<meta property="article:modified_time" content="2024-08-27T15:17:29.668Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="linux系统构建">
 <meta property="article:tag" content="linux嵌入式环境搭建">
@@ -153,6 +153,7 @@
 <li><a href="#3-3-5-words">3.3.5 <code>words</code></a></li>
 <li><a href="#3-3-6-firstword-lastword">3.3.6 <code>firstword/lastword </code></a></li>
 <li><a href="#3-3-7-call">3.3.7 <code>call</code></a></li>
+<li><a href="#3-3-8-info">3.3.8 <code>info</code></a></li>
 </ul>
 </li>
 <li><a href="#3-4-vpath-xuan-xiang">3.4 VPATH选项</a></li>
@@ -374,6 +375,9 @@
 <h3><span id="3-3-7-call">3.3.7  <code>call</code></span><a href="#3-3-7-call" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">func = $1.$2</span><br><span class="line">foo = <span class="variable">$(<span class="built_in">call</span> func,a,b)</span></span><br><span class="line"><span class="section">all:</span></span><br><span class="line">    @echo <span class="variable">$(foo)</span></span><br></pre></td></tr></table></figure>
 
 <p>结果：<code>a.b</code>, 子函数调用，数的参数会被赋值给临时参数·&#x3D;<code>\$1,\$2,\$0</code>则代表函数名本身.</p>
+<h3><span id="3-3-8-info">3.3.8 <code>info</code></span><a href="#3-3-8-info" class="header-anchor">#</a></h3><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">ifeq</span> (<span class="variable">$(KERNEL_DIR)</span>, )</span><br><span class="line"><span class="variable">$(info Please set KERNEL_DIR global variable!!)</span></span><br><span class="line"><span class="keyword">endif</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">ifeq</span> (<span class="variable">$(INSTALL_DIR)</span>, )</span><br><span class="line">INSTALL_DIR = ko</span><br><span class="line"><span class="keyword">endif</span></span><br><span class="line">CUR_DIR = <span class="variable">$(PWD)</span></span><br><span class="line"></span><br><span class="line"><span class="variable">$(info ** [ KERNEL_DIR ] ** = <span class="variable">$(KERNEL_DIR)</span>)</span></span><br><span class="line"><span class="variable">$(info ** [ INSTALL_DIR ] ** = <span class="variable">$(INSTALL_DIR)</span>)</span></span><br></pre></td></tr></table></figure>
+
+<p>可以执行目标前先打印信息。</p>
 <h2><span id="3-4-vpath-xuan-xiang">3.4 VPATH选项</span><a href="#3-4-vpath-xuan-xiang" class="header-anchor">#</a></h2><p>VPATH中添加的目录，即使是文件处于其他目录，我们也可以像操作当前目录一样操作其他目录的文件，例如：</p>
 <figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">VPATH += src</span><br><span class="line"><span class="section">all:foo.c</span></span><br><span class="line">cc <span class="variable">$^</span> -o <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
 
@@ -574,7 +578,7 @@ test has been built!
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/" data-id="clzp8utt0000q9oufatsdh30d" data-title="Makefile-常用函数和通用模板" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/" data-id="cm0dxg146000pdsufazvdbxdd" data-title="Makefile-常用函数和通用模板" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
