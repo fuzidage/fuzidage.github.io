@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>tslib移植使用 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 获取 tslib 源码 2 修改 tslib 源码所属用户 3 ubuntu 工具安装 4 编译 tslib 5 配置 tslib 6 tslib 测试 6.1 ts_test_mt        1 获取 tslib 源码#https:&#x2F;&#x2F;github.com&#x2F;libts&#x2F;tslibgit clone https:&#x2F;&#x2F;github.com&#x2F;libts&#x2F;tslib.git 2 修改">
+<meta property="og:type" content="article">
+<meta property="og:title" content="tslib移植使用">
+<meta property="og:url" content="http://example.com/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 获取 tslib 源码 2 修改 tslib 源码所属用户 3 ubuntu 工具安装 4 编译 tslib 5 配置 tslib 6 tslib 测试 6.1 ts_test_mt        1 获取 tslib 源码#https:&#x2F;&#x2F;github.com&#x2F;libts&#x2F;tslibgit clone https:&#x2F;&#x2F;github.com&#x2F;libts&#x2F;tslib.git 2 修改">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/1.png">
+<meta property="og:image" content="http://example.com/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/2.png">
+<meta property="og:image" content="http://example.com/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/3.png">
+<meta property="article:published_time" content="2024-05-26T15:59:59.000Z">
+<meta property="article:modified_time" content="2024-08-29T16:27:28.007Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="开源插件">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-tslib移植使用" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/" class="article-date">
+  <time class="dt-published" datetime="2024-05-26T15:59:59.000Z" itemprop="datePublished">2024-05-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      tslib移植使用
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-huo-qu-tslib-yuan-ma">1 获取 tslib 源码</a></li>
+<li><a href="#2-xiu-gai-tslib-yuan-ma-suo-shu-yong-hu">2 修改 tslib 源码所属用户</a></li>
+<li><a href="#3-ubuntu-gong-ju-an-zhuang">3 ubuntu 工具安装</a></li>
+<li><a href="#4-bian-yi-tslib">4 编译 tslib</a></li>
+<li><a href="#5-pei-zhi-tslib">5 配置 tslib</a></li>
+<li><a href="#6-tslib-ce-shi">6 tslib 测试</a><ul>
+<li><a href="#6-1-ts-test-mt">6.1 ts_test_mt</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-huo-qu-tslib-yuan-ma">1 获取 tslib 源码</span><a href="#1-huo-qu-tslib-yuan-ma" class="header-anchor">#</a></h1><p><a target="_blank" rel="noopener" href="https://github.com/libts/tslib">https://github.com/libts/tslib</a><br>git clone <a target="_blank" rel="noopener" href="https://github.com/libts/tslib.git">https://github.com/libts/tslib.git</a></p>
+<h1><span id="2-xiu-gai-tslib-yuan-ma-suo-shu-yong-hu">2 修改 tslib 源码所属用户</span><a href="#2-xiu-gai-tslib-yuan-ma-suo-shu-yong-hu" class="header-anchor">#</a></h1><p><code>sudo chown book:book tslib-1.21 -R</code><br>这一步一定要做！否则在稍后的编译中会遇到各种问题。</p>
+<h1><span id="3-ubuntu-gong-ju-an-zhuang">3 ubuntu 工具安装</span><a href="#3-ubuntu-gong-ju-an-zhuang" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install autoconf</span><br><span class="line">sudo apt-get install automake</span><br><span class="line">sudo apt-get install libtool</span><br></pre></td></tr></table></figure>
+<h1><span id="4-bian-yi-tslib">4 编译 tslib</span><a href="#4-bian-yi-tslib" class="header-anchor">#</a></h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd tslib<span class="number">-1.21</span>/ <span class="comment">//进入 tslib 源码目录</span></span><br><span class="line">./autogen.sh</span><br><span class="line">./configure --host=arm-linux-gnueabihf --prefix=/home/zuozhongkai/linux/IMX6ULL/tool/tslib</span><br><span class="line">make <span class="comment">//编译</span></span><br><span class="line">make install <span class="comment">//安装</span></span><br></pre></td></tr></table></figure>
+<p><code>“--host”</code>参数指定编译器，<code>“--prefix”</code>参数指定编译完成以后的 tslib 文件安装到哪里.<br>完成以后 tslib 目录下的内容如下：<br><img src="/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/1.png" alt="image"><br>把所有文件拷贝到开发板的根文件系统中：<br><code>sudo cp * -rf /home/zuozhongkai/linux/nfs/rootfs</code></p>
+<h1><span id="5-pei-zhi-tslib">5 配置 tslib</span><a href="#5-pei-zhi-tslib" class="header-anchor">#</a></h1><p>打开<code>/etc/ts.conf</code> 文件，找到下面这一行：<br><code>module_raw input</code><br>打开<code>/etc/profile </code>文件，在里面加入如下内容：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> TSLIB_TSDEVICE=/dev/input/event1</span><br><span class="line"><span class="built_in">export</span> TSLIB_CALIBFILE=/etc/pointercal</span><br><span class="line"><span class="built_in">export</span> TSLIB_CONFFILE=/etc/ts.conf</span><br><span class="line"><span class="built_in">export</span> TSLIB_PLUGINDIR=/lib/ts</span><br><span class="line"><span class="built_in">export</span> TSLIB_CONSOLEDEVICE=none</span><br><span class="line"><span class="built_in">export</span> TSLIB_FBDEVICE=/dev/fb0</span><br></pre></td></tr></table></figure>
+<p><code>TSLIB_TSDEVICE</code> 表示触摸设备文件，这里设置为<code>/dev/input/event1</code>，这个要根据具体情况设置，如果你的触摸设备文件为 event2 那么就应该设置为<code>/dev/input/event2</code>，以此类推。<br><code>TSLIB_CALIBFILE</code> 表示校准文件，如果进行屏幕校准的话校准结果就保存在这个文件中，这里设置校准文件为&#x2F;etc&#x2F;pointercal，此文件可以不存在，校准的时候会自动生成。<br><code>TSLIB_CONFFILE </code>表示触摸配置文件，文件为<code>/etc/ts.conf</code>，此文件在移植 tslib 的时候会生成。<br><code>TSLIB_PLUGINDIR </code>表示 tslib 插件目录位置，目录为&#x2F;lib&#x2F;ts。<br><code>TSLIB_CONSOLEDEVICE </code>表示控制台设置，这里不设置，因此为 none。<br><code>TSLIB_FBDEVICE </code>表示 FB 设备，也就是屏幕，根据实际情况配置，我的屏幕文件为<code>/dev/fb0</code>，因此这里设置为<code>/dev/fb0</code>。</p>
+<h1><span id="6-tslib-ce-shi">6 tslib 测试</span><a href="#6-tslib-ce-shi" class="header-anchor">#</a></h1><p>一般电容屏可以不用校准，如果是电阻屏就要先进行校准。<br>输入<code>ts_calibrate</code><br>校准完成以后如果不满意，或者不小心对电容屏做了校准，那么直接删除掉<code>/etc/pointercal</code>文件即可。</p>
+<h2><span id="6-1-ts-test-mt">6.1 ts_test_mt</span><a href="#6-1-ts-test-mt" class="header-anchor">#</a></h2><p>此命令会打开一个触摸测试界面：<br><img src="/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/2.png" alt="image"><br>Drag：拖拽按钮，默认就是此功能，大家可以看到屏幕中间有一个十字光标，我们可以通过触摸屏幕来拖拽此光标。一个触摸点一个十字光标，对于 5 点电容触摸屏，如果 5 个手指都放到屏幕上，那么就有 5 个光标，一个手指一个。<br>Draw：绘制按钮，按下此按钮我们就可以在屏幕上进行简单的绘制，可以通过此功能检测多点触摸工作是否正常。<br>Quit：退出按钮，退出 ts_test_mt 测试软件。<br>点击“Draw”按钮，使用绘制功能，5 个手指一起划过屏幕，如果多点电容屏工作正常的话就会在屏幕上留下 5 条线：<br><img src="/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/3.png" alt="image"><br>可以看到有5条横线。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/" data-id="cm0fh8fa30000r4ufhrlqgff6" data-title="tslib移植使用" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2024/06/02/Linux%E6%97%A5%E5%BF%97%E7%AE%A1%E7%90%86-syslog%E5%92%8Crsyslog/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Linux日志管理-syslog和rsyslog
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">linux基本命令集合</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">linux内存管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.33px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.67px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15.83px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.5px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19.17px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.67px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15.83px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.83px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.5px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.33px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.67px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 14.17px;">通信协议</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">August 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">July 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-input%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-input子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-I2C%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-I2C子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/18/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-%E5%86%85%E6%A0%B8led%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-内核led子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/18/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-pinctrl%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-pinctrl子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-gpio%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-gpio子系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

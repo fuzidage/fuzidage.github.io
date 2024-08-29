@@ -69,6 +69,193 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-tailq队列" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/04/11/tailq%E9%98%9F%E5%88%97/" class="article-date">
+  <time class="dt-published" datetime="2024-04-11T06:15:23.000Z" itemprop="datePublished">2024-04-11</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/04/11/tailq%E9%98%9F%E5%88%97/">tailq队列</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-tailq-dui-lie-jie-shao">1 tailq队列介绍</a><ul>
+<li><a href="#1-1-queue-jian-jie">1.1 queue 简介</a></li>
+<li><a href="#1-2-slist">1.2 SLIST</a></li>
+<li><a href="#1-3-stailq">1.3 STAILQ</a></li>
+<li><a href="#1-4-list">1.4 LIST</a></li>
+<li><a href="#1-5-tailq">1.5 TAILQ</a></li>
+<li><a href="#1-6-circleq">1.6 CIRCLEQ</a></li>
+</ul>
+</li>
+<li><a href="#2-tailq-shi-xian-yuan-li-tu-jie">2 TAILQ实现原理图解</a><ul>
+<li><a href="#2-1-miao-shu-qian-yi-ge-he-xia-yi-ge-yuan-su-de-jie-gou">2.1 描述前一个和下一个元素的结构</a></li>
+<li><a href="#2-2-dui-lie-tou">2.2 队列头</a></li>
+<li><a href="#2-3-chu-shi-hua">2.3 初始化</a></li>
+<li><a href="#2-4-cha-ru-yuan-su">2.4 插入元素</a><ul>
+<li><a href="#2-4-1-cha-ru-1-ge-yuan-su">2.4.1 插入1个元素</a></li>
+<li><a href="#2-4-2-tong-li-cha-ru-duo-ge-yuan-su">2.4.2 同理插入多个元素</a></li>
+</ul>
+</li>
+<li><a href="#2-5-shan-chu-yuan-su">2.5 删除元素</a></li>
+<li><a href="#2-6-di-yi-ge-yuan-su">2.6 第一个元素</a></li>
+<li><a href="#2-7-zui-hou-yi-ge-yuan-su">2.7 最后一个元素</a></li>
+<li><a href="#2-8-xia-yi-ge-yuan-su">2.8 下一个元素</a></li>
+<li><a href="#2-9-qian-yi-ge-yuan-su">2.9 前一个元素</a></li>
+<li><a href="#2-10-pan-kong">2.10 判空</a></li>
+<li><a href="#2-11-pan-man">2.11 判满</a></li>
+<li><a href="#2-12-bian-li">2.12 遍历</a></li>
+<li><a href="#2-13-dao-bian-li">2.13 倒遍历</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-tailq-dui-lie-jie-shao">1 tailq队列介绍</span><a href="#1-tailq-dui-lie-jie-shao" class="header-anchor">#</a></h1><p>TAILQ队列是FreeBSD内核中的一种队列数据结构，主要是把队列头抽象成一个单独的结构体。它实现在Linux queue中。</p>
+<h2><span id="1-1-queue-jian-jie">1.1 queue 简介</span><a href="#1-1-queue-jian-jie" class="header-anchor">#</a></h2><p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/1.png" alt="img"></p>
+<p>可以include &lt;sys&#x2F;queue.h&gt;后直接使用。queue 分为 SLIST、LIST、STAILQ、TAILQ、CIRCLEQ 。queue 的所有源码都是宏定义，因此完全包含于queue.h当中，无需编译为库文件。</p>
+<p>可以从toolchains或者系统路径&#x2F;usr&#x2F;include&#x2F;x86_64-linux-gnu&#x2F;sys&#x2F;queue.h找到实现。</p>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/2.png" alt="img"></p>
+<h2><span id="1-2-slist">1.2 SLIST</span><a href="#1-2-slist" class="header-anchor">#</a></h2><p>SLIST 是Singly-linked List 的缩写，意为单向无尾链表。</p>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/3.png" alt="img"></p>
+<h2><span id="1-3-stailq">1.3 STAILQ</span><a href="#1-3-stailq" class="header-anchor">#</a></h2><p>单向有尾链表，节点n为尾节点。</p>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/4.png" alt="img"></p>
+<h2><span id="1-4-list">1.4 LIST</span><a href="#1-4-list" class="header-anchor">#</a></h2><p>双向无尾链表。</p>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/5.png" alt="img"></p>
+<h2><span id="1-5-tailq">1.5 TAILQ</span><a href="#1-5-tailq" class="header-anchor">#</a></h2><p>双向有尾链表。</p>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/6.png" alt="img"></p>
+<h2><span id="1-6-circleq">1.6 CIRCLEQ</span><a href="#1-6-circleq" class="header-anchor">#</a></h2><p>双向循环链表。</p>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/7.png" alt="img"></p>
+<h1><span id="2-tailq-shi-xian-yuan-li-tu-jie">2 TAILQ实现原理图解</span><a href="#2-tailq-shi-xian-yuan-li-tu-jie" class="header-anchor">#</a></h1><p>双向有尾链表,也就是有一个表头和表尾，表头指向节点1和尾节点。</p>
+<h2><span id="2-1-miao-shu-qian-yi-ge-he-xia-yi-ge-yuan-su-de-jie-gou">2.1 描述前一个和下一个元素的结构</span><a href="#2-1-miao-shu-qian-yi-ge-he-xia-yi-ge-yuan-su-de-jie-gou" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> TAILQ_ENTRY(type)                                                   \</span></span><br><span class="line"><span class="keyword">struct</span> &#123;                                                                    \</span><br><span class="line">    <span class="keyword">struct</span> type *tqe_next;      <span class="comment">/* next element */</span>                          \</span><br><span class="line">    <span class="keyword">struct</span> type **tqe_prev;     <span class="comment">/* address of previous next element */</span>      \</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*tqe_next是指向下一个元素的指针，tqe_prev是指向前一个元素的tqe_next地址，对它解引用后</span></span><br><span class="line"><span class="comment">（*tqe_priv）指向当前元素的地址。*/</span></span><br><span class="line">如：</span><br><span class="line"><span class="keyword">struct</span> item&#123;</span><br><span class="line">　　<span class="built_in">int</span> val;</span><br><span class="line">　　TAILQ_ENTRY(item) entries;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/8.png" alt="img"></p>
+<h2><span id="2-2-dui-lie-tou">2.2 队列头</span><a href="#2-2-dui-lie-tou" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span>    TAILQ_HEAD(name, type)                        \</span></span><br><span class="line"><span class="keyword">struct</span> name &#123;                                \</span><br><span class="line">    <span class="keyword">struct</span> type *tqh_first;    <span class="comment">/* first element */</span>            \</span><br><span class="line">    <span class="keyword">struct</span> type **tqh_last;    <span class="comment">/* addr of last next element */</span>        \</span><br><span class="line">&#125;</span><br><span class="line">STAILQ_HEAD(my_tailq,  tailq_entry) queue_head;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/9.png" alt="img"></p>
+<p>先看TAILQ_HEAD:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tqh_first为队列第一个元素的地址；</span><br><span class="line">tqh_last为最后一个元素tqe_next的地址；</span><br><span class="line">tqh_last指向的指针为<span class="number">0</span>；</span><br></pre></td></tr></table></figure>
+
+<p>再看TAILQ_ENTRY:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">tqe_next为队列下一个元素的地址；</span><br><span class="line">tqe_prev为队列上一个元素tqe_next的地址；</span><br><span class="line">tqe_prev指向的指针为当前元素的地址；</span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-3-chu-shi-hua">2.3 初始化</span><a href="#2-3-chu-shi-hua" class="header-anchor">#</a></h2><p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/10.png" alt="img"></p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> TAILQ_INIT(head) do &#123;                                               \</span></span><br><span class="line">    (head)-&gt;tqh_first = NULL;                                               \</span><br><span class="line">    (head)-&gt;tqh_last = &amp;(head)-&gt;tqh_first;                                  \</span><br><span class="line">&#125; <span class="keyword">while</span> (<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-4-cha-ru-yuan-su">2.4 插入元素</span><a href="#2-4-cha-ru-yuan-su" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> TAILQ_INSERT_TAIL(head, elm, field) do &#123;                  \</span></span><br><span class="line">    (elm)-&gt;field.tqe_next = NULL;                                 \</span><br><span class="line">    (elm)-&gt;field.tqe_prev = (head)-&gt;tqh_last;                     \</span><br><span class="line">    *(head)-&gt;tqh_last = (elm);                                    \</span><br><span class="line">    (head)-&gt;tqh_last = &amp;(elm)-&gt;field.tqe_next;                    \</span><br><span class="line">&#125; <span class="keyword">while</span> (<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-4-1-cha-ru-1-ge-yuan-su">2.4.1 插入1个元素</span><a href="#2-4-1-cha-ru-1-ge-yuan-su" class="header-anchor">#</a></h3><ol>
+<li><p>将要插入的node加入到尾部：</p>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/11.png" alt="img"></p>
+</li>
+</ol>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(elm)-&gt;field.tqe_next = NULL;                         </span><br><span class="line">(elm)-&gt;field.tqe_prev = (head)-&gt;tqh_last;<span class="comment">//将要插入的节点prev指向最后一个node </span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li><p>更新头节点:</p>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/12.png" alt="img"></p>
+</li>
+</ol>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">*(head)-&gt;tqh_last = (elm);          </span><br><span class="line">(head)-&gt;tqh_last = &amp;(elm)-&gt;field.tqe_next;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-4-2-tong-li-cha-ru-duo-ge-yuan-su">2.4.2 同理插入多个元素</span><a href="#2-4-2-tong-li-cha-ru-duo-ge-yuan-su" class="header-anchor">#</a></h3><p>同理多个元素时尾插。</p>
+<ol>
+<li><p>将要插入的node加入到尾部:</p>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/13.png" alt="img"></p>
+</li>
+<li><p>更新头节点:</p>
+</li>
+</ol>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/14.png" alt="img"></p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">*(head)-&gt;tqh_last = (elm);           <span class="comment">//尾节点指向新的尾巴</span></span><br><span class="line">(head)-&gt;tqh_last = &amp;(elm)-&gt;field.tqe_next; <span class="comment">//head的last指向新的尾巴</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-5-shan-chu-yuan-su">2.5 删除元素</span><a href="#2-5-shan-chu-yuan-su" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> TAILQ_REMOVE(head, elm, field) do &#123;                       \</span></span><br><span class="line">    <span class="keyword">if</span> (((elm)-&gt;field.tqe_next) != NULL)                          \</span><br><span class="line">        (elm)-&gt;field.tqe_next-&gt;field.tqe_prev = (elm)-&gt;field.tqe_prev;      \</span><br><span class="line">    <span class="keyword">else</span>                                                                    \</span><br><span class="line">        (head)-&gt;tqh_last = (elm)-&gt;field.tqe_prev;                           \</span><br><span class="line">    *(elm)-&gt;field.tqe_prev = (elm)-&gt;field.tqe_next;                         \</span><br><span class="line">&#125; <span class="keyword">while</span> (<span class="number">0</span>)</span><br></pre></td></tr></table></figure>
+
+
+
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/15.png"></p>
+<p>我们现在要把val&#x3D;3的elm删除：<br>elm中的tqe_next不为空，表示elm不是尾节点。那么</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(elm)-&gt;field.tqe_next-&gt;field.tqe_prev = (elm)-&gt;field.tqe_prev;</span><br><span class="line">*(elm)-&gt;field.tqe_prev = (elm)-&gt;field.tqe_next;</span><br></pre></td></tr></table></figure>
+
+<p>这2句执行完后:</p>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/16.png" alt="img"></p>
+<p>然后free掉该elm,</p>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/17.png" alt="img"></p>
+<p>同理再删除val&#x3D;2的elm：</p>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/18.png" alt="img"></p>
+<p>然后free掉该elm，</p>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/19.png" alt="img"></p>
+<p>最后如果要把val&#x3D;4的elm删除：</p>
+<p>elm中的tqe_next为空，表示elm是尾节点。那么，</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(head)-&gt;tqh_last = (elm)-&gt;field.tqe_prev;               <span class="comment">//让head的last指向新的尾巴        </span></span><br><span class="line">*(elm)-&gt;field.tqe_prev = (elm)-&gt;field.tqe_next;    <span class="comment">//让elm的前一个node的next指向该elm的后一个node</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/20.png" alt="img"></p>
+<h2><span id="2-6-di-yi-ge-yuan-su">2.6 第一个元素</span><a href="#2-6-di-yi-ge-yuan-su" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span>        TAILQ_FIRST(head)                ((head)-&gt;tqh_first)</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-7-zui-hou-yi-ge-yuan-su">2.7 最后一个元素</span><a href="#2-7-zui-hou-yi-ge-yuan-su" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span>        TAILQ_LAST(head, headname) \</span></span><br><span class="line">(*(((<span class="keyword">struct</span> headname *)((head)-&gt;tqh_last))-&gt;tqh_last))</span><br></pre></td></tr></table></figure>
+
+<p>这个实现看起来有点绕，我们先做一个实验:</p>
+<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">typedef <span class="keyword">struct</span> _QUEUE_ITEM &#123;</span><br><span class="line">    <span class="built_in">int</span> <span class="keyword">value</span>;</span><br><span class="line">    TAILQ_ENTRY(QUEUE_ITEM) entries;</span><br><span class="line">&#125;QUEUE_ITEM;</span><br><span class="line"></span><br><span class="line">TAILQ_HEAD(TAIL_QUEUE, QUEUE_ITEM) queue_head;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="built_in">int</span> <span class="title">main</span>(<span class="params"><span class="built_in">int</span> argc, <span class="built_in">char</span> **argv</span>)</span> &#123;</span><br><span class="line">    QUEUE_ITEM *item[<span class="number">5</span>];</span><br><span class="line">    TAILQ_INIT(&amp;queue_head);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">int</span> i = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i += <span class="number">1</span>) &#123;</span><br><span class="line">        item[i] = (<span class="keyword">struct</span> QUEUE_ITEM*)malloc(<span class="keyword">sizeof</span>(QUEUE_ITEM));</span><br><span class="line">        item[i]-&gt;<span class="keyword">value</span> = i;</span><br><span class="line">        TAILQ_INSERT_TAIL(&amp;queue_head, item[i], entries);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span>(i = <span class="number">0</span>; i &lt; <span class="number">5</span>; i += <span class="number">1</span>) &#123;</span><br><span class="line">            printf(<span class="string">&quot;item[%d]: item:%#x, next:%#x,&amp;next:%#x, prev:%#x, *prev:%#x\n&quot;</span>,</span><br><span class="line">　　　　　　　　i, item[i], item[i]-&gt;entries.tqe_next, &amp;(item[i]-&gt;entries.tqe_next), item[i]-&gt;entries.tqe_prev, *(item[i]-&gt;entries.tqe_prev));</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    printf(<span class="string">&quot;queue_head:%#x, first:%#x, last:%#x\n&quot;</span>, &amp;queue_head, queue_head.tqh_first, queue_head.tqh_last);</span><br><span class="line">    printf(<span class="string">&quot;last item:%p\n&quot;</span>, TAILQ_LAST(&amp;queue_head, TAIL_QUEUE));</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>打印结果如下:<br><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/21.png" alt="img"></p>
+<p>可以用图形来描述:<br><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/22.png" alt="img"></p>
+<p><code>TAILQ_LAST(&amp;queue_head, TAIL_QUEUE);</code>这句话展开:<br><code>(*(((struct TAIL_QUEUE*)((&amp;queue_head)-&gt;tqh_last))-&gt;tqh_last))</code></p>
+<p><code>((struct TAIL_QUEUE*)((&amp;queue_head)-&gt;tqh_last))</code>这句话,我们把地址0x601060代入进去得0x602098，即为：</p>
+<p><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/23.png" alt="img"></p>
+<p>然后<code>(((struct TAIL_QUEUE*)((&amp;queue_head)-&gt;tqh_last))-&gt;tqh_last)</code>得到0x602078,<br>认真的同学此时已经发现，此时对应倒数第二元素的next地址，</p>
+<p>最后取<code>(*(((struct TAIL_QUEUE*)((&amp;queue_head)-&gt;tqh_last))-&gt;tqh_last))</code>得到0x602090,这就是最后一个元素的地址。</p>
+<p><strong>总结：这里核心其实就是把最后一个元素的entries成员当成head指针来使用</strong>。因为本质上最后一个节点的TAILQ_ENTRY域和TAILQ_HEAD是同样的结构。</p>
+<h2><span id="2-8-xia-yi-ge-yuan-su">2.8 下一个元素</span><a href="#2-8-xia-yi-ge-yuan-su" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span>        TAILQ_NEXT(elm, field)                ((elm)-&gt;field.tqe_next)</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-9-qian-yi-ge-yuan-su">2.9 前一个元素</span><a href="#2-9-qian-yi-ge-yuan-su" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span>        TAILQ_PREV(elm, headname, field) \</span></span><br><span class="line">(*(((<span class="keyword">struct</span> headname *)((elm)-&gt;field.tqe_prev))-&gt;tqh_last))</span><br></pre></td></tr></table></figure>
+
+<p>这里和TAILQ_LAST原理一样，将0x602090代入进去得:<br><img src="/2024/04/11/tailq%E9%98%9F%E5%88%97/24.png" alt="img"><br>然后对*(0x602058)得0x602070,即得到了前一个node的地址。</p>
+<h2><span id="2-10-pan-kong">2.10 判空</span><a href="#2-10-pan-kong" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span>        TAILQ_EMPTY(head)                ((head)-&gt;tqh_first == NULL)</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-11-pan-man">2.11 判满</span><a href="#2-11-pan-man" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span>        TAILQ_FIRST(head)                ((head)-&gt;tqh_first)</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-12-bian-li">2.12 遍历</span><a href="#2-12-bian-li" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span>        TAILQ_FOREACH(var, head, field)                                        \</span></span><br><span class="line"><span class="keyword">for</span> ((<span class="keyword">var</span>) = ((head)-&gt;tqh_first);                                \</span><br><span class="line">(<span class="keyword">var</span>);                                                        \</span><br><span class="line">(<span class="keyword">var</span>) = ((<span class="keyword">var</span>)-&gt;field.tqe_next))</span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-13-dao-bian-li">2.13 倒遍历</span><a href="#2-13-dao-bian-li" class="header-anchor">#</a></h2><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span>        TAILQ_FOREACH_REVERSE(var, head, headname, field)                \</span></span><br><span class="line"><span class="keyword">for</span> ((<span class="keyword">var</span>) = (*(((<span class="keyword">struct</span> headname *)((head)-&gt;tqh_last))-&gt;tqh_last));        \</span><br><span class="line">(<span class="keyword">var</span>);                                                        \</span><br><span class="line">(<span class="keyword">var</span>) = (*(((<span class="keyword">struct</span> headname *)((<span class="keyword">var</span>)-&gt;field.tqe_prev))-&gt;tqh_last)))</span><br></pre></td></tr></table></figure>
+
+<p>当看懂之前的<strong>最后一个元素</strong>原理时，倒遍历的实现是不是超级简单。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/04/11/tailq%E9%98%9F%E5%88%97/" data-id="cm0dxg14f002ldsuf5th8csuz" data-title="tailq队列" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-union和bit-field巧妙进行寄存器位操作" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/04/04/union%E5%92%8Cbit-field%E5%B7%A7%E5%A6%99%E8%BF%9B%E8%A1%8C%E5%AF%84%E5%AD%98%E5%99%A8%E4%BD%8D%E6%93%8D%E4%BD%9C/" class="article-date">
@@ -1654,80 +1841,6 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
 
 
   
-    <article id="post-linux搭建samba服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/" class="article-date">
-  <time class="dt-published" datetime="2024-03-27T15:17:30.000Z" itemprop="datePublished">2024-03-27</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/">linux搭建samba服务</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-an-zhuang-fu-wu">1 安装服务</a></li>
-<li><a href="#2-guan-bi-fang-huo-qiang">2 关闭防火墙</a></li>
-<li><a href="#3-tian-jia-yong-hu-book">3 添加用户book</a></li>
-<li><a href="#4-chong-qi-fu-wu">4 重启服务</a></li>
-<li><a href="#5-windows-jin-xing-samba-ying-she">5 windows进行samba映射</a></li>
-<li><a href="#6-chang-jian-wen-ti">6 常见问题</a></li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-an-zhuang-fu-wu">1 安装服务</span><a href="#1-an-zhuang-fu-wu" class="header-anchor">#</a></h1><p><code>sudo apt-get install samba samba-common</code></p>
-<h1><span id="2-guan-bi-fang-huo-qiang">2 关闭防火墙</span><a href="#2-guan-bi-fang-huo-qiang" class="header-anchor">#</a></h1><p><code>sudo systemctl stop ufw</code></p>
-<h1><span id="3-tian-jia-yong-hu-book">3 添加用户book</span><a href="#3-tian-jia-yong-hu-book" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">sudo smbpasswd -a book</span><br><span class="line">配置samba</span><br><span class="line">sudo vim /etc/samba/smb.conf</span><br><span class="line">[book_share_samba_dir]</span><br><span class="line">        comment = share samba <span class="built_in">dir</span></span><br><span class="line">        path = /home/book/ftp</span><br><span class="line">        valid <span class="built_in">users</span> = book</span><br><span class="line">        force user = book</span><br><span class="line">        force group = book</span><br><span class="line">        creat mask = 0644</span><br><span class="line">        directory mask = 0755</span><br><span class="line">        browseable= <span class="built_in">yes</span></span><br><span class="line">        available = <span class="built_in">yes</span></span><br><span class="line">        public = <span class="built_in">yes</span></span><br><span class="line">        <span class="built_in">read</span> only = no</span><br><span class="line">        writeable = <span class="built_in">yes</span></span><br></pre></td></tr></table></figure>
-
-<h1><span id="4-chong-qi-fu-wu">4 重启服务</span><a href="#4-chong-qi-fu-wu" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">~$ sudo service smbd restart</span><br><span class="line">~$ sudo /etc/init.d/smbd restart</span><br><span class="line">~$ /etc/init.d/smbd restart</span><br></pre></td></tr></table></figure>
-
-
-
-<h1><span id="5-windows-jin-xing-samba-ying-she">5 windows进行samba映射</span><a href="#5-windows-jin-xing-samba-ying-she" class="header-anchor">#</a></h1><p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/1.png" alt="img"></p>
-<p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/2.png" alt="img"></p>
-<p>注意不能用NAT虚拟网络IP访问samba, 要用桥接网络ip，不过ssh可以两种方式访问，但是NAT虚拟网络是用来虚拟机上网的IP地址可能会发生变化，还是建议用桥接网络IP地址。</p>
-<p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/3.png" alt="img"></p>
-<h1><span id="6-chang-jian-wen-ti">6 常见问题</span><a href="#6-chang-jian-wen-ti" class="header-anchor">#</a></h1><p>samba不允许一个用户使用一个以上用户名与一个服务器或共享资源的多重连接，因此需要windows进入cmd</p>
-<p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/4.png" alt="img"></p>
-<p>可以windows cmd下用 net use 命令查看下当前的共享访问到底有没有它。</p>
-<p>有的话，net use * &#x2F;del &#x2F;y</p>
-<p>重新映射网络驱动器即可</p>
-<p><img src="/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/5.png" alt="img"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/03/27/linux%E6%90%AD%E5%BB%BAsamba%E6%9C%8D%E5%8A%A1/" data-id="cm0dxg14a001gdsufb74w9578" data-title="linux搭建samba服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
 
 
   <nav id="page-nav">
@@ -1756,7 +1869,7 @@ wget -O config.sub &#39;http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 11px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 11px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 12px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 13px;">通信协议</a>
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.33px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.67px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15.83px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.5px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19.17px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.67px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15.83px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.83px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.5px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.33px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.67px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 14.17px;">通信协议</a>
     </div>
   </div>
 
