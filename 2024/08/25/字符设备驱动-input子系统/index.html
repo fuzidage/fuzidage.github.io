@@ -59,7 +59,7 @@
 <meta property="og:image" content="http://example.com/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-input%E5%AD%90%E7%B3%BB%E7%BB%9F/42.png">
 <meta property="og:image" content="http://example.com/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-input%E5%AD%90%E7%B3%BB%E7%BB%9F/43.png">
 <meta property="article:published_time" content="2024-08-25T12:02:38.000Z">
-<meta property="article:modified_time" content="2024-08-25T10:39:17.084Z">
+<meta property="article:modified_time" content="2024-08-31T06:45:50.394Z">
 <meta property="article:author" content="John Doe">
 <meta property="article:tag" content="Linux设备驱动">
 <meta name="twitter:card" content="summary">
@@ -403,7 +403,8 @@
 </details>
 
 <h4><span id="5-4-2-1-probe-guo-cheng">5.4.2.1 probe过程</span><a href="#5-4-2-1-probe-guo-cheng" class="header-anchor">#</a></h4><p><img src="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-input%E5%AD%90%E7%B3%BB%E7%BB%9F/30.png" alt="image"></p>
-<p>dts中的<code>compatible</code>和驱动匹配，<code>of_match_table</code>匹配，因此触发probe函数。可以看到FT5426使用的标准I2C从设备驱动框架<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/18183047">Linux I2C子系统驱动</a>。因为使用的I2c2。</p>
+<p>dts中的<code>compatible</code>和驱动匹配，<code>of_match_table</code>匹配，因此触发probe函数。可以看到FT5426使用的标准I2C从设备驱动框架<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/18183047">Linux I2C子系统驱动</a></p>
+<p><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-I2C%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-I2C子系统 | Hexo (fuzidage.github.io)</a>。因为使用的I2c2。</p>
 <p><img src="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-input%E5%AD%90%E7%B3%BB%E7%BB%9F/31.png" alt="image"></p>
 <p>由于<code>i2c_client</code>描述i2c从设备的i2c相关硬件信息。 一个<code>i2c_driver</code>可以支持多个同类型的<code>i2c_client</code>。<code>i2c_client</code>一般描述在设备树中, 这里<code>对应i2c2的ft5426子节点</code>。</p>
 <ol>
@@ -429,7 +430,8 @@
 <p>需要上报的事件为 <code>EV_KEY 和 EV_ABS</code>，需要上报的按键码为<code> BTN_TOUCH</code>(<code>BTN_TOUCH见include\uapi\linux\input-event-codes.h</code>)。<code>EV_KEY </code>是按键事件，用于上报触摸屏是否被按下，相当于把触摸屏当做一个按键。<code>EV_ABS </code>是触摸点坐标数据，<code>BTN_TOUCH </code>表示将触摸屏的按下和抬起用作 <code>BTN_TOUCH </code>按键。</p>
 <p><code>input_set_abs_params </code>函数设置 EV_ABS 事件需要上报 <code>ABS_X、ABS_Y、ABS_MT_POSITION_X 和 ABS_MT_POSITION_Y</code>。单点触摸需要上报<code>ABS_X</code> 和<code> ABS_Y</code>，对于多点触摸需要上报 <code>ABS_MT_POSITION_X </code>和<code> ABS_MT_POSITION_Y</code>。</p>
 <p><code>input_mt_init_slots</code> 函数初始 化 slots，也就是最大触摸点数量，FT5426 是个 5 点电容触摸芯片，因此一共 5 个 slot。</p>
-<h4><span id="5-4-2-2-i2c-shu-ju-chuan-shu">5.4.2.2 I2C数据传输</span><a href="#5-4-2-2-i2c-shu-ju-chuan-shu" class="header-anchor">#</a></h4><p>其实就是i2c数据传输的应用。参考<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/18183047">Linux I2C子系统驱动</a>。</p>
+<h4><span id="5-4-2-2-i2c-shu-ju-chuan-shu">5.4.2.2 I2C数据传输</span><a href="#5-4-2-2-i2c-shu-ju-chuan-shu" class="header-anchor">#</a></h4><p>其实就是i2c数据传输的应用。参考<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/18183047">Linux I2C子系统驱动</a></p>
+<p><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-I2C%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-I2C子系统 | Hexo (fuzidage.github.io)</a>。</p>
 <p><img src="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-input%E5%AD%90%E7%B3%BB%E7%BB%9F/36.png" alt="image"></p>
 <p>读过程：</p>
 <p>构造<code>i2c_msg[0]</code>，flag&#x3D;0表示写，先发送i2c从设备器件地址0x38。然后发送要读哪个寄存器地址。</p>
@@ -486,9 +488,9 @@
 <nav id="article-nav">
   
   
-    <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-I2C%E5%AD%90%E7%B3%BB%E7%BB%9F/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-SPI%E5%AD%90%E7%B3%BB%E7%BB%9F/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">字符设备驱动-I2C子系统</div>
+      <div class="article-nav-title">字符设备驱动-SPI子系统</div>
     </a>
   
 </nav>
@@ -518,7 +520,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Tag Cloud</h3>
     <div class="widget tagcloud">
-      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.33px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.67px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15.83px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.5px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19.17px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.67px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 15px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15.83px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.83px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.5px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.33px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.67px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 14.17px;">通信协议</a>
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.36px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15.45px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.27px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19.09px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.82px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14.55px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15.45px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.91px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.73px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.64px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.36px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 14.55px;">通信协议</a>
     </div>
   </div>
 
@@ -544,6 +546,10 @@
           </li>
         
           <li>
+            <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-SPI%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-SPI子系统</a>
+          </li>
+        
+          <li>
             <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-I2C%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-I2C子系统</a>
           </li>
         
@@ -553,10 +559,6 @@
         
           <li>
             <a href="/2024/08/18/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-pinctrl%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-pinctrl子系统</a>
-          </li>
-        
-          <li>
-            <a href="/2024/08/17/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-gpio%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-gpio子系统</a>
           </li>
         
       </ul>
