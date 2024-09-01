@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>字符设备驱动-PWM子系统 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 pwm子系统框架 1.1 源码结构 1.2 数据结构 1.2.1 pwm_chip 1.2.2 pwm_ops 1.2.3 pwm_state   1.3 API 1.3.1 pwmchip_add 1.3.2 pwmchip_remove 1.3.3 pwm_request 1.3.4 pwm_free 1.3.5 pwm_config 1.3.6 pwm_set_polarity">
+<meta property="og:type" content="article">
+<meta property="og:title" content="字符设备驱动-PWM子系统">
+<meta property="og:url" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 pwm子系统框架 1.1 源码结构 1.2 数据结构 1.2.1 pwm_chip 1.2.2 pwm_ops 1.2.3 pwm_state   1.3 API 1.3.1 pwmchip_add 1.3.2 pwmchip_remove 1.3.3 pwm_request 1.3.4 pwm_free 1.3.5 pwm_config 1.3.6 pwm_set_polarity">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/1.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/2.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/3.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/4.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/5.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/6.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/7.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/8.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/9.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/10.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/11.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/12.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/13.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/14.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/15.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/16.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/17.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/18.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/19.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/20.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/21.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/22.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/23.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/24.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/25.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/26.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/27.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/28.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/29.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/30.png">
+<meta property="og:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/31.png">
+<meta property="article:published_time" content="2024-09-01T04:28:35.000Z">
+<meta property="article:modified_time" content="2024-09-01T09:10:03.259Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Linux设备驱动">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-字符设备驱动-PWM子系统" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/" class="article-date">
+  <time class="dt-published" datetime="2024-09-01T04:28:35.000Z" itemprop="datePublished">2024-09-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      字符设备驱动-PWM子系统
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-pwm-zi-xi-tong-kuang-jia">1 pwm子系统框架</a><ul>
+<li><a href="#1-1-yuan-ma-jie-gou">1.1 源码结构</a></li>
+<li><a href="#1-2-shu-ju-jie-gou">1.2 数据结构</a><ul>
+<li><a href="#1-2-1-pwm-chip">1.2.1 <code>pwm_chip</code></a></li>
+<li><a href="#1-2-2-pwm-ops">1.2.2 <code>pwm_ops</code></a></li>
+<li><a href="#1-2-3-pwm-state">1.2.3 <code>pwm_state</code></a></li>
+</ul>
+</li>
+<li><a href="#1-3-api">1.3 API</a><ul>
+<li><a href="#1-3-1-pwmchip-add">1.3.1 <code>pwmchip_add</code></a></li>
+<li><a href="#1-3-2-pwmchip-remove">1.3.2 <code>pwmchip_remove</code></a></li>
+<li><a href="#1-3-3-pwm-request">1.3.3 pwm_request</a></li>
+<li><a href="#1-3-4-pwm-free">1.3.4 pwm_free</a></li>
+<li><a href="#1-3-5-pwm-config">1.3.5 <code>pwm_config</code></a></li>
+<li><a href="#1-3-6-pwm-set-polarity">1.3.6 <code>pwm_set_polarity</code></a></li>
+<li><a href="#1-3-6-pwm-enable">1.3.6 pwm_enable</a></li>
+<li><a href="#1-3-7-pwm-disable">1.3.7 pwm_disable</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-pwm-qu-dong-shi-li">2 pwm驱动实例</a><ul>
+<li><a href="#2-1-dts-miao-shu">2.1 dts描述</a></li>
+<li><a href="#2-2-shi-neng-pwm-qu-dong">2.2 使能PWM驱动</a></li>
+<li><a href="#2-3-pwm-bei-guang-she-zhi">2.3 PWM 背光设置</a></li>
+<li><a href="#2-4-qu-dong-yuan-ma-fen-xi">2.4 驱动源码分析</a><ul>
+<li><a href="#2-4-1-probe-guo-cheng">2.4.1 probe过程</a><ul>
+<li><a href="#2-4-1-1-imx-chip">2.4.1.1 imx_chip</a></li>
+</ul>
+</li>
+<li><a href="#2-4-2-imx-pwm-ops">2.4.2 imx_pwm_ops</a><ul>
+<li><a href="#2-4-2-1-imx-pwm-config">2.4.2.1 imx_pwm_config</a></li>
+<li><a href="#2-4-2-2-imx-pwm-enable">2.4.2.2 imx_pwm_enable</a></li>
+<li><a href="#2-4-2-3-imx-pwm-disable">2.4.2.3 imx_pwm_disable</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-ji-yu-pwm-sysfs-ce-shi">3 基于pwm sysfs测试</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-pwm-zi-xi-tong-kuang-jia">1 pwm子系统框架</span><a href="#1-pwm-zi-xi-tong-kuang-jia" class="header-anchor">#</a></h1><p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/1.png" alt="image"></p>
+<p>用户态：基于sysfs操作pwm</p>
+<p>内核态分为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">pwm core：pwm_chip的添加删除，pwm_class类pwm_chip/pwm_device的sysfs创建。</span><br><span class="line"></span><br><span class="line">pwm driver：pwm_chip对象实例，注册添加到pwm core。</span><br><span class="line">	pwm_chip可以包含一个或多个pwm_device，每个pwm_device通过设置不同pwm_state来达到目的。</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2><span id="1-1-yuan-ma-jie-gou">1.1 源码结构</span><a href="#1-1-yuan-ma-jie-gou" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">drivers/pwm/</span><br><span class="line">	core.c <span class="comment">//pwm子系统核心。</span></span><br><span class="line">	sysfs.c<span class="comment">//pwm子系统的pwm_class注册，pwm_chip属性，pwm_device属性等定义。</span></span><br><span class="line">	pwm-imx.c<span class="comment">//imx的pwm_chip驱动。</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/2.png" alt="image"></p>
+<p>我已经编译进<code>vmlinux</code>了，可以看到<code>built-in.o</code>。<code>Makefile</code>如下：</p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/3.png" alt="image"></p>
+<p><code>Kconfig</code>如下，我的内核<code>.config</code>配置选中了<code>PWM和PWM_IMX</code>，因此编译进了内核镜像。</p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/4.png" alt="image"></p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/5.png" alt="image"></p>
+<h2><span id="1-2-shu-ju-jie-gou">1.2 数据结构</span><a href="#1-2-shu-ju-jie-gou" class="header-anchor">#</a></h2><h3><span id="1-2-1-pwm-chip">1.2.1 <code>pwm_chip</code></span><a href="#1-2-1-pwm-chip" class="header-anchor">#</a></h3><p>是对一个pwm控制器的抽象。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">pwm_chip</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">device</span> *<span class="title">dev</span>;</span></span><br><span class="line">    <span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">pwm_ops</span> *<span class="title">ops</span>;</span></span><br><span class="line">    <span class="type">int</span> base;</span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> npwm;<span class="comment">//pwm控制器的pwm数量。</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">pwm_device</span> * (*<span class="title">of_xlate</span>)(<span class="keyword">struct</span> <span class="title">pwm_chip</span> *<span class="title">pc</span>,</span></span><br><span class="line"><span class="class">                    <span class="title">const</span> <span class="keyword">struct</span> <span class="title">of_phandle_args</span> *<span class="title">args</span>);</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> of_pwm_n_cells;</span><br><span class="line">    <span class="comment">/* only used internally by the PWM framework */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">list</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">pwm_device</span> *<span class="title">pwms</span>;</span></span><br><span class="line">&#125;; <span class="comment">//include/linux/pwm.h</span></span><br></pre></td></tr></table></figure>
+
+<h3><span id="1-2-2-pwm-ops">1.2.2 <code>pwm_ops</code></span><a href="#1-2-2-pwm-ops" class="header-anchor">#</a></h3><p>pwm控制器的操作接口。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">pwm_ops</span> &#123;</span></span><br><span class="line">	<span class="type">int</span> (*request)(<span class="keyword">struct</span> pwm_chip *chip, <span class="comment">//请求 PWM</span></span><br><span class="line">	<span class="keyword">struct</span> pwm_device *pwm);</span><br><span class="line">	<span class="type">void</span> (*<span class="built_in">free</span>)(<span class="keyword">struct</span> pwm_chip *chip, <span class="comment">//释放 PWM</span></span><br><span class="line">	<span class="keyword">struct</span> pwm_device *pwm);</span><br><span class="line">	<span class="type">int</span> (*config)(<span class="keyword">struct</span> pwm_chip *chip, <span class="comment">//配置 PWM 周期和占空比</span></span><br><span class="line">	<span class="keyword">struct</span> pwm_device *pwm,</span><br><span class="line">	<span class="type">int</span> duty_ns, <span class="type">int</span> period_ns);</span><br><span class="line">	<span class="type">int</span> (*set_polarity)(<span class="keyword">struct</span> pwm_chip *chip, <span class="comment">//设置 PWM 极性</span></span><br><span class="line">	<span class="keyword">struct</span> pwm_device *pwm,</span><br><span class="line">	<span class="keyword">enum</span> pwm_polarity polarity);</span><br><span class="line">	<span class="type">int</span> (*enable)(<span class="keyword">struct</span> pwm_chip *chip, <span class="comment">//使能 PWM</span></span><br><span class="line">	<span class="keyword">struct</span> pwm_device *pwm);</span><br><span class="line">	<span class="type">void</span> (*disable)(<span class="keyword">struct</span> pwm_chip *chip, <span class="comment">//关闭 PWM</span></span><br><span class="line">	<span class="keyword">struct</span> pwm_device *pwm);</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">module</span> *<span class="title">owner</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="1-2-3-pwm-state">1.2.3 <code>pwm_state</code></span><a href="#1-2-3-pwm-state" class="header-anchor">#</a></h3><p>pwm_state就是控制占空比控制转速，亮度参数。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">pwm_state</span> &#123;</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> period; <span class="comment">//pwm的周期，单位ns。</span></span><br><span class="line">    <span class="type">unsigned</span> <span class="type">int</span> duty_cycle; <span class="comment">//占空比duty_cycle，单位ns。</span></span><br><span class="line">    <span class="class"><span class="keyword">enum</span> <span class="title">pwm_polarity</span> <span class="title">polarity</span>;</span><span class="comment">//PWM_POLARITY_NORMAL表示高电平持续duty_cycle，</span></span><br><span class="line">    <span class="comment">//然后是低电平持续剩余时间。PWM_POLARITY_INVERSED表示低电平持续duty_cycle，然后是高电平持续剩余时间。</span></span><br><span class="line">    <span class="type">bool</span> enabled; <span class="comment">//是否使能</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="1-3-api">1.3 API</span><a href="#1-3-api" class="header-anchor">#</a></h2><p>api声明见<code>linux\include\linux\pwm.h</code>，实现<code>linux\drivers\pwm\core.c</code></p>
+<h3><span id="1-3-1-pwmchip-add">1.3.1 <code>pwmchip_add</code></span><a href="#1-3-1-pwmchip-add" class="header-anchor">#</a></h3><p>向<code>pwm</code>子系统注册一个<code>pwm_chip</code>。</p>
+<p><code>int pwmchip_add(struct pwm_chip *chip);</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">pwmchip_add</span><br><span class="line">	pwmchip_add_with_polarity</span><br><span class="line">		-&gt;pwm_ops_check   <span class="comment">//检查pwm_ops是否支持apply等。</span></span><br><span class="line">		-&gt;alloc_pwms     <span class="comment">//为pwm_chip的pwm_device分配allocated_pwms。</span></span><br><span class="line">		-&gt;<span class="comment">//初始化每个pwm_device，并加入pwm_tree。</span></span><br><span class="line">		-&gt;pwmchip_sysfs_export</span><br><span class="line">			-&gt;pwmchip_sysfs_export <span class="comment">//创建pwm_class类设备pwmchpX，位于/sys/class/pwm/pwmchipX。</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/6.png" alt="image"></p>
+<h3><span id="1-3-2-pwmchip-remove">1.3.2 <code>pwmchip_remove</code></span><a href="#1-3-2-pwmchip-remove" class="header-anchor">#</a></h3><p><code>int pwmchip_remove(struct pwm_chip *chip);</code></p>
+<p>删除一个<code>pwm_chip</code>。</p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/7.png" alt="image"></p>
+<h3><span id="1-3-3-pwm-request">1.3.3 pwm_request</span><a href="#1-3-3-pwm-request" class="header-anchor">#</a></h3><p>请求 PWM。</p>
+<p><code>struct pwm_device *pwm_request(int pwm, const char *label)</code></p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/8.png" alt="image"></p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/9.png" alt="image"></p>
+<p>可以看到就是调用具体pwm示例的request函数。</p>
+<h3><span id="1-3-4-pwm-free">1.3.4 pwm_free</span><a href="#1-3-4-pwm-free" class="header-anchor">#</a></h3><p>释放 PWM。</p>
+<p><code>void pwm_free(struct pwm_device *pwm)</code></p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/10.png" alt="image"></p>
+<h3><span id="1-3-5-pwm-config">1.3.5 <code>pwm_config</code></span><a href="#1-3-5-pwm-config" class="header-anchor">#</a></h3><p>配置 PWM 周期和占空比,操作具体pwm实例。</p>
+<p><code>int pwm_config(struct pwm_device *pwm, int duty_ns, int period_ns)</code></p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/11.png" alt="image"></p>
+<h3><span id="1-3-6-pwm-set-polarity">1.3.6 <code>pwm_set_polarity</code></span><a href="#1-3-6-pwm-set-polarity" class="header-anchor">#</a></h3><p>设置 PWM 极性。</p>
+<p><code>int pwm_set_polarity(struct pwm_device *pwm, enum pwm_polarity polarity)</code></p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/12.png" alt="image"></p>
+<h3><span id="1-3-6-pwm-enable">1.3.6 pwm_enable</span><a href="#1-3-6-pwm-enable" class="header-anchor">#</a></h3><p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/13.png" alt="image"></p>
+<h3><span id="1-3-7-pwm-disable">1.3.7 pwm_disable</span><a href="#1-3-7-pwm-disable" class="header-anchor">#</a></h3><p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/14.png" alt="image"></p>
+<p>从<code>1.3.3</code>到<code>1.3.7</code>本质都是调用<code>pwm_ops</code>。</p>
+<h1><span id="2-pwm-qu-dong-shi-li">2 pwm驱动实例</span><a href="#2-pwm-qu-dong-shi-li" class="header-anchor">#</a></h1><p><code>I.MX6ULL </code>有 8 路 PWM 控制器。这 8 路 PWM 都属于<code>I.MX6ULL 的 AIPS-1</code>域，但是在设备树<code>imx6ull.dtsi</code>中 分为了两部分，<code>PWM1~PWM4 </code>在一起，<code>PWM5~PWM8</code> 在一起。以<code>pwm3</code>为例：</p>
+<h2><span id="2-1-dts-miao-shu">2.1 dts描述</span><a href="#2-1-dts-miao-shu" class="header-anchor">#</a></h2><p>打开<code>imx6ull.dtsi</code>：可以看到<code>pwm3</code>的描述：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">pwm3: pwm@<span class="number">02088000</span> &#123;</span><br><span class="line">	compatible = <span class="string">&quot;fsl,imx6ul-pwm&quot;</span>, <span class="string">&quot;fsl,imx27-pwm&quot;</span>;</span><br><span class="line">	reg = &lt;<span class="number">0x02088000</span> <span class="number">0x4000</span>&gt;;</span><br><span class="line">	interrupts = &lt;GIC_SPI <span class="number">85</span> IRQ_TYPE_LEVEL_HIGH&gt;;</span><br><span class="line">	clocks = &lt;&amp;clks IMX6UL_CLK_PWM3&gt;,</span><br><span class="line">	&lt;&amp;clks IMX6UL_CLK_PWM3&gt;;</span><br><span class="line">	clock-names = <span class="string">&quot;ipg&quot;</span>, <span class="string">&quot;per&quot;</span>;</span><br><span class="line">	<span class="meta">#pwm-cells = <span class="string">&lt;2&gt;</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>关 于<code>I.MX6ULL</code>的<code>PWM dts</code>节点描述参考对应的绑定文档 ：<code> Documentation/devicetree/bindings/pwm/ imx-pwm.txt</code></p>
+<p><code>GPIO1_IO04 </code>这里作为<code>PWM3</code>的输出引脚，所以我们需要在设备树里面添加 <code>GPIO1_IO04 </code>的引脚信息以及<code>PWM3</code>控制器对应的节点信息:</p>
+<p>打开<code> imx6ull-alientek-emmc.dts</code>, 添加<code>iomux</code>配置信息：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pinctrl_pwm3: pwm3grp &#123;</span><br><span class="line">	fsl,pins = &lt;MX6UL_PAD_GPIO1_IO04__PWM3_OUT <span class="number">0x110b0</span>&gt;;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&amp;pwm3 &#123;</span><br><span class="line">	pinctrl-names = <span class="string">&quot;default&quot;</span>;</span><br><span class="line">	pinctrl<span class="number">-0</span> = &lt;&amp;pinctrl_pwm3&gt;;</span><br><span class="line">	status = <span class="string">&quot;okay&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-2-shi-neng-pwm-qu-dong">2.2 使能PWM驱动</span><a href="#2-2-shi-neng-pwm-qu-dong" class="header-anchor">#</a></h2><p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/15.png" alt="image"></p>
+<p>从<code>.config</code>中已经使能了，但是为了学习， 我们还是需要知道怎么使能。</p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/16.png" alt="image"></p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-&gt; Device Drivers</span><br><span class="line">    -&gt; Pulse-Width Modulation (PWM) Support</span><br><span class="line">        -&gt; &lt;*&gt; i.MX PWM support</span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-3-pwm-bei-guang-she-zhi">2.3 PWM 背光设置</span><a href="#2-3-pwm-bei-guang-she-zhi" class="header-anchor">#</a></h2><p> <code>linux</code> 内核里面关于 <code>backlight(背光)</code>的绑定文档，路径为<code> Documentation/devicetree/bindings/video/backlight/pwm-backlight.txt</code>，此文档描述了如何创建<code> backlight 节点</code>来使用<code>linux</code>内核自带的<code>pwm</code>背光驱动。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">compatible：内容必须为“pwm-backlight”，通过这个可以匹配到内核自带的 PWM 背光驱</span><br><span class="line">动，驱动文件为 drivers/video/backlight/pwm_bl.c，这里就不去分析驱动源码了。</span><br><span class="line"></span><br><span class="line">pwms：此属性指定背光使用哪一路 PWM，以及 PWM 相关的属性。</span><br><span class="line"></span><br><span class="line">brightness-levels：背光等级数组，范围 <span class="number">0</span>~<span class="number">255</span>，对应占空比为 <span class="number">0</span>%~<span class="number">100</span>%。数组内的值必须</span><br><span class="line">从 <span class="number">0</span> 开始，也就是 <span class="number">0</span>%占空比，最后一个值必须是 <span class="number">255</span>，也就是 <span class="number">100</span>%占空比。数组中间值的个</span><br><span class="line">数以及值大小可以自行定义。</span><br><span class="line"></span><br><span class="line"><span class="keyword">default</span>-brightness-level：默认的背光等级，也就是 brightness-levels 属性中第几个值，注意</span><br><span class="line">这里是数索引编号，不是具体的数值！</span><br><span class="line"></span><br><span class="line">power-supply：支持的电压，此属性可以不需要</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">backlight &#123;</span><br><span class="line">    compatible = <span class="string">&quot;pwm-backlight&quot;</span>;</span><br><span class="line">    pwms = &lt;&amp;pwm1 <span class="number">0</span> <span class="number">5000000</span>&gt;;<span class="comment">// PWM 周期为 5000000ns，频率为 200Hz</span></span><br><span class="line">    brightness-levels = &lt;<span class="number">0</span> <span class="number">4</span> <span class="number">8</span> <span class="number">16</span> <span class="number">32</span> <span class="number">64</span> <span class="number">128</span> <span class="number">255</span>&gt;;</span><br><span class="line">    <span class="keyword">default</span>-brightness-level = &lt;<span class="number">7</span>&gt;;</span><br><span class="line">    status = <span class="string">&quot;okay&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-4-qu-dong-yuan-ma-fen-xi">2.4 驱动源码分析</span><a href="#2-4-qu-dong-yuan-ma-fen-xi" class="header-anchor">#</a></h2><h3><span id="2-4-1-probe-guo-cheng">2.4.1 probe过程</span><a href="#2-4-1-probe-guo-cheng" class="header-anchor">#</a></h3><h4><span id="2-4-1-1-imx-chip">2.4.1.1 imx_chip</span><a href="#2-4-1-1-imx-chip" class="header-anchor">#</a></h4><p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/17.png" alt="image"></p>
+<p>定义了<code>imx_chip</code>，包装了<code>pwm_chip</code>结构。</p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/18.png" alt="image"></p>
+<p>probe时，先分配内存，从dts获取<code>per, ipg</code>等时钟信息，设置pwm的ops为<code>imx_pwm_ops</code>。最后<code>pwmchip_add</code>注册进pwm子系统。注意这里有一个<code>of_id-&gt;data</code>,对应如下：可以看到有<code>v1,v2两2版本</code>，到时候会被ops中的函数调用。</p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/19.png" alt="image"></p>
+<p>同理，驱动卸载最后调用<code>pwmchip_remove</code>注销pwm。</p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/20.png" alt="image"></p>
+<h3><span id="2-4-2-imx-pwm-ops">2.4.2 imx_pwm_ops</span><a href="#2-4-2-imx-pwm-ops" class="header-anchor">#</a></h3><p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/21.png" alt="image"></p>
+<h4><span id="2-4-2-1-imx-pwm-config">2.4.2.1 imx_pwm_config</span><a href="#2-4-2-1-imx-pwm-config" class="header-anchor">#</a></h4><p>配置 PWM 周期和占空比。根据dts描述(<code>”imx27-pwm“</code>)我们使用的是v2。</p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/22.png" alt="image"></p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/23.png" alt="image"></p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/24.png" alt="image"></p>
+<p><code>PWMv2</code>会有4 word的采样fifo, 为了避免采样FIFO溢出，当pwm关闭时，对所有采样FIFO进行软件复位。当pwm使能后处于工作中，要等待完整的 PWM 周期以保证pwm空闲。</p>
+<p>然后设置<code>PWM 周期period_cycles</code>，和<code>占空比duty_cycles</code>。</p>
+<p>最后调用<code>writel</code>写入寄存器。</p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/25.png" alt="image"></p>
+<h4><span id="2-4-2-2-imx-pwm-enable">2.4.2.2 imx_pwm_enable</span><a href="#2-4-2-2-imx-pwm-enable" class="header-anchor">#</a></h4><p>控制<code>MX3_PWMCR</code>寄存器，使能关闭开关。</p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/26.png" alt="image"></p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/27.png" alt="image"></p>
+<h4><span id="2-4-2-3-imx-pwm-disable">2.4.2.3 imx_pwm_disable</span><a href="#2-4-2-3-imx-pwm-disable" class="header-anchor">#</a></h4><p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/28.png" alt="image"></p>
+<h1><span id="3-ji-yu-pwm-sysfs-ce-shi">3 基于pwm sysfs测试</span><a href="#3-ji-yu-pwm-sysfs-ce-shi" class="header-anchor">#</a></h1><p><code>alpha</code>开发板 <code>JP2 排针</code>上的 <code>GPIO_4(GPIO1_IO04)</code>引脚连接到 示波器上。等下看pwm信号效果。</p>
+<p>可以看到一共8 路 PWM 控制器：</p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/29.png" alt="image"></p>
+<p>我们使用的<code>pwm3</code>,对应出<code> pwmchip2</code>, 导出chip2通道的0设备文件:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> 0 &gt; /sys/class/pwm/pwmchip2/export</span><br></pre></td></tr></table></figure>
+
+<p>执行完成会在<code>pwmchip2 </code>目录下生成一个名为<code>“pwm0”</code>的子目录:</p>
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/30.png" alt="image"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">echo</span> 1 &gt; /sys/class/pwm/pwmchip2/pwm0/enable <span class="comment">#使能pwm3</span></span><br><span class="line"><span class="built_in">echo</span> 50000 &gt; /sys/class/pwm/pwmchip2/pwm0/period <span class="comment">#设置周期值，单位为 ns，比如 20KHz 频率的周期就是 50000ns</span></span><br><span class="line"><span class="built_in">echo</span> 10000 &gt; /sys/class/pwm/pwmchip2/pwm0/duty_cycle <span class="comment">#20%占空比</span></span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/31.png" alt="image"></p>
+<p>总结：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">导出chip1通道的0设备文件：<span class="built_in">echo</span> 0 &gt; /sys/class/pwm/pwmchip1/export</span><br><span class="line">配置chip1通道0的周期： <span class="built_in">echo</span> 10000000 &gt; /sys/class/pwm/pwmchip1 /pwm0/period</span><br><span class="line">配置chip1通道0的占空比:<span class="built_in">echo</span> 4000000 &gt;/sys/class/pwm/pwmchip1/pwm0/duty_cycle</span><br><span class="line">配置片chip通道0使能： <span class="built_in">echo</span> 1 &gt; /sys/class/pwm/pwmchip1/pwm0/enable</span><br><span class="line">配置片chip通道0禁能： <span class="built_in">echo</span> 0 &gt; /sys/class/pwm/pwmchip1/pwm0/enable</span><br><span class="line">取消导出片chip通道0设备文件： <span class="built_in">echo</span> 0 &gt;/sys/class/pwm/pwmchip1/unexport</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/" data-id="cm0jcpo1u0000xcuf971uam1a" data-title="字符设备驱动-PWM子系统" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-Framebuffer%E5%AD%90%E7%B3%BB%E7%BB%9F/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          字符设备驱动-Framebuffer子系统
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-input%E5%AD%90%E7%B3%BB%E7%BB%9F/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">字符设备驱动-input子系统</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">linux内存管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.36px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15.45px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.27px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19.09px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.82px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14.55px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15.45px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.91px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.73px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.64px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.36px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 14.55px;">通信协议</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/09/">September 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">August 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">July 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-Framebuffer%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-Framebuffer子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-PWM子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-input%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-input子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-SPI%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-SPI子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-I2C%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-I2C子系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
