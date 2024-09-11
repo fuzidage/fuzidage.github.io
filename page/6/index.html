@@ -69,6 +69,75 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-tslib移植使用" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/" class="article-date">
+  <time class="dt-published" datetime="2024-05-26T15:59:59.000Z" itemprop="datePublished">2024-05-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/">tslib移植使用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-huo-qu-tslib-yuan-ma">1 获取 tslib 源码</a></li>
+<li><a href="#2-xiu-gai-tslib-yuan-ma-suo-shu-yong-hu">2 修改 tslib 源码所属用户</a></li>
+<li><a href="#3-ubuntu-gong-ju-an-zhuang">3 ubuntu 工具安装</a></li>
+<li><a href="#4-bian-yi-tslib">4 编译 tslib</a></li>
+<li><a href="#5-pei-zhi-tslib">5 配置 tslib</a></li>
+<li><a href="#6-tslib-ce-shi">6 tslib 测试</a><ul>
+<li><a href="#6-1-ts-test-mt">6.1 ts_test_mt</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-huo-qu-tslib-yuan-ma">1 获取 tslib 源码</span><a href="#1-huo-qu-tslib-yuan-ma" class="header-anchor">#</a></h1><p><a target="_blank" rel="noopener" href="https://github.com/libts/tslib">https://github.com/libts/tslib</a><br>git clone <a target="_blank" rel="noopener" href="https://github.com/libts/tslib.git">https://github.com/libts/tslib.git</a></p>
+<h1><span id="2-xiu-gai-tslib-yuan-ma-suo-shu-yong-hu">2 修改 tslib 源码所属用户</span><a href="#2-xiu-gai-tslib-yuan-ma-suo-shu-yong-hu" class="header-anchor">#</a></h1><p><code>sudo chown book:book tslib-1.21 -R</code><br>这一步一定要做！否则在稍后的编译中会遇到各种问题。</p>
+<h1><span id="3-ubuntu-gong-ju-an-zhuang">3 ubuntu 工具安装</span><a href="#3-ubuntu-gong-ju-an-zhuang" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install autoconf</span><br><span class="line">sudo apt-get install automake</span><br><span class="line">sudo apt-get install libtool</span><br></pre></td></tr></table></figure>
+<h1><span id="4-bian-yi-tslib">4 编译 tslib</span><a href="#4-bian-yi-tslib" class="header-anchor">#</a></h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd tslib<span class="number">-1.21</span>/ <span class="comment">//进入 tslib 源码目录</span></span><br><span class="line">./autogen.sh</span><br><span class="line">./configure --host=arm-linux-gnueabihf --prefix=/home/zuozhongkai/linux/IMX6ULL/tool/tslib</span><br><span class="line">make <span class="comment">//编译</span></span><br><span class="line">make install <span class="comment">//安装</span></span><br></pre></td></tr></table></figure>
+<p><code>“--host”</code>参数指定编译器，<code>“--prefix”</code>参数指定编译完成以后的 tslib 文件安装到哪里.<br>完成以后 tslib 目录下的内容如下：<br><img src="/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/1.png" alt="image"><br>把所有文件拷贝到开发板的根文件系统中：<br><code>sudo cp * -rf /home/zuozhongkai/linux/nfs/rootfs</code></p>
+<h1><span id="5-pei-zhi-tslib">5 配置 tslib</span><a href="#5-pei-zhi-tslib" class="header-anchor">#</a></h1><p>打开<code>/etc/ts.conf</code> 文件，找到下面这一行：<br><code>module_raw input</code><br>打开<code>/etc/profile </code>文件，在里面加入如下内容：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">export</span> TSLIB_TSDEVICE=/dev/input/event1</span><br><span class="line"><span class="built_in">export</span> TSLIB_CALIBFILE=/etc/pointercal</span><br><span class="line"><span class="built_in">export</span> TSLIB_CONFFILE=/etc/ts.conf</span><br><span class="line"><span class="built_in">export</span> TSLIB_PLUGINDIR=/lib/ts</span><br><span class="line"><span class="built_in">export</span> TSLIB_CONSOLEDEVICE=none</span><br><span class="line"><span class="built_in">export</span> TSLIB_FBDEVICE=/dev/fb0</span><br></pre></td></tr></table></figure>
+<p><code>TSLIB_TSDEVICE</code> 表示触摸设备文件，这里设置为<code>/dev/input/event1</code>，这个要根据具体情况设置，如果你的触摸设备文件为 event2 那么就应该设置为<code>/dev/input/event2</code>，以此类推。<br><code>TSLIB_CALIBFILE</code> 表示校准文件，如果进行屏幕校准的话校准结果就保存在这个文件中，这里设置校准文件为&#x2F;etc&#x2F;pointercal，此文件可以不存在，校准的时候会自动生成。<br><code>TSLIB_CONFFILE </code>表示触摸配置文件，文件为<code>/etc/ts.conf</code>，此文件在移植 tslib 的时候会生成。<br><code>TSLIB_PLUGINDIR </code>表示 tslib 插件目录位置，目录为&#x2F;lib&#x2F;ts。<br><code>TSLIB_CONSOLEDEVICE </code>表示控制台设置，这里不设置，因此为 none。<br><code>TSLIB_FBDEVICE </code>表示 FB 设备，也就是屏幕，根据实际情况配置，我的屏幕文件为<code>/dev/fb0</code>，因此这里设置为<code>/dev/fb0</code>。</p>
+<h1><span id="6-tslib-ce-shi">6 tslib 测试</span><a href="#6-tslib-ce-shi" class="header-anchor">#</a></h1><p>一般电容屏可以不用校准，如果是电阻屏就要先进行校准。<br>输入<code>ts_calibrate</code><br>校准完成以后如果不满意，或者不小心对电容屏做了校准，那么直接删除掉<code>/etc/pointercal</code>文件即可。</p>
+<h2><span id="6-1-ts-test-mt">6.1 ts_test_mt</span><a href="#6-1-ts-test-mt" class="header-anchor">#</a></h2><p>此命令会打开一个触摸测试界面：<br><img src="/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/2.png" alt="image"><br>Drag：拖拽按钮，默认就是此功能，大家可以看到屏幕中间有一个十字光标，我们可以通过触摸屏幕来拖拽此光标。一个触摸点一个十字光标，对于 5 点电容触摸屏，如果 5 个手指都放到屏幕上，那么就有 5 个光标，一个手指一个。<br>Draw：绘制按钮，按下此按钮我们就可以在屏幕上进行简单的绘制，可以通过此功能检测多点触摸工作是否正常。<br>Quit：退出按钮，退出 ts_test_mt 测试软件。<br>点击“Draw”按钮，使用绘制功能，5 个手指一起划过屏幕，如果多点电容屏工作正常的话就会在屏幕上留下 5 条线：<br><img src="/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/3.png" alt="image"><br>可以看到有5条横线。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/05/26/tslib%E7%A7%BB%E6%A4%8D%E4%BD%BF%E7%94%A8/" data-id="cm0xxoge3002cqsuff0xj4qgm" data-title="tslib移植使用" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-linux基本命令集合" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/" class="article-date">
@@ -233,7 +302,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/" data-id="cm0dxg14a001edsufhxtk19m6" data-title="linux基本命令集合" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/" data-id="cm0xxogdy0015qsuf6c7i18tt" data-title="linux基本命令集合" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -598,7 +667,7 @@ BurlyWood </td></table>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/" data-id="cm0dxg14b001idsuf1bdode8p" data-title="markdown语法教程" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/26/markdown%E8%AF%AD%E6%B3%95%E6%95%99%E7%A8%8B/" data-id="cm0xxogdz001dqsuf125700io" data-title="markdown语法教程" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -840,7 +909,7 @@ BurlyWood </td></table>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/26/I2c-SMBus%E5%8D%8F%E8%AE%AE%E5%92%8CI2C-Tools/" data-id="cm0dxg1410003dsuf2shb0wa8" data-title="I2C-SMBus协议和I2C Tool" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/26/I2c-SMBus%E5%8D%8F%E8%AE%AE%E5%92%8CI2C-Tools/" data-id="cm0xxogdn0001qsufaf44enag" data-title="I2C-SMBus协议和I2C Tool" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1040,7 +1109,7 @@ BurlyWood </td></table>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/25/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E4%B8%8Efreetype%E7%A7%BB%E6%A4%8D/" data-id="cm0dxg14h003adsufa4aigzws" data-title="字符编码与freetype移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/25/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E4%B8%8Efreetype%E7%A7%BB%E6%A4%8D/" data-id="cm0xxoge50034qsuf7jw2exbx" data-title="字符编码与freetype移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1191,7 +1260,7 @@ BurlyWood </td></table>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/" data-id="cm0dxg14a0019dsuf00yjhkp6" data-title="ini_parse配置解析功能移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/25/ini-parse%E9%85%8D%E7%BD%AE%E8%A7%A3%E6%9E%90%E5%8A%9F%E8%83%BD%E7%A7%BB%E6%A4%8D/" data-id="cm0xxogdy0019qsuf6fxeftrb" data-title="ini_parse配置解析功能移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1276,7 +1345,7 @@ BurlyWood </td></table>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/" data-id="cm0dxg14v0094dsuf5oo753j2" data-title="通用裸机-传感器" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/12/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-%E4%BC%A0%E6%84%9F%E5%99%A8/" data-id="cm0xxogel009oqsufhwqm2qfq" data-title="通用裸机-传感器" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1709,7 +1778,7 @@ BurlyWood </td></table>
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/03/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-arm%E6%B1%87%E7%BC%96/" data-id="cm0dxg14v0096dsuf0v1jhh4j" data-title="通用裸机-arm汇编" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/03/%E9%80%9A%E7%94%A8%E8%A3%B8%E6%9C%BA-arm%E6%B1%87%E7%BC%96/" data-id="cm0xxogel009qqsuff8ab0des" data-title="通用裸机-arm汇编" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1864,7 +1933,7 @@ CPHA:表示相位，即第一个还是第二个时钟沿采样数据，0为第�
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/02/imx6ull%E8%A3%B8%E6%9C%BA-SPI/" data-id="cm0dxg1490014dsufdperfcai" data-title="imx6ull裸机-SPI" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/02/imx6ull%E8%A3%B8%E6%9C%BA-SPI/" data-id="cm0xxogdx0012qsufavexf2e2" data-title="imx6ull裸机-SPI" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1971,90 +2040,7 @@ CPHA:表示相位，即第一个还是第二个时钟沿采样数据，0为第�
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/02/imx6ull%E8%A3%B8%E6%9C%BA-%E5%AE%9A%E6%97%B6%E5%99%A8/" data-id="cm0dxg1490016dsufct3d425x" data-title="imx6ull裸机-定时器" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-imx6ull裸机-ADC" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/" class="article-date">
-  <time class="dt-published" datetime="2024-05-01T10:56:40.000Z" itemprop="datePublished">2024-05-01</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/">imx6ull裸机-ADC</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-imx6ull-ji-cun-qi">1 IMX6ULL寄存器</a><ul>
-<li><a href="#1-1-adcx-cfg-x-1-2-pei-zhi-ji-cun-qi">1.1 ADCx_CFG(x&#x3D;1~2) 配置寄存器</a></li>
-<li><a href="#1-2-adcx-gc-tong-yong-kong-zhi-ji-cun-qi">1.2 ADCx_GC 通用控制寄存器</a></li>
-<li><a href="#1-3-adcx-gs-tong-yong-zhuang-tai-ji-cun-qi">1.3 ADCx_GS 通用状态寄存器</a></li>
-<li><a href="#1-4-adcx-hs-zhuang-tai-ji-cun-qi">1.4 ADCx_HS 状态寄存器</a></li>
-<li><a href="#1-5-adcx-hc0-kong-zhi-ji-cun-qi">1.5 ADCx_HC0 控制寄存器</a></li>
-<li><a href="#1-6-adcx-r0-shu-ju-ji-cun-qi">1.6 ADCx_R0 数据寄存器</a></li>
-</ul>
-</li>
-<li><a href="#2-liu-cheng-dai-ma">2 流程代码</a><ul>
-<li><a href="#2-1-chu-shi-hua">2.1 初始化</a></li>
-<li><a href="#2-2-zi-dong-xiao-zhun">2.2 自动校准</a></li>
-<li><a href="#2-3-huo-qu-adc-yuan-shi-zhi">2.3 获取ADC原始值</a></li>
-<li><a href="#2-4-huo-qu-adc-yuan-shi-zhi-duo-ci-qu-ping-jun">2.4 获取ADC原始值(多次取平均)</a></li>
-<li><a href="#2-5-huo-qu-mo-shu-zhuan-huan-hou-de-dian-ya">2.5 获取模数转换后的电压</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-imx6ull-ji-cun-qi">1 IMX6ULL寄存器</span><a href="#1-imx6ull-ji-cun-qi" class="header-anchor">#</a></h1><h2><span id="1-1-adcx-cfg-x-x3d-1-2-pei-zhi-ji-cun-qi">1.1 ADCx_CFG(x&#x3D;1~2) 配置寄存器</span><a href="#1-1-adcx-cfg-x-x3d-1-2-pei-zhi-ji-cun-qi" class="header-anchor">#</a></h2><p><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/1.jpg" alt="image"><br><strong>OVWREN</strong> (bit16)：数据复写使能位，为 1 的时候使能复写功能，为 0 的时候关闭复写功能。<br><strong>AVGS</strong>(bit15:14)：硬件平均次数，只有当 ADC1_GC 寄存器的 AVGE 位为 1 的时候才有效<br><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/2.png" alt="image"><br><strong>ADTRG</strong>(bit13)：转换触发选择。为 0 的时候选择软件触发，为 1 的时候，不选择软件触发。<br><strong>REFSEL</strong>(bit12:11)：参考电压选择，为 00 时选择 VREFH&#x2F;VREFL 这两个引脚上的电压为参考电压，正点原子 ALPHA 开发板上 VREFH 为 3.3V，VREFL 为 0V。<br><strong>ADHSC</strong>(bit10)：高速转换使能位，当为 0 时为正常模式，为 1 时为高速模式。<br><strong>ADSTS</strong>(bit9:8)：设置 ADC 的采样周期，与 ADLSMP 位一起决定采样周期：<br><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/3.png" alt="image"><br><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/4.png" alt="image"><br><strong>ADLSMP</strong>(bit4)：长采样周期使能位，当值为 0 时为短采样周期模式，为 1 时为长采样周期模式。搭配 ADSTS 位一起控制 ADC 的采样周期。<br><strong>MODE</strong>(bit3:2)：选择转换精度：<br><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/5.png" alt="image"><br><strong>ADICLK</strong>(bit1:0)：输入时钟源选择，为 00 的时候选择 IPG Clock，为 01 的时候选择 IPG Clock&#x2F;2，为 10 的时候无效，为 11 的时候选择呢 ADACK。本教程我们设置为 11，也就是选择ADACK 为 ADC 的时钟源。</p>
-<h2><span id="1-2-adcx-gc-tong-yong-kong-zhi-ji-cun-qi">1.2 ADCx_GC 通用控制寄存器</span><a href="#1-2-adcx-gc-tong-yong-kong-zhi-ji-cun-qi" class="header-anchor">#</a></h2><p><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/6.png" alt="image"><br><strong>CAL</strong>(bit7)：当该位写入 1 时，硬件校准功能将会启动，校准过程中该位会一直保持 1，校准完成后会清 0，校准完成后需要检查一下ADC_GS[CALF]位，确认校准结果。<br><strong>ADCO</strong>(bit6)：连续转换使能位，只有在开启了硬件平均功能时有效，为 0 时只能转换一次或一组，当 ADCO 为 1 时可以连续转换或多组。<br><strong>AVGE</strong>(bit5)：硬件平均使能位。为 0 时关闭，为 1 时使能。<br><strong>ACFE</strong>(bit4)：比较功能使能位。为 0 时关闭，为 1 时使能。<br><strong>ACFGT</strong>(bit3)：配置比较方法，如果为 0 的话就比较转换结果是否小于 ADC_CV 寄存器值，如果为 1 的话就比较装换结果是否大于或等于 ADC_CV 寄存器值。<br><strong>ACREN</strong>(bit2)：范围比较功能使能位。为 0 的话仅和 ADC_CV 里的 CV1 比较，为 1 的话和 ADC_CV 里的 CV1、CV2 比较。<br><strong>ACREN</strong>(bit2)：范围比较功能使能位。为 0 的话仅和 ADC_CV 里的 CV1 比较，为 1 的话和 ADC_CV 里的 CV1、CV2 比较。<br><strong>DMAEN</strong>(bit1)：DMA 功能使能位，为 0 是关闭，为 1 是开启<br><strong>ADACKEN</strong>(bit0)：异步时钟输出使能位，为 0 是关闭，为 1 时开启</p>
-<h2><span id="1-3-adcx-gs-tong-yong-zhuang-tai-ji-cun-qi">1.3 ADCx_GS 通用状态寄存器</span><a href="#1-3-adcx-gs-tong-yong-zhuang-tai-ji-cun-qi" class="header-anchor">#</a></h2><p><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/7.png" alt="image"><br><strong>AWKST</strong>(bit2)：异步唤醒中断状态，为 1 时表示发生了异步唤醒中断。为 0 时没有发生异步中断。<br><strong>CALF</strong>(bit1)：校准失败标志位，为 0 的时候表示校准正常完成，为 1 的时候表示校准失败。<br><strong>ADACT</strong>(bit0)：转换活动标志，为 0 的时候表示转换没有进行，为 1 的时候表示正在进行转换。</p>
-<h2><span id="1-4-adcx-hs-zhuang-tai-ji-cun-qi">1.4 ADCx_HS 状态寄存器</span><a href="#1-4-adcx-hs-zhuang-tai-ji-cun-qi" class="header-anchor">#</a></h2><p>COCO0表示转换完成.</p>
-<p><strong>COCO0</strong>(bit0)：每次转换完成此位就会被置 1。</p>
-<h2><span id="1-5-adcx-hc0-kong-zhi-ji-cun-qi">1.5 ADCx_HC0 控制寄存器</span><a href="#1-5-adcx-hc0-kong-zhi-ji-cun-qi" class="header-anchor">#</a></h2><p><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/8.png" alt="image"><br><strong>AIEN</strong>(bit7)：转换完成中断控制位，为 1 的时候打开转换完成中断，为 0 的时候关闭。<br><strong>ADCH</strong>(bit4:0)：转换通道选择，可以设置为 00000~01111 分别对应通道 0~15。11001 为内部通道，用于 ADC 自测。</p>
-<h2><span id="1-6-adcx-r0-shu-ju-ji-cun-qi">1.6 ADCx_R0 数据寄存器</span><a href="#1-6-adcx-r0-shu-ju-ji-cun-qi" class="header-anchor">#</a></h2><p><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/9.png" alt="image"></p>
-<h1><span id="2-liu-cheng-dai-ma">2 流程代码</span><a href="#2-liu-cheng-dai-ma" class="header-anchor">#</a></h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span>、初始化 ADC1_CH1</span><br><span class="line"><span class="comment">//初始化 ADC1_CH1，配置 ADC 位数，时钟源，采样时间等。</span></span><br><span class="line"><span class="number">2</span>、校准 ADC</span><br><span class="line"><span class="comment">//ADC 在使用之前需要校准一次。</span></span><br><span class="line"><span class="number">3</span>、使能 ADC</span><br><span class="line"><span class="comment">//配置好 ADC 以后就可以开启了。</span></span><br><span class="line"><span class="number">4</span>、读取 ADC 值</span><br><span class="line"><span class="comment">//ADC 正常工作以后就可以读取 ADC 值。</span></span><br></pre></td></tr></table></figure>
-<h2><span id="2-1-chu-shi-hua">2.1 初始化</span><a href="#2-1-chu-shi-hua" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">adc1ch1_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    ADC1-&gt;CFG = <span class="number">0</span>;</span><br><span class="line">    ADC1-&gt;CFG |= (<span class="number">2</span> &lt;&lt; <span class="number">2</span>) | (<span class="number">3</span> &lt;&lt; <span class="number">0</span>);</span><br><span class="line">    ADC1-&gt;GC = <span class="number">0</span>;</span><br><span class="line">    ADC1-&gt;GC |= <span class="number">1</span> &lt;&lt; <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* CFG寄存器</span></span><br><span class="line"><span class="comment">     * bit16        0       关闭复写功能</span></span><br><span class="line"><span class="comment">     * bit15:14     00      硬件平均设置为默认值，00的时候4次平均，</span></span><br><span class="line"><span class="comment">     *                      但是得ADC_GC寄存器的AVGE位置1来使能硬件平均</span></span><br><span class="line"><span class="comment">     * bit13        0       软件触发</span></span><br><span class="line"><span class="comment">     * bit12:1      00      参考电压为VREFH/VREFL，也就是3.3V/0V</span></span><br><span class="line"><span class="comment">     * bit10        0       正常转换速度</span></span><br><span class="line"><span class="comment">     * bit9:8       00      采样时间2/12，ADLSMP=0(短采样)的时候为2个周期</span></span><br><span class="line"><span class="comment">     *                      ADLSMP=1(长采样)的时候为12个周期</span></span><br><span class="line"><span class="comment">     * bit7         0       非低功耗模式</span></span><br><span class="line"><span class="comment">     * bit6:5       00      ADC时钟源1分频 </span></span><br><span class="line"><span class="comment">     * bit4         0       短采样</span></span><br><span class="line"><span class="comment">     * bit3:2       10      12位ADC</span></span><br><span class="line"><span class="comment">     * bit1:0       11      ADC时钟源选择ADACK</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line"><span class="comment">/* GC寄存器</span></span><br><span class="line"><span class="comment">     * bit7     0       先关闭校准功能，后面会校准</span></span><br><span class="line"><span class="comment">     * bit6     0       关闭持续转换</span></span><br><span class="line"><span class="comment">     * bit5     0       关闭硬件平均功能</span></span><br><span class="line"><span class="comment">     * bit4     0       关闭比较功能</span></span><br><span class="line"><span class="comment">     * bit3     0       关闭比较的Greater Than功能</span></span><br><span class="line"><span class="comment">     * bit2     0       关闭比较的Range功能</span></span><br><span class="line"><span class="comment">     * bit1     0       关闭DMA</span></span><br><span class="line"><span class="comment">     * bit0     1       使能ADACK</span></span><br><span class="line"><span class="comment">     */</span></span><br></pre></td></tr></table></figure>
-<h2><span id="2-2-zi-dong-xiao-zhun">2.2 自动校准</span><a href="#2-2-zi-dong-xiao-zhun" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">status_t</span> <span class="title function_">adc1_autocalibration</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="type">status_t</span> ret  = kStatus_Success;</span><br><span class="line">	ADC1-&gt;GS |= (<span class="number">1</span> &lt;&lt; <span class="number">2</span>);   <span class="comment">/* 清除CALF位，写1清零 */</span></span><br><span class="line">	ADC1-&gt;GC |= (<span class="number">1</span> &lt;&lt; <span class="number">7</span>);   <span class="comment">/* 使能校准功能 */</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 校准完成之前GC寄存器的CAL位会一直为1，直到校准完成此位自动清零 */</span></span><br><span class="line">	<span class="keyword">while</span>((ADC1-&gt;GC &amp; (<span class="number">1</span> &lt;&lt; <span class="number">7</span>)) != <span class="number">0</span>) &#123; </span><br><span class="line">		<span class="comment">/* 如果GS寄存器的CALF位为1的话表示校准失败 */</span></span><br><span class="line">		<span class="keyword">if</span>((ADC1-&gt;GS &amp; (<span class="number">1</span> &lt;&lt; <span class="number">2</span>)) != <span class="number">0</span>) &#123;</span><br><span class="line">			ret = kStatus_Fail;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/* 校准成功以后HS寄存器的COCO0位会置1 */</span></span><br><span class="line">	<span class="keyword">if</span>((ADC1-&gt;HS  &amp; (<span class="number">1</span> &lt;&lt; <span class="number">0</span>)) == <span class="number">0</span>) </span><br><span class="line">		ret = kStatus_Fail;</span><br><span class="line">	<span class="comment">/* 如果GS寄存器的CALF位为1的话表示校准失败 */</span></span><br><span class="line">		<span class="keyword">if</span>((ADC1-&gt;GS &amp; (<span class="number">1</span> &lt;&lt; <span class="number">2</span>)) != <span class="number">0</span>) </span><br><span class="line">		ret = kStatus_Fail;</span><br><span class="line">	<span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-
-<h2><span id="2-3-huo-qu-adc-yuan-shi-zhi">2.3 获取ADC原始值</span><a href="#2-3-huo-qu-adc-yuan-shi-zhi" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">int</span> <span class="title function_">getadc_value</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="comment">/* 配置ADC通道1 */</span></span><br><span class="line">	ADC1-&gt;HC[<span class="number">0</span>] = <span class="number">0</span>;            <span class="comment">/* 关闭转换结束中断    */</span></span><br><span class="line">	ADC1-&gt;HC[<span class="number">0</span>] |= (<span class="number">1</span> &lt;&lt; <span class="number">0</span>);     <span class="comment">/* 通道1            */</span></span><br><span class="line">	<span class="keyword">while</span>((ADC1-&gt;HS &amp; (<span class="number">1</span> &lt;&lt; <span class="number">0</span>)) == <span class="number">0</span>);  <span class="comment">/* 等待转换完成 */</span></span><br><span class="line">	<span class="keyword">return</span> ADC1-&gt;R[<span class="number">0</span>];    <span class="comment">/* 返回ADC值 */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2><span id="2-4-huo-qu-adc-yuan-shi-zhi-duo-ci-qu-ping-jun">2.4 获取ADC原始值(多次取平均)</span><a href="#2-4-huo-qu-adc-yuan-shi-zhi-duo-ci-qu-ping-jun" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">short</span> <span class="title function_">getadc_average</span><span class="params">(<span class="type">unsigned</span> <span class="type">char</span> times)</span> &#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> temp_val = <span class="number">0</span>;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> t;</span><br><span class="line">	<span class="keyword">for</span>(t = <span class="number">0</span>; t &lt; times; t++)&#123;</span><br><span class="line">		temp_val += getadc_value();</span><br><span class="line">		delayms(<span class="number">5</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> temp_val / times;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h2><span id="2-5-huo-qu-mo-shu-zhuan-huan-hou-de-dian-ya">2.5 获取模数转换后的电压</span><a href="#2-5-huo-qu-mo-shu-zhuan-huan-hou-de-dian-ya" class="header-anchor">#</a></h2><p>由于精度为12 bit, ADC范围为[0, 4095]。同时电压满输出时为3.3v，因此当ADC数据拉满，得到3300mv，也就是3.3v</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">short</span> <span class="title function_">getadc_volt</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> adcvalue=<span class="number">0</span>;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> ret = <span class="number">0</span>;</span><br><span class="line">	adcvalue = getadc_average(<span class="number">5</span>);</span><br><span class="line">	ret = (<span class="type">float</span>)adcvalue * (<span class="number">3300.0f</span> / <span class="number">4096.0f</span>);    	<span class="comment">/* 获取计算后的带小数的实际电压值 */</span></span><br><span class="line">	<span class="keyword">return</span>  ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/" data-id="cm0dxg1480011dsuf6he8f6o5" data-title="imx6ull裸机-ADC" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/02/imx6ull%E8%A3%B8%E6%9C%BA-%E5%AE%9A%E6%97%B6%E5%99%A8/" data-id="cm0xxogdx0010qsufh93mb1v4" data-title="imx6ull裸机-定时器" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       

@@ -69,6 +69,287 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-buildroot教程" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/" class="article-date">
+  <time class="dt-published" datetime="2024-07-23T15:36:29.000Z" itemprop="datePublished">2024-07-23</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/">buildroot教程</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-yin-ru-buildroot">1 引入buildroot</a><ul>
+<li><a href="#1-1-xia-zai-buildroot">1.1 下载buildroot</a></li>
+<li><a href="#1-2-buildroot-mu-lu-jie-gou">1.2 buildroot目录结构</a><ul>
+<li><a href="#1-2-0-buildroot-yuan-mu-lu">1.2.0 buildroot源目录</a></li>
+<li><a href="#1-2-1-bian-yi-chu-de-output-shu-chu-mu-lu-jie-shao">1.2.1 编译出的output输出目录介绍</a></li>
+</ul>
+</li>
+<li><a href="#1-3-pei-zhi-target-options">1.3 配置 Target options</a></li>
+<li><a href="#1-4-pei-zhi-gong-ju-lian">1.4 配置工具链</a><ul>
+<li><a href="#1-4-1-nei-bu-gong-ju-lian">1.4.1 内部工具链</a></li>
+<li><a href="#1-4-2-wai-bu-gong-ju-lian">1.4.2 外部工具链</a></li>
+</ul>
+</li>
+<li><a href="#1-5-pei-zhi-build-options">1.5 配置 build options</a></li>
+<li><a href="#1-6-pei-zhi-system-configuration">1.6 配置 System configuration</a></li>
+<li><a href="#1-7-pei-zhi-filesystem-images">1.7 配置 Filesystem images</a></li>
+<li><a href="#1-8-jin-zhi-bian-yi-linux-nei-he-he-uboot">1.8 禁止编译 Linux 内核和 uboot</a></li>
+<li><a href="#1-9-pei-zhi-target-packages">1.9 配置 Target packages</a></li>
+</ul>
+</li>
+<li><a href="#2-bian-yi-buildroot">2 编译buildroot</a><ul>
+<li><a href="#2-1-make-help">2.1 make help</a></li>
+<li><a href="#2-2-make-print-version">2.2 make print-version</a></li>
+<li><a href="#2-3-make-menuconfig">2.3 make menuconfig</a></li>
+<li><a href="#2-4-make-xxxx-defconfig">2.4 make xxxx_defconfig</a></li>
+<li><a href="#2-5-make">2.5 make</a><ul>
+<li><a href="#2-5-1-nfs-gua-zai-gen-wen-jian-xi-tong">2.5.1 nfs 挂载根文件系统</a></li>
+</ul>
+</li>
+<li><a href="#2-6-make-show-targets">2.6 make show-targets</a></li>
+</ul>
+</li>
+<li><a href="#3-buildroot-kuang-jia-yuan-li">3 buildroot框架原理</a><ul>
+<li><a href="#3-1-tian-jia-zi-ji-de-ruan-jian-bao">3.1 添加自己的软件包</a><ul>
+<li><a href="#3-1-1-package-config-in-zong-ru-kou-tian-jia-cai-dan">3.1.1 package&#x2F;Config.in总入口添加菜单</a></li>
+<li><a href="#3-1-2-pei-zhi-app-dui-ying-de-config-in-he-mk-wen-jian">3.1.2 配置APP对应的Config.in和mk文件</a><ul>
+<li><a href="#3-1-2-1-config-in">3.1.2.1 Config.in</a></li>
+<li><a href="#3-1-2-2-helloworld-mk">3.1.2.2 helloworld.mk</a></li>
+</ul>
+</li>
+<li><a href="#3-1-3-bian-xie-app-yuan-ma-he-makefile">3.1.3 编写APP源码和Makefile</a></li>
+<li><a href="#3-1-4-tong-guo-make-menuconfig-xuan-zhong-app">3.1.4 通过make menuconfig选中APP</a></li>
+<li><a href="#3-1-5-bian-yi-shi-yong-app">3.1.5 编译使用APP</a></li>
+</ul>
+</li>
+<li><a href="#3-2-ru-he-chong-xin-bian-yi-ruan-jian-bao">3.2 如何重新编译软件包</a></li>
+<li><a href="#3-3-shi-neng-di-san-fang-ruan-jian-he-ku">3.3 使能第三方软件和库</a><ul>
+<li><a href="#3-3-1-shi-neng-yin-pin-de-alsa-ku-tao-jian">3.3.1 使能音频的ALSA库套件</a></li>
+<li><a href="#3-3-2-shi-neng-busybox-tao-jian">3.3.2 使能busybox套件</a><ul>
+<li><a href="#3-3-2-1-xiu-gai-pei-zhi-busybox-tao-jian">3.3.2.1 修改配置busybox套件</a></li>
+<li><a href="#3-3-2-2-rebuild-busybox-tao-jian">3.3.2.2 rebuild busybox套件</a></li>
+</ul>
+</li>
+<li><a href="#3-3-3-ps1-huan-jing-bian-liang">3.3.3 PS1环境变量</a></li>
+</ul>
+</li>
+<li><a href="#3-4-dan-du-sheng-cheng-mu-biao-build-out-of-tree">3.4 单独生成目标（build out of tree）</a></li>
+</ul>
+</li>
+<li><a href="#4-buildroot-guan-fang-jiao-cheng-lian-jie">4 buildroot官方教程链接</a></li>
+<li><a href="#5-fu-lu">5 附录</a><ul>
+<li><a href="#5-1-buildroot-bian-yi-log">5.1 buildroot编译log</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-yin-ru-buildroot">1 引入buildroot</span><a href="#1-yin-ru-buildroot" class="header-anchor">#</a></h1><p>Buildroot是Linux平台上一个开源的嵌入式Linux系统<strong>自动构建框架</strong>。用来制作根文件系统，我们还要自己去移植一些第三方软件和库，比如 <code>alsa</code>、<code>iperf</code>、<code>mplayer</code> 等等。</p>
+<p>那么有没有一种傻瓜式的方法或软件，它不仅包含了 <code>busybox</code> 的功能，而且里面还集成了各种软件，需要什么软件就选择什么软件，不需要我们去移植。答案肯定是有的，<code>buildroot </code>就是这样一种工具。</p>
+<h2><span id="1-1-xia-zai-buildroot">1.1 下载buildroot</span><a href="#1-1-xia-zai-buildroot" class="header-anchor">#</a></h2><p>Buildroot版本每2个月，2月，5月，8月和11月发布一次。版本号的格式为YYYY.MM，例如2013.02、2014.08。</p>
+<p>可以从<a target="_blank" rel="noopener" href="http://buildroot.org/downloads/">http://buildroot.org/downloads/</a>获得发行包。</p>
+<p>也可通过<code>github</code>仓库获取最新版本：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> git://git.busybox.net/buildroot</span><br></pre></td></tr></table></figure>
+
+<p><code>buildroot</code> 和<code> uboot</code>、<code>Linux kernel </code>一样也支持图形化配置：<br><code>make menuconfig</code><br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/1.png" alt="image"></p>
+<h2><span id="1-2-buildroot-mu-lu-jie-gou">1.2 buildroot目录结构</span><a href="#1-2-buildroot-mu-lu-jie-gou" class="header-anchor">#</a></h2><h3><span id="1-2-0-buildroot-yuan-mu-lu">1.2.0 buildroot源目录</span><a href="#1-2-0-buildroot-yuan-mu-lu" class="header-anchor">#</a></h3><ul>
+<li><p><code>arch</code>: CPU架构相关的配置脚本</p>
+</li>
+<li><p><code>board</code>: 在构建系统时，board默认的boot和Linux kernel配置文件，以及一些板级相关脚本</p>
+</li>
+<li><p><code>boot</code>: uboot配置脚本目录</p>
+</li>
+<li><p><code>configs</code>: 板级配置文件，该目录下的配置文件记录着该机器平台或者方案使用的工具链，boot， kernel，各种应用软件包的配置</p>
+</li>
+<li><p><code>dl</code>: download的简写，下载一些开源包。第一次下载后，下次就不会再去从官网下载了，而是从dl&#x2F;目录下拿开源包，以节约时间</p>
+</li>
+<li><p><code>docs</code>:</p>
+</li>
+<li><p><code>fs</code>: 各种文件系统的自动构建脚本</p>
+</li>
+<li><p><code>linux</code>: 存放Linux kernel的自动构建脚本</p>
+</li>
+<li><p><code>package</code>: 第三方开源包的自动编译构建脚本，用来配置编译dl目录下载的开源包</p>
+</li>
+<li><p><code>support</code>:</p>
+</li>
+<li><p><code>system</code>: 存放文件系统目录的和设备节点的模板，这些模板会被拷贝到<code>output/</code>目录下，用于制作根文件系统<code>rootfs</code></p>
+</li>
+<li><p><code>toolchain/ </code>目录中存放着各种制作工具链的脚本</p>
+</li>
+</ul>
+<h3><span id="1-2-1-bian-yi-chu-de-output-shu-chu-mu-lu-jie-shao">1.2.1 编译出的output输出目录介绍</span><a href="#1-2-1-bian-yi-chu-de-output-shu-chu-mu-lu-jie-shao" class="header-anchor">#</a></h3><ul>
+<li><p><code>images/</code>存储所有映像（内核映像，引导加载程序和根文件系统映像）的位置。这些是您需要放在目标系统上的文件。</p>
+</li>
+<li><p><code>build/</code>构建所有组件的位置（包括主机上Buildroot所需的工具和针对目标编译的软件包）。该目录为每个组件包含一个子目录。</p>
+</li>
+<li><p><code>host/</code>包含为主机构建的工具和目标工具链。</p>
+</li>
+<li><p><code>staging/</code>是到内部目标工具链host&#x2F;的符号链接 </p>
+</li>
+<li><p><code>target/</code>它几乎包含了目标的完整根文件系统。除了设备文件<code>/dev/</code>（Buildroot无法创建它们，因为Buildroot不能以root身份运行并且不想以root身份运行）之外，所需的一切都存在。</p>
+</li>
+</ul>
+<h2><span id="1-3-pei-zhi-target-options">1.3 配置 Target options</span><a href="#1-3-pei-zhi-target-options" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Target options</span><br><span class="line">	-&gt; Target Architecture = ARM (little endian)</span><br><span class="line">	-&gt; Target Binary Format = ELF</span><br><span class="line">	-&gt; Target Architecture Variant = cortex-A7</span><br><span class="line">	-&gt; Target ABI = EABIhf</span><br><span class="line">	-&gt; Floating point strategy = NEON/VFPv4</span><br><span class="line">	-&gt; ARM instruction <span class="built_in">set</span> = ARM</span><br></pre></td></tr></table></figure>
+<p>配置输出目标选项，架构，格式，浮点策略，指令集啊。配置好后如下：<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/2.png" alt="image"></p>
+<h2><span id="1-4-pei-zhi-gong-ju-lian">1.4 配置工具链</span><a href="#1-4-pei-zhi-gong-ju-lian" class="header-anchor">#</a></h2><p>Buildroot为交叉编译工具链提供了两种解决方案：</p>
+<h3><span id="1-4-1-nei-bu-gong-ju-lian">1.4.1 内部工具链</span><a href="#1-4-1-nei-bu-gong-ju-lian" class="header-anchor">#</a></h3><ul>
+<li>内部工具链，称为<code>Buildroot toolchain</code>。<code>buildroot </code>其实是可以自动下载交叉编译器的，但是都是从国外服务器下载的， 鉴于国内的网络环境，推荐大家设置成自己所使用的交叉编译器(也就是外部工具链)。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/3.png" alt="image"></li>
+</ul>
+<h3><span id="1-4-2-wai-bu-gong-ju-lian">1.4.2 外部工具链</span><a href="#1-4-2-wai-bu-gong-ju-lian" class="header-anchor">#</a></h3><ul>
+<li>外部工具链<code>External toolchain</code>。</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">Toolchain</span><br><span class="line">-&gt; Toolchain type = External toolchain</span><br><span class="line">-&gt; Toolchain = Custom toolchain <span class="comment">//选择用户自己的交叉编译器</span></span><br><span class="line">-&gt; Toolchain origin = Pre-installed toolchain <span class="comment">//选择预装的编译器,否则Toolchain to be downloaded and installed</span></span><br><span class="line">-&gt; Toolchain path =/usr/local/arm/gcc-linaro<span class="number">-4.9</span><span class="number">.4</span><span class="number">-2017.01</span>-x86_64_arm-linux-gnueabihf</span><br><span class="line">-&gt; Toolchain prefix = $(ARCH)-linux-gnueabihf <span class="comment">//前缀</span></span><br><span class="line">-&gt; External toolchain gcc version = <span class="number">4.9</span>.x</span><br><span class="line">-&gt; External toolchain kernel headers series = <span class="number">4.1</span>.x</span><br><span class="line">-&gt; External toolchain C library = glibc/eglibc</span><br><span class="line">-&gt; [*] Toolchain has SSP support? (NEW) <span class="comment">//选中</span></span><br><span class="line">-&gt; [*] Toolchain has RPC support? (NEW) <span class="comment">//选中</span></span><br><span class="line">-&gt; [*] Toolchain has C++ support? <span class="comment">//选中</span></span><br><span class="line">-&gt; [*] Enable MMU support (NEW) <span class="comment">//选中</span></span><br></pre></td></tr></table></figure>
+
+<p><code>Toolchain</code>：设置为 Custom toolchain，表示使用用户自己的交叉编译器。<br><code>Toolchain origin</code>：设置为 Pre-installed toolchain，表示使用预装的交叉编译器。<br><code>Toolchain path</code>：设置自己安装的交叉编译器绝对路径！buildroot 要用到。<br><code>Toolchain prefix</code>：设置交叉编译器前缀，要根据自己实际所使用的交叉编译器来设置，比如我们使用的是 <code>arm-linux-gnueabihf-gcc</code>，因此前缀就是<code>$(ARCH)-linux-gnueabihf</code>，其中 ARCH 我们前面已经设置为了 arm。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/4.png" alt="image"></p>
+<h2><span id="1-5-pei-zhi-build-options">1.5 配置 build options</span><a href="#1-5-pei-zhi-build-options" class="header-anchor">#</a></h2><p>编译选项，编译第三方插件使用静态还是动态链接等。</p>
+<h2><span id="1-6-pei-zhi-system-configuration">1.6 配置 System configuration</span><a href="#1-6-pei-zhi-system-configuration" class="header-anchor">#</a></h2><p>系统配置，比如开发板名字、欢迎语、用户名、密码等。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">System configuration</span><br><span class="line">-&gt; System hostname = alpha_imx6ull <span class="comment">//平台名字，自行设置</span></span><br><span class="line">-&gt; System banner = Welcome to alpha i.mx6ull <span class="comment">//欢迎语</span></span><br><span class="line">-&gt; Init system = BusyBox <span class="comment">//使用 busybox</span></span><br><span class="line">-&gt; /dev management = Dynamic using devtmpfs + mdev <span class="comment">//使用 mdev</span></span><br><span class="line">-&gt; [*] Enable root login with password (NEW) <span class="comment">//使能登录密码</span></span><br><span class="line">-&gt; Root password = <span class="number">123456</span> <span class="comment">//登录密码为 123456</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="1-7-pei-zhi-filesystem-images">1.7 配置 Filesystem images</span><a href="#1-7-pei-zhi-filesystem-images" class="header-anchor">#</a></h2><p>根文件系统格式。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">-&gt; Filesystem images</span><br><span class="line">-&gt; [*] ext2/<span class="number">3</span>/<span class="number">4</span> root filesystem <span class="comment">//如果是 EMMC 或 SD 卡的话就用 ext3/ext4</span></span><br><span class="line">-&gt; ext2/<span class="number">3</span>/<span class="number">4</span> variant = ext4 <span class="comment">//选择 ext4 格式</span></span><br><span class="line">-&gt; [*] ubi image containing an ubifs root filesystem <span class="comment">//如果使用 NAND 的话就用 ubifs</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/5.png" alt="image"></p>
+<h2><span id="1-8-jin-zhi-bian-yi-linux-nei-he-he-uboot">1.8 禁止编译 Linux 内核和 uboot</span><a href="#1-8-jin-zhi-bian-yi-linux-nei-he-he-uboot" class="header-anchor">#</a></h2><p>一版不建议uboot和kernel也用buildroot。buildroot 不仅仅能构建根文件系统，也可以编译 linux 内核和 uboot。</p>
+<p>buildroot如果开启了uboot和Linux内核的编译，会自动下载最新的 linux 内核和 uboot，那么最新的内核和uboot会对编译器版本号有要求，可能导致编译失败。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">-&gt; Kernel</span><br><span class="line">-&gt; [ ] Linux Kernel <span class="comment">//不要选择编译 Linux Kernel 选项！</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/6.png" alt="image"></p>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/7.png" alt="image"></p>
+<h2><span id="1-9-pei-zhi-target-packages">1.9 配置 Target packages</span><a href="#1-9-pei-zhi-target-packages" class="header-anchor">#</a></h2><p><a name="1.9配置Targetpackages"></a></p>
+<p>配置要选择的第三方库或软件、比如 <code>alsa-utils、ffmpeg、iperf</code>等工具。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/8.png" alt="image"></p>
+<h1><span id="2-bian-yi-buildroot">2 编译buildroot</span><a href="#2-bian-yi-buildroot" class="header-anchor">#</a></h1><h2><span id="2-1-make-help">2.1 make help</span><a href="#2-1-make-help" class="header-anchor">#</a></h2><p>可以看到<code>buildroot</code>下make的使用细节，包括对<code>package、uclibc、busybox、linux</code>以及文档生成等配置。</p>
+<h2><span id="2-2-make-print-version">2.2 make print-version</span><a href="#2-2-make-print-version" class="header-anchor">#</a></h2><p>打印<code>buildroot</code>版本号</p>
+<h2><span id="2-3-make-menuconfig">2.3 make menuconfig</span><a href="#2-3-make-menuconfig" class="header-anchor">#</a></h2><p>或者(<code>make linux-menuconfig</code>…):进行图形化配置</p>
+<h2><span id="2-4-make-xxxx-defconfig">2.4 make xxxx_defconfig</span><a href="#2-4-make-xxxx-defconfig" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">Buildroot_2020.02.x/configs$ <span class="built_in">ls</span></span><br><span class="line">100ask                                                nexbox_a95x_defconfig</span><br><span class="line">100ask_imx6ull_mini_ddr512m_systemV_core_defconfig    nitrogen6sx_defconfig</span><br><span class="line">100ask_imx6ull_mini_ddr512m_systemV_qt5_defconfig     nitrogen6x_defconfig</span><br><span class="line">100ask_imx6ull_pro_ddr512m_systemV_core_defconfig     nitrogen7_defconfig</span><br><span class="line">100ask_imx6ull_pro_ddr512m_systemV_qt5_defconfig      nitrogen8m_defconfig</span><br><span class="line">100ask_stm32mp157_pro_ddr512m_busybox_core_defconfig  odroidxu4_defconfig</span><br><span class="line">100ask_stm32mp157_pro_ddr512m_systemD_core_defconfig  olimex_a10_olinuxino_lime_defconfig</span><br><span class="line">100ask_stm32mp157_pro_ddr512m_systemD_qt5_defconfig   olimex_a13_olinuxino_defconfig</span><br><span class="line">100ask_stm32mp157_pro_ddr512m_systemV_core_defconfig  olimex_a20_olinuxino_lime2_defconfig</span><br></pre></td></tr></table></figure>
+
+<p><code>make 100ask_imx6ull_pro_ddr512m_systemV_core_defconfig</code>即可产生<code>.config</code>和<code>output目录</code>：<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/9.png" alt="image"></p>
+<h2><span id="2-5-make">2.5 make</span><a href="#2-5-make" class="header-anchor">#</a></h2><p><code>sudo make //注意不能-jxxx，来指定多核编译</code></p>
+<p>make命令通常将执行以下步骤：</p>
+<ol>
+<li>下载源文件（根据需要）；</li>
+<li>配置、构建和安装交叉编译工具链，或仅导入外部工具链；</li>
+<li>配置、构建和安装选定的目标软件包；</li>
+<li>构建内核映像（如果选择）；</li>
+<li>构建引导加载程序映像（如果选择）；</li>
+<li>以选定的格式创建一个根文件系统</li>
+</ol>
+<ul>
+<li><code>make clean</code>：delete all build products (including build directories, host, staging and target trees, the images and the toolchain)</li>
+<li><code>make distclean</code>: 等于make clean+删除配置</li>
+<li><code>make show-targets</code>:显示出本次配置所要编译所有的目标</li>
+<li><code>make  pkg-target</code>:单独编译某个pkg模块</li>
+<li><code>make pkg-rebuild</code>:重新编译pkg</li>
+<li><code>make  pkg-extrac</code>t:只下载解压pkg,不编译，pkg解压后放在 <code>output/build/</code>对应的<code>pkg-dir</code>目录下</li>
+<li><code>make pkg-source</code>:只下载某pkg，然后不做任何事情</li>
+<li><code>make list-defconfigs</code>:例举所有可用的defconfigs。</li>
+<li><code>make xxx_menuconfig</code>:比如<code>make linux-menuconfig</code></li>
+</ul>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/10.png" alt="image"></p>
+<p><code>rootfs.tar</code>就是编译出的根文件系统，解压缩后就能使用。</p>
+<h3><span id="2-5-1-nfs-gua-zai-gen-wen-jian-xi-tong">2.5.1 nfs 挂载根文件系统</span><a href="#2-5-1-nfs-gua-zai-gen-wen-jian-xi-tong" class="header-anchor">#</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">setenv bootargs <span class="string">&#x27;console=tty1 console=ttymxc0,115200 root=/dev/nfs nfsroot=192.168.1.253:</span></span><br><span class="line"><span class="string">/home/zuozhongkai/linux/nfs/buildrootfs rw ip=192.168.1.251:192.168.1.253:192.168.1.1:255.255.</span></span><br><span class="line"><span class="string">255.0::eth0:off&#x27;</span></span><br></pre></td></tr></table></figure>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/11.png" alt="image"></p>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/12.png" alt="image"></p>
+<p>可以看到能进入rootfs，但是驱动ko和第三方软件和库没有。</p>
+<h2><span id="2-6-make-show-targets">2.6 make show-targets</span><a href="#2-6-make-show-targets" class="header-anchor">#</a></h2><p><code>make show-targets</code>显示出本次配置所要编译所有的目标。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/13.png" alt="image"></p>
+<h1><span id="3-buildroot-kuang-jia-yuan-li">3 buildroot框架原理</span><a href="#3-buildroot-kuang-jia-yuan-li" class="header-anchor">#</a></h1><p><code>Buildroot</code>提供了函数框架和变量命令框架，采用它的框架编写的<code>app_pkg.mk</code>这种<code>Makefile</code>格式的<code>自动构建脚本</code>，将被<code>package/pkg-generic.mk</code> 这个核心脚本展开填充到<code>buildroot</code>主目录下的<code>Makefile</code>中去。</p>
+<p>最后<code>make all</code>执行<code>Buildroot</code>主目录下的<code>Makefile</code>，生成你想要的image。 <code>package/pkg-generic.mk</code>中通过调用同目录下的<code>pkg-download.mk</code>、<code>pkg-utils.mk</code>文件，已经帮你自动实现了下载、解压、依赖包下载编译等一系列机械化的流程。</p>
+<p>你只要需要按照格式写<code>app_pkg.mk</code>，填充下载地址，链接依赖库的名字等一些特有的构建细节即可。 总而言之，<code>Buildroot</code>本身提供构建流程的框架，开发者按照格式写脚本，提供必要的构建细节，配置整个系统，最后自动构建出你的系统。</p>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/14.png"></p>
+<h2><span id="3-1-tian-jia-zi-ji-de-ruan-jian-bao">3.1 添加自己的软件包</span><a href="#3-1-tian-jia-zi-ji-de-ruan-jian-bao" class="header-anchor">#</a></h2><h3><span id="3-1-1-package-x2f-config-in-zong-ru-kou-tian-jia-cai-dan">3.1.1 package&#x2F;Config.in总入口添加菜单</span><a href="#3-1-1-package-x2f-config-in-zong-ru-kou-tian-jia-cai-dan" class="header-anchor">#</a></h3><p>添加如下语句：</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">menu <span class="string">&quot;myown(fuzidage) package&quot;</span></span><br><span class="line">	source <span class="string">&quot;package/helloworld/Config.in&quot;</span></span><br><span class="line">endmenu</span><br></pre></td></tr></table></figure>
+
+<p>为自己的软件包添加入口，这样在<code>make menuconfig</code>的时候就可以找到自己的软件包的<code>Config.in</code>，如果在<code>make menuconfig</code>的时候选中<code>helloworld</code>，那么<code>&quot;BR2_PACKAGE_HELLOWORLD=y&quot;</code>也会同步到<code>.config</code>中去。</p>
+<h3><span id="3-1-2-pei-zhi-app-dui-ying-de-config-in-he-mk-wen-jian">3.1.2 配置APP对应的Config.in和mk文件</span><a href="#3-1-2-pei-zhi-app-dui-ying-de-config-in-he-mk-wen-jian" class="header-anchor">#</a></h3><p>在<code>package</code>中新增目录<code>helloworld</code>，并在里面添加<code>Config.in</code>和<code>helloworld.mk</code></p>
+<h4><span id="3-1-2-1-config-in">3.1.2.1 Config.in</span><a href="#3-1-2-1-config-in" class="header-anchor">#</a></h4><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">config BR2_PACKAGE_HELLOWORLD</span><br><span class="line">bool <span class="string">&quot;helloworld&quot;</span></span><br><span class="line">help</span><br><span class="line">  This is a demo to add myown(fuzidage) package.</span><br></pre></td></tr></table></figure>
+
+<p><code>helloworld/Config.in</code>文件，可以通过<code>make menuconfig</code>可以对<code>helloworld</code>进行选择。只有在<code>BR2_PACKAGE_HELLOWORLD=y</code>条件下，才会调用<code>helloworld.mk</code>进行编译</p>
+<h4><span id="3-1-2-2-helloworld-mk">3.1.2.2 helloworld.mk</span><a href="#3-1-2-2-helloworld-mk" class="header-anchor">#</a></h4><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">################################################################################</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment"># helloworld</span></span><br><span class="line"><span class="comment">#</span></span><br><span class="line"><span class="comment">################################################################################</span></span><br><span class="line">HELLOWORLD_VERSION:= 1.0.0</span><br><span class="line">HELLOWORLD_SITE:= <span class="variable">$(CURDIR)</span>/work/helloworld</span><br><span class="line">HELLOWORLD_SITE_METHOD:=local</span><br><span class="line">HELLOWORLD_INSTALL_TARGET:=YES</span><br><span class="line"></span><br><span class="line"><span class="keyword">define</span> HELLOWORLD_BUILD_CMDS</span><br><span class="line">    <span class="variable">$(MAKE)</span> CC=<span class="string">&quot;<span class="variable">$(TARGET_CC)</span>&quot;</span> LD=<span class="string">&quot;<span class="variable">$(TARGET_LD)</span>&quot;</span> -C $(@D) all</span><br><span class="line"><span class="keyword">endef</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">define</span> HELLOWORLD_INSTALL_TARGET_CMDS</span><br><span class="line">    <span class="variable">$(INSTALL)</span> -D -m 0755 $(@D)/helloworld <span class="variable">$(TARGET_DIR)</span>/bin</span><br><span class="line"><span class="keyword">endef</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">define</span> HELLOWORLD_PERMISSIONS</span><br><span class="line">    /bin/helloworld f 4755 0 0 - - - - -</span><br><span class="line"><span class="keyword">endef</span></span><br><span class="line"><span class="variable">$(<span class="built_in">eval</span> $(generic-package)</span>)</span><br></pre></td></tr></table></figure>
+
+<p><code>helloworld.mk</code>包括源码位置、安装目录、权限设置等。</p>
+<h3><span id="3-1-3-bian-xie-app-yuan-ma-he-makefile">3.1.3 编写APP源码和Makefile</span><a href="#3-1-3-bian-xie-app-yuan-ma-he-makefile" class="header-anchor">#</a></h3><p>创建一个<code>work/helloworld</code>目录，建立<code>hello_world.c</code>和<code>makefile</code>。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#include &lt;stdio.h&gt;</span></span><br><span class="line">int main()&#123;</span><br><span class="line">	printf(<span class="string">&quot;hello world\n&quot;</span>);</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line"><span class="section">all: helloworld</span></span><br><span class="line"><span class="section">helloworld: helloworld.o</span></span><br><span class="line">	<span class="variable">$(CC)</span> -o helloworld helloworld.o</span><br><span class="line"><span class="section">clean:</span></span><br><span class="line">	rm -rf *.o</span><br><span class="line">	rm -rf helloworld</span><br><span class="line"><span class="section">install:</span></span><br><span class="line">	<span class="variable">$(INSTALL)</span> -D -m 0755 helloworld <span class="variable">$(TARGET_DIR)</span>/bin</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-1-4-tong-guo-make-menuconfig-xuan-zhong-app">3.1.4 通过make menuconfig选中APP</span><a href="#3-1-4-tong-guo-make-menuconfig-xuan-zhong-app" class="header-anchor">#</a></h3><p>通过上面对<code>package/Config.in</code>入口的配置, 我们可以通过<code>make menuconfig</code>，进入<code>Target packages</code>可以看见多了一个<code>&quot;myown(fuzidage) package&quot;</code>入口，选中，保存配置到<code>.config</code>。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/15.png" alt="image"></p>
+<p>然后<code>make savedefconfig</code>，对helloworld的配置就会保存到对应的<code>xxx_defconfig</code>中。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/16.png" alt="image"></p>
+<h3><span id="3-1-5-bian-yi-shi-yong-app">3.1.5 编译使用APP</span><a href="#3-1-5-bian-yi-shi-yong-app" class="header-anchor">#</a></h3><p>可以和整个平台一起编译APP；或者<code>make helloworld</code>单独编译。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/17.png" alt="image"></p>
+<p>编译过程中，会被拷贝到<code>output/build/helloworld-1.0.0</code>文件夹中。然后生成的bin文件拷贝到<code>output/target/bin/helloworld</code>，这个文件会打包到文件系统中。<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/18.png" alt="image"></p>
+<p>如果需要清空相应的源文件，通过<code>make helloworld-dirclean</code>。</p>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/19.png" alt="image"></p>
+<h2><span id="3-2-ru-he-chong-xin-bian-yi-ruan-jian-bao">3.2 如何重新编译软件包</span><a href="#3-2-ru-he-chong-xin-bian-yi-ruan-jian-bao" class="header-anchor">#</a></h2><p>经过第一次完整编译后，如果我们需要对源码包重新配置，我们不能直接在<code>buildroot</code>上的根目录下直接make，<code>buildroot</code>是不知道你已经对源码进行重新配置，它只会将第一次编译出来的文件，再次打包成根文件系统镜像文件。</p>
+<p>那么可以通过以下2种方式重新编译：</p>
+<ol>
+<li><p>直接删除源码包,然后<code>make all</code></p>
+ <figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">例如我们要重新编译helloworld，那么可以直接删除output/build/helloworld目录，</span><br><span class="line">那么当你make的时候，就会自动从dl文件夹下，解压缩源码包，并重新安装。这种效率偏低</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>进行<code>xxx-rebuild</code>,然后<code>make all</code></p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">也是以helloworld为例子，我们直接输入make helloworld-rebuild，</span><br><span class="line">即可对build/helloworld/目录进行重新编译，然后还要进行make all(或者make world 或者 make target-post-image)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>如果要重新配置编译安装：</p>
+ <figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make &lt;package&gt;-reconfigure; make all</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2><span id="3-3-shi-neng-di-san-fang-ruan-jian-he-ku">3.3 使能第三方软件和库</span><a href="#3-3-shi-neng-di-san-fang-ruan-jian-he-ku" class="header-anchor">#</a></h2><p>前面 <a href="#1.9%E9%85%8D%E7%BD%AETargetpackages">1.9配置Targetpackages</a> 有引入介绍。</p>
+<h3><span id="3-3-1-shi-neng-yin-pin-de-alsa-ku-tao-jian">3.3.1 使能音频的ALSA库套件</span><a href="#3-3-1-shi-neng-yin-pin-de-alsa-ku-tao-jian" class="header-anchor">#</a></h3><p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/20.png" alt="image"></p>
+<h3><span id="3-3-2-shi-neng-busybox-tao-jian">3.3.2 使能busybox套件</span><a href="#3-3-2-shi-neng-busybox-tao-jian" class="header-anchor">#</a></h3><p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/21.png" alt="image"></p>
+<p>使能后，<code>buildroot</code> 会自动下载 <code>busybox</code> 压缩包，<code>buildroot </code>下载的源码压缩包都存 放在<code>/dl </code>目录下，在<code> dl</code> 目录下就有一个叫做<code>“busybox”</code>的文件夹，此目录下保存着 busybox 压 缩包:<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/22.png" alt="image"></p>
+<p><code>make all</code>编译完后, <code>buildroot</code> 将所有解压缩后的软件保存在<code>/output/build </code>软件中，我们可以找到<code>/output/build/busybox-1.29.3</code> 这个文件夹，此文件夹就是解压后的 busybox 源码:<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/23.png" alt="image"><br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/24.png" alt="image"></p>
+<h4><span id="3-3-2-1-xiu-gai-pei-zhi-busybox-tao-jian">3.3.2.1 修改配置busybox套件</span><a href="#3-3-2-1-xiu-gai-pei-zhi-busybox-tao-jian" class="header-anchor">#</a></h4><p>修改busybox源码就直接在<code>/output/build/busybox-1.29.3</code>修改。</p>
+<p><code>make busybox-menuconfig</code>可以配置busybox套件选择哪些功能：<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/25.png" alt="image"></p>
+<h4><span id="3-3-2-2-rebuild-busybox-tao-jian">3.3.2.2 rebuild busybox套件</span><a href="#3-3-2-2-rebuild-busybox-tao-jian" class="header-anchor">#</a></h4><p><code>make busybox</code>或者<code>make busybox-rebuild</code>即可重新编译。</p>
+<p>编译完后还要<code>make</code>或者<code>make target-post-image</code>对其进行打包进根文件系统。</p>
+<h3><span id="3-3-3-ps1-huan-jing-bian-liang">3.3.3 PS1环境变量</span><a href="#3-3-3-ps1-huan-jing-bian-liang" class="header-anchor">#</a></h3><p>我们构建的根文件系统启动以后会发现， 输入命令的时候命令行前面一直都是<code>“#”</code>，如果我们进入到某个目录的话前面并不会显示当前目录路径:<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/26.png" alt="image"></p>
+<p>PS1 用于设置命令提示符格式，格式如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">PS1 = ‘命令列表’</span><br><span class="line">命令列表中可选的参数如下：</span><br><span class="line">\! 显示该命令的历史记录编号。</span><br><span class="line"> \<span class="comment"># 显示当前命令的命令编号。</span></span><br><span class="line"> \$ 显示$符作为提示符，如果用户是 root 的话，则显示<span class="comment">#号。</span></span><br><span class="line"> \\ 显示反斜杠。</span><br><span class="line"> \d 显示当前日期。</span><br><span class="line"> \h 显示主机名。</span><br><span class="line"> \n 打印新行。</span><br><span class="line"> \nnn 显示 nnn 的八进制值。</span><br><span class="line"> \s 显示当前运行的 shell 的名字。</span><br><span class="line"> \t 显示当前时间。</span><br><span class="line"> \u 显示当前用户的用户名。</span><br><span class="line"> \W 显示当前工作目录的名字。</span><br><span class="line"> \w 显示当前工作目录的路径</span><br></pre></td></tr></table></figure>
+
+<p>我们打开&#x2F;etc&#x2F;profie，修改成如下：<br><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/27.png" alt="image"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PS1=<span class="string">&#x27;[\u@\h]:\w$:&#x27;</span></span><br><span class="line"><span class="built_in">export</span> PS1</span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-4-dan-du-sheng-cheng-mu-biao-build-out-of-tree">3.4 单独生成目标（build out of tree）</span><a href="#3-4-dan-du-sheng-cheng-mu-biao-build-out-of-tree" class="header-anchor">#</a></h2><p><code>make O=/home/XXX/output</code></p>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/28.png"></p>
+<h1><span id="4-buildroot-guan-fang-jiao-cheng-lian-jie">4 buildroot官方教程链接</span><a href="#4-buildroot-guan-fang-jiao-cheng-lian-jie" class="header-anchor">#</a></h1><p><a target="_blank" rel="noopener" href="https://bootlin.com/doc/training/buildroot/">buildroot官方训练教程</a></p>
+<p><a target="_blank" rel="noopener" href="https://cloud.tencent.com/developer/article/2147438">buildroot中文手册</a></p>
+<p><img src="/2024/07/23/buildroot%E6%95%99%E7%A8%8B/29.png" alt="image-20240814004339288"></p>
+<p>可以下载正点原子翻译的中文版buildroot手册。</p>
+<h1><span id="5-fu-lu">5 附录</span><a href="#5-fu-lu" class="header-anchor">#</a></h1><h2><span id="5-1-buildroot-bian-yi-log">5.1 buildroot编译log</span><a href="#5-1-buildroot-bian-yi-log" class="header-anchor">#</a></h2><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- imx_v7_defconfig V=1 &gt; log.1 2&gt;&amp;1</span><br><span class="line">make V=1 &gt; buildroot.build.log 2&gt;&amp;1</span><br></pre></td></tr></table></figure>
+
+<p>见附件：<a target="_blank" rel="noopener" href="https://files.cnblogs.com/files/fuzidage/buildroot.build.rar?t=1724326727&download=true">https://files.cnblogs.com/files/fuzidage/buildroot.build.rar?t=1724326727&amp;download=true</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/07/23/buildroot%E6%95%99%E7%A8%8B/" data-id="cm0xxogdw000sqsufayu6cdbr" data-title="buildroot教程" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-Linux内核-异常输出函数调用栈calltrace分析" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/" class="article-date">
@@ -252,7 +533,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/" data-id="cm0dxg144000bdsuf9cth208n" data-title="Linux内核-异常输出函数调用栈calltrace分析" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/" data-id="cm0xxogds000aqsufcz4ubojw" data-title="Linux内核-异常输出函数调用栈calltrace分析" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -494,7 +775,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/" data-id="cm0dxg1400001dsuf3u3r4sus" data-title="Linux内核-kmalloc与vmalloc及CMA内存" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/" data-id="cm0xxogdp0003qsuf6s9i3955" data-title="Linux内核-kmalloc与vmalloc及CMA内存" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1129,7 +1410,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/" data-id="cm0dxg1430007dsufghdv40wy" data-title="Linux内核-并发与同步" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8-%E5%B9%B6%E5%8F%91%E4%B8%8E%E5%90%8C%E6%AD%A5/" data-id="cm0xxogds0008qsuf7pxj240j" data-title="Linux内核-并发与同步" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1350,7 +1631,7 @@ messages    messages.0  messages.1  messages.2  messages.3
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/" data-id="cm0dxg1430006dsuf72vd9ksr" data-title="Linux内核-rootfs构建移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8-rootfs%E6%9E%84%E5%BB%BA%E7%A7%BB%E6%A4%8D/" data-id="cm0xxogdr0006qsuf9kzn4vjn" data-title="Linux内核-rootfs构建移植" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1577,7 +1858,7 @@ messages    messages.0  messages.1  messages.2  messages.3
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" data-id="cm0dxg145000ddsuf45tpfqo0" data-title="Linux内核启动流程" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/07/20/Linux%E5%86%85%E6%A0%B8%E5%90%AF%E5%8A%A8%E6%B5%81%E7%A8%8B/" data-id="cm0xxogdt000dqsuf88bxh95f" data-title="Linux内核启动流程" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1888,7 +2169,7 @@ messages    messages.0  messages.1  messages.2  messages.3
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/" data-id="cm0dxg1440008dsufcq2fa7qf" data-title="Linux内核Makefile编译过程" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/07/18/Linux%E5%86%85%E6%A0%B8Makefile%E7%BC%96%E8%AF%91%E8%BF%87%E7%A8%8B/" data-id="cm0xxogds000bqsufcssuhxbz" data-title="Linux内核Makefile编译过程" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -2253,7 +2534,7 @@ messages    messages.0  messages.1  messages.2  messages.3
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/07/18/Linux%E5%86%85%E6%A0%B8%E9%A1%B6%E5%B1%82Makefile%E8%AF%A6%E8%A7%A3/" data-id="cm0dxg14e0029dsuf8vh8hyce" data-title="Linux内核顶层Makefile详解" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/07/18/Linux%E5%86%85%E6%A0%B8%E9%A1%B6%E5%B1%82Makefile%E8%AF%A6%E8%A7%A3/" data-id="cm0xxoge0001nqsufg5og7jbb" data-title="Linux内核顶层Makefile详解" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -2306,7 +2587,7 @@ messages    messages.0  messages.1  messages.2  messages.3
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/06/29/hello-world/" data-id="cm0dxg148000zdsufaqx1glto" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/06/29/hello-world/" data-id="cm0xxogdw000xqsuf56hh5d5p" data-title="Hello World" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -2816,111 +3097,11 @@ test has been built!
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/" data-id="cm0dxg146000pdsufazvdbxdd" data-title="Makefile-常用函数和通用模板" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/06/24/Makefile-%E5%B8%B8%E7%94%A8%E5%87%BD%E6%95%B0%E5%92%8C%E9%80%9A%E7%94%A8%E6%A8%A1%E6%9D%BF/" data-id="cm0xxogdv000qqsufadzbf0rw" data-title="Makefile-常用函数和通用模板" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-uboot-menuconfig和Kconfig图像化配置" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/" class="article-date">
-  <time class="dt-published" datetime="2024-06-23T14:14:48.000Z" itemprop="datePublished">2024-06-23</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/">uboot-menuconfig和Kconfig图像化配置</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-ncurses-ku-an-zhuang">1 ncurses 库安装</a></li>
-<li><a href="#2-menuconfig-cai-dan-shi-yong-shuo-ming-he-ju-li">2 menuconfig菜单使用说明和举例</a></li>
-<li><a href="#3-menuconfig-tu-xing-hua-pei-zhi-yuan-li">3 menuconfig 图形化配置原理</a><ul>
-<li><a href="#3-1-make-menuconfig-guo-cheng">3.1 make menuconfig 过程</a><ul>
-<li><a href="#3-1-1-kconfig-yu-fa-jian-jie">3.1.1 Kconfig 语法简介</a><ul>
-<li><a href="#3-1-1-1-mainmenu">3.1.1.1 mainmenu</a></li>
-<li><a href="#3-1-1-2-zi-kconfig">3.1.1.2 子Kconfig</a></li>
-<li><a href="#3-1-1-3-menu-endmenu-cai-dan">3.1.1.3 menu&#x2F;endmenu 菜单</a></li>
-<li><a href="#3-1-1-4-config-tiao-mu">3.1.1.4 config条目</a></li>
-<li><a href="#3-1-1-5-depends-on-he-select">3.1.1.5 depends on 和 select</a></li>
-<li><a href="#3-1-1-6-choice-endchoice">3.1.1.6 choice&#x2F;endchoice</a></li>
-<li><a href="#3-1-1-7-menuconfig">3.1.1.7 menuconfig</a></li>
-<li><a href="#3-1-1-8-comment">3.1.1.8 comment</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#4-menuconfig-cai-dan-shi-zhan-lian-xi">4 menuconfig菜单实战练习</a></li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-ncurses-ku-an-zhuang">1 ncurses 库安装</span><a href="#1-ncurses-ku-an-zhuang" class="header-anchor">#</a></h1><p>uboot 或 Linux 内核可以通过输入<code>make menuconfig</code>来打开图形化配置界面，<code>menuconfig</code>是一套图形化的配置工具，需要<code>ncurses</code>库支持。<br><code>sudo apt-get install build-essential</code><br><code>sudo apt-get install libncurses5-dev</code></p>
-<h1><span id="2-menuconfig-cai-dan-shi-yong-shuo-ming-he-ju-li">2 menuconfig菜单使用说明和举例</span><a href="#2-menuconfig-cai-dan-shi-yong-shuo-ming-he-ju-li" class="header-anchor">#</a></h1><p><code>menuconfig </code>重点会用到两个文件：<code>.config </code>和 <code>Kconfig</code>，<code>.config </code>文件前面已经说了，这个文件保存着 uboot 的配置项，使用 <code>menuconfig </code>配置完 uboot 以后会更新<code>.config </code>文件。<code>Kconfig</code>文件是图形界面的描述文件，也就是描述界面应该有什么内容，很多目录下都会有<code>Kconfig</code>文件。<br><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- mx6ull_alientek_emmc_defconfig</code><br><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- menuconfig</code><br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/1.png" alt="image"><br>通过键盘上的<code>“↑”</code>和<code>“↓”</code>键来选择要配置的菜单，按下<code>“Enter”</code>键进入子菜单。菜单中高亮的字母就是此菜单的热键，在键盘上按下此高亮字母对应的键可以快速选中对应的菜单。选中子菜单以后按下<code>“Y”</code>键就会将相应的代码编译进 Uboot 中，菜单前面变为<code>“&lt; * &gt;”</code>。按下<code>“N”</code>键不编译相应的代码，按下<code>“M”</code>键就会将相应的代码编译为模块，菜单前面变为<code>“&lt; M &gt;”</code>。按两下<code>“Esc”</code>键退出，也就是返回到上一级，按下<code>“?”</code>键查看此菜单的帮助信息，按下<code>“/”</code>键打开搜索框，可以在搜索框输入要搜索的内容。<br>在配置界面下方会有五个按钮，这五个按钮的功能如下：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&lt;Select&gt;：选中按钮，和“Enter”键的功能相同，负责选中并进入某个菜单。</span><br><span class="line">&lt;Exit&gt;：退出按钮，和按两下“Esc”键功能相同，退出当前菜单，返回到上一级。</span><br><span class="line">&lt;Help&gt;：帮助按钮，查看选中菜单的帮助信息。</span><br><span class="line">&lt;Save&gt;：保存按钮，保存修改后的配置文件。</span><br><span class="line">&lt;Load&gt;：加载按钮，加载指定的配置文件。</span><br></pre></td></tr></table></figure>
-<p>就以如何使能<code>dns</code>命令为例，讲解一下如何通过图形化界面来配置 uboot。进入<code>“Command line interface ---&gt;”</code>这个配置项:<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/2.png" alt="image"><br>选择<code>“Network commands ---&gt;”</code>，进入网络相关命令配置项:<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/3.png" alt="image"><br>可以看出，uboot 中有很多和网络有关的命令，比如<code>bootp、tftpboot、dhcp</code>等等。选中<code> dns</code>，然后按下键盘上的<code>“Y”</code>键，此时<code>dns</code>前面的<code>“[ ]”</code>变成了<code>“[ * ]” </code>:<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/4.png" alt="image"><br>细心的朋友应该会发现，在<code>mx6ull_alientek_emmc.h</code>里面我们配置使能了<code> dhcp</code> 和<code>ping</code>命令，但是在上图中的<code>“[ ]”</code>并不是<code>“[ * ]”</code>，也就是说不编译<code>dhcp</code>和 <code>ping</code>命令，这不是冲突了吗？实际情况是<code> dhcp</code> 和<code> ping</code> 命令是会编译的。之所以在上图中没有体现出来时因为我们是直接在<code>mx6ull_alientek_emmc.h</code>中定义的宏<code>CONFIG_CMD_PING</code>和<code>CONFIG_CMD_DHCP</code>，而<code> menuconfig</code> 是通过读取<code>.config </code>文件来判断使能了哪些功能，<code>.config</code>里面并没有宏<code>CONFIG_CMD_PING</code>和<code>CONFIG_CMD_DHCP</code>,因此<code>menuconfig</code>不会选中这两项。<br>总结下：配置选项来自2个地方，一个是<code>mx6ull_alientek_emmc.h</code>，一个是<code>.config</code><br>选中<code> dns</code>，然后按下<code>“H”</code>或者<code>“?”</code>键可以打开<code>dns</code>命令的帮助提示信息：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/5.png" alt="image"><br>选择<code>dns</code>命令以后，按两下 <code>ESC </code>键（按两下<code>ESC</code>键相当于返回上一层），退出当前配置项，进入到上一层配置项，输入<code>Y</code>保存修改后的配置到<code>.config</code>。<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/6.png" alt="image"><br>再打开<code>.config</code>，会发现多了<code>“CONFIG_CMD_DNS=y”</code>这一行：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/7.png" alt="image"><br>再次编译：<br><code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- -j16</code><br>烧录uboot进sd卡，开机从sd卡启动,进入uboot命令行后，输入<code>help或者?</code>就可以看到uboot支持了dns命令。<br>测试：先将板子连接能上外网的路由器，要先设置一下<code>dns</code>服务器的 IP 地址，也就是设置环境变量 <code>dnsip </code>的值：<br><code>setenv dnsip 114.114.114.114</code><br><code>saveenv</code><br>设置好以后就可以使用 dns 命令查看百度官网的 IP 地址了:<br><code>dns www.baidu.com</code><br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/8.png" alt="image"><br>可以看到dns解析命令功能正常。</p>
-<h1><span id="3-menuconfig-tu-xing-hua-pei-zhi-yuan-li">3 menuconfig 图形化配置原理</span><a href="#3-menuconfig-tu-xing-hua-pei-zhi-yuan-li" class="header-anchor">#</a></h1><h2><span id="3-1-make-menuconfig-guo-cheng">3.1 make menuconfig 过程</span><a href="#3-1-make-menuconfig-guo-cheng" class="header-anchor">#</a></h2><p>同<code>defconfig</code>一样，<code>make menuconfig</code> 也会匹配到顶层<code> Makefile。</code> </p>
-<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/17859528.html">Uboot顶层Makefile解析-1. defconfig过程分析 - fuzidage - 博客园 (cnblogs.com)</a></p>
-<p><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/06/22/uboot-%E7%BC%96%E8%AF%91defconfig%E5%88%86%E6%9E%90/">uboot-编译defconfig分析 | Hexo (fuzidage.github.io)</a></p>
-<p><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/9.png" alt="image"><br>其中 <code>build=-f ./scripts/Makefile.build obj</code>, 展开后：<br><code>make -f ./scripts/Makefile.build obj=scripts/kconfig menuconfig</code><br><code>Makefile.build </code>会读取<code>scripts/kconfig/Makefile</code>中的内容，在<code>scripts/kconfig/Makefile</code>中可以找到如下代码：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/10.png" alt="image"><br>其中<code>obj= scripts/kconfig</code>，<code>silent</code>是设置静默编译的，在这里可以忽略不计，<code>Kconfig=Kconfig</code>，因此扩展以后就是：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/11.png" alt="image"><br><code>scripts/kconfig/mconf.c </code>这个文件会被编译，生成 <code>mconf </code>这个可执行文件。<code>mconf </code>会调用 uboot 根目录下的 <code>Kconfig </code>文件开始构建图形配置界面。</p>
-<h3><span id="3-1-1-kconfig-yu-fa-jian-jie">3.1.1 Kconfig 语法简介</span><a href="#3-1-1-kconfig-yu-fa-jian-jie" class="header-anchor">#</a></h3><h4><span id="3-1-1-1-mainmenu">3.1.1.1 mainmenu</span><a href="#3-1-1-1-mainmenu" class="header-anchor">#</a></h4><p>输入<code>make menuconfig</code>以后打开的默认界面就是<code>mainmenu</code>，在顶层<code> Kconfig</code> 中有如下代码：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/12.png" alt="image"><br>我们的uboot是<code>UBOOTVERSION=2016.03</code>，如下：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/13.png" alt="image"></p>
-<h4><span id="3-1-1-2-zi-kconfig">3.1.1.2 子Kconfig</span><a href="#3-1-1-2-zi-kconfig" class="header-anchor">#</a></h4><p><code>Kconfig </code>也可以调用其他子目录中的<code>Kconfig</code>文件，调用方法如下:<br><code>source &quot;xxx/Kconfig&quot;</code><br>顶层<code>Kconfig</code>中，调用了很多子<code>Kconfig</code>:<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/14.png" alt="image"></p>
-<h4><span id="3-1-1-3-menu-x2f-endmenu-cai-dan">3.1.1.3 menu&#x2F;endmenu 菜单</span><a href="#3-1-1-3-menu-x2f-endmenu-cai-dan" class="header-anchor">#</a></h4><p><code>menu </code>用于生成菜单，<code>endmenu </code>就是菜单结束标志。在顶层<code>Kconfig </code>中有如下代码：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/15.png" alt="image"><br>体现在主菜单界面如下所示：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/16.png" alt="image"><br>在<code>“General setup”</code>菜单上面还有 <code>“Architecture select (ARM architecture)”</code>和<code>“ARM architecture”</code>这两个子菜单，但是在顶层 <code>Kconfig </code>中并没有看到这两个子菜单对应的<code>menu/endmenu </code>代码块，那这两个子菜单是怎么来的呢？这两个子菜单就是<code>arch/Kconfig</code>文件生成的。包括主界面中的<code>“Boot timing”、“Console recording”</code>等等这些子菜单，都是分别由顶层<code>Kconfig </code>所调用的 <code>common/Kconfig、cmd/Kconfig</code> 等这些子<code>Kconfig</code>文件来创建的。</p>
-<h4><span id="3-1-1-4-config-tiao-mu">3.1.1.4 config条目</span><a href="#3-1-1-4-config-tiao-mu" class="header-anchor">#</a></h4><p>顶层<code>Kconfig</code>中的<code>“General setup”</code>子菜单内容如下：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">14 menu <span class="string">&quot;General setup&quot;</span></span><br><span class="line">15</span><br><span class="line">16 config LOCALVERSION</span><br><span class="line">17 string <span class="string">&quot;Local version - append to U-Boot release&quot;</span></span><br><span class="line">18 help</span><br><span class="line">19 Append an extra string to the end of your U-Boot version.</span><br><span class="line">20 This will show up on your boot log, for example.</span><br><span class="line">21 The string you set here will be appended after the contents of</span><br><span class="line">22 any files with a filename matching localversion* in your</span><br><span class="line">23 object and source tree, in that order. Your total string can</span><br><span class="line">24 be a maximum of 64 characters.</span><br><span class="line">25 </span><br><span class="line">26 config LOCALVERSION_AUTO</span><br><span class="line">27 bool <span class="string">&quot;Automatically append version information to the version </span></span><br><span class="line"><span class="string">string&quot;</span></span><br><span class="line">28 default y</span><br><span class="line">29 help</span><br><span class="line">......</span><br><span class="line">45 </span><br><span class="line">46 config CC_OPTIMIZE_FOR_SIZE</span><br><span class="line">47 bool <span class="string">&quot;Optimize for size&quot;</span></span><br><span class="line">48 default y</span><br><span class="line">49 help</span><br><span class="line">......</span><br><span class="line">54 </span><br><span class="line">55 config SYS_MALLOC_F</span><br><span class="line">56 bool <span class="string">&quot;Enable malloc() pool before relocation&quot;</span></span><br><span class="line">57 default y if DM</span><br><span class="line">58 help</span><br><span class="line">......</span><br><span class="line">63 </span><br><span class="line">64 config SYS_MALLOC_F_LEN</span><br><span class="line">65 hex <span class="string">&quot;Size of malloc() pool before relocation&quot;</span></span><br><span class="line">66 depends on SYS_MALLOC_F</span><br><span class="line">67 default 0x400</span><br><span class="line">68 help</span><br><span class="line">......</span><br><span class="line">73 </span><br><span class="line">74 menuconfig EXPERT</span><br><span class="line">75 bool <span class="string">&quot;Configure standard U-Boot features (expert users)&quot;</span></span><br><span class="line">76 default y</span><br><span class="line">77 help</span><br><span class="line">......</span><br><span class="line">82 </span><br><span class="line">83 if EXPERT</span><br><span class="line">84 config SYS_MALLOC_CLEAR_ON_INIT</span><br><span class="line">85 bool <span class="string">&quot;Init with zeros the memory reserved for malloc (slow)&quot;</span></span><br><span class="line">86 default y</span><br><span class="line">87 help</span><br><span class="line">......</span><br><span class="line">99 <span class="keyword">endif</span></span><br><span class="line">100 endmenu <span class="comment"># General setup</span></span><br></pre></td></tr></table></figure>
-<p>可以看到有大量的<code>“config xxxx”</code>的代码块，也就是<code>config</code>条目。<code>“General setup”</code>菜单的<code>config</code>条目具体配置项如下：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/17.png" alt="image"><br><code>“config LOCALVERSION”</code>对应着第一个配置项，<code>“config LOCALVERSION_AUTO”</code>对应着 第 二 个 配 置 项。</p>
-<p>① 第 16 和 26 行，这两行都以 <code>config </code>关键字开头，后面跟着 <code>LOCALVERSION </code>和<code>LOCALVERSION_AUTO</code>，这两个就是配置项名字。假如我们使能了<code> LOCALVERSION_AUTO</code>这个功能，那么就会下<code>.config</code> 文件中生成 <code>CONFIG_LOCALVERSION_AUTO</code>。</p>
-<p>②<code>config</code>关键字下面的这几行是配置项属性，17<del>24 行是<code> LOCALVERSION</code> 的属性，27</del>44 行是<code> LOCALVERSION_AUTO</code> 的属性。</p>
-<p>③ 属性里面描述了配置项的类型、输入提示、依赖关系、帮助信息和默认值等。第 17 行的<code>string</code>是变量类型，也就<code>“CONFIG_ LOCALVERSION”</code>的变量类型。可以为：<code>bool、tristate、string、hex 和 int</code>，一共 5 种。最常用的是 <code>bool、tristate 和 string </code>这三种，<code>bool </code>类型有两种值：<code>y 和 n</code>，当为 y 的时候表示使能这个配置项，当为 n 的时候就禁止这个配置项。<code>tristate </code>类型有三种值：<code>y、m 和 n</code>，其中 y 和 n 的涵义与 bool 类型一样，m 表示将这个配置项编译为模块。<code>string </code>为字符串类型，所以 <code>LOCALVERSION </code>是个字符串变量，用来存储本地字符串，选中以后即可输入用户定义的本地版本号，如下图：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/18.png" alt="image"></p>
-<p><code>string </code>后面的<code>“Local version - append to U-Boot release”</code>就是这个配置项在图形界面上的显示出来的标题。<br>④ 第 18 行，<code>help </code>表示帮助信息，告诉我们配置项的含义，当我们按下<code>“h”或“?”</code>弹出来的帮助界面就是 <code>help </code>的内容。<br>⑤ 第 27 行，说明<code>“CONFIG_LOCALVERSION_AUTO”</code>是个<code>bool </code>类型，可以通过按下 Y 或N 键来使能或者禁止 <code>CONFIG_LOCALVERSION_AUTO</code>。<br>⑥ 第 28 行，<code>“default y”</code>表示 <code>CONFIG_LOCALVERSION_AUTO </code>的默认值就是 y，所以这一行默认会被选中。</p>
-<h4><span id="3-1-1-5-depends-on-he-select">3.1.1.5 depends on 和 select</span><a href="#3-1-1-5-depends-on-he-select" class="header-anchor">#</a></h4><p>打开 <code>arch/Kconfig </code>文件，在里面有这如下代码：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/19.png" alt="image"><br>第 9 行，<code>“depends on”</code>说明<code>“SYS_GENERIC_BOARD”</code>项依赖于<code>“HAVE_GENERIC_BOARD”</code>,也就是说<code>“HAVE_GENERIC_BOARD”</code>被选中以后<code>“SYS_GENERIC_BOARD”</code>才能被选中。<br>第 17~20 行，<code>“select”</code>表示方向依赖，当选中<code>“ARC”</code>以后，<code>“HAVE_PRIVATE_LIBGCC”、“HAVE_GENERIC_BOARD”、“SYS_GENERIC_BOARD”和“SUPPORT_OF_CONTROL”</code>这四个也会被选中。</p>
-<h4><span id="3-1-1-6-choice-x2f-endchoice">3.1.1.6 choice&#x2F;endchoice</span><a href="#3-1-1-6-choice-x2f-endchoice" class="header-anchor">#</a></h4><p>在<code>arch/Kconfig</code>文件中有如下代码：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">11 choice</span><br><span class="line">12 prompt <span class="string">&quot;Architecture select&quot;</span></span><br><span class="line">13 default SANDBOX</span><br><span class="line">14 </span><br><span class="line">15 config ARC</span><br><span class="line">16 bool <span class="string">&quot;ARC architecture&quot;</span></span><br><span class="line">......</span><br><span class="line">21 </span><br><span class="line">22 config ARM</span><br><span class="line">23 bool <span class="string">&quot;ARM architecture&quot;</span></span><br><span class="line">......</span><br><span class="line">29 </span><br><span class="line">30 config AVR32</span><br><span class="line">31 bool <span class="string">&quot;AVR32 architecture&quot;</span></span><br><span class="line">......</span><br><span class="line">35 </span><br><span class="line">36 config BLACKFIN</span><br><span class="line">37 bool <span class="string">&quot;Blackfin architecture&quot;</span></span><br><span class="line">......</span><br><span class="line">40 </span><br><span class="line">41 config M68K</span><br><span class="line">42 bool <span class="string">&quot;M68000 architecture&quot;</span></span><br><span class="line">......</span><br><span class="line">117</span><br><span class="line">118 endchoice</span><br></pre></td></tr></table></figure>
-
-<p><code>choice/endchoice </code>代码段定义了一组可选择项，将多个类似的配置项组合在一起，供用户单选或者多选。该示例就是选择处理器架构，可以从<code>ARC、ARM、AVR32</code>等这些架构中选择，这里是单选。在 uboot 图形配置界面上选择<code>“Architecture select”</code>，进入以后如下图：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/20.png" alt="image"><br>第 12 行的<code>prompt</code>给出这个<code>choice/endchoice </code>段的提示信息为<code>“Architecture select”</code>。</p>
-<h4><span id="3-1-1-7-menuconfig">3.1.1.7 menuconfig</span><a href="#3-1-1-7-menuconfig" class="header-anchor">#</a></h4><p><code>menuconfig 和 menu </code>很类似，但是 <code>menuconfig </code>是个<strong>带选项的菜单</strong>,如顶层<code>Kconfig</code>中的<code>“General setup”</code>中的列表中有一项<code>menuconfig EXPERT</code>：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/21.png" alt="image"><br>结果如下：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/22.png" alt="image"><br>可以看到，前面有<code>“[ ]”</code>说明这个<strong>菜单是可选的</strong>，当选中这个菜单以后就可以进入到子选项中：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/23.png" alt="image"><br>如果不选择<code>“Configure standard U-Boot features (expert users)”</code>，那么所描述的菜单就不会显示出来，进去以后是空白的。</p>
-<h4><span id="3-1-1-8-comment">3.1.1.8 comment</span><a href="#3-1-1-8-comment" class="header-anchor">#</a></h4><p><code>comment</code>用于注释， 也就是在图形化界面中显示一行注释。例如<code>drivers/mtd/nand/Kconfig</code>中：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">74 config NAND_ARASAN</span><br><span class="line">75 bool <span class="string">&quot;Configure Arasan Nand&quot;</span></span><br><span class="line">76 help</span><br><span class="line">......</span><br><span class="line">80</span><br><span class="line">81 comment <span class="string">&quot;Generic NAND options&quot;</span></span><br></pre></td></tr></table></figure>
-<p>第 81 行使用<code>comment</code>标注了一行注释，注释内容为：<code>“Generic NAND options”</code>，这行注释在配置项<code> NAND_ARASAN</code> 的下面。<br>在配置项<code>“Configure Arasan Nand”</code>下面有一行注释，注释内容为<code>“*** Generic NAND options ***”</code>：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/24.png" alt="image"></p>
-<h1><span id="4-menuconfig-cai-dan-shi-zhan-lian-xi">4 menuconfig菜单实战练习</span><a href="#4-menuconfig-cai-dan-shi-zhan-lian-xi" class="header-anchor">#</a></h1><p>接下来自定义一个菜单进行练习，自定义菜单要求如下：<br>①、在主界面中添加一个名为<code>“My test menu”</code>，此菜单内部有一个配置项。<br>②、配置项为<code>“MY_TESTCONFIG”</code>，此配置项处于菜单<code>“My test menu”</code>中。<br>③、配置项的为变量类型为<code> bool</code>，默认值为 <code>y</code>。<br>④、配置项菜单名字为<code>“This is my test config”</code><br>⑤、配置项的帮助内容为<code>“This is a empty config, just for tset!”</code>。<br>在顶层 <code>Kconfig</code>，在最后面加入如下代码：</p>
-<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">1 menu <span class="string">&quot;My test menu&quot;</span></span><br><span class="line">2</span><br><span class="line">3 config MY_TESTCONFIG</span><br><span class="line">4 bool <span class="string">&quot;This is my test config&quot;</span></span><br><span class="line">5 default y</span><br><span class="line">6 help</span><br><span class="line">7 This is a empty config, just for test!</span><br><span class="line">8</span><br><span class="line">9 endmenu <span class="comment"># my test menu</span></span><br></pre></td></tr></table></figure>
-<p>再次执行<code>make ARCH=arm CROSS_COMPILE=arm-linux-gnueabihf- menuconfig</code>：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/25.png" alt="image"><br>可以看出，主菜单最后面出现了一个名为<code>“My test menu”</code>的子菜单，这个就是上面添加进来的子菜单。进入此子菜单：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/26.png" alt="image"><br>可以看出，配置项也添加成功，按H查看帮助信息：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/27.png" alt="image"><br>保存退出，打开.config文件：<br><img src="/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/28.png" alt="image"><br>配置项<code>MY_TESTCONFIG</code>默认也是被选中的，因此在<code>.config </code>文件中肯定会有<code>“CONFIG_MY_TESTCONFIG=y”</code>这一行。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/06/23/uboot-menuconfig%E5%92%8CKconfig%E5%9B%BE%E5%83%8F%E5%8C%96%E9%85%8D%E7%BD%AE/" data-id="cm0dxg14g002sdsuf5dd4h2m2" data-title="uboot-menuconfig和Kconfig图像化配置" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li></ul>
 
     </footer>
   </div>

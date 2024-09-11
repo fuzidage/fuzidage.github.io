@@ -69,6 +69,89 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-imx6ull裸机-ADC" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/" class="article-date">
+  <time class="dt-published" datetime="2024-05-01T10:56:40.000Z" itemprop="datePublished">2024-05-01</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/">imx6ull裸机-ADC</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-imx6ull-ji-cun-qi">1 IMX6ULL寄存器</a><ul>
+<li><a href="#1-1-adcx-cfg-x-1-2-pei-zhi-ji-cun-qi">1.1 ADCx_CFG(x&#x3D;1~2) 配置寄存器</a></li>
+<li><a href="#1-2-adcx-gc-tong-yong-kong-zhi-ji-cun-qi">1.2 ADCx_GC 通用控制寄存器</a></li>
+<li><a href="#1-3-adcx-gs-tong-yong-zhuang-tai-ji-cun-qi">1.3 ADCx_GS 通用状态寄存器</a></li>
+<li><a href="#1-4-adcx-hs-zhuang-tai-ji-cun-qi">1.4 ADCx_HS 状态寄存器</a></li>
+<li><a href="#1-5-adcx-hc0-kong-zhi-ji-cun-qi">1.5 ADCx_HC0 控制寄存器</a></li>
+<li><a href="#1-6-adcx-r0-shu-ju-ji-cun-qi">1.6 ADCx_R0 数据寄存器</a></li>
+</ul>
+</li>
+<li><a href="#2-liu-cheng-dai-ma">2 流程代码</a><ul>
+<li><a href="#2-1-chu-shi-hua">2.1 初始化</a></li>
+<li><a href="#2-2-zi-dong-xiao-zhun">2.2 自动校准</a></li>
+<li><a href="#2-3-huo-qu-adc-yuan-shi-zhi">2.3 获取ADC原始值</a></li>
+<li><a href="#2-4-huo-qu-adc-yuan-shi-zhi-duo-ci-qu-ping-jun">2.4 获取ADC原始值(多次取平均)</a></li>
+<li><a href="#2-5-huo-qu-mo-shu-zhuan-huan-hou-de-dian-ya">2.5 获取模数转换后的电压</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-imx6ull-ji-cun-qi">1 IMX6ULL寄存器</span><a href="#1-imx6ull-ji-cun-qi" class="header-anchor">#</a></h1><h2><span id="1-1-adcx-cfg-x-x3d-1-2-pei-zhi-ji-cun-qi">1.1 ADCx_CFG(x&#x3D;1~2) 配置寄存器</span><a href="#1-1-adcx-cfg-x-x3d-1-2-pei-zhi-ji-cun-qi" class="header-anchor">#</a></h2><p><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/1.jpg" alt="image"><br><strong>OVWREN</strong> (bit16)：数据复写使能位，为 1 的时候使能复写功能，为 0 的时候关闭复写功能。<br><strong>AVGS</strong>(bit15:14)：硬件平均次数，只有当 ADC1_GC 寄存器的 AVGE 位为 1 的时候才有效<br><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/2.png" alt="image"><br><strong>ADTRG</strong>(bit13)：转换触发选择。为 0 的时候选择软件触发，为 1 的时候，不选择软件触发。<br><strong>REFSEL</strong>(bit12:11)：参考电压选择，为 00 时选择 VREFH&#x2F;VREFL 这两个引脚上的电压为参考电压，正点原子 ALPHA 开发板上 VREFH 为 3.3V，VREFL 为 0V。<br><strong>ADHSC</strong>(bit10)：高速转换使能位，当为 0 时为正常模式，为 1 时为高速模式。<br><strong>ADSTS</strong>(bit9:8)：设置 ADC 的采样周期，与 ADLSMP 位一起决定采样周期：<br><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/3.png" alt="image"><br><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/4.png" alt="image"><br><strong>ADLSMP</strong>(bit4)：长采样周期使能位，当值为 0 时为短采样周期模式，为 1 时为长采样周期模式。搭配 ADSTS 位一起控制 ADC 的采样周期。<br><strong>MODE</strong>(bit3:2)：选择转换精度：<br><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/5.png" alt="image"><br><strong>ADICLK</strong>(bit1:0)：输入时钟源选择，为 00 的时候选择 IPG Clock，为 01 的时候选择 IPG Clock&#x2F;2，为 10 的时候无效，为 11 的时候选择呢 ADACK。本教程我们设置为 11，也就是选择ADACK 为 ADC 的时钟源。</p>
+<h2><span id="1-2-adcx-gc-tong-yong-kong-zhi-ji-cun-qi">1.2 ADCx_GC 通用控制寄存器</span><a href="#1-2-adcx-gc-tong-yong-kong-zhi-ji-cun-qi" class="header-anchor">#</a></h2><p><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/6.png" alt="image"><br><strong>CAL</strong>(bit7)：当该位写入 1 时，硬件校准功能将会启动，校准过程中该位会一直保持 1，校准完成后会清 0，校准完成后需要检查一下ADC_GS[CALF]位，确认校准结果。<br><strong>ADCO</strong>(bit6)：连续转换使能位，只有在开启了硬件平均功能时有效，为 0 时只能转换一次或一组，当 ADCO 为 1 时可以连续转换或多组。<br><strong>AVGE</strong>(bit5)：硬件平均使能位。为 0 时关闭，为 1 时使能。<br><strong>ACFE</strong>(bit4)：比较功能使能位。为 0 时关闭，为 1 时使能。<br><strong>ACFGT</strong>(bit3)：配置比较方法，如果为 0 的话就比较转换结果是否小于 ADC_CV 寄存器值，如果为 1 的话就比较装换结果是否大于或等于 ADC_CV 寄存器值。<br><strong>ACREN</strong>(bit2)：范围比较功能使能位。为 0 的话仅和 ADC_CV 里的 CV1 比较，为 1 的话和 ADC_CV 里的 CV1、CV2 比较。<br><strong>ACREN</strong>(bit2)：范围比较功能使能位。为 0 的话仅和 ADC_CV 里的 CV1 比较，为 1 的话和 ADC_CV 里的 CV1、CV2 比较。<br><strong>DMAEN</strong>(bit1)：DMA 功能使能位，为 0 是关闭，为 1 是开启<br><strong>ADACKEN</strong>(bit0)：异步时钟输出使能位，为 0 是关闭，为 1 时开启</p>
+<h2><span id="1-3-adcx-gs-tong-yong-zhuang-tai-ji-cun-qi">1.3 ADCx_GS 通用状态寄存器</span><a href="#1-3-adcx-gs-tong-yong-zhuang-tai-ji-cun-qi" class="header-anchor">#</a></h2><p><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/7.png" alt="image"><br><strong>AWKST</strong>(bit2)：异步唤醒中断状态，为 1 时表示发生了异步唤醒中断。为 0 时没有发生异步中断。<br><strong>CALF</strong>(bit1)：校准失败标志位，为 0 的时候表示校准正常完成，为 1 的时候表示校准失败。<br><strong>ADACT</strong>(bit0)：转换活动标志，为 0 的时候表示转换没有进行，为 1 的时候表示正在进行转换。</p>
+<h2><span id="1-4-adcx-hs-zhuang-tai-ji-cun-qi">1.4 ADCx_HS 状态寄存器</span><a href="#1-4-adcx-hs-zhuang-tai-ji-cun-qi" class="header-anchor">#</a></h2><p>COCO0表示转换完成.</p>
+<p><strong>COCO0</strong>(bit0)：每次转换完成此位就会被置 1。</p>
+<h2><span id="1-5-adcx-hc0-kong-zhi-ji-cun-qi">1.5 ADCx_HC0 控制寄存器</span><a href="#1-5-adcx-hc0-kong-zhi-ji-cun-qi" class="header-anchor">#</a></h2><p><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/8.png" alt="image"><br><strong>AIEN</strong>(bit7)：转换完成中断控制位，为 1 的时候打开转换完成中断，为 0 的时候关闭。<br><strong>ADCH</strong>(bit4:0)：转换通道选择，可以设置为 00000~01111 分别对应通道 0~15。11001 为内部通道，用于 ADC 自测。</p>
+<h2><span id="1-6-adcx-r0-shu-ju-ji-cun-qi">1.6 ADCx_R0 数据寄存器</span><a href="#1-6-adcx-r0-shu-ju-ji-cun-qi" class="header-anchor">#</a></h2><p><img src="/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/9.png" alt="image"></p>
+<h1><span id="2-liu-cheng-dai-ma">2 流程代码</span><a href="#2-liu-cheng-dai-ma" class="header-anchor">#</a></h1><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1</span>、初始化 ADC1_CH1</span><br><span class="line"><span class="comment">//初始化 ADC1_CH1，配置 ADC 位数，时钟源，采样时间等。</span></span><br><span class="line"><span class="number">2</span>、校准 ADC</span><br><span class="line"><span class="comment">//ADC 在使用之前需要校准一次。</span></span><br><span class="line"><span class="number">3</span>、使能 ADC</span><br><span class="line"><span class="comment">//配置好 ADC 以后就可以开启了。</span></span><br><span class="line"><span class="number">4</span>、读取 ADC 值</span><br><span class="line"><span class="comment">//ADC 正常工作以后就可以读取 ADC 值。</span></span><br></pre></td></tr></table></figure>
+<h2><span id="2-1-chu-shi-hua">2.1 初始化</span><a href="#2-1-chu-shi-hua" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">adc1ch1_init</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    ADC1-&gt;CFG = <span class="number">0</span>;</span><br><span class="line">    ADC1-&gt;CFG |= (<span class="number">2</span> &lt;&lt; <span class="number">2</span>) | (<span class="number">3</span> &lt;&lt; <span class="number">0</span>);</span><br><span class="line">    ADC1-&gt;GC = <span class="number">0</span>;</span><br><span class="line">    ADC1-&gt;GC |= <span class="number">1</span> &lt;&lt; <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/* CFG寄存器</span></span><br><span class="line"><span class="comment">     * bit16        0       关闭复写功能</span></span><br><span class="line"><span class="comment">     * bit15:14     00      硬件平均设置为默认值，00的时候4次平均，</span></span><br><span class="line"><span class="comment">     *                      但是得ADC_GC寄存器的AVGE位置1来使能硬件平均</span></span><br><span class="line"><span class="comment">     * bit13        0       软件触发</span></span><br><span class="line"><span class="comment">     * bit12:1      00      参考电压为VREFH/VREFL，也就是3.3V/0V</span></span><br><span class="line"><span class="comment">     * bit10        0       正常转换速度</span></span><br><span class="line"><span class="comment">     * bit9:8       00      采样时间2/12，ADLSMP=0(短采样)的时候为2个周期</span></span><br><span class="line"><span class="comment">     *                      ADLSMP=1(长采样)的时候为12个周期</span></span><br><span class="line"><span class="comment">     * bit7         0       非低功耗模式</span></span><br><span class="line"><span class="comment">     * bit6:5       00      ADC时钟源1分频 </span></span><br><span class="line"><span class="comment">     * bit4         0       短采样</span></span><br><span class="line"><span class="comment">     * bit3:2       10      12位ADC</span></span><br><span class="line"><span class="comment">     * bit1:0       11      ADC时钟源选择ADACK</span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line"><span class="comment">/* GC寄存器</span></span><br><span class="line"><span class="comment">     * bit7     0       先关闭校准功能，后面会校准</span></span><br><span class="line"><span class="comment">     * bit6     0       关闭持续转换</span></span><br><span class="line"><span class="comment">     * bit5     0       关闭硬件平均功能</span></span><br><span class="line"><span class="comment">     * bit4     0       关闭比较功能</span></span><br><span class="line"><span class="comment">     * bit3     0       关闭比较的Greater Than功能</span></span><br><span class="line"><span class="comment">     * bit2     0       关闭比较的Range功能</span></span><br><span class="line"><span class="comment">     * bit1     0       关闭DMA</span></span><br><span class="line"><span class="comment">     * bit0     1       使能ADACK</span></span><br><span class="line"><span class="comment">     */</span></span><br></pre></td></tr></table></figure>
+<h2><span id="2-2-zi-dong-xiao-zhun">2.2 自动校准</span><a href="#2-2-zi-dong-xiao-zhun" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">status_t</span> <span class="title function_">adc1_autocalibration</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="type">status_t</span> ret  = kStatus_Success;</span><br><span class="line">	ADC1-&gt;GS |= (<span class="number">1</span> &lt;&lt; <span class="number">2</span>);   <span class="comment">/* 清除CALF位，写1清零 */</span></span><br><span class="line">	ADC1-&gt;GC |= (<span class="number">1</span> &lt;&lt; <span class="number">7</span>);   <span class="comment">/* 使能校准功能 */</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 校准完成之前GC寄存器的CAL位会一直为1，直到校准完成此位自动清零 */</span></span><br><span class="line">	<span class="keyword">while</span>((ADC1-&gt;GC &amp; (<span class="number">1</span> &lt;&lt; <span class="number">7</span>)) != <span class="number">0</span>) &#123; </span><br><span class="line">		<span class="comment">/* 如果GS寄存器的CALF位为1的话表示校准失败 */</span></span><br><span class="line">		<span class="keyword">if</span>((ADC1-&gt;GS &amp; (<span class="number">1</span> &lt;&lt; <span class="number">2</span>)) != <span class="number">0</span>) &#123;</span><br><span class="line">			ret = kStatus_Fail;</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">/* 校准成功以后HS寄存器的COCO0位会置1 */</span></span><br><span class="line">	<span class="keyword">if</span>((ADC1-&gt;HS  &amp; (<span class="number">1</span> &lt;&lt; <span class="number">0</span>)) == <span class="number">0</span>) </span><br><span class="line">		ret = kStatus_Fail;</span><br><span class="line">	<span class="comment">/* 如果GS寄存器的CALF位为1的话表示校准失败 */</span></span><br><span class="line">		<span class="keyword">if</span>((ADC1-&gt;GS &amp; (<span class="number">1</span> &lt;&lt; <span class="number">2</span>)) != <span class="number">0</span>) </span><br><span class="line">		ret = kStatus_Fail;</span><br><span class="line">	<span class="keyword">return</span> ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2><span id="2-3-huo-qu-adc-yuan-shi-zhi">2.3 获取ADC原始值</span><a href="#2-3-huo-qu-adc-yuan-shi-zhi" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">int</span> <span class="title function_">getadc_value</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="comment">/* 配置ADC通道1 */</span></span><br><span class="line">	ADC1-&gt;HC[<span class="number">0</span>] = <span class="number">0</span>;            <span class="comment">/* 关闭转换结束中断    */</span></span><br><span class="line">	ADC1-&gt;HC[<span class="number">0</span>] |= (<span class="number">1</span> &lt;&lt; <span class="number">0</span>);     <span class="comment">/* 通道1            */</span></span><br><span class="line">	<span class="keyword">while</span>((ADC1-&gt;HS &amp; (<span class="number">1</span> &lt;&lt; <span class="number">0</span>)) == <span class="number">0</span>);  <span class="comment">/* 等待转换完成 */</span></span><br><span class="line">	<span class="keyword">return</span> ADC1-&gt;R[<span class="number">0</span>];    <span class="comment">/* 返回ADC值 */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2><span id="2-4-huo-qu-adc-yuan-shi-zhi-duo-ci-qu-ping-jun">2.4 获取ADC原始值(多次取平均)</span><a href="#2-4-huo-qu-adc-yuan-shi-zhi-duo-ci-qu-ping-jun" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">short</span> <span class="title function_">getadc_average</span><span class="params">(<span class="type">unsigned</span> <span class="type">char</span> times)</span> &#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> temp_val = <span class="number">0</span>;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> t;</span><br><span class="line">	<span class="keyword">for</span>(t = <span class="number">0</span>; t &lt; times; t++)&#123;</span><br><span class="line">		temp_val += getadc_value();</span><br><span class="line">		delayms(<span class="number">5</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> temp_val / times;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2><span id="2-5-huo-qu-mo-shu-zhuan-huan-hou-de-dian-ya">2.5 获取模数转换后的电压</span><a href="#2-5-huo-qu-mo-shu-zhuan-huan-hou-de-dian-ya" class="header-anchor">#</a></h2><p>由于精度为12 bit, ADC范围为[0, 4095]。同时电压满输出时为3.3v，因此当ADC数据拉满，得到3300mv，也就是3.3v</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">short</span> <span class="title function_">getadc_volt</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> adcvalue=<span class="number">0</span>;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> ret = <span class="number">0</span>;</span><br><span class="line">	adcvalue = getadc_average(<span class="number">5</span>);</span><br><span class="line">	ret = (<span class="type">float</span>)adcvalue * (<span class="number">3300.0f</span> / <span class="number">4096.0f</span>);    	<span class="comment">/* 获取计算后的带小数的实际电压值 */</span></span><br><span class="line">	<span class="keyword">return</span>  ret;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/05/01/imx6ull%E8%A3%B8%E6%9C%BA-ADC/" data-id="cm0xxogdw000vqsuf93l4673z" data-title="imx6ull裸机-ADC" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
     <article id="post-s3c2440裸机编程-电阻触摸屏" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
   <div class="article-meta">
     <a href="/2024/05/01/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E7%94%B5%E9%98%BB%E8%A7%A6%E6%91%B8%E5%B1%8F/" class="article-date">
@@ -322,7 +405,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/05/01/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E7%94%B5%E9%98%BB%E8%A7%A6%E6%91%B8%E5%B1%8F/" data-id="cm0dxg14f002idsuf9e7ra0ac" data-title="s3c2440裸机编程-电阻触摸屏" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/05/01/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E7%94%B5%E9%98%BB%E8%A7%A6%E6%91%B8%E5%B1%8F/" data-id="cm0xxoge20028qsufc7fv0qfl" data-title="s3c2440裸机编程-电阻触摸屏" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -712,7 +795,7 @@ LINE：有些地方叫做 tvd，显示一帧有效数据所需的时间，假如
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/" data-id="cm0dxg14d0022dsuf5rob4hlt" data-title="s3c2440裸机编程-LDC" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/19/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-LDC/" data-id="cm0xxoge1001uqsuf2imbf3kw" data-title="s3c2440裸机编程-LDC" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -967,7 +1050,7 @@ LINE：有些地方叫做 tvd，显示一帧有效数据所需的时间，假如
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/18/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-SPI/" data-id="cm0dxg14c001zdsuf379x5403" data-title="s3c2440裸机编程-SPI" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/18/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-SPI/" data-id="cm0xxoge1001sqsuf94hb35dj" data-title="s3c2440裸机编程-SPI" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1228,7 +1311,7 @@ LINE：有些地方叫做 tvd，显示一帧有效数据所需的时间，假如
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/18/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-I2C/" data-id="cm0dxg14c001xdsuf2zhq5qey" data-title="s3c2440裸机编程-I2C" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/18/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-I2C/" data-id="cm0xxoge0001pqsuf9odtehvz" data-title="s3c2440裸机编程-I2C" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1550,7 +1633,7 @@ LINE：有些地方叫做 tvd，显示一帧有效数据所需的时间，假如
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/" data-id="cm0dxg14d0027dsuf3c5c2cum" data-title="s3c2440裸机编程-nandflash" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/17/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-nandflash/" data-id="cm0xxoge1001zqsufbzsw5iop" data-title="s3c2440裸机编程-nandflash" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -1645,7 +1728,7 @@ bit[0]:用来启动adc
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-ADC/" data-id="cm0dxg14c001udsuf9pg4erna" data-title="s3c2440裸机编程-ADC" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-ADC/" data-id="cm0xxoge0001kqsuf1a639yrf" data-title="s3c2440裸机编程-ADC" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -2168,7 +2251,7 @@ Thumb state(几乎用不上)
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/" data-id="cm0dxg14b001pdsuf7xyshhs4" data-title="s3c2440裸机-异常中断" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/16/s3c2440%E8%A3%B8%E6%9C%BA-%E5%BC%82%E5%B8%B8%E4%B8%AD%E6%96%AD/" data-id="cm0xxoge0001lqsuf7qpi712g" data-title="s3c2440裸机-异常中断" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -2384,7 +2467,7 @@ Thumb state(几乎用不上)
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/" data-id="cm0dxg14e002bdsuf4ivshufq" data-title="s3c2440裸机编程-代码重定位和清bss" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/" data-id="cm0xxoge10022qsufa1dv6x6t" data-title="s3c2440裸机编程-代码重定位和清bss" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
@@ -2660,741 +2743,11 @@ Thumb state(几乎用不上)
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/" data-id="cm0dxg144000adsufblyt9499" data-title="Linux内核-内核链表" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      <a data-url="http://example.com/2024/04/13/Linux%E5%86%85%E6%A0%B8-%E5%86%85%E6%A0%B8%E9%93%BE%E8%A1%A8/" data-id="cm0xxogdr0007qsuf4q7u5zfl" data-title="Linux内核-内核链表" class="article-share-link"><span class="fa fa-share">Share</span></a>
       
       
       
   <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li></ul>
-
-    </footer>
-  </div>
-  
-</article>
-
-
-
-  
-    <article id="post-s3c2440裸机编程-内存控制器" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
-  <div class="article-meta">
-    <a href="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/" class="article-date">
-  <time class="dt-published" datetime="2024-04-11T11:57:48.000Z" itemprop="datePublished">2024-04-11</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="p-name article-title" href="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/">s3c2440裸机编程-内存控制器</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="e-content article-entry" itemprop="articleBody">
-      
-        <div class="toc">
-
-<!-- toc -->
-
-<ul>
-<li><a href="#1-nei-cun-jie-kou-gai-nian">1 内存接口概念</a><ul>
-<li><a href="#1-1-bu-tong-lei-xing-de-kong-zhi-qi">1.1 不同类型的控制器</a></li>
-<li><a href="#1-2-ru-he-fang-wen-kong-zhi-qi-di-zhi">1.2 如何访问控制器地址</a><ul>
-<li><a href="#1-2-1-men-dian-lu-xie-yi-lei-kong-zhi-qi">1.2.1 门电路&#x2F;协议类控制器</a></li>
-<li><a href="#1-2-2-nei-cun-lei-kong-zhi-qi">1.2.2 内存类控制器</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#2-bu-tong-wei-kuan-nei-cun-yu-cpu-di-zhi-lian-jie-guan-xi">2 不同位宽内存与CPU地址连接关系</a><ul>
-<li><a href="#2-1-8bit-x1-rom-yu-cpu-di-zhi-xian-lian-jie">2.1 8bit x1 rom与CPU地址线连接</a></li>
-<li><a href="#2-2-8bit-x2-rom-yu-cpu-di-zhi-xian-lian-jie">2.2 8bit x2 rom与CPU地址线连接</a></li>
-<li><a href="#2-3-8bit-x4-rom-yu-cpu-di-zhi-xian-lian-jie">2.3 8bit x4 rom与CPU地址线连接</a></li>
-<li><a href="#2-4-16bit-x1-rom-yu-cpu-di-zhi-xian-lian-jie">2.4 16bit  x1 rom与CPU地址线连接</a></li>
-<li><a href="#2-5-16bit-x2-rom-yu-cpu-di-zhi-xian-lian-jie">2.5 16bit  x2 rom与CPU地址线连接</a></li>
-</ul>
-</li>
-<li><a href="#3-bu-tong-wei-kuan-nei-cun-yu-cpu-wei-shi-me-yao-cuo-wei-xiang-lian">3 不同位宽内存与CPU为什么要错位相连</a><ul>
-<li><a href="#3-1-pei-zhi-nei-cun-kong-zhi-qi-wei-kuan">3.1 配置内存控制器位宽</a></li>
-</ul>
-</li>
-<li><a href="#4-nei-cun-kong-zhi-qi-di-zhi-ying-she-fan-wei">4 内存控制器地址映射范围</a></li>
-<li><a href="#5-sdram-fang-wen-shi-li">5 SDRAM访问实例</a><ul>
-<li><a href="#5-1-sdram-cun-chu-jie-gou">5.1 SDRAM存储结构</a></li>
-<li><a href="#5-2-sdram-yin-jiao-jie-xian">5.2 SDRAM引脚接线</a></li>
-<li><a href="#5-3-sdram-di-zhi-fan-wei">5.3 SDRAM地址范围</a></li>
-<li><a href="#5-4-sdram-shu-ju-fang-wen-guo-cheng">5.4 SDRAM数据访问过程</a></li>
-<li><a href="#5-5-sdram-qu-dong-shi-li">5.5 SDRAM驱动实例</a><ul>
-<li><a href="#5-5-1-wei-kuan-ji-cun-qi">5.5.1 位宽寄存器</a></li>
-<li><a href="#5-5-2-bank-kong-zhi-ji-cun-qi">5.5.2 BANK控制寄存器</a></li>
-<li><a href="#5-5-3-shua-xin-kong-zhi-ji-cun-qi">5.5.3 刷新控制寄存器</a></li>
-<li><a href="#5-5-4-banksize-ji-cun-qi">5.5.4 BANKSIZE寄存器</a></li>
-<li><a href="#5-5-5-mo-shi-she-zhi-ji-cun-qi">5.5.5 模式设置寄存器</a></li>
-<li><a href="#5-5-6-ce-shi-dai-ma">5.5.6 测试代码</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#6-norflash-fang-wen-shi-li">6 NorFlash访问实例</a><ul>
-<li><a href="#6-1-flash-chong-lei-te-xing-jie-shao">6.1 Flash种类特性介绍</a></li>
-<li><a href="#6-2-norflash-di-zhi-fan-wei">6.2 NorFlash地址范围</a></li>
-<li><a href="#6-3-norflash-yin-jiao-miao-shu">6.3 NorFlash引脚描述</a></li>
-<li><a href="#6-4-norflash-ying-jian-lian-jie">6.4 NorFlash硬件连接</a></li>
-<li><a href="#6-5-norflash-shu-ju-fang-wen-guo-cheng">6.5 NorFlash数据访问过程</a></li>
-<li><a href="#6-6-norflash-shi-xu-chu-shi-hua">6.6 NorFlash时序初始化</a><ul>
-<li><a href="#6-6-1-bank-kong-zhi-ji-cun-qi-she-zhi">6.6.1 BANK控制寄存器设置</a><ul>
-<li><a href="#6-6-1-1-nei-cun-kong-zhi-qi-shi-xu-she-zhi">6.6.1.1 内存控制器时序设置</a><ul>
-<li><a href="#6-6-1-1-1-tacc">6.6.1.1.1 Tacc</a></li>
-<li><a href="#6-6-1-1-2-tacs-tcos-tcoh-tcah">6.6.1.1.2 Tacs&#x2F;Tcos&#x2F;Tcoh&#x2F;Tcah</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#6-6-2-ce-shi-dai-ma">6.6.2 测试代码</a><ul>
-<li><a href="#6-6-2-1-ce-shi-jie-guo">6.6.2.1 测试结果</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#7-u-boot-ming-ling-fang-wen-norflash">7 u-boot命令访问NorFlash</a><ul>
-<li><a href="#7-1-cao-zuo-norflash">7.1 操作NorFlash</a><ul>
-<li><a href="#7-1-1-reset">7.1.1 reset</a></li>
-<li><a href="#7-1-2-du-id">7.1.2 读ID</a></li>
-<li><a href="#7-1-3-du-shu-ju">7.1.3 读数据</a></li>
-<li><a href="#7-1-4-du-shu-xing">7.1.4 读属性</a></li>
-<li><a href="#7-1-5-xie-shu-ju">7.1.5 写数据</a><ul>
-<li><a href="#7-1-5-1-ca-chu">7.1.5.1 擦除</a></li>
-<li><a href="#7-1-5-2-xie-ru">7.1.5.2 写入</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#7-2-cao-zuo-norflash-tuo-zhan">7.2 操作NorFlash-拓展</a><ul>
-<li><a href="#7-2-1-di-zhi-wei-kuan-bu-dui-qi-dao-zhi-si-ji-fen-xi">7.2.1 地址位宽不对齐导致死机分析</a></li>
-<li><a href="#7-2-2-mei-ci-xie-du-yao-xian-ca-chu">7.2.2 每次写都要先擦除</a></li>
-<li><a href="#7-2-3-ca-chu-dan-wei-kuai">7.2.3 擦除单位-块</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li><a href="#8-norflash-qu-dong-shi-li">8 NorFlash驱动实例</a><ul>
-<li><a href="#8-1-shi-bie-norflash">8.1 识别NorFlash</a><ul>
-<li><a href="#8-1-1-fa-ming-ling">8.1.1 发命令</a></li>
-<li><a href="#8-1-2-du-yi-ci-shu-ju">8.1.2 读一次数据</a></li>
-<li><a href="#8-1-3-shi-bie-han-shu">8.1.3 识别函数</a></li>
-</ul>
-</li>
-<li><a href="#8-2-du-shu-ju">8.2 读数据</a></li>
-<li><a href="#8-3-ca-shu-ju">8.3 擦数据</a></li>
-<li><a href="#8-3-xie-shu-ju">8.3 写数据</a></li>
-</ul>
-</li>
-</ul>
-<!-- tocstop -->
-
-</div>
-
-<h1><span id="1-nei-cun-jie-kou-gai-nian">1 内存接口概念</span><a href="#1-nei-cun-jie-kou-gai-nian" class="header-anchor">#</a></h1><h2><span id="1-1-bu-tong-lei-xing-de-kong-zhi-qi">1.1 不同类型的控制器</span><a href="#1-1-bu-tong-lei-xing-de-kong-zhi-qi" class="header-anchor">#</a></h2><p>S3C2440是个片上系统，有GPIO控制器（接有GPIO管脚(GPA-GPH)）,有串口控制器 (接有TXD RXD引脚),有memory controller内存控制器，有Nand控制器等…</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/1.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">（<span class="number">1</span>）GPIO控制器属于门电路，不涉及到时序，相对简单。</span><br><span class="line">（<span class="number">2</span>）串口控制器属于协议类接口，类似的协议类接口还有iic、iis、spi等。 </span><br><span class="line">（<span class="number">3</span>）前面的GPIO/门电路接口、协议类接口，都不会把地址输出到外部设备，仅仅只是将地址写入到相应的控制器。</span><br><span class="line">接下来的内存类接口，会把地址输出到外部，cpu将地址写入内存控制器，内存控制器还需访问外部设备，比如NorFlash、网卡、SDRAM。</span><br></pre></td></tr></table></figure>
-
-<h2><span id="1-2-ru-he-fang-wen-kong-zhi-qi-di-zhi">1.2 如何访问控制器地址</span><a href="#1-2-ru-he-fang-wen-kong-zhi-qi-di-zhi" class="header-anchor">#</a></h2><p>GPIO&#x2F;门电路接口、协议类接口、内存类接口都属于CPU的统一编址。但对于Nand Flash，它没有独立的地址线和cpu的地址总线相连接，因此它不参与CPU的统一编址。</p>
-<h3><span id="1-2-1-men-dian-lu-x2f-xie-yi-lei-kong-zhi-qi">1.2.1 门电路&#x2F;协议类控制器</span><a href="#1-2-1-men-dian-lu-x2f-xie-yi-lei-kong-zhi-qi" class="header-anchor">#</a></h3><p>对于门电路接口、协议类接口，直接访问寄存器即可。</p>
-<h3><span id="1-2-2-nei-cun-lei-kong-zhi-qi">1.2.2 内存类控制器</span><a href="#1-2-2-nei-cun-lei-kong-zhi-qi" class="header-anchor">#</a></h3><p>对于内存类接口，交给内存控制器去处理。下面详细分析：</p>
-<p>CPU只管发出一个地址，内存控制器根据该地址范围选择不同的模块，然后从模块中得到数据或者发送数据到模块中。<br>如下图，SDRAM、DM9000网卡、Nor Flash都接在s3c2440的数据总线和地址总线上，CPU把数据和地址发送出去，然后内存控制器根据地址范围确定要拉低选中哪个片选信号（nCS），再根据片选信号（nCS）选择相应的设备，进行收发地址和数据，互不干扰。</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/2.jpg"></p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/3.png" alt="image-20240411202307277"></p>
-<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">1</span>)当CPU发出的指令的地址范围处于<span class="number">0x00000000</span> - <span class="number">0x08000000</span>，</span><br><span class="line">内存控制器就会使nGCS0处于低电平（片选引脚被选中），NorFlash被选中。(NorFlash启动时才行，nand启动时nGCS0这块对应SRAM)</span><br><span class="line">(<span class="number">2</span>)当CPU发出的指令的地址范围处于<span class="number">0x20000000</span> - <span class="number">0x28000000</span>，</span><br><span class="line">内存控制器就会使nGCS4处于低电平（片选引脚被选中），网卡DM9000被选中。</span><br><span class="line">(<span class="number">3</span>)当CPU发出的指令的地址范围处于<span class="number">0x30000000</span> - <span class="number">0x38000000</span>，</span><br><span class="line">内存控制器就会使nGCS6处于低电平（片选引脚被选中），SDRAM被选中</span><br></pre></td></tr></table></figure>
-
-<p>内存控制器根据不同的地址地址范围，发出不同的片选引脚，只有被片选引脚选中的芯片才能正常工作，不被选中的芯片就像不存在一样，不工作。</p>
-<p>从s3c2440 datasheet中我们得知内存控制器可访问的地址范围有1G(0x0000,0000-0x4000,0000)，8个bank,每个bank_size为128M。理论上需要2^30（30条地址线）来确定是哪个bank,哪个地址。但是实际上只用到了27条,那么是怎么确定是哪个bank被选中了呢？</p>
-<p>cpu每次发给内存控制器的地址都是Addr[31:0],但是内存控制器发给外设（sdram，nor,dm9000）却只用到了A[26:0]。第[29:27]被用来确定要拉低哪个nGCS，即要选中哪个bank:</p>
-<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">bit[<span class="number">29</span>:<span class="number">27</span>]		bit[<span class="number">26</span>:<span class="number">0</span>]</span><br><span class="line"><span class="number">0b000</span>		-&gt;    <span class="number">0x000</span>,<span class="number">0000</span><span class="number">-0x7ff</span>,ffff  （bank0被选中 （<span class="number">128</span>M））</span><br><span class="line"><span class="number">0b001</span>		-&gt;    <span class="number">0x800</span>,<span class="number">0000</span><span class="number">-0xfff</span>,ffff  (bank1被选中 （<span class="number">128</span>M）)</span><br><span class="line">...				...</span><br><span class="line"><span class="number">0b110</span>		-&gt;    <span class="number">0x000</span>,<span class="number">0000</span><span class="number">-0x7ff</span>,ffff  （bank6被选中 （<span class="number">128</span>M））</span><br><span class="line"><span class="number">0b111</span>		-&gt;    <span class="number">0x800</span>,<span class="number">0000</span><span class="number">-0xfff</span>,ffff  （bank7被选中 （<span class="number">128</span>M））</span><br></pre></td></tr></table></figure>
-
-<p>那么对于大容量的nandflash，理论上需要更多的地址线来确认访问地址，那既然没有地址线，cpu是如何访问nand的呢？当然是通过nand控制器，nand是地址、命令、数据都共用数据总线。这里只是引入一个话题，具体见<a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/13020052.html">s3c2440裸机-nand控制器</a>。</p>
-<h1><span id="2-bu-tong-wei-kuan-nei-cun-yu-cpu-di-zhi-lian-jie-guan-xi">2 不同位宽内存与CPU地址连接关系</span><a href="#2-bu-tong-wei-kuan-nei-cun-yu-cpu-di-zhi-lian-jie-guan-xi" class="header-anchor">#</a></h1><p>s3c2440芯片手册上外设rom与CPU地址总线连接如下：<br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/4.png"></p>
-<h2><span id="2-1-8bit-x1-rom-yu-cpu-di-zhi-xian-lian-jie">2.1 8bit x1 rom与CPU地址线连接</span><a href="#2-1-8bit-x1-rom-yu-cpu-di-zhi-xian-lian-jie" class="header-anchor">#</a></h2><p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/5.png"></p>
-<h2><span id="2-2-8bit-x2-rom-yu-cpu-di-zhi-xian-lian-jie">2.2 8bit x2 rom与CPU地址线连接</span><a href="#2-2-8bit-x2-rom-yu-cpu-di-zhi-xian-lian-jie" class="header-anchor">#</a></h2><p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/6.png"></p>
-<h2><span id="2-3-8bit-x4-rom-yu-cpu-di-zhi-xian-lian-jie">2.3 8bit x4 rom与CPU地址线连接</span><a href="#2-3-8bit-x4-rom-yu-cpu-di-zhi-xian-lian-jie" class="header-anchor">#</a></h2><p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/7.png"></p>
-<h2><span id="2-4-16bit-x1-rom-yu-cpu-di-zhi-xian-lian-jie">2.4 16bit  x1 rom与CPU地址线连接</span><a href="#2-4-16bit-x1-rom-yu-cpu-di-zhi-xian-lian-jie" class="header-anchor">#</a></h2><p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/8.png"></p>
-<h2><span id="2-5-16bit-x2-rom-yu-cpu-di-zhi-xian-lian-jie">2.5 16bit  x2 rom与CPU地址线连接</span><a href="#2-5-16bit-x2-rom-yu-cpu-di-zhi-xian-lian-jie" class="header-anchor">#</a></h2><p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/9.png"><br>从上面的图中，我们知道可以对2片位宽为8bit的内存扩展级联成1个16bit的内存，同理可用4片位宽为8bit的内存进行级联成1个32bit的内存。</p>
-<h1><span id="3-bu-tong-wei-kuan-nei-cun-yu-cpu-wei-shi-me-yao-cuo-wei-xiang-lian">3 不同位宽内存与CPU为什么要错位相连</span><a href="#3-bu-tong-wei-kuan-nei-cun-yu-cpu-wei-shi-me-yao-cuo-wei-xiang-lian" class="header-anchor">#</a></h1><p>从上面的图中，我们还看见一个规律:</p>
-<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">当外设总线位宽为<span class="number">8b</span>it时， 外设A0接CPU的地址总线ADDR[<span class="number">0</span>],</span><br><span class="line">A[<span class="number">1</span>]-&gt;ADDR[<span class="number">1</span>] ...A[<span class="number">15</span>]-&gt;ADDR[<span class="number">15</span>]</span><br><span class="line"></span><br><span class="line">当外设总线位宽为<span class="number">16b</span>it时，外设A0接CPU的地址总线ADDR[<span class="number">1</span>]，</span><br><span class="line">A[<span class="number">1</span>]-&gt;ADDR[<span class="number">2</span>] ...A[<span class="number">15</span>]-&gt;ADDR[<span class="number">16</span>]</span><br><span class="line"></span><br><span class="line">当外设总线位宽为<span class="number">32b</span>it时，外设A0接CPU的地址总线ADDR[<span class="number">2</span>]，</span><br><span class="line">A[<span class="number">1</span>]-&gt;ADDR[<span class="number">3</span>] ...A[<span class="number">15</span>]-&gt;ADDR[<span class="number">17</span>]</span><br></pre></td></tr></table></figure>
-<p>为什么要这样设计呢？先看一个例子：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MOV R0， #3</span><br><span class="line">LDRB R1, [R0]  @ 从内存地址为3的地方，读出一个字节到R1</span><br></pre></td></tr></table></figure>
-
-<p>如图有8bitROM、16bitROM、32bitROM:<br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/10.jpg"></p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">（1）对于8bitROM ，8bit是一次读写的最小单位，即0地址是第一个8bit，1地址是第二个8bit;</span><br><span class="line">CPU发出地址3，即A0和A1都为1，8bitROM的A0和A1收到的也都是1，</span><br><span class="line">于是找到了ROM上地址为3的8bit数据,包含了我们需要的数据。</span><br><span class="line"></span><br><span class="line">（2）对于16bitROM ，16bit是一次读写的最小单位，即0地址是第一个16bit，里面有两个8bit数据;</span><br><span class="line">CPU发出地址3，即A0和A1都为1，16bitROM的A0和A1分别收到的是1和0，</span><br><span class="line">于是找到了ROM上地址为1的16bit数据，包含了我们需要的数据，最后内存控制器再帮我们挑选出所需的8bit数据。</span><br><span class="line"></span><br><span class="line">（3）对于32bitROM ，32bit是一次读写的最小单位，即0地址是第一个32bit，里面有四个8bit数据;</span><br><span class="line">CPU发出的地址3，即A0和A1都为0，32bitROM的A0和A1收到的都是0，</span><br><span class="line">于是找到了ROM上地址为0的32bit数据，包含了我们需要的数据，最后内存控制器再帮我们挑选出所需的8bit数据。</span><br></pre></td></tr></table></figure>
-
-<p>用表格更好理解：</p>
-<table>
-<thead>
-<tr>
-<th>ROM&#x2F;bit</th>
-<th>CPU发出地址</th>
-<th>ROM收到地址</th>
-<th>ROM返回数据</th>
-<th>内存控制器挑选出数据给CPU</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>8bit(ROM)</td>
-<td>0b000011</td>
-<td>0b000011</td>
-<td>编号3的存储单元中的8数据</td>
-<td>编号3的存储单元中的8数据</td>
-</tr>
-<tr>
-<td>16bit(ROM)</td>
-<td>0b000011</td>
-<td>0b000001</td>
-<td>编号1的存储单元中的16数据</td>
-<td>根据”A0&#x3D;1”,挑出低8bit数据</td>
-</tr>
-<tr>
-<td>32bit(ROM)</td>
-<td>0b000011</td>
-<td>0b000000</td>
-<td>编号0的存储单元中的32数据</td>
-<td>根据”A1A0&#x3D;11”,挑出最低8bit数据</td>
-</tr>
-</tbody></table>
-<p>对上图的数据再次整理：</p>
-<table>
-<thead>
-<tr>
-<th>ROM&#x2F;bit</th>
-<th>CPU发出地址</th>
-<th>ROM收到地址（内存控制器转发给rom）</th>
-<th>ROM返回数据</th>
-<th>内存控制器组装数据给CPU</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>8bit(ROM)</td>
-<td>0b000100</td>
-<td>0b000100</td>
-<td>地址4的一个1byte数据</td>
-<td>组装地址7、6、5、4数据成4字节数据</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>0b000101</td>
-<td>地址5的一个1byte数据</td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>0b000110</td>
-<td>地址6的一个1byte数据</td>
-<td></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>0b000111</td>
-<td>地址7的一个1byte数据</td>
-<td></td>
-</tr>
-<tr>
-<td>16bit(ROM)</td>
-<td>0b000100</td>
-<td>0b00010</td>
-<td>地址2的一个2byte数据</td>
-<td>组装地址3、2的数据成4字节数据</td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td>0b00011</td>
-<td>地址3的一个2byte数据</td>
-<td></td>
-</tr>
-<tr>
-<td>32bit(ROM)</td>
-<td>0b000100</td>
-<td>0b00001</td>
-<td>地址1的一个4byte数据</td>
-<td>直接返回4字节数据</td>
-</tr>
-</tbody></table>
-<p>这里牵扯到地址、内存中数据的排列存储，有点深入，如果实在无法理解，记住怎么去错位相连就好了。<br><strong>结论：</strong></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span>和cpu地址总线相连的外设地址线确定了要访问外设的地址，即哪个存储单元；</span><br><span class="line"><span class="number">2.</span>然后内存控制器拿到外设存储单元中的数据后，再根据那几个错开的引脚[A1-A0]的值（CPU地址总线没接的那几个引脚的值），来挑出相应的数据给CPU。</span><br></pre></td></tr></table></figure>
-
-<p>再举一个例子， 假如读取一个32位的数据时，前面读的是8位数据：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MOV R0,   #4</span><br><span class="line">LDR  R1,  [R0]  @去地址4，读取4字节数据</span><br></pre></td></tr></table></figure>
-
-<p>我们知道CPU发出的是32bit地址,那么</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">对于32bit Rom，内存控制器会给它发1次，rom也会相应的接收1次;</span><br><span class="line">对于16bit Rom，内存控制器会给它发2次，rom也会相应的接收2次;</span><br><span class="line">对于8bit  Rom，内存控制器给它发4次， rom接收4次，</span><br></pre></td></tr></table></figure>
-
-<h2><span id="3-1-pei-zhi-nei-cun-kong-zhi-qi-wei-kuan">3.1 配置内存控制器位宽</span><a href="#3-1-pei-zhi-nei-cun-kong-zhi-qi-wei-kuan" class="header-anchor">#</a></h2><p>接不同的rom外设，s3c2440内存控制器总线位宽要配置成不一样。位宽和等待控制寄存器如下：<br>BWSCON(BUSWIDTH&amp;WAITCONTROLREGISTER):</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/11.png" alt="img"></p>
-<p><code>我们SDRAM的位宽为32,DW6[25:24]设置成10， 没有使用等待信号，所以WS6[26]=0。 bank7跟随bank6的配置， 因此BWSCON寄存器的值为：0x22000000</code></p>
-<h1><span id="4-nei-cun-kong-zhi-qi-di-zhi-ying-she-fan-wei">4 内存控制器地址映射范围</span><a href="#4-nei-cun-kong-zhi-qi-di-zhi-ying-she-fan-wei" class="header-anchor">#</a></h1><p>怎样确定芯片的访问地址？</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">1. 根据片选信号确定基地址</span><br><span class="line">2. 根据芯片所接地址线确定范围</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/12.png"></p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/13.png"></p>
-<table>
-<thead>
-<tr>
-<th>外设类型</th>
-<th>接内存控制器的哪个片选</th>
-<th>基地址</th>
-<th>占用CPU的地址总线</th>
-<th>地址范围(offset + size)</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>nor</td>
-<td>nGCS0</td>
-<td>0x0000,0000</td>
-<td>ADDR0-ADDR20</td>
-<td>0x0000,0000 ~ 0x001f,ffff(2M)</td>
-</tr>
-<tr>
-<td>dm9000网卡</td>
-<td>nGCS4</td>
-<td>0x2000,0000</td>
-<td>ADDR0和ADDR2</td>
-<td>0x2000,0000 ~ 0x2000,0005(5byte)</td>
-</tr>
-<tr>
-<td>sdram</td>
-<td>nGCS6</td>
-<td>0x3000,0000</td>
-<td>ADDR0-ADDR25</td>
-<td>0x3000,0000 ~ 0x3000,0000 + RAM_SIZE</td>
-</tr>
-</tbody></table>
-<p>这里再次提醒一下: 有人发现上图中nor没有和CPU的ADDR0相连接，sdram没有和CPU的ADDR0、ADDR1相连接。不要觉得ADDR0、ADDR1没用到，由于nor数据位宽是16bit，ADDR0是给内存控制器拆分数据用的，同样sdram数据位宽32bit，ADDR0、ADDR1也是给内存控制器拆分数据用的。这个上面已分析过，这也是什么要错位连接的原因。</p>
-<h1><span id="5-sdram-fang-wen-shi-li">5 SDRAM访问实例</span><a href="#5-sdram-fang-wen-shi-li" class="header-anchor">#</a></h1><p>以EM63A165TS-6G这款外接SRAM存储来展开介绍。</p>
-<h2><span id="5-1-sdram-cun-chu-jie-gou">5.1 SDRAM存储结构</span><a href="#5-1-sdram-cun-chu-jie-gou" class="header-anchor">#</a></h2><p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/14.jpg"></p>
-<h2><span id="5-2-sdram-yin-jiao-jie-xian">5.2 SDRAM引脚接线</span><a href="#5-2-sdram-yin-jiao-jie-xian" class="header-anchor">#</a></h2><p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/15.png"></p>
-<p>这里采用2片 EM63A165TS-6G 级联作为外接内存，关于EM63A165TS-6G的规则描述参考datasheet。可以看到该sdram是16bit 的，从接线可以看出第一片存储低16位数据，第二片存储高16位数据。</p>
-<p>引脚说明：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">A0-A12：地址总线</span><br><span class="line">D0-D15:数据总线（位宽<span class="number">16</span>,<span class="number">2</span>片级联成位宽<span class="number">32</span>）</span><br><span class="line">BA0-BA1:bank选择</span><br><span class="line">nSCS：片选</span><br><span class="line">nSRAS:行地址选择</span><br><span class="line">nSCAS:列地址选择</span><br><span class="line">nWE:写使能</span><br><span class="line">SCLK:时钟</span><br><span class="line">SCKE:时钟使能</span><br></pre></td></tr></table></figure>
-
-<h2><span id="5-3-sdram-di-zhi-fan-wei">5.3 SDRAM地址范围</span><a href="#5-3-sdram-di-zhi-fan-wei" class="header-anchor">#</a></h2><p>前面提到片选接了nGCS6，地址映射的base_addr&#x3D;0x3000,0000,那么size是多大呢？</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/16.png"></p>
-<p>容量为：4M word x 16-bit x 4-bank &#x3D; 32M，再看原理图我们是两片级联，所以容量为4M word x 32-bit x 4-bank&#x3D;64M。所以地址范围是**[0x3000_0000 ~ 0x33ff_ffff]**</p>
-<p>在对比另一款W9825G6KH SDRAM为例，地址总线A0-A12,数据总线D0-D15,因此内存大小：2^13 * 2^9 &#x3D;  &#x3D; 4194304,等于4M,加上有4个bank，数据为宽16位，因此内存大小4Mx4x2字节。</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/17.png" alt="image"></p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/18.png" alt="image"></p>
-<p>框图翻译成中文形式：</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/19.png" alt="image"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">CLK：时钟线，SDRAM 是同步动态随机存储器，“同步”的意思就是时钟，因此需要一根额外的时钟线，这是和 SRAM 最大的不同，SRAM 没有时钟线。</span><br><span class="line">CKE：时钟使能信号线，SRAM 没有 CKE 信号。</span><br><span class="line">CS：片选信号，这个和 SRAM 一样，都有片选信号。</span><br><span class="line">RAS：行选通信号，低电平有效，SDRAM 和 SRAM 的寻址方式不同，SDRAM 按照行、列来确定某个具体的存储区域。因此就有行地址和列地址之分，行地址和列地址共同复用同一组地址线，要访问某一个地址区域，必须要先后发送行地址和列地址</span><br><span class="line">CAS：列选通信号，和 RAS 类似，低电平有效，选中以后就可以发送列地址了。</span><br><span class="line">WE：写使能信号，低电平有效</span><br><span class="line">A0-A12: 地址线</span><br><span class="line">DQ0-DQ15: 16位数据线</span><br><span class="line">BS0-BS1: BANK 选择线</span><br><span class="line">LDQM,UDQM: 高低字节数据选择线</span><br></pre></td></tr></table></figure>
-
-<h2><span id="5-4-sdram-shu-ju-fang-wen-guo-cheng">5.4 SDRAM数据访问过程</span><a href="#5-4-sdram-shu-ju-fang-wen-guo-cheng" class="header-anchor">#</a></h2><p>我们知道64M&#x3D;2^20*2^6&#x3D;2^26，那么需要26条地址线，再看看原理图，我们发现SDRAM的地址线A[12:0]只有13条，那么最多只能访问2^13&#x3D;8K的数据，地址线明显配不上这么大的容量,那么它是如何解决的呢？</p>
-<p>答：当然是<strong>拆分地址了，多次传输</strong>。</p>
-<p>我们从SDRAM的内部存储结构得知要确定SDRAM的一个存储单元，先确定是哪个bank,然后再确定在哪一行、哪一列即可。SDRAM有4个bank,由BA0、BA1决定选中哪个bank,查看SDRAM手册见下图：</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/20.png"></p>
-<p>通过选中nSRAS选中行地址,从而发送行地址；最后通过选中nSCAS选中列地址，从而发送列地址。例如：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ldr	r0, =0x30000000;</span><br><span class="line">ldr r1, [r0]; 从SDRAM基地址读取4byte数据</span><br></pre></td></tr></table></figure>
-
-<p>过程如下：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span>发出片选信号nGCS6，选中SDRAM</span><br><span class="line"><span class="number">2.</span>发出bank选中信号(BA0，BA1),确定是SDRAM上的哪个bank，从原理图得知CPU的ADDR24、ADDR25对应SDRAM上的BA0，BA1,所以让BA0、BA1=<span class="number">00</span>,选中bankA。</span><br></pre></td></tr></table></figure>
-
-<p>然后从sdram规格书确定行列地址的数目：</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/21.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">3.</span>发出行地址信号nSRAS,使能行地址传输。传输行地址，确定是哪一行（看SDRAM手册确定行地址数(A12-A0)<span class="number">13</span>条）</span><br><span class="line"><span class="number">4.</span>发出列地址信号nnSCAS,使能列地址传输。传输列地址，确定是哪一列(看SDRAM手册确定列地址(A8-A0)<span class="number">9</span>条)</span><br></pre></td></tr></table></figure>
-
-<p>从而发送完整的0x30000000地址到了SDRAM,SDRAM返回4byte数据给CPU。</p>
-<h2><span id="5-5-sdram-qu-dong-shi-li">5.5 SDRAM驱动实例</span><a href="#5-5-sdram-qu-dong-shi-li" class="header-anchor">#</a></h2><p>s3c2440内存控制器共有13个寄存器。我们要设置内存控制器参数，适配外接SDRAM。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">BANK0--BANK5只需要设置BWSCON和BANKCONx(x为0～5）两个寄存器；</span><br><span class="line">BANK6、BANK7外接SDRAM时，除BWSCON和BANKCONx（x为6、7）外，还要设置REFRESH、BANKSIZE、MRSRB6、MRSRB7等4个寄存器。</span><br></pre></td></tr></table></figure>
-
-<h3><span id="5-5-1-wei-kuan-ji-cun-qi">5.5.1 位宽寄存器</span><a href="#5-5-1-wei-kuan-ji-cun-qi" class="header-anchor">#</a></h3><p>BWSCON(BUSWIDTH&amp;WAITCONTROLREGISTER)</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/22.png"></p>
-<p><code>我们SDRAM的位宽为32,DW6[25:24]设置成10， 没有使用等待信号，所以WS6[26]=0。 bank7跟随bank6的配置， 因此BWSCON寄存器的值为：0x22000000。</code></p>
-<h3><span id="5-5-2-bank-kong-zhi-ji-cun-qi">5.5.2 BANK控制寄存器</span><a href="#5-5-2-bank-kong-zhi-ji-cun-qi" class="header-anchor">#</a></h3><p>BANKCONTROLREGISTER:</p>
-<p>在8个BANK中，只有BANK6和BANK7可以外接SRAM或SDRAM。BANKCON6设置参数如下：</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/23.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">MT[<span class="number">16</span>:<span class="number">15</span>]：设置BANK是ROM/SRAM还是DRAM，我们用的SDRAM，属于DRAM。</span><br><span class="line">Trcd[<span class="number">3</span>:<span class="number">2</span>]：行地址和列地址间隔多长时间，看SDRAM芯片手册时间间隔Trcd&gt;<span class="number">18</span>ns，我们HCLK=<span class="number">100</span>MHZ,clocks为<span class="number">10</span>ns,所以设置为<span class="number">2</span>clocks即可。</span><br></pre></td></tr></table></figure>
-
-<h3><span id="5-5-3-shua-xin-kong-zhi-ji-cun-qi">5.5.3 刷新控制寄存器</span><a href="#5-5-3-shua-xin-kong-zhi-ji-cun-qi" class="header-anchor">#</a></h3><p>REFRESH(REFRESHCONTROLREGISTER)</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/24.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">REFEN[<span class="number">23</span>]：设置开启SDRAM的刷新功能。</span><br><span class="line">TREFMD[<span class="number">22</span>]：SDRAM的刷新模式，<span class="number">0</span>=CBR/AutoRefresh，选择自动刷新。</span><br><span class="line"></span><br><span class="line">Trp[<span class="number">21</span>：<span class="number">20</span>]：根据sdram手册Trp&gt;<span class="number">18</span>ns, 设为<span class="number">0</span>(<span class="number">2</span> clocks)即可。</span><br><span class="line">Tsrc[<span class="number">19</span>：<span class="number">18</span>]: Tsrc = Trc - Trp = Trc<span class="number">-20</span>, 根据sdram手册Trc&gt;=<span class="number">60</span>,我们取Trc =<span class="number">70</span>, 则Tsrc= <span class="number">50</span>ns(<span class="number">5</span>clocks)即可。</span><br><span class="line">RefreshCounter[<span class="number">10</span>:<span class="number">0</span>]：Refresh period = (<span class="number">211</span>-refresh_count+<span class="number">1</span>)/HCLK，</span><br><span class="line">RefreshCount = <span class="number">211</span> + <span class="number">1</span> - <span class="number">100</span>*Refresh period，看SDRAM手册“<span class="number">8192</span> refresh cycles/<span class="number">64</span>ms”， Refresh period= <span class="number">64000u</span>s/<span class="number">8192</span> = <span class="number">7.8u</span>s，</span><br><span class="line">RefreshCount取推荐值<span class="number">1269</span>= <span class="number">0x4f5</span>.</span><br><span class="line">综上，REFRESH寄存器设为<span class="number">0x8404F5</span>。</span><br></pre></td></tr></table></figure>
-
-<h3><span id="5-5-4-banksize-ji-cun-qi">5.5.4 BANKSIZE寄存器</span><a href="#5-5-4-banksize-ji-cun-qi" class="header-anchor">#</a></h3><p>BANKSIZEREG ISTER</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/25.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">BURST_EN[<span class="number">7</span>]：<span class="number">0</span>=ARM核禁上突发传输，<span class="number">1</span>=ARM核支持突发传输(推荐)；</span><br><span class="line">SCKEEN[<span class="number">5</span>]：<span class="number">0</span>=不使用SCKE信号令SDRAM进入省电模式，<span class="number">1</span>=使用SCKE信号令SDRAM进入省电模式(推荐)；</span><br><span class="line">SCLK-EN[<span class="number">4</span>]：<span class="number">0</span>=时刻发出SCLK信号，<span class="number">1</span>=仅在访问SDRAM期间发出SCLK信号（推荐）；</span><br><span class="line">BK76MAP[<span class="number">2</span>:<span class="number">0</span>]：配置banksize成<span class="number">64</span>M</span><br><span class="line">因此，BANKSIZE寄存器设为<span class="number">0xB1</span>。</span><br></pre></td></tr></table></figure>
-
-<h3><span id="5-5-5-mo-shi-she-zhi-ji-cun-qi">5.5.5 模式设置寄存器</span><a href="#5-5-5-mo-shi-she-zhi-ji-cun-qi" class="header-anchor">#</a></h3><p>SDRAM MODE REGISTER SET REGISTER(MRSR)</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/26.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">CL[<span class="number">6</span>:<span class="number">4</span>]:表示发出行、列地址后，等多久才返回收到数据， 看SDRAM手册发现Tcas &gt;=<span class="number">18</span>ns,所以配置成<span class="number">2</span> clocks即可。</span><br><span class="line">MRSRB6寄存器设置为<span class="number">0x20</span>。</span><br></pre></td></tr></table></figure>
-
-<h3><span id="5-5-6-ce-shi-dai-ma">5.5.6 测试代码</span><a href="#5-5-6-ce-shi-dai-ma" class="header-anchor">#</a></h3><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">sdram_init</span>(<span class="params"><span class="keyword">void</span></span>)</span> &#123;</span><br><span class="line">	BWSCON = <span class="number">0x22000000</span>;</span><br><span class="line">	BANKCON6 = <span class="number">0x18001</span>;</span><br><span class="line">	BANKCON7 = <span class="number">0x18001</span>;</span><br><span class="line">	REFRESH  = <span class="number">0x8404f5</span>;</span><br><span class="line">	BANKSIZE = <span class="number">0xb1</span>;</span><br><span class="line">	MRSRB6   = <span class="number">0x20</span>;</span><br><span class="line">	MRSRB7   = <span class="number">0x20</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="built_in">int</span> <span class="title">sdram_test</span>(<span class="params"><span class="keyword">void</span></span>)</span> &#123;</span><br><span class="line">	<span class="keyword">volatile</span> unsigned <span class="built_in">char</span> *p = (<span class="keyword">volatile</span> unsigned <span class="built_in">char</span> *)<span class="number">0x30000000</span>;<span class="comment">//sdram base addr</span></span><br><span class="line">	<span class="built_in">int</span> i;</span><br><span class="line">	<span class="comment">// write sdram</span></span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++)</span><br><span class="line">		p[i] = <span class="number">0x55</span>;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// read sdram</span></span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">1000</span>; i++)</span><br><span class="line">		<span class="keyword">if</span> (p[i] != <span class="number">0x55</span>)</span><br><span class="line">			<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="built_in">int</span> <span class="title">main</span>(<span class="params"><span class="keyword">void</span></span>)</span> &#123;</span><br><span class="line">	uart0_init();</span><br><span class="line">	sdram_init();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (sdram_test() == <span class="number">0</span>)</span><br><span class="line">		led_test();	</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>当进行sdram_init后可已访问0x3000_0000地址的内容，led流水灯闪烁。<br>不初始化sdram_init，sdram_test执行会导致程序卡死。</p>
-<h1><span id="6-norflash-fang-wen-shi-li">6 NorFlash访问实例</span><a href="#6-norflash-fang-wen-shi-li" class="header-anchor">#</a></h1><h2><span id="6-1-flash-chong-lei-te-xing-jie-shao">6.1 Flash种类特性介绍</span><a href="#6-1-flash-chong-lei-te-xing-jie-shao" class="header-anchor">#</a></h2><p>flash一般分为nand flash和nor flash，各自特性如下：</p>
-<table>
-<thead>
-<tr>
-<th></th>
-<th>Nor</th>
-<th>NAND</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>XIP(片上执行)</td>
-<td>yes</td>
-<td>no</td>
-</tr>
-<tr>
-<td>性能(擦除)</td>
-<td>非常慢(5s,块太大)</td>
-<td>快(3ms)</td>
-</tr>
-<tr>
-<td>性能(写)</td>
-<td>慢</td>
-<td>快</td>
-</tr>
-<tr>
-<td>性能(读)</td>
-<td>快</td>
-<td>快</td>
-</tr>
-<tr>
-<td>可靠性</td>
-<td>高</td>
-<td>一般（容易出现位反转）</td>
-</tr>
-<tr>
-<td>可擦除次数</td>
-<td>10000 ~ 100000</td>
-<td>100000 ~ 1000000</td>
-</tr>
-<tr>
-<td>接口</td>
-<td>与ram类似，可直接访问任意地址</td>
-<td>I&#x2F;O接口（无地址线,必须串行访问，命令、地址、数据共用8位IO）</td>
-</tr>
-<tr>
-<td>易用性</td>
-<td>容易</td>
-<td>复杂</td>
-</tr>
-<tr>
-<td>主要用途</td>
-<td>常用于保存代码和关键数据</td>
-<td>用于保存数据</td>
-</tr>
-<tr>
-<td>价格</td>
-<td>高</td>
-<td>低</td>
-</tr>
-<tr>
-<td>容量</td>
-<td>小</td>
-<td>大</td>
-</tr>
-<tr>
-<td>常用文件系统类型</td>
-<td>jffs</td>
-<td>yaffs</td>
-</tr>
-</tbody></table>
-<p>nor有以下优缺点相对nand：</p>
-<figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">优点：</span><br><span class="line">    操作简单（可以像内存一样随机访问）</span><br><span class="line">    读取速度快</span><br><span class="line">    可靠性高，不易出现位反转</span><br><span class="line">缺点：</span><br><span class="line">    容量小，价格贵</span><br><span class="line">    擦写慢</span><br><span class="line">    寿命短</span><br></pre></td></tr></table></figure>
-
-<h2><span id="6-2-norflash-di-zhi-fan-wei">6.2 NorFlash地址范围</span><a href="#6-2-norflash-di-zhi-fan-wei" class="header-anchor">#</a></h2><p>前面介绍内存控制器地址映射范围说了，得知nor接了bank 0,地址范围是0x0000,0000 ~ 0x001f,ffff。</p>
-<h2><span id="6-3-norflash-yin-jiao-miao-shu">6.3 NorFlash引脚描述</span><a href="#6-3-norflash-yin-jiao-miao-shu" class="header-anchor">#</a></h2><p>下面是一款典型的nor flash原理图<strong>MX29LV800BBTC</strong>。</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/27.png"></p>
-<p>引脚信息：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">地址线（A0-A20）</span><br><span class="line">数据线(DQ0-DQ15)</span><br><span class="line">片选信号（nCE）</span><br><span class="line">读写使能信号(LnOE/LnWE)</span><br></pre></td></tr></table></figure>
-
-<p>Nor Flash可以像内存一样读，但是不能像内存一样写，需要做一些特殊的操作才能进行写操作，这是因为nor是属于rom（只读存储器），不能像ram一样可以任意的写0写1，只能将存储介质中的电平由1变成0，不能将0变成1，所以要向nor中写入数据，必须先进行擦除动作。</p>
-<h2><span id="6-4-norflash-ying-jian-lian-jie">6.4 NorFlash硬件连接</span><a href="#6-4-norflash-ying-jian-lian-jie" class="header-anchor">#</a></h2><p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/28.jpg"></p>
-<h2><span id="6-5-norflash-shu-ju-fang-wen-guo-cheng">6.5 NorFlash数据访问过程</span><a href="#6-5-norflash-shu-ju-fang-wen-guo-cheng" class="header-anchor">#</a></h2><p>下图是S3C2440的内存控制器的可编程访问周期读写时序，里面的时间参数要根据外部norflash的性能进行配置。</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/29.png"></p>
-<p>时序含义：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Tacs: Address <span class="built_in">set</span>-up time before nGCSn（表示地址信号A发出多久后才能发出nGCS片选）</span><br><span class="line">Tcos: Chip selection <span class="built_in">set</span>-up time before nOE（表示片选信号nGCS发出多久后才能发出读使能信号）</span><br><span class="line">Tacc: access cycle（数据访问周期）</span><br><span class="line">Tacp: page模式下的访问周期</span><br><span class="line">Tcoh: Chip selection hold time after <span class="title function_">nOE</span> <span class="params">(nOE信号释放多久后才能释放片选nGCS)</span></span><br><span class="line">Tcah: Address hold time after <span class="title function_">nGCSn</span> <span class="params">(片选nGCS释放多久后才能释放地址信号A)</span></span><br></pre></td></tr></table></figure>
-<p>下面我们根据此款norflash <strong>MX29LV160D</strong>手册中的访问时序图来分析，如下图：<br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/30.png"><br>从上面<strong>MX29LV160D</strong>手册的时序图中我们看见：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">(1)先发送地址信号A</span><br><span class="line">(2)发送片选CE</span><br><span class="line">(3)发送读使能OE</span><br><span class="line">(4)从数据总线上读出数据</span><br><span class="line">(5)释放信号...</span><br></pre></td></tr></table></figure>
-
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">发出地址数据(Addresses)后，要等待Taa(要求大于等于70ns)时间，地址数据才有效;</span><br><span class="line">发出片选信号(CE#)后，要等待Tce(要求大于等于70ns)时间，片选信号才有效;</span><br><span class="line">发出读信号(OE#)后要等待Toe(要求大于等于30ns)时间，读信号才有效;</span><br></pre></td></tr></table></figure>
-
-<p>Tas（地址建立时间，也就是地址发送多久后才能继续发后面的片选信号）最小可以为0，那么说明地址信号（A）、片选(CE)、读(OE)使能信号可以一起发出。</p>
-<p>为了简单我们把地址(Addresses)，片选信号(CE#)，读信号(OE#)，同时发出，然后让它们都等待70ns即可(等待地址信号，片选信号，读写使能信号有效)。</p>
-<p>我们再看看上面的nor访问时序图，释放地址、片选、读使能信号都没有时间差值dt要求，那么说明地址、片选、读使能信号可以同时释放。</p>
-<h2><span id="6-6-norflash-shi-xu-chu-shi-hua">6.6 NorFlash时序初始化</span><a href="#6-6-norflash-shi-xu-chu-shi-hua" class="header-anchor">#</a></h2><p>打开s3c2440内存控制器。</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/31.png"></p>
-<h3><span id="6-6-1-bank-kong-zhi-ji-cun-qi-she-zhi">6.6.1 BANK控制寄存器设置</span><a href="#6-6-1-bank-kong-zhi-ji-cun-qi-she-zhi" class="header-anchor">#</a></h3><h4><span id="6-6-1-1-nei-cun-kong-zhi-qi-shi-xu-she-zhi">6.6.1.1 内存控制器时序设置</span><a href="#6-6-1-1-nei-cun-kong-zhi-qi-shi-xu-she-zhi" class="header-anchor">#</a></h4><h5><span id="6-6-1-1-1-tacc">6.6.1.1.1 Tacc</span><a href="#6-6-1-1-1-tacc" class="header-anchor">#</a></h5><p>Tacc表示数据访问周期：</p>
-<p>从上图可以看到Tacc的默认值是111，对应14个clocks。s3c2440系统上电采用12MHz的晶振，HCLK&#x3D;OSC&#x3D;12MHz，那么Tacc&#x3D;(1&#x2F;(12*10^6)) * 14≈1166 ns，这个值很大，远超过了我们的nor手册上的Trc&#x3D;70ns，几乎可以满足所有NorFlash的要求,这也是为什么我们不做初始化也能访问norflash的原因。</p>
-<p>启动后，由于我们的时钟HCLK设置成了100MHz，T&#x3D;1000&#x2F;100&#x3D;10ns，Tacc&#x3D; 10ns*14 &gt;70ns, 所以内存控制器不配置Tacc也是能访问该flash的。为了让访问速率加快，因此设置Tacc&gt;70ns即可，配置成101，8个clocks即可。</p>
-<h5><span id="6-6-1-1-2-tacs-x2f-tcos-x2f-tcoh-x2f-tcah">6.6.1.1.2 Tacs&#x2F;Tcos&#x2F;Tcoh&#x2F;Tcah</span><a href="#6-6-1-1-2-tacs-x2f-tcos-x2f-tcoh-x2f-tcah" class="header-anchor">#</a></h5><p>从nor的分析中，我们得知地址、片选、读使能同时发出和同时释放，所以配置Tacs,Tcos,Tcoh,Tcah皆为0。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">BANKCON0 = (*(<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">long</span> *)(<span class="number">0x48000004</span>));</span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">bank0_tacc_set</span><span class="params">(<span class="type">int</span> val)</span> </span>&#123;</span><br><span class="line">	BANKCON0 = val &lt;&lt; <span class="number">8</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">bank0_tacc_set</span>(<span class="number">0x5</span>);</span><br></pre></td></tr></table></figure>
-
-<h3><span id="6-6-2-ce-shi-dai-ma">6.6.2 测试代码</span><a href="#6-6-2-ce-shi-dai-ma" class="header-anchor">#</a></h3><figure class="highlight c#"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="built_in">int</span> <span class="title">main</span>(<span class="params"><span class="keyword">void</span></span>)</span> &#123;</span><br><span class="line">	unsigned <span class="built_in">char</span> c;</span><br><span class="line">	uart0_init();<span class="comment">//参考前面的uart编程</span></span><br><span class="line">	puts(<span class="string">&quot;Enter the Tacc val: \n\r&quot;</span>);</span><br><span class="line">	<span class="keyword">while</span>(<span class="number">1</span>) &#123;</span><br><span class="line">		c = getchar();</span><br><span class="line">		putchar(c);</span><br><span class="line">		<span class="keyword">if</span> (c &gt;= <span class="string">&#x27;0&#x27;</span> &amp;&amp; c &lt;= <span class="string">&#x27;7&#x27;</span>) &#123;</span><br><span class="line">			bank0_tacc_set(c - <span class="string">&#x27;0&#x27;</span>);</span><br><span class="line">			led_test();<span class="comment">//跑马灯代码我就不贴了，谁都会</span></span><br><span class="line">		&#125; <span class="keyword">else</span>&#123;</span><br><span class="line">			puts(<span class="string">&quot;Error, val should between 0~7\n\r&quot;</span>);</span><br><span class="line">			puts(<span class="string">&quot;Enter the Tacc val: \n\r&quot;</span>);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4><span id="6-6-2-1-ce-shi-jie-guo">6.6.2.1 测试结果</span><a href="#6-6-2-1-ce-shi-jie-guo" class="header-anchor">#</a></h4><p>输入0~4,Tacc小于70ns,无法读取Nor Flash上数据，LED不能闪烁。</p>
-<p>输入5~7，Tacc大于70ns,可以读取Nor Flash上数据，LED不断闪烁，且值越小越快。</p>
-<p>结论：我们的内存控制器默认配置的tacc一般都能兼容大多数市面上的norflash，一般都是可以访问的，无需进行对内存控制器进行多余的配置。</p>
-<h1><span id="7-u-boot-ming-ling-fang-wen-norflash">7 u-boot命令访问NorFlash</span><a href="#7-u-boot-ming-ling-fang-wen-norflash" class="header-anchor">#</a></h1><p><strong>前提</strong>：<br>    norflash初始化正常，能够正常从nor上执行。</p>
-<p>对s3c2440而言，cpu总是从0地址读取指令执行程序。当cpu设置成nor启动时，0地址对应nor。cpu从nand启动时，0地址对应sram。</p>
-<h2><span id="7-1-cao-zuo-norflash">7.1 操作NorFlash</span><a href="#7-1-cao-zuo-norflash" class="header-anchor">#</a></h2><p>将板子设为nor启动，那么0地址对应nor，我们先将uboot烧写到nor中,启动uboot。</p>
-<p>打开这款<strong>MX29LV800BBTC</strong> norflash手册，找到操作flash的命令表：<br><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/32.png"></p>
-<h3><span id="7-1-1-reset">7.1.1 reset</span><a href="#7-1-1-reset" class="header-anchor">#</a></h3><p>往任何一个地址写入F0即可。</p>
-<h3><span id="7-1-2-du-id">7.1.2 读ID</span><a href="#7-1-2-du-id" class="header-anchor">#</a></h3><p>很多的Nor Flash可以配置成位宽16bit(Word)，位宽8bit(Byte)，我们这款norflash数据位宽为16bit。下面我们按照nor手册上的命令表尝试一下:</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">往地址<span class="number">555</span>H写入AAH(解锁)	</span><br><span class="line">往地址<span class="number">2</span>AAH写入<span class="number">55</span>H(解锁)</span><br><span class="line">往地址<span class="number">555</span>H写入<span class="number">90</span>H（命令）</span><br><span class="line">读<span class="number">0</span>地址得到厂家ID(C2H)</span><br><span class="line">读<span class="number">1</span>地址得到设备ID(<span class="number">22</span>DAH或<span class="number">225B</span>H)</span><br><span class="line">退出读ID状态(给任意地址写F0H就可以了)</span><br></pre></td></tr></table></figure>
-
-<p>上面的地址是对于norflash的，那么我们CPU要怎么发送地址呢？从原理图接线我们知道CPU和nor的地址是错位相连的。</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/33.png"></p>
-<table>
-<thead>
-<tr>
-<th>cpu地址</th>
-<th>nor地址</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>A15~A1</td>
-<td>A14~A0</td>
-</tr>
-</tbody></table>
-<p>那么可以看到cpu的地址实际相当于是nor地址左移了一位，那么比如要想给nor上的555H地址写入AAH,那么CPU要发出的地址应该为0x555&lt;&lt;1,也就是nor地址的2倍。</p>
-<p>下面对在Nor Flash的操作，cpu的操作，U-BOOT上的操作进行比较，如下表：</p>
-<table>
-<thead>
-<tr>
-<th>Nor Flash的操作</th>
-<th>cpu的操作</th>
-<th>U-BOOT上的操作</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>往地址555H写入AAH(解锁)</td>
-<td>往地址AAAH写入AAH(解锁)</td>
-<td>mw.w aaa aa</td>
-</tr>
-<tr>
-<td>往地址2AAH写入55H(解锁)</td>
-<td>往地址554H写入55H(解锁)</td>
-<td>mw.w 554 55</td>
-</tr>
-<tr>
-<td>往地址555H写入90H(命令)</td>
-<td>往地址AAAH写入90H(命令)</td>
-<td>mw.w aaa 90</td>
-</tr>
-<tr>
-<td>读0地址得到厂家ID(C2H)</td>
-<td>读0地址得到厂家ID(C2H)</td>
-<td>md.w 0 1 (1:表示读一次)</td>
-</tr>
-<tr>
-<td>读1地址得到设备ID(22DAH或225BH)</td>
-<td>读2地址得到设备ID(22DAH或225BH)</td>
-<td>md.w 2 1</td>
-</tr>
-<tr>
-<td>退出读ID状态（给任意地址写F0H）</td>
-<td>退出读ID状态（给任意地址写F0H）</td>
-<td>mw.w 0 f0</td>
-</tr>
-</tbody></table>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/34.png"></p>
-<p>我们读出厂家id为c2，设备id为2249，和我们的nor手册上是一致的。我们发出f0命令，进行复位，这时读取的数据就不再是厂家id和设备id了，而是我们norflash中的实际的数据17 00 00 ea。</p>
-<h3><span id="7-1-3-du-shu-ju">7.1.3 读数据</span><a href="#7-1-3-du-shu-ju" class="header-anchor">#</a></h3><p>前面说了，nor属于rom, 有独立地址线，可以像ram一样的读，只要做好内存控制器的初始化工作就可以直接读了。</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/35.png"></p>
-<p>我们再用二进制编辑器打开我们烧进去的uboot.bin，发现内容一样，说明我们从norflash中读出来的数据是正确的。</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/36.png"></p>
-<h3><span id="7-1-4-du-shu-xing">7.1.4 读属性</span><a href="#7-1-4-du-shu-xing" class="header-anchor">#</a></h3><p>通常Linux内核里面要识别一个 Nor Flash 有两种方法：</p>
-<p>一种是 jedec 探测，就是在内核里面事先定义一个数组，该数组里面放有不同厂家各个芯片的一些参数，探测的时候将 flash 的 ID 和数组里面的 ID 一一比较，如果发现相同的，就使用该数组的参数。 jedec 探测的优点就是简单，只要通过flash的数组编号，即可访问该款flash属性，缺点是如果内核要支持的 flash 种类很多，这个数组就会很庞大。</p>
-<p>一种是 CFI(common flash interface)探测，就是直接发各种命令来读取芯片的信息，比如 ID、容量等，芯片本身就包含了电压有多大，容量有有多少等信息。</p>
-<p>我们的这款norflash属于cfi探测，下面对在Nor Flash上操作，s3c2440上操作，U-BOOT上进行cfi 探测（读取芯片信息）。</p>
-<p>下图是从datasheet中检索出进入cfi模式后的一些flash属性查找表，可以按照表格命令查询norflash的一些属性(容量、电压、block信息等)：</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/37.png"></p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/38.png"></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span>根据命令表往<span class="number">55</span>H地址写入<span class="number">98</span>H进入cfi模式</span><br><span class="line"><span class="number">2.</span>读取`qry`字符</span><br><span class="line"><span class="number">3.</span>获取属性</span><br></pre></td></tr></table></figure>
-
-<table>
-<thead>
-<tr>
-<th>Nor Flash上操作cfi</th>
-<th>2440上操作cfi</th>
-<th>U-BOOT上操作cfi</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>往55H地址写入98H（进入cfi模式）</td>
-<td>往AAH地址写入98H</td>
-<td>mw.w aa 98</td>
-</tr>
-<tr>
-<td>读地址10H得到0051（’q’）</td>
-<td>读地址20H得到0051</td>
-<td>md.w 20 1</td>
-</tr>
-<tr>
-<td>读地址11H得到0052(‘r’)</td>
-<td>读地址22H得到0052</td>
-<td>md.w 22 1</td>
-</tr>
-<tr>
-<td>读地址12H得到0059(‘y’)</td>
-<td>读地址24H得到0059</td>
-<td>md.w 24 1</td>
-</tr>
-<tr>
-<td>读地址27H得到容量</td>
-<td>读地址4EH得到容量</td>
-<td>md.w 4e 1</td>
-</tr>
-<tr>
-<td>读地址1BH得到VCCmin</td>
-<td>读地址36H得到VCCmin</td>
-<td>md.w 36 1</td>
-</tr>
-</tbody></table>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/39.png"></p>
-<p>从测试结果我们看到容量为2^21&#x3D;2M，Vcc最小提供电压是2.7v。</p>
-<h3><span id="7-1-5-xie-shu-ju">7.1.5 写数据</span><a href="#7-1-5-xie-shu-ju" class="header-anchor">#</a></h3><p>前面说了，nor属于rom, 有独立地址线，可以像ram一样的读，用md命令直接读取，不能像内存一样直接写，不信我们试试：</p>
-<ol>
-<li><p>我们在Nor Flash地址0x10000读数据</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/40.png"></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">由于我们的uboot只有162k,烧录到norflash后，norflash上的的0x100000地址还没有被写入数据，norflash的容量为2M(0~0x200000),所以读取NorFlash的0x10000的地址数据是0xffff...</span><br></pre></td></tr></table></figure>
-</li>
-<li><p>在Nor flash的0x10000地址写数据0x1234，然后在这个地址读出数据：</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/41.png"></p>
-<p>可以看到0x1234无法写进去，读出来还是0xfffff。为什么呢？要怎么才能将0x1234写进去。找到命令表：</p>
-<table>
-<thead>
-<tr>
-<th>Nor Flash上写操作</th>
-<th>2440上写操作</th>
-<th>U-BOOT上写操作</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>往地址555H写AAH(解锁)</td>
-<td>往地址AAAH写AAH(解锁)</td>
-<td>mw.w aaa aa</td>
-</tr>
-<tr>
-<td>往地址2AAH写55H(解锁)</td>
-<td>往地址554H写55H(解锁)</td>
-<td>mw.w 554 55</td>
-</tr>
-<tr>
-<td>往地址555H写A0H</td>
-<td>往地址AAAH写A0H</td>
-<td>mw.w aaa a0</td>
-</tr>
-<tr>
-<td>往地址PA写PD</td>
-<td>往地址0x100000写1234h</td>
-<td>mw.w 100000 1234</td>
-</tr>
-</tbody></table>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/42.png"></p>
-</li>
-</ol>
-<p>可以看到0x1234已被写入到地址0x100000。再次往0x100000地址处，写入0x5678：</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/43.png"></p>
-<p>这时我们发现0x100000地址处的数据不是0x5678，而是0x1230，为什么？</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">原因：flash有无法位反转的特性。</span><br><span class="line">具体分析：</span><br><span class="line">由于原来的数据已经是0x1234不是全0xffff，flash存储介质中只能1变成0，不能将0变成1。所以在0x1234的基础上不去擦出直接继续去写0x5678是会有问题的。</span><br><span class="line">如果将0x1234不擦就去写成0x5678,过程如下：</span><br><span class="line">0001 0010 0011 0100(0x1234)</span><br><span class="line">0101 0110 0111 1000(0x5678)</span><br><span class="line">----------------------------</span><br><span class="line">0001 0010 0011 0000(0x1230)</span><br></pre></td></tr></table></figure>
-
-<p>所以得到就是0x1230, 因此flash写入前一定要先擦除。</p>
-<h4><span id="7-1-5-1-ca-chu">7.1.5.1 擦除</span><a href="#7-1-5-1-ca-chu" class="header-anchor">#</a></h4><p>从datasheet找到擦除命令表：</p>
-<table>
-<thead>
-<tr>
-<th>Nor Flash擦操作</th>
-<th>u-boot擦操作</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>往地址555H写AAH</td>
-<td>mw.w   aaa    aa</td>
-</tr>
-<tr>
-<td>往地址2AAH写55H</td>
-<td>mw.w   554    55</td>
-</tr>
-<tr>
-<td>往地址555H写80H</td>
-<td>mw.w    aaa   80</td>
-</tr>
-<tr>
-<td>往地址555H写AAH</td>
-<td>mw.w   aaa    aa</td>
-</tr>
-<tr>
-<td>往地址2AAH写55H</td>
-<td>mw.w   554    55</td>
-</tr>
-<tr>
-<td>往地址PA写30H</td>
-<td>mw.w  100000  30</td>
-</tr>
-</tbody></table>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/44.png"></p>
-<p>擦除后再读取发现数据就已经变成了0xffff,后面就可以进行写操作了。</p>
-<h4><span id="7-1-5-2-xie-ru">7.1.5.2 写入</span><a href="#7-1-5-2-xie-ru" class="header-anchor">#</a></h4><p>找到写入命令表，进行写入：</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/45.png"></p>
-<p>现在数据就变成我们的0x5678了。</p>
-<p>注意：在写norflash时，要注意不要写0地址或者是uboot所在的地址，这样写入后norflash上的uboot程序就被破坏了。比如本测试就是写了0x100000地址,这个地址在uboot之外。</p>
-<h2><span id="7-2-cao-zuo-norflash-tuo-zhan">7.2 操作NorFlash-拓展</span><a href="#7-2-cao-zuo-norflash-tuo-zhan" class="header-anchor">#</a></h2><h3><span id="7-2-1-di-zhi-wei-kuan-bu-dui-qi-dao-zhi-si-ji-fen-xi">7.2.1 地址位宽不对齐导致死机分析</span><a href="#7-2-1-di-zhi-wei-kuan-bu-dui-qi-dao-zhi-si-ji-fen-xi" class="header-anchor">#</a></h3><p>uboot发送md.w 0, md.w 2, md.w 4等偶地址命令能够读取norflash，但使用md.w 1, md.w 3,md.w 5就会出现死机，为什么？</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">由于我们的norflash是<span class="number">16b</span>it数据位宽的，访问时要<span class="number">2b</span>yte对齐。如果不想以<span class="number">2b</span>yte为单位进行访问，那么要用uboot中用md.b <span class="number">1</span>,md.b <span class="number">3</span>这种单字节读取命令。</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/46.png"></p>
-<h3><span id="7-2-2-mei-ci-xie-du-yao-xian-ca-chu">7.2.2 每次写都要先擦除</span><a href="#7-2-2-mei-ci-xie-du-yao-xian-ca-chu" class="header-anchor">#</a></h3><p>操作norflash进行擦写的时候能够解锁一次，擦写多次吗？</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">不能，每次擦写都要进行解锁动作。</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/47.png" alt="image-20240412144608560"></p>
-<h3><span id="7-2-3-ca-chu-dan-wei-kuai">7.2.3 擦除单位-块</span><a href="#7-2-3-ca-chu-dan-wei-kuai" class="header-anchor">#</a></h3><p>擦除那么是以块（block）为单位的，那么当进行擦除时发送的地址并不是以块对齐的，会有什么结果？</p>
-<p><code>也能擦除成功，会根据地址范围确定在哪一个块中。</code></p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/48.png"></p>
-<p>填入的地址是0x100009,也是擦除0x100000地址对应的块。</p>
-<h1><span id="8-norflash-qu-dong-shi-li">8 NorFlash驱动实例</span><a href="#8-norflash-qu-dong-shi-li" class="header-anchor">#</a></h1><h2><span id="8-1-shi-bie-norflash">8.1 识别NorFlash</span><a href="#8-1-shi-bie-norflash" class="header-anchor">#</a></h2><p>我们知道要识别norflash属性，要让norflash进入cfi模式，然后按照手册上的表格发送一系列的命令就能获取norflash属性。</p>
-<h3><span id="8-1-1-fa-ming-ling">8.1.1 发命令</span><a href="#8-1-1-fa-ming-ling" class="header-anchor">#</a></h3><p>实现一个cpu向nor发命令的一个函数nor_cmd()。我们的norflash是16bit位宽的，所以访问nor是以16位为单位访问的。</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> NOR_FLASH_BASE  0  <span class="comment">/* s3c2440, nor--&gt;cs0, base addr = 0 */</span></span></span><br><span class="line"><span class="comment">/* 比如:   55H 98 </span></span><br><span class="line"><span class="comment">** 本意是: 往(0 + (0x55)&lt;&lt;1)写入0x98</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">nor_write_word</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> base, <span class="type">unsigned</span> <span class="type">int</span> offset, <span class="type">unsigned</span> <span class="type">int</span> val)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">short</span> *p = (<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">short</span> *)(base + (offset &lt;&lt; <span class="number">1</span>));</span><br><span class="line">	*p = val;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">nor_cmd</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> offset, <span class="type">unsigned</span> <span class="type">int</span> cmd)</span> </span>&#123;</span><br><span class="line">	<span class="built_in">nor_write_word</span>(NOR_FLASH_BASE, offset, cmd);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><code>nor_cmd(0x55, 0x90);</code>即可往norflash的0x55写入了0x98。</p>
-<h3><span id="8-1-2-du-yi-ci-shu-ju">8.1.2  读一次数据</span><a href="#8-1-2-du-yi-ci-shu-ju" class="header-anchor">#</a></h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">unsigned</span> <span class="type">short</span> <span class="title">nor_read_word</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> base, <span class="type">unsigned</span> <span class="type">int</span> offset)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">short</span> *p = (<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">short</span> *)(base + (offset &lt;&lt; <span class="number">1</span>));</span><br><span class="line">    <span class="keyword">return</span> *p;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="type">unsigned</span> <span class="type">short</span> <span class="title">nor_dat</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> offset)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> <span class="built_in">nor_read_word</span>(NOR_FLASH_BASE, offset);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>调用<code>nor_dat(0x100000)</code>即可得到该地址的数据。</p>
-<h3><span id="8-1-3-shi-bie-han-shu">8.1.3 识别函数</span><a href="#8-1-3-shi-bie-han-shu" class="header-anchor">#</a></h3><p>有了发命令函数nor_cmd和读一次数据函数nor_dat,那么就就可以参考nor芯片手册的命令表进行操作norflash了。</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/49.png"></p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* 进入NOR FLASH的CFI模式</span></span><br><span class="line"><span class="comment"> * 读取flash属性</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="type">void</span> <span class="title">do_scan_nor_flash</span><span class="params">(<span class="type">void</span>)</span> </span>&#123;</span><br><span class="line">	<span class="type">char</span> str[<span class="number">4</span>];</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> size;</span><br><span class="line">	<span class="type">int</span> regions, i;</span><br><span class="line">	<span class="type">int</span> region_info_base = <span class="number">0x2d</span>; <span class="comment">//第0块region的基地址2d，第1块region的基地址31,第2块region的基地址35......（参考手册表4-3）</span></span><br><span class="line">	<span class="type">int</span> block_addr=<span class="number">0</span>, blocks, block_size, j;</span><br><span class="line">	<span class="type">int</span> cnt = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">	<span class="type">int</span> vendor, device;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 打印厂家ID、设备ID */</span></span><br><span class="line">	<span class="built_in">nor_cmd</span>(<span class="number">0x555</span>, <span class="number">0xaa</span>);    <span class="comment">/* 解锁 */</span></span><br><span class="line">	<span class="built_in">nor_cmd</span>(<span class="number">0x2aa</span>, <span class="number">0x55</span>); </span><br><span class="line">	<span class="built_in">nor_cmd</span>(<span class="number">0x555</span>, <span class="number">0x90</span>);    <span class="comment">/* read id */</span></span><br><span class="line">	vendor = <span class="built_in">nor_dat</span>(<span class="number">0</span>);</span><br><span class="line">	device = <span class="built_in">nor_dat</span>(<span class="number">1</span>);</span><br><span class="line">	<span class="built_in">nor_cmd</span>(<span class="number">0</span>, <span class="number">0xf0</span>);        <span class="comment">/* reset */</span></span><br><span class="line">	</span><br><span class="line">	<span class="built_in">nor_cmd</span>(<span class="number">0x55</span>, <span class="number">0x98</span>);  <span class="comment">/* 进入cfi模式 */</span></span><br><span class="line">	str[<span class="number">0</span>] = <span class="built_in">nor_dat</span>(<span class="number">0x10</span>);	<span class="comment">//读地址10H得到0051（&#x27;q&#x27;）</span></span><br><span class="line">	str[<span class="number">1</span>] = <span class="built_in">nor_dat</span>(<span class="number">0x11</span>);	<span class="comment">//读地址11H得到0052(&#x27;r&#x27;)</span></span><br><span class="line">	str[<span class="number">2</span>] = <span class="built_in">nor_dat</span>(<span class="number">0x12</span>);	<span class="comment">//读地址12H得到0059(&#x27;y&#x27;)</span></span><br><span class="line">	str[<span class="number">3</span>] = <span class="string">&#x27;\0&#x27;</span>;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;str = %s\n\r&quot;</span>, str);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 打印容量 */</span></span><br><span class="line">	size = <span class="number">1</span>&lt;&lt;(<span class="built_in">nor_dat</span>(<span class="number">0x27</span>));</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;vendor id = 0x%x, device id = 0x%x, nor size = 0x%x = %dM\n\r&quot;</span>, vendor, device, size, size/(<span class="number">1024</span>*<span class="number">1024</span>));</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* 打印各个扇区的起始地址 */</span></span><br><span class="line">	<span class="comment">/* 名词解释:</span></span><br><span class="line"><span class="comment">	 * region : 一个nor flash含有1个或多个region, 一个region含有1个或多个block(扇区).</span></span><br><span class="line"><span class="comment">	 * Erase block region[i] information:</span></span><br><span class="line"><span class="comment">	 *    前2字节+1    : 表示该region有多少个block </span></span><br><span class="line"><span class="comment">	 *    后2字节*256  : 表示block的大小</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Block/Sector start Address:\n\r&quot;</span>);</span><br><span class="line">	regions = <span class="built_in">nor_dat</span>(<span class="number">0x2c</span>);  <span class="comment">//读出region数量</span></span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; regions; i++) &#123;</span><br><span class="line">		blocks = <span class="number">1</span> + <span class="built_in">nor_dat</span>(region_info_base) + (<span class="built_in">nor_dat</span>(region_info_base+<span class="number">1</span>)&lt;&lt;<span class="number">8</span>);</span><br><span class="line">		block_size = <span class="number">256</span> * (<span class="built_in">nor_dat</span>(region_info_base+<span class="number">2</span>) + (<span class="built_in">nor_dat</span>(region_info_base+<span class="number">3</span>)&lt;&lt;<span class="number">8</span>));</span><br><span class="line"></span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;\n\rregion %d, blocks = %d, block_size = 0x%x, block_addr = 0x%x\n\r&quot;</span>, i, blocks, block_size, block_addr);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; blocks; j++) &#123;</span><br><span class="line">			<span class="comment">/* 打印每个block的起始地址 */</span></span><br><span class="line">			<span class="built_in">printHex</span>(block_addr);</span><br><span class="line">			<span class="built_in">putchar</span>(<span class="string">&#x27; &#x27;</span>);</span><br><span class="line">			cnt++;</span><br><span class="line">			<span class="keyword">if</span> (cnt % <span class="number">5</span> == <span class="number">0</span>)</span><br><span class="line">				<span class="built_in">printf</span>(<span class="string">&quot;\n\r&quot;</span>);</span><br><span class="line">				</span><br><span class="line">			block_addr += block_size;</span><br><span class="line">		&#125;</span><br><span class="line">		</span><br><span class="line">		region_info_base += <span class="number">4</span>;	<span class="comment">/*得到region[i]的基地址*/</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;\n\r&quot;</span>);</span><br><span class="line">	<span class="comment">/* 退出CFI模式 */</span></span><br><span class="line">	<span class="built_in">nor_cmd</span>(<span class="number">0</span>, <span class="number">0xf0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/50.png"></p>
-<p>从测试结果来看每个region的block个数和block_size不一定一样，像region[0]只有一个block，block_size为4*64K；<br>region[1]有2个block，block_size&#x3D;2*64K。</p>
-<h2><span id="8-2-du-shu-ju">8.2 读数据</span><a href="#8-2-du-shu-ju" class="header-anchor">#</a></h2><p>由于NOR Flash是内存类接口，可以像内存一样读取，那么do_read_nor_flash函数代码如下：</p>
-<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">void</span> <span class="title">do_read_nor_flash</span><span class="params">(<span class="type">void</span>)</span></span>&#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> addr;</span><br><span class="line">	<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">char</span> *p;</span><br><span class="line">	<span class="type">int</span> i, j;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> c;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> str[<span class="number">16</span>];</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 获得地址 */</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Enter the address to read: &quot;</span>);</span><br><span class="line">	addr = <span class="built_in">get_uint</span>();</span><br><span class="line"></span><br><span class="line">	p = (<span class="keyword">volatile</span> <span class="type">unsigned</span> <span class="type">char</span> *)addr;</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Data : \n\r&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">4</span>; i++)&#123;</span><br><span class="line">		<span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; <span class="number">16</span>; j++)&#123;</span><br><span class="line">			c = *p++;</span><br><span class="line">			str[j] = c;</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;%02x &quot;</span>, c);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;   ; &quot;</span>);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">for</span> (j = <span class="number">0</span>; j &lt; <span class="number">16</span>; j++)&#123;</span><br><span class="line">			<span class="keyword">if</span> (str[j] &lt; <span class="number">0x20</span> || str[j] &gt; <span class="number">0x7e</span>)  <span class="comment">/* 不可视字符 */</span></span><br><span class="line">				<span class="built_in">putchar</span>(<span class="string">&#x27;.&#x27;</span>);</span><br><span class="line">			<span class="keyword">else</span></span><br><span class="line">				<span class="built_in">putchar</span>(str[j]);</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;\n\r&quot;</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2><span id="8-3-ca-shu-ju">8.3 擦数据</span><a href="#8-3-ca-shu-ju" class="header-anchor">#</a></h2><p>norflash擦写都是需要一定时间的，那么当我执行擦除或者写入动作后什么时候代表一次擦写动作已经完成了呢？</p>
-<p>芯片手册提供了一个方法，每次擦除或者烧写过程中都可以查询数据总线上的第6位（Q6）,当它保持稳定的时候表示一次擦除或者烧写动作完成，如下图：</p>
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/51.png"></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">wait_ready</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> addr)</span> &#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> val;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> pre;</span><br><span class="line"></span><br><span class="line">	pre = nor_dat(addr&gt;&gt;<span class="number">1</span>);</span><br><span class="line">	val = nor_dat(addr&gt;&gt;<span class="number">1</span>);</span><br><span class="line">	<span class="keyword">while</span> ((val &amp; (<span class="number">1</span>&lt;&lt;<span class="number">6</span>)) != (pre &amp; (<span class="number">1</span>&lt;&lt;<span class="number">6</span>))) &#123;</span><br><span class="line">		pre = val;</span><br><span class="line">		val = nor_dat(addr&gt;&gt;<span class="number">1</span>);		</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">do_erase_nor_flash</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> addr;</span><br><span class="line">	</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Enter the address of sector to erase: &quot;</span>);</span><br><span class="line">	addr = get_uint();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;erasing ...\n\r&quot;</span>);</span><br><span class="line">	nor_cmd(<span class="number">0x555</span>, <span class="number">0xaa</span>);    <span class="comment">/* 解锁 */</span></span><br><span class="line">	nor_cmd(<span class="number">0x2aa</span>, <span class="number">0x55</span>); </span><br><span class="line">	nor_cmd(<span class="number">0x555</span>, <span class="number">0x80</span>);	 <span class="comment">/* erase sector */</span></span><br><span class="line">	</span><br><span class="line">	nor_cmd(<span class="number">0x555</span>, <span class="number">0xaa</span>);    <span class="comment">/* 解锁 */</span></span><br><span class="line">	nor_cmd(<span class="number">0x2aa</span>, <span class="number">0x55</span>); </span><br><span class="line">	nor_cmd(addr&gt;&gt;<span class="number">1</span>, <span class="number">0x30</span>);	 <span class="comment">/* 发出扇区地址 */</span></span><br><span class="line">	wait_ready(addr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/52.png"></p>
-<p>可以看到擦除后这个block就是全0xffff了。</p>
-<h2><span id="8-3-xie-shu-ju">8.3 写数据</span><a href="#8-3-xie-shu-ju" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">do_write_nor_flash</span><span class="params">(<span class="type">void</span>)</span>&#123;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> addr;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> str[<span class="number">100</span>];</span><br><span class="line">	<span class="type">int</span> i, j;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> val;</span><br><span class="line">	</span><br><span class="line">	<span class="comment">/* 获得地址 */</span></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Enter the address of sector to write: &quot;</span>);</span><br><span class="line">	addr = get_uint();</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;Enter the string to write: &quot;</span>);</span><br><span class="line">	gets(str);</span><br><span class="line"></span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;writing ...\n\r&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/* str[0],str[1]==&gt;16bit </span></span><br><span class="line"><span class="comment">	 * str[2],str[3]==&gt;16bit </span></span><br><span class="line"><span class="comment">	 */</span></span><br><span class="line">	i = <span class="number">0</span>;</span><br><span class="line">	j = <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">while</span> (str[i] &amp;&amp; str[j]) &#123;</span><br><span class="line">		val = str[i] + (str[j]&lt;&lt;<span class="number">8</span>);</span><br><span class="line">		</span><br><span class="line">		<span class="comment">/* 烧写 */</span></span><br><span class="line">		nor_cmd(<span class="number">0x555</span>, <span class="number">0xaa</span>);	 <span class="comment">/* 解锁 */</span></span><br><span class="line">		nor_cmd(<span class="number">0x2aa</span>, <span class="number">0x55</span>); </span><br><span class="line">		nor_cmd(<span class="number">0x555</span>, <span class="number">0xa0</span>);	 <span class="comment">/* program */</span></span><br><span class="line">		nor_cmd(addr&gt;&gt;<span class="number">1</span>, val);</span><br><span class="line">		<span class="comment">/* 等待烧写完成 : 读数据, Q6无变化时表示结束 */</span></span><br><span class="line">		wait_ready(addr);</span><br><span class="line"></span><br><span class="line">		i += <span class="number">2</span>;</span><br><span class="line">		j += <span class="number">2</span>;</span><br><span class="line">		addr += <span class="number">2</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	val = str[i];</span><br><span class="line">	<span class="comment">/* 烧写 */</span></span><br><span class="line">	nor_cmd(<span class="number">0x555</span>, <span class="number">0xaa</span>);	 <span class="comment">/* 解锁 */</span></span><br><span class="line">	nor_cmd(<span class="number">0x2aa</span>, <span class="number">0x55</span>); </span><br><span class="line">	nor_cmd(<span class="number">0x555</span>, <span class="number">0xa0</span>);	 <span class="comment">/* program */</span></span><br><span class="line">	nor_cmd(addr&gt;&gt;<span class="number">1</span>, val);</span><br><span class="line">	<span class="comment">/* 等待烧写完成 : 读数据, Q6无变化时表示结束 */</span></span><br><span class="line">	wait_ready(addr);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/53.png"></p>
-<p>由于我的norflash是位宽为16bit的，所以我们上面代码do_write_nor_flash进行写入时是以2byte（wold）为单位进行写入的。</p>
-<p>总结：只要从spec中拿到了命令操作表，读写擦，识别就可以很轻松应对实现。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://example.com/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E5%86%85%E5%AD%98%E6%8E%A7%E5%88%B6%E5%99%A8/" data-id="cm0dxg14e002ddsuffsjt1di3" data-title="s3c2440裸机编程-内存控制器" class="article-share-link"><span class="fa fa-share">Share</span></a>
-      
-      
-      
-  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li></ul>
 
     </footer>
   </div>
