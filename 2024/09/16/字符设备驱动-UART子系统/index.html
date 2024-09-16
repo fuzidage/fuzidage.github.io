@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>字符设备驱动-UART子系统 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 引入UART工作原理 2 Linux下TTY驱动框架 2.1 设备节点差别 2.1.1 串口终端（&#x2F;dev&#x2F;ttyS*） 2.1.2 控制台终端（&#x2F;dev&#x2F;console） 2.1.3 虚拟终端（&#x2F;dev&#x2F;tty*）   2.2 架构层次 2.3 UART驱动子系统 2.3.1 数据结构和API 2.3.1.1 uart_d">
+<meta property="og:type" content="article">
+<meta property="og:title" content="字符设备驱动-UART子系统">
+<meta property="og:url" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 引入UART工作原理 2 Linux下TTY驱动框架 2.1 设备节点差别 2.1.1 串口终端（&#x2F;dev&#x2F;ttyS*） 2.1.2 控制台终端（&#x2F;dev&#x2F;console） 2.1.3 虚拟终端（&#x2F;dev&#x2F;tty*）   2.2 架构层次 2.3 UART驱动子系统 2.3.1 数据结构和API 2.3.1.1 uart_d">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/1.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/2.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/2-1.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/3.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/4.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/5.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/6.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/7.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/8.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/9.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/10.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/11.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/12.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/13.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/14.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/15.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/16.png">
+<meta property="og:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/17.png">
+<meta property="article:published_time" content="2024-09-16T05:43:19.000Z">
+<meta property="article:modified_time" content="2024-09-16T11:18:59.832Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="通信协议">
+<meta property="article:tag" content="Linux设备驱动">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-字符设备驱动-UART子系统" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/" class="article-date">
+  <time class="dt-published" datetime="2024-09-16T05:43:19.000Z" itemprop="datePublished">2024-09-16</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      字符设备驱动-UART子系统
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-yin-ru-uart-gong-zuo-yuan-li">1 引入UART工作原理</a></li>
+<li><a href="#2-linux-xia-tty-qu-dong-kuang-jia">2 Linux下TTY驱动框架</a><ul>
+<li><a href="#2-1-she-bei-jie-dian-chai-bie">2.1 设备节点差别</a><ul>
+<li><a href="#2-1-1-chuan-kou-zhong-duan-dev-ttys">2.1.1 串口终端（&#x2F;dev&#x2F;ttyS*）</a></li>
+<li><a href="#2-1-2-kong-zhi-tai-zhong-duan-dev-console">2.1.2 控制台终端（&#x2F;dev&#x2F;console）</a></li>
+<li><a href="#2-1-3-xu-ni-zhong-duan-dev-tty">2.1.3 虚拟终端（&#x2F;dev&#x2F;tty*）</a></li>
+</ul>
+</li>
+<li><a href="#2-2-jia-gou-ceng-ci">2.2 架构层次</a></li>
+<li><a href="#2-3-uart-qu-dong-zi-xi-tong">2.3 UART驱动子系统</a><ul>
+<li><a href="#2-3-1-shu-ju-jie-gou-he-api">2.3.1 数据结构和API</a><ul>
+<li><a href="#2-3-1-1-uart-driver">2.3.1.1 uart_driver</a><ul>
+<li><a href="#2-3-1-1-1-uart-driver-zhu-ce-yu-zhu-xiao">2.3.1.1.1 uart_driver 注册与注销</a></li>
+</ul>
+</li>
+<li><a href="#2-3-1-2-uart-port">2.3.1.2 uart_port</a><ul>
+<li><a href="#2-3-1-2-1-uart-port-de-tian-jia-yu-yi-chu">2.3.1.2.1 uart_port 的添加与移除</a></li>
+<li><a href="#2-3-1-2-2-uart-port-de-xiu-mian-yu-hui-fu">2.3.1.2.2 uart_port 的休眠与恢复</a></li>
+</ul>
+</li>
+<li><a href="#2-3-1-3-uart-ops">2.3.1.3 uart_ops</a></li>
+<li><a href="#2-3-1-4-console">2.3.1.4 console</a></li>
+<li><a href="#2-3-1-5-bo-te-lu-xiang-guan">2.3.1.5 波特率相关</a></li>
+<li><a href="#2-3-1-6-xiang-chuan-kou-xie-kong-zhi-tai-xin-xi">2.3.1.6 向串口写控制台信息</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-4-uart-kong-zhi-qi-shi-li-imx-wei-li">2.4 UART控制器示例-imx为例</a><ul>
+<li><a href="#2-4-1-dts-miao-shu">2.4.1 dts描述</a></li>
+<li><a href="#2-4-2-probe-chu-shi-hua">2.4.2 probe初始化</a></li>
+<li><a href="#2-4-2-shou-ju-shou-fa-liu-cheng">2.4.2 收据收发流程</a><ul>
+<li><a href="#2-4-2-1-open-guo-cheng">2.4.2.1 open过程</a></li>
+<li><a href="#2-4-2-2-fa-song-jie-shou-zong-liu-cheng">2.4.2.2 发送接收总流程</a></li>
+<li><a href="#2-4-2-3-fa-song-write-guo-cheng">2.4.2.3 发送-write过程</a><ul>
+<li><a href="#2-4-2-3-1-yong-hu-xie-shu-ju-liu-cheng">2.4.2.3.1 用户写数据流程</a></li>
+<li><a href="#2-4-2-3-2-ying-jian-xie-shu-ju-liu-cheng">2.4.2.3.2 硬件写数据流程</a></li>
+</ul>
+</li>
+<li><a href="#2-4-2-4-jie-shou-read-guo-cheng">2.4.2.4 接收-read过程</a><ul>
+<li><a href="#2-4-2-4-1-zhong-duan-chan-sheng-shu-ju-liu-cheng">2.4.2.4.1 中断产生数据流程</a></li>
+<li><a href="#2-4-2-4-2-yong-hu-du-qu-shu-ju-liu-cheng">2.4.2.4.2 用户读取数据流程</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-uart-yong-hu-tai-kong-zhi-han-shu">3 UART用户态控制函数</a><ul>
+<li><a href="#3-1-api-shuo-ming">3.1 API说明</a><ul>
+<li><a href="#3-1-1-she-zhi-can-shu">3.1.1 设置参数</a></li>
+<li><a href="#3-1-2-cao-zuo-liu-cheng">3.1.2 操作流程</a></li>
+</ul>
+</li>
+<li><a href="#3-2-demo-ju-li">3.2 demo举例</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-yin-ru-uart-gong-zuo-yuan-li">1 引入UART工作原理</span><a href="#1-yin-ru-uart-gong-zuo-yuan-li" class="header-anchor">#</a></h1><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/12003751.html">uart硬件传输原理</a>。<a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/04/11/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-UART%E4%BD%93%E7%B3%BB/">s3c2440裸机编程-UART体系</a>。</p>
+<h1><span id="2-linux-xia-tty-qu-dong-kuang-jia">2 Linux下TTY驱动框架</span><a href="#2-linux-xia-tty-qu-dong-kuang-jia" class="header-anchor">#</a></h1><p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/1.png" alt="image"></p>
+<p>可以看到<code>tty框架</code>下不止包含uart,还有display设备，键盘设备。</p>
+<p>详细展开如下，<code>tty_driver</code>位于<code>tty_io.c</code>， 调用底下的<code>uart_diver</code>位于<code>serial_core.c</code>。<code>uart_driver</code>子系统会被最底层的soc厂商拿去适配，调用<code>uart_register_driver</code>注册自己的uart控制器，去实现控制器要实现的<code>uart_fops</code>操作函数。<br><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/2.png" alt="image"></p>
+<h2><span id="2-1-she-bei-jie-dian-chai-bie">2.1 设备节点差别</span><a href="#2-1-she-bei-jie-dian-chai-bie" class="header-anchor">#</a></h2><p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/2-1.png" alt="image"></p>
+<h3><span id="2-1-1-chuan-kou-zhong-duan-x2f-dev-x2f-ttys">2.1.1 串口终端（&#x2F;dev&#x2F;ttyS*）</span><a href="#2-1-1-chuan-kou-zhong-duan-x2f-dev-x2f-ttys" class="header-anchor">#</a></h3><p>串口终端是使用计算机串口连接的终端设备。Linux把每个串行端口都看做是一个字符设备。这些串行端口所对应的设备名称是<code>/dev/ttySAC*</code>;</p>
+<h3><span id="2-1-2-kong-zhi-tai-zhong-duan-x2f-dev-x2f-console">2.1.2 控制台终端（&#x2F;dev&#x2F;console）</span><a href="#2-1-2-kong-zhi-tai-zhong-duan-x2f-dev-x2f-console" class="header-anchor">#</a></h3><p>在Linux系统中，计算机的输出设备通常被称为控制台终端，这里特指printk信息输出到设备。<code>/dev/console</code>是一个虚拟的设备，它需要映射到真正的tty上，比如通过内核启动参数<code>“console=ttySCA0”</code>就把console映射到了串口0</p>
+<h3><span id="2-1-3-xu-ni-zhong-duan-x2f-dev-x2f-tty">2.1.3 虚拟终端（&#x2F;dev&#x2F;tty*）</span><a href="#2-1-3-xu-ni-zhong-duan-x2f-dev-x2f-tty" class="header-anchor">#</a></h3><p>当用户登录时，使用的是虚拟终端。使用<code>Ctcl+Alt[F1 - F6]</code>组合键时，我们就可以切换到tty1、tty2、tty3等上面去。tty*就称为虚拟终端，而tty0则是当前所使用虚拟终端的一个别名。</p>
+<h2><span id="2-2-jia-gou-ceng-ci">2.2 架构层次</span><a href="#2-2-jia-gou-ceng-ci" class="header-anchor">#</a></h2><p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/3.png" alt="image"></p>
+<p>TTY核心层-&gt;线路规划层-&gt;tty驱动层。</p>
+<h2><span id="2-3-uart-qu-dong-zi-xi-tong">2.3 UART驱动子系统</span><a href="#2-3-uart-qu-dong-zi-xi-tong" class="header-anchor">#</a></h2><h3><span id="2-3-1-shu-ju-jie-gou-he-api">2.3.1 数据结构和API</span><a href="#2-3-1-shu-ju-jie-gou-he-api" class="header-anchor">#</a></h3><h4><span id="2-3-1-1-uart-driver">2.3.1.1 uart_driver</span><a href="#2-3-1-1-uart-driver" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">uart_driver</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">module</span> *<span class="title">owner</span>;</span> <span class="comment">/* 模块所属者 */</span></span><br><span class="line">	<span class="type">const</span> <span class="type">char</span> *driver_name; <span class="comment">/* 驱动名字 */</span></span><br><span class="line">	<span class="type">const</span> <span class="type">char</span> *dev_name; <span class="comment">/* 设备名字 */</span></span><br><span class="line">	<span class="type">int</span> major; <span class="comment">/* 主设备号 */</span></span><br><span class="line">	<span class="type">int</span> minor; <span class="comment">/* 次设备号 */</span></span><br><span class="line">	<span class="type">int</span> nr; <span class="comment">/* 设备数 */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">console</span> *<span class="title">cons</span>;</span> <span class="comment">/* 控制台 */</span></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	* these are private; the low level driver should not</span></span><br><span class="line"><span class="comment">	* touch these; they should be initialised to NULL</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">uart_state</span> *<span class="title">state</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">tty_driver</span> *<span class="title">tty_driver</span>;</span></span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//include/linux/serial_core.h</span></span><br></pre></td></tr></table></figure>
+
+<h5><span id="2-3-1-1-1-uart-driver-zhu-ce-yu-zhu-xiao">2.3.1.1.1 uart_driver 注册与注销</span><a href="#2-3-1-1-1-uart-driver-zhu-ce-yu-zhu-xiao" class="header-anchor">#</a></h5><p><code>int uart_register_driver(struct uart_driver *drv);</code></p>
+<p><code>返回值：0，成功；负值，失败。</code></p>
+<p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/4.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">retval = tty_register_driver(normal);</span><br><span class="line">	error = register_chrdev_region(dev, driver-&gt;num, driver-&gt;name);<span class="comment">//也是通过字符设备驱动框架注册</span></span><br><span class="line">		d = tty_register_device(driver, i, <span class="literal">NULL</span>);</span><br><span class="line">			tty_register_device_attr(driver, index, device, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line">				retval = tty_cdev_add(driver, devt, index, <span class="number">1</span>);</span><br><span class="line">					driver-&gt;cdevs[index]-&gt;ops = &amp;tty_fops;</span><br><span class="line">					err = cdev_add(driver-&gt;cdevs[index], dev, count);</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/5.png" alt="image"></p>
+<p>设置<code>uart_ops</code>为tty的<code>tty_operations</code>。然后调用<code>tty_register_driver</code>注册到tty子系统。</p>
+<p><code>void uart_unregister_driver(struct uart_driver *drv);</code></p>
+<h4><span id="2-3-1-2-uart-port">2.3.1.2 uart_port</span><a href="#2-3-1-2-uart-port" class="header-anchor">#</a></h4><p>描述串口端口的I&#x2F;O端口或I&#x2F;O内存地址、FIFO大小、端口类型、串口时钟等信息。实际上，一个<code>uart_port</code>实现对应一个串口设备。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">uart_port</span> &#123;</span></span><br><span class="line">	<span class="type">spinlock_t</span> lock; <span class="comment">/* port lock */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> iobase; <span class="comment">/* in/out[bwl] */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">char</span> __iomem *membase; <span class="comment">/* read/write[bwl] */</span></span><br><span class="line">	..</span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">uart_ops</span> *<span class="title">ops</span>;</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> custom_divisor;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> line; <span class="comment">/* port index */</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> minor;</span><br><span class="line">	<span class="type">resource_size_t</span> mapbase; <span class="comment">/* for ioremap */</span></span><br><span class="line">	<span class="type">resource_size_t</span> mapsize;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">device</span> *<span class="title">dev</span>;</span> <span class="comment">/* parent device */</span></span><br><span class="line">	..</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">//include/linux/serial_core.h</span></span><br></pre></td></tr></table></figure>
+
+<h5><span id="2-3-1-2-1-uart-port-de-tian-jia-yu-yi-chu">2.3.1.2.1 uart_port 的添加与移除</span><a href="#2-3-1-2-1-uart-port-de-tian-jia-yu-yi-chu" class="header-anchor">#</a></h5><p><code>int uart_add_one_port(struct uart_driver *drv, struct uart_port *uport);</code></p>
+<p><code>返回值：0，成功；负值，失败。</code></p>
+<p><code>uart_port </code>和 <code>uart_driver </code>结合起来。</p>
+<p><code>int uart_remove_one_port(struct uart_driver *drv, struct uart_port *uport);</code></p>
+<h5><span id="2-3-1-2-2-uart-port-de-xiu-mian-yu-hui-fu">2.3.1.2.2 uart_port 的休眠与恢复</span><a href="#2-3-1-2-2-uart-port-de-xiu-mian-yu-hui-fu" class="header-anchor">#</a></h5><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">uart_suspend_port</span><span class="params">(<span class="keyword">struct</span> uart_driver *drv, <span class="keyword">struct</span> uart_port *port)</span>;<span class="comment">//挂起特定的串口端口</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">uart_resume_port</span><span class="params">(<span class="keyword">struct</span> uart_driver *drv, <span class="keyword">struct</span> uart_port *port)</span>;</span><br><span class="line"><span class="comment">//唤醒上层因串口端口写数据而堵塞的进程，通常在串口发送中断处理函数中调用该函数</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">uart_write_wakeup</span><span class="params">(<span class="keyword">struct</span> uart_port *port)</span>;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="2-3-1-3-uart-ops">2.3.1.3 uart_ops</span><a href="#2-3-1-3-uart-ops" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">uart_ops</span> &#123;</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="title function_">int</span> <span class="params">(*tx_empty)</span><span class="params">(<span class="keyword">struct</span> uart_port *)</span>;</span><br><span class="line">	<span class="type">void</span> (*set_mctrl)(<span class="keyword">struct</span> uart_port *, <span class="type">unsigned</span> <span class="type">int</span> mctrl);</span><br><span class="line">	<span class="type">unsigned</span> <span class="title function_">int</span> <span class="params">(*get_mctrl)</span><span class="params">(<span class="keyword">struct</span> uart_port *)</span>;</span><br><span class="line">	<span class="type">void</span> (*stop_tx)(<span class="keyword">struct</span> uart_port *);</span><br><span class="line">	<span class="type">void</span> (*start_tx)(<span class="keyword">struct</span> uart_port *);</span><br><span class="line">	<span class="type">void</span> (*throttle)(<span class="keyword">struct</span> uart_port *);</span><br><span class="line">	<span class="type">void</span> (*unthrottle)(<span class="keyword">struct</span> uart_port *);</span><br><span class="line">	<span class="type">void</span> (*send_xchar)(<span class="keyword">struct</span> uart_port *, <span class="type">char</span> ch);</span><br><span class="line">	<span class="type">void</span> (*stop_rx)(<span class="keyword">struct</span> uart_port *);</span><br><span class="line">	<span class="type">void</span> (*enable_ms)(<span class="keyword">struct</span> uart_port *);</span><br><span class="line">	<span class="type">void</span> (*break_ctl)(<span class="keyword">struct</span> uart_port *, <span class="type">int</span> ctl);</span><br><span class="line">	<span class="type">int</span> (*startup)(<span class="keyword">struct</span> uart_port *);</span><br><span class="line">	<span class="type">void</span> (*shutdown)(<span class="keyword">struct</span> uart_port *);</span><br><span class="line">	<span class="type">void</span> (*flush_buffer)(<span class="keyword">struct</span> uart_port *);</span><br><span class="line">	<span class="type">void</span> (*set_termios)(<span class="keyword">struct</span> uart_port *, <span class="keyword">struct</span> ktermios *new,<span class="keyword">struct</span> ktermios *old);</span><br><span class="line">	<span class="type">void</span> (*set_ldisc)(<span class="keyword">struct</span> uart_port *, <span class="keyword">struct</span> ktermios *);</span><br><span class="line">	<span class="type">void</span> (*pm)(<span class="keyword">struct</span> uart_port *, <span class="type">unsigned</span> <span class="type">int</span> state,<span class="type">unsigned</span> <span class="type">int</span> oldstate);</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	* Return a string describing the type of the port</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	<span class="type">const</span> <span class="type">char</span> *(*type)(<span class="keyword">struct</span> uart_port *);</span><br><span class="line"></span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	* Release IO and memory resources used by the port.</span></span><br><span class="line"><span class="comment">	* This includes iounmap if necessary.</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	<span class="type">void</span> (*release_port)(<span class="keyword">struct</span> uart_port *);</span><br><span class="line">	<span class="comment">/*</span></span><br><span class="line"><span class="comment">	* Request IO and memory resources used by the port.</span></span><br><span class="line"><span class="comment">	* This includes iomapping the port if necessary.</span></span><br><span class="line"><span class="comment">	*/</span></span><br><span class="line">	<span class="type">int</span> (*request_port)(<span class="keyword">struct</span> uart_port *);</span><br><span class="line">	<span class="type">void</span> (*config_port)(<span class="keyword">struct</span> uart_port *, <span class="type">int</span>);</span><br><span class="line">	<span class="type">int</span> (*verify_port)(<span class="keyword">struct</span> uart_port *, <span class="keyword">struct</span> serial_struct *);</span><br><span class="line">	<span class="type">int</span> (*ioctl)(<span class="keyword">struct</span> uart_port *, <span class="type">unsigned</span> <span class="type">int</span>, <span class="type">unsigned</span> <span class="type">long</span>);</span><br><span class="line">	<span class="meta">#<span class="keyword">ifdef</span> CONFIG_CONSOLE_POLL</span></span><br><span class="line">	<span class="type">int</span> (*poll_init)(<span class="keyword">struct</span> uart_port *);</span><br><span class="line">	<span class="type">void</span> (*poll_put_char)(<span class="keyword">struct</span> uart_port *, <span class="type">unsigned</span> <span class="type">char</span>);</span><br><span class="line">	<span class="type">int</span> (*poll_get_char)(<span class="keyword">struct</span> uart_port *);</span><br><span class="line">	<span class="meta">#<span class="keyword">endif</span></span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="2-3-1-4-console">2.3.1.4 console</span><a href="#2-3-1-4-console" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">console</span> &#123;</span></span><br><span class="line">      <span class="type">char</span> name[<span class="number">16</span>];</span><br><span class="line">      <span class="type">void</span>(*write)(<span class="keyword">struct</span> console *，<span class="type">const</span> <span class="type">char</span> *, unsigined);</span><br><span class="line">      <span class="type">int</span> (*read)(<span class="keyword">struct</span> console *, <span class="type">char</span> *, <span class="type">unsigned</span>);</span><br><span class="line">      <span class="class"><span class="keyword">struct</span> <span class="title">tty_driver</span> *(<span class="keyword">struct</span> <span class="title">console</span> *,<span class="title">int</span>*);</span></span><br><span class="line">      <span class="type">void</span> (*unblank)(<span class="type">void</span>);</span><br><span class="line">      <span class="type">int</span>  (*setup)(<span class="keyword">struct</span> console *, <span class="type">char</span> *);</span><br><span class="line">      <span class="type">int</span>  (*early_setup)(<span class="type">void</span>);</span><br><span class="line">      <span class="type">short</span>  flags;</span><br><span class="line">      <span class="type">short</span>  index; <span class="comment">/*用来指定该console使用哪一个uart port (对应的uart_port中的line),</span></span><br><span class="line"><span class="comment">      如果为-1,kernel会自动选择第一个uart port*/</span></span><br><span class="line">      <span class="type">int</span>   cflag;</span><br><span class="line">      <span class="type">void</span>  *data;</span><br><span class="line">      <span class="class"><span class="keyword">struct</span>   <span class="title">console</span> *<span class="title">next</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="2-3-1-5-bo-te-lu-xiang-guan">2.3.1.5 波特率相关</span><a href="#2-3-1-5-bo-te-lu-xiang-guan" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*功能：uart_get_baud_rate通过解码termios结构体来获取指定串口的波特率</span></span><br><span class="line"><span class="comment"> *参数：</span></span><br><span class="line"><span class="comment"> *     port：要获取波特率的串口端口</span></span><br><span class="line"><span class="comment"> *     termios:当前期望的termios配置(包括串口波特率)</span></span><br><span class="line"><span class="comment"> *     old:以前的termios配置，可以为NULL</span></span><br><span class="line"><span class="comment"> *     min:可以接受的最小波特率</span></span><br><span class="line"><span class="comment"> *     max:可以接受的最大波特率</span></span><br><span class="line"><span class="comment"> *     返回值：串口波特率</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">int</span> <span class="title function_">uart_get_baund_rate</span><span class="params">(<span class="keyword">struct</span> uart_port *port, <span class="keyword">struct</span> ktermios *termios</span></span><br><span class="line"><span class="params">                                 , <span class="keyword">struct</span> ktermios *old,<span class="type">unsigned</span> <span class="type">int</span> min, <span class="type">unsigned</span> <span class="type">int</span> max)</span>;</span><br><span class="line"><span class="comment">/*功能：uart_get_divisor 用于计算某一波特率的串口时钟分频数(串口波特率除数）</span></span><br><span class="line"><span class="comment"> *参数：</span></span><br><span class="line"><span class="comment"> *     port：要计算分频数的串口端口</span></span><br><span class="line"><span class="comment"> *     baud：期望的波特率</span></span><br><span class="line"><span class="comment"> *返回值：串口时钟分频数</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="type">unsigned</span> <span class="type">int</span> <span class="title function_">uart_get_divisor</span><span class="params">(<span class="keyword">struct</span> uart_port *port, <span class="type">unsigned</span> <span class="type">int</span> baund)</span>;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="2-3-1-6-xiang-chuan-kou-xie-kong-zhi-tai-xin-xi">2.3.1.6 向串口写控制台信息</span><a href="#2-3-1-6-xiang-chuan-kou-xie-kong-zhi-tai-xin-xi" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*功能：uart_console_write用于向串口端口写一控制台信息</span></span><br><span class="line"><span class="comment"> *参数：</span></span><br><span class="line"><span class="comment"> *     port：要写信息的串口端口</span></span><br><span class="line"><span class="comment"> *     s:要写的信息</span></span><br><span class="line"><span class="comment"> *     count：信息的大小</span></span><br><span class="line"><span class="comment"> *     putchar：用于向串口端口写字符的函数，该函数有两个参数：串口端口和要写的字符</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">Void <span class="title function_">uart_console_write</span><span class="params">(<span class="keyword">struct</span> uart_port *port,<span class="type">const</span> <span class="type">char</span> *s,</span></span><br><span class="line"><span class="params">     <span class="type">unsigned</span> <span class="type">int</span> count,viod(*<span class="built_in">putchar</span>)(<span class="keyword">struct</span> uart_port*, <span class="type">int</span>))</span>;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2><span id="2-4-uart-kong-zhi-qi-shi-li-imx-wei-li">2.4 UART控制器示例-imx为例</span><a href="#2-4-uart-kong-zhi-qi-shi-li-imx-wei-li" class="header-anchor">#</a></h2><p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/6.png" alt="image"></p>
+<p>位于<code>drivers\tty\serial\imx.c</code>,使用platform_driver框架，调用<code>uart_register_driver</code>注册到uart子系统。</p>
+<h3><span id="2-4-1-dts-miao-shu">2.4.1 dts描述</span><a href="#2-4-1-dts-miao-shu" class="header-anchor">#</a></h3><p>板子使用的是uart3,打开<code>imx6ul.dtsi</code>，可以看到默认status是disabled。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">uart3: serial@<span class="number">021</span>ec000 &#123;</span><br><span class="line">	compatible = <span class="string">&quot;fsl,imx6ul-uart&quot;</span>,</span><br><span class="line">	<span class="string">&quot;fsl,imx6q-uart&quot;</span>, <span class="string">&quot;fsl,imx21-uart&quot;</span>;</span><br><span class="line">	reg = &lt;<span class="number">0x021ec000</span> <span class="number">0x4000</span>&gt;;</span><br><span class="line">	interrupts = &lt;GIC_SPI <span class="number">28</span> IRQ_TYPE_LEVEL_HIGH&gt;;</span><br><span class="line">	clocks = &lt;&amp;clks IMX6UL_CLK_UART3_IPG&gt;,</span><br><span class="line">	&lt;&amp;clks IMX6UL_CLK_UART3_SERIAL&gt;;</span><br><span class="line">	clock-names = <span class="string">&quot;ipg&quot;</span>, <span class="string">&quot;per&quot;</span>;</span><br><span class="line">	dmas = &lt;&amp;sdma <span class="number">29</span> <span class="number">4</span> <span class="number">0</span>&gt;, &lt;&amp;sdma <span class="number">30</span> <span class="number">4</span> <span class="number">0</span>&gt;;</span><br><span class="line">	dma-names = <span class="string">&quot;rx&quot;</span>, <span class="string">&quot;tx&quot;</span>;</span><br><span class="line">	status = <span class="string">&quot;disabled&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>我们再外面引用它，打开<code>imx6ull-alientek-emmc.dts</code>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">pinctrl_uart3: uart3grp &#123;</span><br><span class="line">	fsl,pins = &lt;</span><br><span class="line">		MX6UL_PAD_UART3_TX_DATA__UART3_DCE_TX <span class="number">0X1b0b1</span></span><br><span class="line">		MX6UL_PAD_UART3_RX_DATA__UART3_DCE_RX <span class="number">0X1b0b1</span></span><br><span class="line">	&gt;;</span><br><span class="line">&#125;;</span><br><span class="line">&amp;uart3 &#123;</span><br><span class="line">	pinctrl-names = <span class="string">&quot;default&quot;</span>;</span><br><span class="line">	pinctrl<span class="number">-0</span> = &lt;&amp;pinctrl_uart3&gt;;</span><br><span class="line">	status = <span class="string">&quot;okay&quot;</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h3><span id="2-4-2-probe-chu-shi-hua">2.4.2 probe初始化</span><a href="#2-4-2-probe-chu-shi-hua" class="header-anchor">#</a></h3><p>当dts和驱动的compatible匹配，那么probe执行如下：</p>
+<p>初始化<code> uart_port</code>，然后将其添加到对应的 <code>uart_driver </code>中。</p>
+<ol>
+<li>解析dts, 设置中断号，io基地址后<code>ioremap</code>, 设置port属性。</li>
+</ol>
+<p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/7.png" alt="image"></p>
+<ol start="2">
+<li>设置port属性的ops</li>
+</ol>
+<p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/8.png" alt="image"></p>
+<ol start="3">
+<li>更具dts获取和设置时钟频率。</li>
+<li>注册中断</li>
+</ol>
+<p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/9.png" alt="image"></p>
+<ol start="5">
+<li><code>uart_add_one_port(&amp;imx_reg, &amp;sport-&gt;port);</code>添加端口到uart_driver。</li>
+</ol>
+<h3><span id="2-4-2-shou-ju-shou-fa-liu-cheng">2.4.2 收据收发流程</span><a href="#2-4-2-shou-ju-shou-fa-liu-cheng" class="header-anchor">#</a></h3><h4><span id="2-4-2-1-open-guo-cheng">2.4.2.1 open过程</span><a href="#2-4-2-1-open-guo-cheng" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//tty_io.c</span></span><br><span class="line"><span class="type">static</span> <span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">file_operations</span> <span class="title">tty_fops</span> =</span> &#123;</span><br><span class="line">	.read		= tty_read,</span><br><span class="line">	.write		= tty_write,</span><br><span class="line">	.open		= tty_open,</span><br><span class="line">	.release	= tty_release,</span><br><span class="line">     ······</span><br><span class="line">&#125;;<span class="comment">//open(&quot;/dev/tty&quot;);</span></span><br><span class="line"><span class="comment">//进入tty_open函数：</span></span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">tty_open</span><span class="params">(<span class="keyword">struct</span> inode *inode, <span class="keyword">struct</span> file *filp)</span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">tty_struct</span> *<span class="title">tty</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">tty_driver</span> *<span class="title">driver</span> =</span> <span class="literal">NULL</span>;</span><br><span class="line">    ......</span><br><span class="line">	<span class="keyword">if</span> (tty-&gt;ops-&gt;open)	<span class="comment">/*即uart_open*/</span></span><br><span class="line">		retval = tty-&gt;ops-&gt;open(tty, filp);<span class="comment">//</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">uart_open</span><span class="params">(<span class="keyword">struct</span> tty_struct *tty, <span class="keyword">struct</span> file *filp)</span> &#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">uart_driver</span> *<span class="title">drv</span> =</span> (<span class="keyword">struct</span> uart_driver *)tty-&gt;driver-&gt;driver_state;</span><br><span class="line">	<span class="type">int</span> retval;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">uart_state</span> *<span class="title">state</span> =</span> drv-&gt;state + line;</span><br><span class="line">	retval = uart_startup(tty, state, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">uart_startup</span><span class="params">(<span class="keyword">struct</span> tty_struct *tty, <span class="keyword">struct</span> uart_state *state, <span class="type">int</span> init_hw)</span> &#123;</span><br><span class="line">	retval = uart_port_startup(tty, state, init_hw);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">uart_port_startup</span><span class="params">(<span class="keyword">struct</span> tty_struct *tty, <span class="keyword">struct</span> uart_state *state, <span class="type">int</span> init_hw)</span> &#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">uart_port</span> *<span class="title">uport</span> =</span> state-&gt;uart_port;</span><br><span class="line">	<span class="keyword">if</span> (!state-&gt;xmit.buf) &#123;</span><br><span class="line">		page = get_zeroed_page(GFP_KERNEL);		<span class="comment">/*分配了一页内存*/</span></span><br><span class="line">		state-&gt;xmit.buf = (<span class="type">unsigned</span> <span class="type">char</span> *) page;	<span class="comment">/*串口底层发送缓冲区*/</span></span><br><span class="line">		uart_circ_clear(&amp;state-&gt;xmit);</span><br><span class="line">	&#125;</span><br><span class="line">	retval = uport-&gt;ops-&gt;startup(uport);		<span class="comment">/*即imx_startup*/</span></span><br><span class="line">	<span class="keyword">return</span> retval;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="type">static</span> <span class="type">int</span> <span class="title function_">imx_startup</span><span class="params">(<span class="keyword">struct</span> uart_port *port)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">imx_port</span> *<span class="title">sport</span> =</span> (<span class="keyword">struct</span> imx_port *)port;</span><br><span class="line">	<span class="type">int</span> retval, i;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">long</span> flags, temp;</span><br><span class="line">    .....</span><br><span class="line">	<span class="comment">/* Can we enable the DMA support? */</span></span><br><span class="line">	<span class="keyword">if</span> (is_imx6q_uart(sport) &amp;&amp; !uart_console(port)</span><br><span class="line">		&amp;&amp; !sport-&gt;dma_is_inited)</span><br><span class="line">		imx_uart_dma_init(sport);  <span class="comment">//配置发送消息时DMA搬运的目标地址，接收消息时DMA搬运的源地址</span></span><br><span class="line"> </span><br><span class="line">	<span class="keyword">if</span> (sport-&gt;dma_is_inited)</span><br><span class="line">		INIT_DELAYED_WORK(&amp;sport-&gt;tsk_dma_tx, dma_tx_work);<span class="comment">//定义了一个延后工作任务</span></span><br><span class="line">    <span class="comment">//DMA发送搬运，在串口发送数据会唤醒调度</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4><span id="2-4-2-2-fa-song-jie-shou-zong-liu-cheng">2.4.2.2 发送接收总流程</span><a href="#2-4-2-2-fa-song-jie-shou-zong-liu-cheng" class="header-anchor">#</a></h4><p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/10.png" alt="image"></p>
+<h4><span id="2-4-2-3-fa-song-write-guo-cheng">2.4.2.3 发送-write过程</span><a href="#2-4-2-3-fa-song-write-guo-cheng" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> 应用层调用write系统调用来写入数据</span><br><span class="line"><span class="number">2.</span> write系统调用会调用到tty_write函数，这个函数定义在driver/tty/tty_io.c文件中。</span><br><span class="line">    而在tty_write函数里面调用的是ld-&gt;ops-&gt;write函数，这个就是line discipline层的write函数。</span><br><span class="line"><span class="number">3.</span> line discipline层的write函数就是n_tty_write函数，这个函数定义在driver/tty/n_tty.c文件中。</span><br><span class="line">    n_tty_write函数会进一步调用到uart_write函数，这个函数是通过tty_operations结构体的指针来访问的。</span><br><span class="line"><span class="number">4.</span> uart_write函数会进一步调用到start_tx函数，这个函数也是通过tty_operations结构体的指针来访问的。</span><br><span class="line">    在i.MX6ULL平台上，这个函数对应的就是imx_start_tx函数。</span><br><span class="line"><span class="number">5.</span> 在imx_start_tx函数中，会通过设置UCR1寄存器的TXMPTYEN位来使能发送缓冲区空中断。</span><br><span class="line">    这个操作是通过调用writel(temp | UCR1_TXMPTYEN, sport-&gt;port.membase + UCR1)来完成的。</span><br><span class="line"><span class="number">6.</span> 当UART控制器的发送缓冲区空了之后，就会产生一个中断。这个中断会被内核的中断处理机制捕获，</span><br><span class="line">    并调用相应的中断处理程序来处理。</span><br><span class="line"><span class="number">7.</span> 在中断处理程序中，会从环形缓冲区中取出数据，并写入到UART控制器的发送缓冲区中。</span><br><span class="line">    然后UART控制器会自动将这些数据发送出去。</span><br></pre></td></tr></table></figure>
+
+<h5><span id="2-4-2-3-1-yong-hu-xie-shu-ju-liu-cheng">2.4.2.3.1 用户写数据流程</span><a href="#2-4-2-3-1-yong-hu-xie-shu-ju-liu-cheng" class="header-anchor">#</a></h5><p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/11.png" alt="image"></p>
+<p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/12.png" alt="image"></p>
+<p>在<code>tty_write</code>中通过<code>ld-&gt;ops-&gt;write</code>调用了线路规程的write函数，也就是调用了<code>tty_ldisc_N_TTY</code>的<code>ntty_write</code>函数。</p>
+<h5><span id="2-4-2-3-2-ying-jian-xie-shu-ju-liu-cheng">2.4.2.3.2 硬件写数据流程</span><a href="#2-4-2-3-2-ying-jian-xie-shu-ju-liu-cheng" class="header-anchor">#</a></h5><p><code>drivers\tty\serial\imx.c</code>的发送函数<code>imx_start_tx</code>和发送中断函数<code>imx_txint</code>。</p>
+<p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/13.png" alt="image"></p>
+<p>一开始时，发送buffer肯定为空，会立刻产生中断:</p>
+<p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/14.png" alt="image"></p>
+<h4><span id="2-4-2-4-jie-shou-read-guo-cheng">2.4.2.4 接收-read过程</span><a href="#2-4-2-4-jie-shou-read-guo-cheng" class="header-anchor">#</a></h4><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> UART硬件控制器的接收端接收到数据后，数据会被自动写入接收缓冲区。</span><br><span class="line">    如果接收缓冲区中的数据达到一定数量（例如，半满或者满），</span><br><span class="line">    或者在一定时间内没有新的数据到来，那么就会产生一个接收中断。</span><br><span class="line"><span class="number">2.</span> 执行中断服务程序。在i.MX6ULL平台上，对应imx_rxint函数，在drivers/tty/serial/imx.c文件中。</span><br><span class="line">    <span class="number">2.1</span> imx_rxint函数中，首先会得到数据，然后通知line_disciplie层来处理，</span><br><span class="line">    	调用line_disciplie层的n_tty_receive_buf函数。</span><br><span class="line">    <span class="number">2.2</span> n_tty_receive_buf调用n_tty_receive_buf_common__receive_buf。</span><br><span class="line">    	这个函数会根据TTY设备的配置来处理新的数据，例如进行字符映射、回显等操作。</span><br><span class="line">    	处理完之后，数据已经被存储在了环形缓冲区，并且也已经进行了必要的处理，接下来等待应用程序的read来读取。</span><br><span class="line"><span class="number">3.</span> 应用层的read来读取数据，调用tty层的tty_read函数，进一步调用line discipline层的read函数，</span><br><span class="line">    这个line discipline层的read函数就可以读取前面从底层传过来的数据了。  </span><br></pre></td></tr></table></figure>
+
+<h5><span id="2-4-2-4-1-zhong-duan-chan-sheng-shu-ju-liu-cheng">2.4.2.4.1 中断产生数据流程</span><a href="#2-4-2-4-1-zhong-duan-chan-sheng-shu-ju-liu-cheng" class="header-anchor">#</a></h5><p><code>imx_rxint</code><br>    &#x2F;&#x2F; 读取硬件状态<br>    &#x2F;&#x2F; 得到数据<br>    &#x2F;&#x2F; 在对应的<code>uart_port</code>中更新统计信息, 比如<code>sport-&gt;port.icount.rx++</code>;<br>    &#x2F;&#x2F; 把数据存入<code>tty_port</code>里的<code>tty_buffer</code><br>   <code> tty_insert_flip_char(port, rx, flg)</code><br>    &#x2F;&#x2F; 通知行规程来处理<br>   <code> tty_flip_buffer_push(port);</code><br>    <code>tty_schedule_flip(port);</code><br> <code>   queue_work(system_unbound_wq, &amp;buf-&gt;work);</code> &#x2F;&#x2F; 使用工作队列来处理<br>    &#x2F;&#x2F; 对应flush_to_ldisc函数  </p>
+<h5><span id="2-4-2-4-2-yong-hu-du-qu-shu-ju-liu-cheng">2.4.2.4.2 用户读取数据流程</span><a href="#2-4-2-4-2-yong-hu-du-qu-shu-ju-liu-cheng" class="header-anchor">#</a></h5><p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/15.png" alt="image"></p>
+<p>在<code>tty_read</code>中通过<code>ld-&gt;ops-&gt;read</code>调用了线路规程的read函数，也就是调用了<code>tty_ldisc_N_TTY</code>的<code>ntty_read</code>函数。</p>
+<h1><span id="3-uart-yong-hu-tai-kong-zhi-han-shu">3 UART用户态控制函数</span><a href="#3-uart-yong-hu-tai-kong-zhi-han-shu" class="header-anchor">#</a></h1><h2><span id="3-1-api-shuo-ming">3.1 API说明</span><a href="#3-1-api-shuo-ming" class="header-anchor">#</a></h2><table>
+<thead>
+<tr>
+<th>属性</th>
+<th align="left">说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>tcgetatrr</td>
+<td align="left">取属性（termios结构）</td>
+</tr>
+<tr>
+<td>tcsetarr</td>
+<td align="left">设置属性（termios结构）</td>
+</tr>
+<tr>
+<td>cfgetispeed</td>
+<td align="left">得到输入速度</td>
+</tr>
+<tr>
+<td>cfsetispeed</td>
+<td align="left">得到输出速度</td>
+</tr>
+<tr>
+<td>cfstospeed</td>
+<td align="left">设置输出速度</td>
+</tr>
+<tr>
+<td>tcdrain</td>
+<td align="left">等待所有输出都被传输</td>
+</tr>
+<tr>
+<td>tcflow</td>
+<td align="left">挂起传输或接收</td>
+</tr>
+<tr>
+<td>tcflush</td>
+<td align="left">刷请未决输出和&#x2F;或输入</td>
+</tr>
+<tr>
+<td>tcsendbreak</td>
+<td align="left">送BREAK字符</td>
+</tr>
+<tr>
+<td>tcgetpgrp</td>
+<td align="left">得到前台进程组ID</td>
+</tr>
+<tr>
+<td>Tcsetpgrp</td>
+<td align="left">设置前台进程组ID</td>
+</tr>
+</tbody></table>
+<h3><span id="3-1-1-she-zhi-can-shu">3.1.1 设置参数</span><a href="#3-1-1-she-zhi-can-shu" class="header-anchor">#</a></h3><ol>
+<li>获取属性， <code>tegetatrr(fd, &amp;oldtio);</code></li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">termious</span> <span class="title">newtio</span>, <span class="title">oldtio</span>;</span></span><br><span class="line">tegetattr(fd, &amp;oldtio);</span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>激活选项有<code>CLOCAL</code>和<code>CREAD</code>，用于本地连接和接收使用</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">newtio.cflag |= CLOCAL|CREAD;</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>设置波特率</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">newtio.c_cflag = B115200;</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>设置数据位，需使用掩码设置</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">newtio.c_cflag &amp;= ~CSIZE;</span><br><span class="line">Newtio.c_cflag |= CS8;</span><br></pre></td></tr></table></figure>
+
+<ol start="5">
+<li>设置停止位，通过激活<code>c_cflag</code>中的<code>CSTOP</code>实现。若停止位为1,则清除<code>CSTOPB</code>，若停止位为2，则激活<code>CSTOP</code></li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">newtio.c_cflag &amp;= ~CSTOPB; <span class="comment">/*停止位设置为1*/</span></span><br><span class="line">Newtio.c_cflag |= CSTOPB; <span class="comment">/*停止位设置为2 */</span></span><br></pre></td></tr></table></figure>
+
+<ol start="6">
+<li>设置流控</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">newtio.c_cfag |= CRTSCTS <span class="comment">/*开启硬件流控 */</span></span><br><span class="line">newtio.c_cfag |= (IXON | IXOFF | IXANY); <span class="comment">/*开启软件流控*/</span></span><br></pre></td></tr></table></figure>
+
+<ol start="7">
+<li>奇偶检验位设置，使用<code>c_cflag</code>和<code>c_ifag</code>.<br>7.1 设置奇校验</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">newtio.c_cflag |= PARENB;</span><br><span class="line">newtio.c_cflag |= PARODD;</span><br><span class="line">newtio.c_iflag |= (INPCK | ISTRIP);</span><br></pre></td></tr></table></figure>
+<p>   7.2 设置偶校验</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">newtio.c_iflag |= (INPCK | ISTRIP);</span><br><span class="line">newtio.c_cflag |= PARENB;</span><br><span class="line">newtio.c_cflag |= ~PARODD;</span><br></pre></td></tr></table></figure>
+
+<ol start="8">
+<li>设置最少字符和等待时间，对于接收字符和等待时间没有什么特别的要求，可设置为0：</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">newtio.c_cc[VTIME] = <span class="number">0</span>;</span><br><span class="line">newtio.c_cc[VMIN]  = <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
+
+<ol start="9">
+<li>处理要写入的引用对象<br><code>tcflush</code>函数刷清(抛弃）输入缓冲（终端程序已经接收到，但用户程序尚未读）或输出缓冲（用户程序已经写，但未发送）。</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">tcflash</span><span class="params">(<span class="type">int</span> filedes, <span class="type">int</span> quene)</span></span><br><span class="line">quene数应当是下列三个常数之一:</span><br><span class="line">  *TCIFLUSH 刷清输入队列</span><br><span class="line">  *TCOFLUSH 刷清输出队列</span><br><span class="line">  *TCIOFLUSH 刷清输入、输出队列</span><br><span class="line">例如：</span><br><span class="line"><span class="title function_">tcflush</span><span class="params">(fd, TCIFLUSH)</span>;</span><br></pre></td></tr></table></figure>
+
+<ol start="10">
+<li>激活配置，在完成配置后，需要激活配置使其生效。使用<code>tcsetattr()</code>函数：</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">tcsetarr</span><span class="params">(<span class="type">int</span> filedes, <span class="type">const</span> <span class="keyword">struct</span> termios *termptr)</span>;</span><br><span class="line">opt 指定在什么时候新的终端属性才起作用，</span><br><span class="line">   *TCSANOW:更改立即发生</span><br><span class="line">   *TCSADRAIN:发送了所有输出后更改才发生。若更改输出参数则应使用此选项</span><br><span class="line">   *TCSAFLUSH:发送了所有输出后更改才发生。更进一步，在更改发生时未读的</span><br><span class="line">                 所有输入数据都被删除（刷清）</span><br><span class="line">例如：tcsetatrr(fd, TCSANOW, &amp;newtio);</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-1-2-cao-zuo-liu-cheng">3.1.2 操作流程</span><a href="#3-1-2-cao-zuo-liu-cheng" class="header-anchor">#</a></h3><ol>
+<li>打开串口，例如<code>&quot;/dev/ttySLB0&quot;</code></li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">fd = open(<span class="string">&quot;/dev/ttySLB0&quot;</span>,O_RDWR | O_NOCTTY | O_NDELAY);</span><br><span class="line"><span class="comment">/*O_NOCTTY：是为了告诉Linux这个程序不会成为这个端口上的“控制终端”。</span></span><br><span class="line"><span class="comment">	如果不这样做的话，所有的输入，比如键盘上过来的Ctrl+C中止信号等等，会影响到你的进程。</span></span><br><span class="line"><span class="comment">O_NDELAY：这个标志则是告诉Linux这个程序并不关心DCD信号线的状态，</span></span><br><span class="line"><span class="comment">	也就是不管串口是否有数据到来，都是非阻塞的，程序继续执行。</span></span><br><span class="line"><span class="comment">*/</span></span><br></pre></td></tr></table></figure>
+
+<ol start="2">
+<li>恢复串口状态为阻塞状态，用于等待串口数据的读入，用fcntl函数：</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">fcntl(fd,F_SETFL,<span class="number">0</span>);  <span class="comment">//F_SETFL：设置文件flag为0，即默认，即阻塞状态</span></span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>接着测试打开的文件描述符是否应用一个终端设备，以进一步确认串口是否正确打开。</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">isatty(STDIN_FILENO);</span><br></pre></td></tr></table></figure>
+
+<ol start="4">
+<li>读写串口</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">串口的读写与普通文件一样，使用read，write函数</span><br><span class="line">read(fd, buf ,<span class="number">8</span>);</span><br><span class="line">write(fd,buff,<span class="number">8</span>);</span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-2-demo-ju-li">3.2 demo举例</span><a href="#3-2-demo-ju-li" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/types.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;sys/stat.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;fcntl.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;termios.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;string.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;unistd.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;log/log.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdlib.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> UART_DEVICE     <span class="string">&quot;/dev/ttySLB1&quot;</span></span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">temp</span> &#123;</span></span><br><span class="line">	<span class="type">float</span> temp_max1;</span><br><span class="line">	<span class="type">float</span> temp_max2;</span><br><span class="line">	<span class="type">float</span> temp_max3;</span><br><span class="line">	<span class="type">float</span> temp_min;</span><br><span class="line">	<span class="type">float</span> temp_mean;</span><br><span class="line">	<span class="type">float</span> temp_enviromem;</span><br><span class="line">	<span class="type">char</span> temp_col[<span class="number">1536</span>];</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">	<span class="type">int</span> count, i, fd;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">termios</span> <span class="title">oldtio</span>, <span class="title">newtio</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">temp</span> *<span class="title">temp</span>;</span></span><br><span class="line">	temp = (<span class="keyword">struct</span> temp *)<span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="keyword">struct</span> temp));</span><br><span class="line">	<span class="keyword">if</span> (!temp) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;malloc failed\n&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="type">char</span> cmd_buf1[] = &#123; <span class="number">0xAA</span>, <span class="number">0x01</span>, <span class="number">0x04</span>, <span class="number">0x00</span>, <span class="number">0x06</span>, <span class="number">0x10</span>, <span class="number">0x05</span>, <span class="number">0x00</span>, <span class="number">0xBB</span>&#125;;</span><br><span class="line">	<span class="type">char</span> cmd_buf2[] = &#123; <span class="number">0xAA</span>, <span class="number">0x01</span>, <span class="number">0x04</span>, <span class="number">0x00</span>, <span class="number">0x00</span>, <span class="number">0xA0</span>, <span class="number">0x00</span>, <span class="number">0x03</span>, <span class="number">0xBB</span>&#125;;</span><br><span class="line">	<span class="type">char</span> cmd_buf3[] = &#123; <span class="number">0xAA</span>, <span class="number">0x01</span>, <span class="number">0x04</span>, <span class="number">0x00</span>, <span class="number">0x03</span>, <span class="number">0x10</span>, <span class="number">0x01</span>, <span class="number">0x00</span>, <span class="number">0xBB</span>&#125;;</span><br><span class="line">	<span class="type">char</span> read_buf[<span class="number">2000</span>];</span><br><span class="line"></span><br><span class="line">	fd = open(UART_DEVICE, O_RDWR | O_NOCTTY);</span><br><span class="line">	<span class="keyword">if</span> (fd &lt; <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;Open %s failed\n&quot;</span>, UART_DEVICE);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125; </span><br><span class="line">	tcgetattr(fd, &amp;oldtio);<span class="comment">//获取当前操作模式参数</span></span><br><span class="line">	<span class="built_in">memset</span>(&amp;newtio, <span class="number">0</span>, <span class="keyword">sizeof</span>(newtio));</span><br><span class="line">	<span class="comment">//波特率=230400 数据位=8 使能数据接收</span></span><br><span class="line">	newtio.c_cflag = B230400 | CS8 | CLOCAL | CREAD | CSTOPB;</span><br><span class="line">	newtio.c_iflag = IGNPAR;</span><br><span class="line">	tcflush(fd, TCIFLUSH);<span class="comment">//清空输入缓冲区和输出缓冲区</span></span><br><span class="line">	tcsetattr(fd, TCSANOW, &amp;newtio);<span class="comment">//设置新的操作参数</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">//printf(&quot;input: %s, len = %d\n&quot;, cmd_buf, strlen(cmd_buf));</span></span><br><span class="line">	<span class="comment">//------------向uart发送数据-------------------</span></span><br><span class="line">	<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">9</span>; i++)</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;%#X &quot;</span>, cmd_buf1[i]);</span><br><span class="line"></span><br><span class="line">	count = write(fd, cmd_buf1, <span class="number">9</span>);</span><br><span class="line">	<span class="keyword">if</span> (count != <span class="number">9</span>) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;send failed\n&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	usleep(<span class="number">500000</span>);</span><br><span class="line">	<span class="built_in">memset</span>(read_buf, <span class="number">0</span>, <span class="keyword">sizeof</span>(read_buf));</span><br><span class="line">	count = read(fd, read_buf, <span class="keyword">sizeof</span>(read_buf));</span><br><span class="line">	<span class="keyword">if</span> (count &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; count; i++);</span><br><span class="line">		temp-&gt;temp_max1 = read_buf[<span class="number">7</span>] &lt;&lt; <span class="number">8</span> | read_buf[<span class="number">6</span>];</span><br><span class="line">		temp-&gt;temp_max2 = read_buf[<span class="number">9</span>] &lt;&lt; <span class="number">8</span> | read_buf[<span class="number">8</span>];</span><br><span class="line">		temp-&gt;temp_max3 = read_buf[<span class="number">11</span>] &lt;&lt; <span class="number">8</span> | read_buf[<span class="number">10</span>];</span><br><span class="line">		temp-&gt;temp_min  = read_buf[<span class="number">13</span>] &lt;&lt; <span class="number">8</span> | read_buf[<span class="number">12</span>];</span><br><span class="line">		temp-&gt;temp_mean = read_buf[<span class="number">15</span>] &lt;&lt; <span class="number">8</span> | read_buf[<span class="number">14</span>];</span><br><span class="line"></span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;temp-&gt;temp_max1 = %f\n&quot;</span>, temp-&gt;temp_max1 * <span class="number">0.01</span>);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;temp-&gt;temp_max2 = %f\n&quot;</span>, temp-&gt;temp_max2 * <span class="number">0.01</span>);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;temp-&gt;temp_max3 = %f\n&quot;</span>, temp-&gt;temp_max3 * <span class="number">0.01</span>);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;temp-&gt;temp_min  = %f\n&quot;</span>, temp-&gt;temp_min  * <span class="number">0.01</span>);</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;temp-&gt;temp_mean = %f\n&quot;</span>, temp-&gt;temp_mean * <span class="number">0.01</span>);</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;read temp failed\n&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	count = write(fd, cmd_buf3, <span class="number">9</span>);</span><br><span class="line">	<span class="keyword">if</span> (count != <span class="number">9</span>) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;send failed\n&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	usleep(<span class="number">365</span>);</span><br><span class="line">	<span class="built_in">memset</span>(read_buf, <span class="number">0</span>, <span class="keyword">sizeof</span>(read_buf));</span><br><span class="line">	count = read(fd, read_buf, <span class="keyword">sizeof</span>(read_buf));</span><br><span class="line">	<span class="keyword">if</span> (count &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; count; i++);</span><br><span class="line">		temp-&gt;temp_enviromem = read_buf[<span class="number">7</span>] &lt;&lt; <span class="number">8</span> | read_buf[<span class="number">6</span>];</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;temp-&gt;temp_enviromem = %f\n&quot;</span>, temp-&gt;temp_enviromem * <span class="number">0.01</span>);	</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;read enviromem failed\n&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	count = write(fd, cmd_buf2, <span class="number">9</span>);</span><br><span class="line">	<span class="keyword">if</span> (count != <span class="number">9</span>) &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;send failed\n&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	usleep(<span class="number">70000</span>);</span><br><span class="line">	<span class="built_in">memset</span>(read_buf, <span class="number">0</span>, <span class="keyword">sizeof</span>(read_buf));</span><br><span class="line">	<span class="built_in">memset</span>(temp-&gt;temp_col, <span class="number">0</span>, <span class="keyword">sizeof</span>(temp-&gt;temp_col));</span><br><span class="line">	count = read(fd, read_buf, <span class="keyword">sizeof</span>(read_buf));</span><br><span class="line">	<span class="built_in">printf</span>(<span class="string">&quot;count = %d\n&quot;</span>, count);</span><br><span class="line">	<span class="keyword">if</span> (count &gt; <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; count - <span class="number">7</span>; i++)</span><br><span class="line">		temp-&gt;temp_col[i] = read_buf[i+<span class="number">6</span>];</span><br><span class="line">		<span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; <span class="number">1536</span>; i++)</span><br><span class="line">		&#123;</span><br><span class="line">			<span class="keyword">if</span> (!(i%<span class="number">10</span>))</span><br><span class="line">				<span class="built_in">printf</span>(<span class="string">&quot;\n&quot;</span>);</span><br><span class="line">			<span class="built_in">printf</span>(<span class="string">&quot;%#X &quot;</span>, temp-&gt;temp_col[i]);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		<span class="built_in">printf</span>(<span class="string">&quot;read temp colour failed\n&quot;</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="built_in">free</span>(temp); </span><br><span class="line">	close(fd);</span><br><span class="line">	tcsetattr(fd, TCSANOW, &amp;oldtio); <span class="comment">//恢复原先的设置</span></span><br><span class="line">	<span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/16.png" alt="image"></p>
+<p><img src="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/17.png" alt="image"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/" data-id="cm14wn6by0000psuf9q4xb7am" data-title="字符设备驱动-UART子系统" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-RTC%E5%AD%90%E7%B3%BB%E7%BB%9F/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">字符设备驱动-RTC子系统</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">linux内存管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.36px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15.45px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.27px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19.09px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.82px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14.55px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15.45px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.91px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.73px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.64px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.36px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 15.45px;">通信协议</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/09/">September 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">August 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">July 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-UART子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-RTC%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-RTC子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-Framebuffer%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-Framebuffer子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-PWM子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-input%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-input子系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
