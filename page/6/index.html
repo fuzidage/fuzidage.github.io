@@ -760,9 +760,19 @@ news - network news subsystem（网络系统信息）
 </li>
 <li><a href="#1-2-wen-jian-zi-fu-cao-zuo-ming-ling">1.2 文件字符操作命令</a><ul>
 <li><a href="#1-2-1-xargs">1.2.1 xargs</a></li>
-<li><a href="#1-2-2-grep">1.2.2 grep</a></li>
+<li><a href="#1-2-1-find">1.2.1 find</a><ul>
+<li><a href="#tong-pei-fu">通配符</a></li>
+<li><a href="#ban-sui-zhi-xing-ren-wu">伴随执行任务</a></li>
 </ul>
 </li>
+<li><a href="#1-2-2-grep">1.2.2 grep</a><ul>
+<li><a href="#uniq-shan-chu-chong-fu-xing">uniq 删除重复行</a></li>
+<li><a href="#tr-zi-fu-chuan-ti-huan">tr字符串替换</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#1-2-awk-shu-ju-liu-chu-li">1.2 awk数据流处理</a></li>
 <li><a href="#1-3-wang-luo-ming-ling">1.3 网络命令</a></li>
 </ul>
 </li>
@@ -770,12 +780,18 @@ news - network news subsystem（网络系统信息）
 <li><a href="#3-1-jie-shi-qi">3.1 解释器</a></li>
 <li><a href="#3-2-duan-dai-ma-zhu-shi">3.2 段代码注释</a></li>
 <li><a href="#3-3-read-ming-ling">3.3 read命令</a></li>
-<li><a href="#3-4-test-ming-ling">3.4 test命令</a></li>
+<li><a href="#3-4-test-ming-ling">3.4 test命令</a><ul>
+<li><a href="#3-4-1-wen-jian-ce-shi">3.4.1 文件测试</a></li>
+<li><a href="#3-4-2-bi-jiao-ce-shi">3.4.2 比较测试</a></li>
+<li><a href="#3-4-3-duo-chong-tiao-jian-ce-shi">3.4.3 多重条件测试</a></li>
+</ul>
+</li>
 <li><a href="#3-5-ming-ling-xing-can-shu">3.5 命令行参数</a></li>
 <li><a href="#3-6-tiao-jian-yu-ju">3.6 条件语句</a></li>
 <li><a href="#3-7-case-yu-ju">3.7 case语句</a></li>
 <li><a href="#3-8-han-shu">3.8 函数</a></li>
 <li><a href="#3-9-xun-huan-yu-ju">3.9 循环语句</a></li>
+<li><a href="#3-9-shu-zu">3.9 数组</a></li>
 <li><a href="#3-10-typeset-huo-zhe-declare">3.10 typeset或者declare</a></li>
 <li><a href="#3-11-unset">3.11 unset</a></li>
 <li><a href="#3-12-readonly">3.12 readonly</a></li>
@@ -784,10 +800,15 @@ news - network news subsystem（网络系统信息）
 <li><a href="#3-13-2-qu-diao-yi-xing-zhong-duo-yu-de-kong-ge">3.13.2 去掉一行中多余的空格</a></li>
 </ul>
 </li>
+<li><a href="#3-14-shell-jiao-ben-ru-he-cha-kan-jiang-yao-zhi-xing-de-ming-ling">3.14 shell脚本如何查看将要执行的命令</a></li>
+<li><a href="#3-15-zi-fu-chuan-zhong-ti-huan-yi-ge-zi-fu">3.15 字符串中替换一个字符</a></li>
+<li><a href="#3-16-suan-shu-yun-suan-fu">3.16 算数运算符</a></li>
+<li><a href="#3-17-chong-ding-xiang">3.17 重定向</a><ul>
+<li><a href="#3-17-1-bao-cun-log-dao-wen-ben">3.17.1 保存log到文本</a></li>
 </ul>
 </li>
-<li><a href="#4-shell-jiao-ben-ru-he-cha-kan-jiang-yao-zhi-xing-de-ming-ling">4 shell脚本如何查看将要执行的命令</a></li>
-<li><a href="#5-bao-cun-log-dao-wen-ben">5 保存log到文本</a></li>
+</ul>
+</li>
 </ul>
 <!-- tocstop -->
 
@@ -821,6 +842,15 @@ news - network news subsystem（网络系统信息）
 <h3><span id="1-1-4-df">1.1.4 df</span><a href="#1-1-4-df" class="header-anchor">#</a></h3><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/13.png" alt="image"></p>
 <h2><span id="1-2-wen-jian-zi-fu-cao-zuo-ming-ling">1.2 文件字符操作命令</span><a href="#1-2-wen-jian-zi-fu-cao-zuo-ming-ling" class="header-anchor">#</a></h2><h3><span id="1-2-1-xargs">1.2.1 xargs</span><a href="#1-2-1-xargs" class="header-anchor">#</a></h3><p><code>find -name *.sh |xargs grep -rn &quot;build_all&quot;</code></p>
 <p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/14.png" alt="image"></p>
+<h3><span id="1-2-1-find">1.2.1 find</span><a href="#1-2-1-find" class="header-anchor">#</a></h3><p>按时间搜索：<br>-atime 访问时间 (单位是天，分钟单位则是-amin，以下类似）<br>-mtime 修改时间 （内容被修改）<br>-ctime 变化时间 （元数据或权限变化）</p>
+<p>最近7天被访问过的所有文件：<br><code>find . -atime 7 -type f -print</code><br>最近7天被修改的文件：<br><code>find . -maxdepth 2 -mtime 7 -type f</code></p>
+<h4><span id="tong-pei-fu">通配符</span><a href="#tong-pei-fu" class="header-anchor">#</a></h4><p>一版find命令还会伴随通配符使用：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">*：匹配任意多个字符</span><br><span class="line">?：匹配任意一个字符</span><br><span class="line">[...]：匹配中括号内出现的任意一个字符</span><br><span class="line">[!...]：不匹配中括号内出现的任意一个字符</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">$ find . -name *.txt</span><br><span class="line">$ find -name *.[ch]</span><br><span class="line">$ find -name *fsi*.?  <span class="comment">#查找包含fsi字符，同时又有.c或者.h等单个字符后缀的文件</span></span><br><span class="line">./i2c/busses/i2c-fsi.c</span><br><span class="line">./spi/spi-fsi.c</span><br><span class="line">./input/joystick/fsia6b.c</span><br><span class="line">./fsi/fsi-sbefifo.c</span><br><span class="line">./fsi/fsi-master-ast-cf.c</span><br><span class="line">./fsi/fsi-master-aspeed.c</span><br><span class="line">./fsi/fsi-master.h</span><br><span class="line">./fsi/fsi-occ.c</span><br><span class="line">./fsi/fsi-master-hub.c</span><br><span class="line">./fsi/fsi-master-gpio.c</span><br><span class="line">./fsi/fsi-core.c</span><br><span class="line">./fsi/fsi-scom.c</span><br><span class="line">./fsi/cf-fsi-fw.h</span><br></pre></td></tr></table></figure>
+
+<h4><span id="ban-sui-zhi-xing-ren-wu">伴随执行任务</span><a href="#ban-sui-zhi-xing-ren-wu" class="header-anchor">#</a></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 找到后执行删除</span></span><br><span class="line">find . -name <span class="string">&quot;*.txt&quot;</span> -<span class="built_in">exec</span> <span class="built_in">rm</span> &#123;&#125; \;</span><br></pre></td></tr></table></figure>
+
 <h3><span id="1-2-2-grep">1.2.2 grep</span><a href="#1-2-2-grep" class="header-anchor">#</a></h3><p><code>find /path/to/directory -type f -name &quot;*.txt&quot; | grep &quot;keyword&quot;</code></p>
 <p>-w 全词匹配。<br>-v 反向搜索<br>-i 不区分大小写</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">$匹配以字符串结尾的行</span><br><span class="line">^ 匹配以字符串开头的行</span><br><span class="line"></span><br><span class="line">找出空行 grep <span class="string">&quot;^$&quot;</span> test.txt -n</span><br><span class="line">找出unix开头的行grep <span class="string">&quot;^unix&quot;</span> geekfile.txt</span><br><span class="line">找出.结尾的行 grep <span class="string">&quot;\.$&quot;</span> test.txt -n -o</span><br><span class="line">找出os.结尾的行，grep <span class="string">&quot;os.$&quot;</span> geekfile.txt</span><br></pre></td></tr></table></figure>
@@ -833,6 +863,7 @@ news - network news subsystem（网络系统信息）
 <p>下面一个脚本用grep -v排除掉不需要的行，也就是删除包含指定字符的行从一个文件。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/bash</span></span><br><span class="line"><span class="comment"># 定义要删除的特定字符</span></span><br><span class="line">pattern=<span class="string">&quot;特定字符&quot;</span></span><br><span class="line"><span class="comment"># 定义要处理的文件名</span></span><br><span class="line">filename=<span class="string">&quot;文件名&quot;</span></span><br><span class="line"><span class="comment"># 使用grep命令找到含有特定字符的行，并将结果输出到一个临时文件中</span></span><br><span class="line">grep -v <span class="string">&quot;<span class="variable">$pattern</span>&quot;</span> <span class="string">&quot;<span class="variable">$filename</span>&quot;</span> &gt; temp.txt</span><br><span class="line"><span class="comment"># 将临时文件的内容复制回原始文件</span></span><br><span class="line"><span class="built_in">cat</span> temp.txt &gt; <span class="string">&quot;<span class="variable">$filename</span>&quot;</span></span><br><span class="line"><span class="comment"># 删除临时文件</span></span><br><span class="line"><span class="built_in">rm</span> temp.txt</span><br></pre></td></tr></table></figure>
 
+<h4><span id="uniq-shan-chu-chong-fu-xing">uniq 删除重复行</span><a href="#uniq-shan-chu-chong-fu-xing" class="header-anchor">#</a></h4><h4><span id="tr-zi-fu-chuan-ti-huan">tr字符串替换</span><a href="#tr-zi-fu-chuan-ti-huan" class="header-anchor">#</a></h4><h2><span id="1-2-awk-shu-ju-liu-chu-li">1.2 awk数据流处理</span><a href="#1-2-awk-shu-ju-liu-chu-li" class="header-anchor">#</a></h2><p>常用的就是提取文件中的列字段，比如提取file中的第二个和第三个字段。<br><code>awk &#39;&#123;print $2, $3&#125;&#39; file</code></p>
 <h2><span id="1-3-wang-luo-ming-ling">1.3 网络命令</span><a href="#1-3-wang-luo-ming-ling" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ifconfig eth0 up/down</span><br><span class="line">udhcpc -i eth0 //通过路由器分配 IP 地址</span><br><span class="line">ifconfig eth0 192.168.1.251 netmask 255.255.255.0 //设置 IP 地址和子网掩码</span><br><span class="line">route add default gw 192.168.1.1 //添加默认网关</span><br></pre></td></tr></table></figure>
 
 <h1><span id="3-shell-jiao-ben-ming-ling">3 shell脚本命令</span><a href="#3-shell-jiao-ben-ming-ling" class="header-anchor">#</a></h1><h2><span id="3-1-jie-shi-qi">3.1 解释器</span><a href="#3-1-jie-shi-qi" class="header-anchor">#</a></h2><ol>
@@ -851,6 +882,12 @@ news - network news subsystem（网络系统信息）
 <p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/21.png" alt="image"></p>
 <p>中括号也能表示测试，里面只能用&#x3D;&#x3D;或!&#x3D;。</p>
 <p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/22.png" alt="image"></p>
+<h3><span id="3-4-1-wen-jian-ce-shi">3.4.1 文件测试</span><a href="#3-4-1-wen-jian-ce-shi" class="header-anchor">#</a></h3><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/22-1.png" alt="image-20240921213503247"></p>
+<h3><span id="3-4-2-bi-jiao-ce-shi">3.4.2 比较测试</span><a href="#3-4-2-bi-jiao-ce-shi" class="header-anchor">#</a></h3><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/22-2.png" alt="image-20240921213551593"></p>
+<h3><span id="3-4-3-duo-chong-tiao-jian-ce-shi">3.4.3 多重条件测试</span><a href="#3-4-3-duo-chong-tiao-jian-ce-shi" class="header-anchor">#</a></h3><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/22-3.png" alt="image"></p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/22-4.png" alt="image"></p>
+<p>可以看到第一和第三条test都成立：</p>
+<p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/22-5.png" alt="image"></p>
 <h2><span id="3-5-ming-ling-xing-can-shu">3.5 命令行参数</span><a href="#3-5-ming-ling-xing-can-shu" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$0</span>, <span class="variable">$1</span>, <span class="variable">$2</span>, <span class="variable">$3</span>...</span><br><span class="line"><span class="variable">$0</span>表示脚本文件名</span><br><span class="line"><span class="variable">$1</span>表示第一个参数</span><br><span class="line"><span class="variable">$n</span>表示第n个参数</span><br><span class="line"><span class="variable">$#</span>表示一共有多少个命令行参数</span><br><span class="line"><span class="variable">$@</span>表示所有的命令行参数集合，<span class="variable">$0</span> <span class="variable">$1</span> <span class="variable">$2</span> ... <span class="variable">$n</span></span><br><span class="line">$*表示等价<span class="variable">$@</span></span><br><span class="line">$?表示上一条命令是否返回成功，成功为0,错误非0</span><br><span class="line">$$表示当前脚本的进程号</span><br></pre></td></tr></table></figure>
 
 <p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/23.png" alt="image"></p>
@@ -862,6 +899,9 @@ news - network news subsystem（网络系统信息）
 <h2><span id="3-9-xun-huan-yu-ju">3.9 循环语句</span><a href="#3-9-xun-huan-yu-ju" class="header-anchor">#</a></h2><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/29.png" alt="image"></p>
 <p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/30.png" alt="image"></p>
 <p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/31.png" alt="image"></p>
+<h2><span id="3-9-shu-zu">3.9 数组</span><a href="#3-9-shu-zu" class="header-anchor">#</a></h2><p>用括号来表示数组，数组元素用“空格”符号分割开：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">array_name=(value0 value1 value2 value3)</span><br><span class="line">array_name=(</span><br><span class="line">value0</span><br><span class="line">value1</span><br><span class="line">value2</span><br><span class="line">value3</span><br><span class="line">)</span><br><span class="line"><span class="comment">#还可以每个元素进行定义，可以不使用连续的下标，而且下标的范围没有限制。</span></span><br><span class="line">array_name[0]=value0</span><br><span class="line">array_name[1]=value1</span><br><span class="line">array_name[2]=value2</span><br><span class="line"></span><br><span class="line"><span class="comment">#读取数组</span></span><br><span class="line">val=<span class="variable">$&#123;array_name[2]&#125;</span></span><br><span class="line">all=<span class="variable">$&#123;array_name[*]&#125;</span></span><br><span class="line">all2=<span class="variable">$&#123;array_name[@]&#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 取得数组元素的个数</span></span><br><span class="line">length=<span class="variable">$&#123;#array_name[@]&#125;</span></span><br><span class="line"><span class="comment"># 或者</span></span><br><span class="line">length=<span class="variable">$&#123;#array_name[*]&#125;</span></span><br><span class="line"><span class="comment"># 取得数组单个元素的长度</span></span><br><span class="line">lengthn=<span class="variable">$&#123;#array_name[n]&#125;</span></span><br></pre></td></tr></table></figure>
+
 <h2><span id="3-10-typeset-huo-zhe-declare">3.10 typeset或者declare</span><a href="#3-10-typeset-huo-zhe-declare" class="header-anchor">#</a></h2><p>sh脚本默认所有变量都是字符串，比如val&#x3D;1，也表示val是一个字符串“1”。那么需要如何声明一个变量类型，用typeset或者declare。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">typeset</span> -i data=1</span><br></pre></td></tr></table></figure>
 
@@ -871,9 +911,14 @@ news - network news subsystem（网络系统信息）
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">find /path/to/dir：找到指定目录/path/to/dir下的所有文件。</span><br><span class="line">-<span class="built_in">type</span> f：仅查找文件。</span><br><span class="line">-name <span class="string">&quot;*.txt&quot;</span>：限制文件名以.txt结尾。</span><br><span class="line">-<span class="built_in">exec</span>：对找到的每个文件执行后面的命令。</span><br><span class="line">sed -i：使用sed进行替换，-i表示直接修改文件内容。</span><br><span class="line"><span class="string">&#x27;s/oldstring/newstring/g&#x27;</span>：sed的替换表达式，g表示全局替换。</span><br><span class="line">&#123;&#125;：表示find找到的文件名。</span><br><span class="line">+：结束-<span class="built_in">exec</span>命令，批量处理匹配到的文件。</span><br></pre></td></tr></table></figure>
 
 <h3><span id="3-13-2-qu-diao-yi-xing-zhong-duo-yu-de-kong-ge">3.13.2 去掉一行中多余的空格</span><a href="#3-13-2-qu-diao-yi-xing-zhong-duo-yu-de-kong-ge" class="header-anchor">#</a></h3><p><code>sed -i &#39;s/[[:space:]]\+/ /g&#39; array.sh</code><br><code>s/[[:space:]]\+/ /g</code> 是替换命令，它会将一个或多个空白字符（包括空格、制表符等）替换为单个空格.</p>
-<h1><span id="4-shell-jiao-ben-ru-he-cha-kan-jiang-yao-zhi-xing-de-ming-ling">4 shell脚本如何查看将要执行的命令</span><a href="#4-shell-jiao-ben-ru-he-cha-kan-jiang-yao-zhi-xing-de-ming-ling" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">set</span> -x</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Hello, World!&quot;</span></span><br></pre></td></tr></table></figure>
+<h2><span id="3-14-shell-jiao-ben-ru-he-cha-kan-jiang-yao-zhi-xing-de-ming-ling">3.14 shell脚本如何查看将要执行的命令</span><a href="#3-14-shell-jiao-ben-ru-he-cha-kan-jiang-yao-zhi-xing-de-ming-ling" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#!/bin/sh</span></span><br><span class="line"><span class="built_in">set</span> -x</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;Hello, World!&quot;</span></span><br></pre></td></tr></table></figure>
 
-<h1><span id="5-bao-cun-log-dao-wen-ben">5 保存log到文本</span><a href="#5-bao-cun-log-dao-wen-ben" class="header-anchor">#</a></h1><p><code>make all &gt; build_osdrv.log 2&gt;&amp;1</code></p>
+<h2><span id="3-15-zi-fu-chuan-zhong-ti-huan-yi-ge-zi-fu">3.15 字符串中替换一个字符</span><a href="#3-15-zi-fu-chuan-zhong-ti-huan-yi-ge-zi-fu" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">string=<span class="string">&quot;123123&quot;</span></span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$&#123;string/3/0&#125;</span>			<span class="comment">#用0替换第一个遇见的3</span></span><br><span class="line"><span class="built_in">echo</span> <span class="variable">$&#123;string//3/0&#125;</span>			<span class="comment">#用0替换串中所有3</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-16-suan-shu-yun-suan-fu">3.16 算数运算符</span><a href="#3-16-suan-shu-yun-suan-fu" class="header-anchor">#</a></h2><p><img src="/2024/05/26/linux%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E9%9B%86%E5%90%88/32.png" alt="image"></p>
+<h2><span id="3-17-chong-ding-xiang">3.17 重定向</span><a href="#3-17-chong-ding-xiang" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="variable">$who</span></span><br><span class="line">weiyong.luo pts/1130     2024-09-21 12:12 (xxx.xxx.xxx.xxx)</span><br><span class="line">shawn.wu pts/1036     2024-09-11 17:48 (xxx.xxx.xxx.xxx)</span><br><span class="line">weiyong.luo pts/1133     2024-09-21 12:12 </span><br><span class="line">robin.lee pts/1134     2024-09-21 15:23 </span><br><span class="line">chengzhi.lian pts/1135     2024-09-21 09:02</span><br><span class="line">robin.lee pts/1166     2024-09-20 18:15 </span><br><span class="line"></span><br><span class="line"><span class="built_in">who</span> &gt;<span class="built_in">users</span> <span class="comment">##输出重定向到users文件</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#再看输入重定向</span></span><br><span class="line"><span class="comment">#从文件获取输入信息给命令。</span></span><br><span class="line">$ <span class="built_in">wc</span> -l &lt; <span class="built_in">users</span>  <span class="comment">#统计users文件的行数</span></span><br><span class="line">12</span><br></pre></td></tr></table></figure>
+
+<h3><span id="3-17-1-bao-cun-log-dao-wen-ben">3.17.1 保存log到文本</span><a href="#3-17-1-bao-cun-log-dao-wen-ben" class="header-anchor">#</a></h3><p><code>make all &gt; build_osdrv.log 2&gt;&amp;1</code></p>
 
       
     </div>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>windows10搭建Linux子系统WSL2及winnfsd服务 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 安装WSL2子系统 1.1 下载安装 1.2 开启依赖 1.3 启动WSL Ubuntu 1.3.1 查看版本为WSL2   1.4 导出Ubuntu到D盘 1.5 wsl2与windows相互访问 1.5.1 wsl2访问windows 1.5.2 windows访问wsl2   1.6 vhdx虚拟磁盘瘦身 1.6.1 diskpart   1.7 连接USB设备 1.8 美化终">
+<meta property="og:type" content="article">
+<meta property="og:title" content="windows10搭建Linux子系统WSL2及winnfsd服务">
+<meta property="og:url" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 安装WSL2子系统 1.1 下载安装 1.2 开启依赖 1.3 启动WSL Ubuntu 1.3.1 查看版本为WSL2   1.4 导出Ubuntu到D盘 1.5 wsl2与windows相互访问 1.5.1 wsl2访问windows 1.5.2 windows访问wsl2   1.6 vhdx虚拟磁盘瘦身 1.6.1 diskpart   1.7 连接USB设备 1.8 美化终">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/1.png">
+<meta property="og:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/2.png">
+<meta property="og:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/3.png">
+<meta property="og:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/4.png">
+<meta property="og:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/5.png">
+<meta property="og:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/6.png">
+<meta property="og:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/7.png">
+<meta property="og:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/8.png">
+<meta property="og:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/9.png">
+<meta property="og:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/10.png">
+<meta property="og:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/11.png">
+<meta property="og:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/12.png">
+<meta property="og:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/13.png">
+<meta property="og:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/14.png">
+<meta property="article:published_time" content="2024-03-31T15:10:00.000Z">
+<meta property="article:modified_time" content="2024-09-21T14:04:35.462Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="linux嵌入式环境搭建">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-windows10搭建Linux子系统WSL2及winnfsd服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/" class="article-date">
+  <time class="dt-published" datetime="2024-03-31T15:10:00.000Z" itemprop="datePublished">2024-03-31</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      windows10搭建Linux子系统WSL2及winnfsd服务
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-an-zhuang-wsl2-zi-xi-tong">1 安装WSL2子系统</a><ul>
+<li><a href="#1-1-xia-zai-an-zhuang">1.1 下载安装</a></li>
+<li><a href="#1-2-kai-qi-yi-lai">1.2 开启依赖</a></li>
+<li><a href="#1-3-qi-dong-wsl-ubuntu">1.3 启动WSL Ubuntu</a><ul>
+<li><a href="#1-3-1-cha-kan-ban-ben-wei-wsl2">1.3.1 查看版本为WSL2</a></li>
+</ul>
+</li>
+<li><a href="#1-4-dao-chu-ubuntu-dao-d-pan">1.4 导出Ubuntu到D盘</a></li>
+<li><a href="#1-5-wsl2-yu-windows-xiang-hu-fang-wen">1.5 wsl2与windows相互访问</a><ul>
+<li><a href="#1-5-1-wsl2-fang-wen-windows">1.5.1 wsl2访问windows</a></li>
+<li><a href="#1-5-2-windows-fang-wen-wsl2">1.5.2 windows访问wsl2</a></li>
+</ul>
+</li>
+<li><a href="#1-6-vhdx-xu-ni-ci-pan-shou-shen">1.6 vhdx虚拟磁盘瘦身</a><ul>
+<li><a href="#1-6-1-diskpart">1.6.1 diskpart</a></li>
+</ul>
+</li>
+<li><a href="#1-7-lian-jie-usb-she-bei">1.7 连接USB设备</a></li>
+<li><a href="#1-8-mei-hua-zhong-duan">1.8 美化终端</a><ul>
+<li><a href="#1-8-1-windows-terminal">1.8.1 windows terminal</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-winnfsd-windows-da-jian-nfs-fu-wu">2 winnfsd-windows搭建nfs服务</a><ul>
+<li><a href="#2-1-xia-zai-yun-xing-winnfsd">2.1 下载运行winnfsd</a></li>
+<li><a href="#2-2-pei-zhi-windows-wang-qia-he-kai-fa-ban-hu-tong">2.2 配置Windows网卡和开发板互通</a></li>
+<li><a href="#2-3-gua-zai-windows-mu-lu-dao-ban-zi">2.3 挂载windows目录到板子</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-an-zhuang-wsl2-zi-xi-tong">1 安装WSL2子系统</span><a href="#1-an-zhuang-wsl2-zi-xi-tong" class="header-anchor">#</a></h1><h2><span id="1-1-xia-zai-an-zhuang">1.1 下载安装</span><a href="#1-1-xia-zai-an-zhuang" class="header-anchor">#</a></h2><p>进入<code>windows Store</code>，搜索Ubuntu，下载：<br><img src="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/1.png" alt="image"></p>
+<h2><span id="1-2-kai-qi-yi-lai">1.2 开启依赖</span><a href="#1-2-kai-qi-yi-lai" class="header-anchor">#</a></h2><p>右键windows左下角-&gt;应用和功能-&gt;相关设置-程序和功能-&gt;启用或关闭windows功能。勾选适用于Linux的windows子系统和虚拟机平台(<code>WSL2</code>需要)选项：<br><img src="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/2.png" alt="image"></p>
+<p>也可以直接在powershell中输入如下两条指令开启:</p>
+<figure class="highlight basic"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart</span><br><span class="line">dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart</span><br></pre></td></tr></table></figure>
+
+<h2><span id="1-3-qi-dong-wsl-ubuntu">1.3 启动WSL Ubuntu</span><a href="#1-3-qi-dong-wsl-ubuntu" class="header-anchor">#</a></h2><p>wsl是windows控制Ubuntu镜像的工具。</p>
+<h3><span id="1-3-1-cha-kan-ban-ben-wei-wsl2">1.3.1 查看版本为WSL2</span><a href="#1-3-1-cha-kan-ban-ben-wei-wsl2" class="header-anchor">#</a></h3><p>安装完成后，启动<code>Ubuntu</code>，会提示创建用户。在powerShell中输入:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl -l --all -v</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/3.png" alt="image"></p>
+<p>可以看到版本为<code>wsl2</code>。如果不是wsl2,请按照下面方式升级：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --set-version Ubuntu-20.04 2</span><br></pre></td></tr></table></figure>
+
+<p>提示需要更新内核组件，我们这里直接下载linux内核包进行安装：</p>
+<p> <a target="_blank" rel="noopener" href="https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi">https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi</a></p>
+<p>使WSL 2成为你的默认体系结构：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --set-default-version 2</span><br></pre></td></tr></table></figure>
+
+<h2><span id="1-4-dao-chu-ubuntu-dao-d-pan">1.4 导出Ubuntu到D盘</span><a href="#1-4-dao-chu-ubuntu-dao-d-pan" class="header-anchor">#</a></h2><p>默认会安装到c盘：<code>C:\Users\robin.lee\AppData\Local\Packages\CanonicalGroupLimited.Ubuntu_79rhkp1fndgsc</code></p>
+<p><img src="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/4.png" alt="image"></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">wsl --shutdown <span class="comment">//关闭虚拟机</span></span><br><span class="line">wsl --export Ubuntu<span class="number">-20.04</span> D:\wsl-ubuntu20<span class="number">.04</span>.tar <span class="comment">//导出打包到D:\wsl-ubuntu20.04.tar</span></span><br><span class="line">wsl --unregister Ubuntu<span class="number">-20.04</span>  <span class="comment">//注销当前分发版</span></span><br><span class="line">wsl --import Ubuntu<span class="number">-20.04</span> D:\wsl2-ubuntu20<span class="number">.04</span> D:\wsl-ubuntu20<span class="number">.04</span>.tar --version <span class="number">2</span> <span class="comment">//重新导入并安装WSL2到指定目录</span></span><br></pre></td></tr></table></figure>
+
+<p>导出完成后，在相应磁盘路径下即可看到文件夹:<br><img src="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/5.png" alt="image"></p>
+<p>可以删除tar文件，也可保留，方便损坏后重新导入tar文件。</p>
+<h2><span id="1-5-wsl2-yu-windows-xiang-hu-fang-wen">1.5 wsl2与windows相互访问</span><a href="#1-5-wsl2-yu-windows-xiang-hu-fang-wen" class="header-anchor">#</a></h2><h3><span id="1-5-1-wsl2-fang-wen-windows">1.5.1 wsl2访问windows</span><a href="#1-5-1-wsl2-fang-wen-windows" class="header-anchor">#</a></h3><p>直接在<code>ubuntu</code>中访问<code>/mnt/</code>下磁盘挂载目录即可：<br><img src="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/6.png" alt="image"></p>
+<h3><span id="1-5-2-windows-fang-wen-wsl2">1.5.2 windows访问wsl2</span><a href="#1-5-2-windows-fang-wen-wsl2" class="header-anchor">#</a></h3><p>直接在资源管理器中输入<code>\\wsl$</code> 即可:</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">\\wsl.localhost\Ubuntu</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/7.png" alt="image"></p>
+<p>为了方便，固定到快速访问。注意这是不能再透过<code>/mnt</code>目录访问自己，如c,d盘：<br><img src="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/8.png" alt="image"></p>
+<h2><span id="1-6-vhdx-xu-ni-ci-pan-shou-shen">1.6 vhdx虚拟磁盘瘦身</span><a href="#1-6-vhdx-xu-ni-ci-pan-shou-shen" class="header-anchor">#</a></h2><p>由于<code>WSL2</code>使用<code>虚拟硬盘(VHD)</code>存储linux下的文件，随着Linux下文件越来越多，占用空间也会不断增长。但是，在Linux中减少文件占用，WSL却没有相应的自动减少硬盘空间的占用。如下可以看到vhdx虚拟磁盘文件很大。<br><img src="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/9.png" alt="image"></p>
+<h3><span id="1-6-1-diskpart">1.6.1 diskpart</span><a href="#1-6-1-diskpart" class="header-anchor">#</a></h3><p>执行diskpart，会弹出一个cmd窗口：输入如下命令即可完成瘦身。<br><img src="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/10.png" alt="image"></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> vdisk file=<span class="string">&quot;D:\WSL\Ubuntu2004\ext4.vhdx&quot;</span></span><br><span class="line">attach vdisk <span class="built_in">readonly</span></span><br><span class="line">compact vdisk</span><br><span class="line">detach vdisk</span><br></pre></td></tr></table></figure>
+<p><img src="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/11.png" alt="image"></p>
+<h2><span id="1-7-lian-jie-usb-she-bei">1.7 连接USB设备</span><a href="#1-7-lian-jie-usb-she-bei" class="header-anchor">#</a></h2><p><a target="_blank" rel="noopener" href="https://learn.microsoft.com/zh-cn/windows/wsl/connect-usb">https://learn.microsoft.com/zh-cn/windows/wsl/connect-usb</a></p>
+<h2><span id="1-8-mei-hua-zhong-duan">1.8 美化终端</span><a href="#1-8-mei-hua-zhong-duan" class="header-anchor">#</a></h2><h3><span id="1-8-1-windows-terminal">1.8.1 windows terminal</span><a href="#1-8-1-windows-terminal" class="header-anchor">#</a></h3><p>原生的Ubuntu窗口还是low了点，字体和字符编码支持得都不是很好。可以进入windows的应用商店下载<code>windows terminal</code>:<br><img src="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/12.png" alt="image"></p>
+<p>启动后界面如下，可自定义配色和语言字体等个性化设置。<br><img src="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/13.png" alt="image"></p>
+<h1><span id="2-winnfsd-windows-da-jian-nfs-fu-wu">2 winnfsd-windows搭建nfs服务</span><a href="#2-winnfsd-windows-da-jian-nfs-fu-wu" class="header-anchor">#</a></h1><h2><span id="2-1-xia-zai-yun-xing-winnfsd">2.1 下载运行winnfsd</span><a href="#2-1-xia-zai-yun-xing-winnfsd" class="header-anchor">#</a></h2><p>下载windows nfs服务<a target="_blank" rel="noopener" href="https://github.com/winnfsd/winnfsd/releases/tag/2.4.0">Release 2.4.0 · winnfsd&#x2F;winnfsd · GitHub</a>，直接运行，选择要导出的目录:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">.\WinNFSd.exe D:\code\</span><br><span class="line">Usage: WinNFSd.exe [-id &lt;uid&gt; &lt;gid&gt;] [-<span class="built_in">log</span> on | off] [-pathFile &lt;file&gt;] [-addr &lt;ip&gt;] [export path] [alias path]</span><br></pre></td></tr></table></figure>
+
+<p>wsl子系统默认是通过虚拟网卡NAT模式转接到笔记本的网卡上的，所以wsl是可以上网的：<br><img src="/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/14.png" alt="image"></p>
+<p>目前wsl只支持一张虚拟网卡，也就是说wsl系统要上网和要和板子通信两者只能取其一，但是wsl系统中可以随意访问windows文件系统，所以可以在windows上搭建NFS服务，然后直接在wsl系统中访问windows导出的共享文件夹，这样就能同步更改到板子上了。</p>
+<p>比如我们把<code>D:\code</code>作为开发目录，windows和wls都能访问，又能挂载到板子上。</p>
+<h2><span id="2-2-pei-zhi-windows-wang-qia-he-kai-fa-ban-hu-tong">2.2 配置Windows网卡和开发板互通</span><a href="#2-2-pei-zhi-windows-wang-qia-he-kai-fa-ban-hu-tong" class="header-anchor">#</a></h2><p>windows电脑的WIFI网卡上网， 以太网卡作为局域网和板端互通。</p>
+<p>配置网卡ip；（网络适配器中找到对应网口的以太网卡，配置静态ip和网关）</p>
+<h2><span id="2-3-gua-zai-windows-mu-lu-dao-ban-zi">2.3 挂载windows目录到板子</span><a href="#2-3-gua-zai-windows-mu-lu-dao-ban-zi" class="header-anchor">#</a></h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mount -t nfs -o nolock 192.168.1.100:/D/code /mnt/nfs</span><br></pre></td></tr></table></figure>
+
+<p>这里挂载<code>d盘的code</code>文件夹，注意D一定要大写。</p>
+<p>这样<code>D/code</code>就挂载到了板端。同样<code>D/code</code>下可以在wsl下进行代码编辑编译浏览，编译好之后直接可以切到板端去运行测试。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/31/windows10%E6%90%AD%E5%BB%BALinux%E5%AD%90%E7%B3%BB%E7%BB%9FWSL2%E5%8F%8Awinnfsd%E6%9C%8D%E5%8A%A1/" data-id="cm1c7rmew0000xgufggaf8mna" data-title="windows10搭建Linux子系统WSL2及winnfsd服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2024/04/01/Vim%E9%85%8D%E7%BD%AE%E6%88%90%E7%B1%BB%E4%BC%BCsource-insight%E7%9A%84IDE/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Vim配置成类似source-insight的IDE
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2024/03/31/Windows10%E6%90%AD%E5%BB%BANFS%E6%9C%8D%E5%8A%A1/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Windows10搭建NFS服务</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">linux内存管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.36px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15.45px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.27px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19.09px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.82px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14.55px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15.45px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.91px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.73px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.64px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.36px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 15.45px;">通信协议</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/09/">September 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">August 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">July 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-UART子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-RTC%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-RTC子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-Framebuffer%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-Framebuffer子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-PWM%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-PWM子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-input%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-input子系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
