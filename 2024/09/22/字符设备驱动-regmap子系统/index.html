@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>字符设备驱动-regmap子系统 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 regmap的架构 2 数据结构 2.1 regmap 结构体 2.2 regmap_config   3 API 3.1 Regmap 申请与初始化 3.2 regmap 设备访问 3.3 regmap_config 掩码设置   4 Regmap操作SPI-ICM20608实验 4.1 初始化 regmap 4.2 regmap 访问icm20608   5 Regmap操作I2">
+<meta property="og:type" content="article">
+<meta property="og:title" content="字符设备驱动-regmap子系统">
+<meta property="og:url" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 regmap的架构 2 数据结构 2.1 regmap 结构体 2.2 regmap_config   3 API 3.1 Regmap 申请与初始化 3.2 regmap 设备访问 3.3 regmap_config 掩码设置   4 Regmap操作SPI-ICM20608实验 4.1 初始化 regmap 4.2 regmap 访问icm20608   5 Regmap操作I2">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/1.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/2.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/3.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/4.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/5.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/6.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/7.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/8.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/9.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/10.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/11.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/12.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/13.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/14.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/15.png">
+<meta property="og:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/16.png">
+<meta property="article:published_time" content="2024-09-22T07:33:15.000Z">
+<meta property="article:modified_time" content="2024-09-22T07:58:08.298Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="Linux设备驱动">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-字符设备驱动-regmap子系统" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/" class="article-date">
+  <time class="dt-published" datetime="2024-09-22T07:33:15.000Z" itemprop="datePublished">2024-09-22</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      字符设备驱动-regmap子系统
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-regmap-de-jia-gou">1 regmap的架构</a></li>
+<li><a href="#2-shu-ju-jie-gou">2 数据结构</a><ul>
+<li><a href="#2-1-regmap-jie-gou-ti">2.1 regmap 结构体</a></li>
+<li><a href="#2-2-regmap-config">2.2 regmap_config</a></li>
+</ul>
+</li>
+<li><a href="#3-api">3 API</a><ul>
+<li><a href="#3-1-regmap-shen-qing-yu-chu-shi-hua">3.1 Regmap 申请与初始化</a></li>
+<li><a href="#3-2-regmap-she-bei-fang-wen">3.2 regmap 设备访问</a></li>
+<li><a href="#3-3-regmap-config-yan-ma-she-zhi">3.3 regmap_config 掩码设置</a></li>
+</ul>
+</li>
+<li><a href="#4-regmap-cao-zuo-spi-icm20608-shi-yan">4 Regmap操作SPI-ICM20608实验</a><ul>
+<li><a href="#4-1-chu-shi-hua-regmap">4.1 初始化 regmap</a></li>
+<li><a href="#4-2-regmap-fang-wen-icm20608">4.2 regmap 访问icm20608</a></li>
+</ul>
+</li>
+<li><a href="#5-regmap-cao-zuo-i2c-ap3216c-shi-yan">5 Regmap操作I2C-ap3216c实验</a><ul>
+<li><a href="#5-1-chu-shi-hua-regmap">5.1 初始化 regmap</a></li>
+<li><a href="#5-2-regmap-fang-wen-ap3216c">5.2 regmap 访问ap3216c</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-regmap-de-jia-gou">1 regmap的架构</span><a href="#1-regmap-de-jia-gou" class="header-anchor">#</a></h1><p><code>regmap</code>是为了方便操作寄存器而设计的，它将所有模块的寄存器(包括soc上模块的寄存器和外围设备的寄存器等)<br>抽象出来，用一套统一接口来操作寄存器，统一操作<code> i2c、i3c、spi、mmio、sccb、sdw、slimbus、irq</code>等。</p>
+<p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/1.png" alt="image"></p>
+<p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/2.png" alt="image"></p>
+<p><code>regmap </code>框架分为三层：</p>
+<p> ①、底层物理总线：<code> regmap</code> 支持的物理总线有<code> i2c、i3c、spi、mmio、sccb、sdw、slimbus、irq、spmi 和 w1</code>。</p>
+<p> ②、<code>regmap </code>核心层：用于实现<code> regmap</code>核心。</p>
+<p> ③、<code>regmapAPI </code> 抽象层，<code>regmap </code>向驱动编写人员提供的 API 接口。</p>
+<h1><span id="2-shu-ju-jie-gou">2 数据结构</span><a href="#2-shu-ju-jie-gou" class="header-anchor">#</a></h1><h2><span id="2-1-regmap-jie-gou-ti">2.1 regmap 结构体</span><a href="#2-1-regmap-jie-gou-ti" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">regmap</span> &#123;</span></span><br><span class="line">	<span class="class"><span class="keyword">union</span> &#123;</span></span><br><span class="line">		<span class="class"><span class="keyword">struct</span> <span class="title">mutex</span> <span class="title">mutex</span>;</span></span><br><span class="line">		<span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">			<span class="type">spinlock_t</span> spinlock;</span><br><span class="line">			<span class="type">unsigned</span> <span class="type">long</span> spinlock_flags;</span><br><span class="line">		&#125;;</span><br><span class="line">	&#125;;</span><br><span class="line">	regmap_lock lock;</span><br><span class="line">	regmap_unlock unlock;</span><br><span class="line">	<span class="type">void</span> *lock_arg; <span class="comment">/* This is passed to lock/unlock functions */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">device</span> *<span class="title">dev</span>;</span> <span class="comment">/* Device we do I/O on */</span></span><br><span class="line">	<span class="type">void</span> *work_buf; <span class="comment">/* Scratch buffer used to format I/O */</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">regmap_format</span> <span class="title">format</span>;</span> <span class="comment">/* Buffer format */</span></span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">regmap_bus</span> *<span class="title">bus</span>;</span></span><br><span class="line">	<span class="type">void</span> *bus_context;</span><br><span class="line">	<span class="type">const</span> <span class="type">char</span> *name;</span><br><span class="line"></span><br><span class="line">	<span class="type">bool</span> async;</span><br><span class="line">	<span class="type">spinlock_t</span> async_lock;</span><br><span class="line">	<span class="type">wait_queue_head_t</span> async_waitq;</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">async_list</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">async_free</span>;</span></span><br><span class="line">	<span class="type">int</span> async_ret;</span><br><span class="line">	...</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> max_register;</span><br><span class="line">	<span class="type">bool</span> (*writeable_reg)(<span class="keyword">struct</span> device *dev, <span class="type">unsigned</span> <span class="type">int</span> reg);</span><br><span class="line">	<span class="type">bool</span> (*readable_reg)(<span class="keyword">struct</span> device *dev, <span class="type">unsigned</span> <span class="type">int</span> reg);</span><br><span class="line">	<span class="type">bool</span> (*volatile_reg)(<span class="keyword">struct</span> device *dev, <span class="type">unsigned</span> <span class="type">int</span> reg);</span><br><span class="line">	<span class="type">bool</span> (*precious_reg)(<span class="keyword">struct</span> device *dev, <span class="type">unsigned</span> <span class="type">int</span> reg);</span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">regmap_access_table</span> *<span class="title">wr_table</span>;</span></span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">regmap_access_table</span> *<span class="title">rd_table</span>;</span></span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">regmap_access_table</span> *<span class="title">volatile_table</span>;</span></span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">regmap_access_table</span> *<span class="title">precious_table</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="type">int</span> (*reg_read)(<span class="type">void</span> *context, <span class="type">unsigned</span> <span class="type">int</span> reg,</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> *val);</span><br><span class="line">	<span class="type">int</span> (*reg_write)(<span class="type">void</span> *context, <span class="type">unsigned</span> <span class="type">int</span> reg,</span><br><span class="line">	 <span class="type">unsigned</span> <span class="type">int</span> val);</span><br><span class="line">	......</span><br><span class="line">	<span class="class"><span class="keyword">struct</span> <span class="title">rb_root</span> <span class="title">range_tree</span>;</span></span><br><span class="line">	<span class="type">void</span> *selector_work_buf; <span class="comment">/* Scratch buffer used for selector */</span></span><br><span class="line">&#125;;  <span class="comment">// drivers/base/regmap/internal.h</span></span><br></pre></td></tr></table></figure>
+
+<p><code>regmap </code>的初始化通过结构体 <code>regmap_config</code>来完成。</p>
+<h2><span id="2-2-regmap-config">2.2 regmap_config</span><a href="#2-2-regmap-config" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">regmap_config</span> &#123;</span></span><br><span class="line">	<span class="type">const</span> <span class="type">char</span> *name;<span class="comment">//名字</span></span><br><span class="line">	<span class="type">int</span> reg_bits;<span class="comment">//寄存器地址位数，必填字段。</span></span><br><span class="line">	<span class="type">int</span> reg_stride;<span class="comment">//寄存器地址步长。</span></span><br><span class="line">	<span class="type">int</span> pad_bits; <span class="comment">//寄存器和值之间的填充位数</span></span><br><span class="line">	<span class="type">int</span> val_bits; <span class="comment">//寄存器值位数，必填字段</span></span><br><span class="line"></span><br><span class="line">    <span class="comment">//可写回调函数</span></span><br><span class="line">	<span class="type">bool</span> (*writeable_reg)(<span class="keyword">struct</span> device *dev, <span class="type">unsigned</span> <span class="type">int</span> reg);</span><br><span class="line">	<span class="comment">//可读回调函数</span></span><br><span class="line">    <span class="type">bool</span> (*readable_reg)(<span class="keyword">struct</span> device *dev, <span class="type">unsigned</span> <span class="type">int</span> reg);</span><br><span class="line">	<span class="comment">//可缓存回调函数</span></span><br><span class="line">    <span class="type">bool</span> (*volatile_reg)(<span class="keyword">struct</span> device *dev, <span class="type">unsigned</span> <span class="type">int</span> reg);</span><br><span class="line">	<span class="comment">//是否不能读回调函数，当寄存器不能读，就返回tree</span></span><br><span class="line">    <span class="type">bool</span> (*precious_reg)(<span class="keyword">struct</span> device *dev, <span class="type">unsigned</span> <span class="type">int</span> reg);</span><br><span class="line">	regmap_lock lock;</span><br><span class="line">	regmap_unlock unlock;</span><br><span class="line">	<span class="type">void</span> *lock_arg;</span><br><span class="line">    <span class="comment">//读操作</span></span><br><span class="line">	<span class="type">int</span> (*reg_read)(<span class="type">void</span> *context, <span class="type">unsigned</span> <span class="type">int</span> reg, <span class="type">unsigned</span> <span class="type">int</span> *val);</span><br><span class="line">	<span class="comment">//写操作</span></span><br><span class="line">    <span class="type">int</span> (*reg_write)(<span class="type">void</span> *context, <span class="type">unsigned</span> <span class="type">int</span> reg, <span class="type">unsigned</span> <span class="type">int</span> val);</span><br><span class="line">	<span class="type">bool</span> fast_io;<span class="comment">//快速 I/O，使用 spinlock 替代 mutex 来提升锁性能。</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> max_register;<span class="comment">//有效的最大寄存器地址</span></span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">regmap_access_table</span> *<span class="title">wr_table</span>;</span><span class="comment">//可写的地址范围</span></span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">regmap_access_table</span> *<span class="title">rd_table</span>;</span><span class="comment">//可读的地址范围</span></span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">regmap_access_table</span> *<span class="title">volatile_table</span>;</span><span class="comment">//可缓存的地址范围</span></span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">regmap_access_table</span> *<span class="title">precious_table</span>;</span><span class="comment">//不可读的地址范围</span></span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">reg_default</span> *<span class="title">reg_defaults</span>;</span><span class="comment">//寄存器模式值,有两个成员变量：reg是寄存器地址，def是默认值</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> num_reg_defaults;<span class="comment">//默认寄存器表中的元素个数</span></span><br><span class="line">	<span class="class"><span class="keyword">enum</span> <span class="title">regcache_type</span> <span class="title">cache_type</span>;</span></span><br><span class="line">	<span class="type">const</span> <span class="type">void</span> *reg_defaults_raw;</span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> num_reg_defaults_raw;</span><br><span class="line"></span><br><span class="line">	u8 read_flag_mask; <span class="comment">//读标志掩码。</span></span><br><span class="line">	u8 write_flag_mask; <span class="comment">//写标志掩码</span></span><br><span class="line"></span><br><span class="line">	<span class="type">bool</span> use_single_rw;</span><br><span class="line">	<span class="type">bool</span> can_multi_write;</span><br><span class="line"></span><br><span class="line">	<span class="class"><span class="keyword">enum</span> <span class="title">regmap_endian</span> <span class="title">reg_format_endian</span>;</span></span><br><span class="line">	<span class="class"><span class="keyword">enum</span> <span class="title">regmap_endian</span> <span class="title">val_format_endian</span>;</span></span><br><span class="line"></span><br><span class="line">	<span class="type">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">regmap_range_cfg</span> *<span class="title">ranges</span>;</span></span><br><span class="line">	<span class="type">unsigned</span> <span class="type">int</span> num_ranges;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<h1><span id="3-api">3 API</span><a href="#3-api" class="header-anchor">#</a></h1><h2><span id="3-1-regmap-shen-qing-yu-chu-shi-hua">3.1 Regmap 申请与初始化</span><a href="#3-1-regmap-shen-qing-yu-chu-shi-hua" class="header-anchor">#</a></h2><p><code>regmap </code>支持多种物理总线，比如 I2C 和 SPI，我们需要根据所使用的接口来选 择合适的<code> regmap</code> 初始化函数。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">struct</span> regmap * <span class="title function_">regmap_init_spi</span><span class="params">(<span class="keyword">struct</span> spi_device *spi, <span class="type">const</span> <span class="keyword">struct</span> regmap_config *config)</span>;</span><br><span class="line"><span class="keyword">struct</span> regmap * <span class="title function_">regmap_init_i2c</span><span class="params">(<span class="keyword">struct</span> i2c_client *i2c, <span class="type">const</span> <span class="keyword">struct</span> regmap_config *config)</span>;</span><br><span class="line"><span class="type">void</span> <span class="title function_">regmap_exit</span><span class="params">(<span class="keyword">struct</span> regmap *<span class="built_in">map</span>)</span>;<span class="comment">//不管是什么物理接口，退出都用regmap_exit</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-2-regmap-she-bei-fang-wen">3.2 regmap 设备访问</span><a href="#3-2-regmap-she-bei-fang-wen" class="header-anchor">#</a></h2><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">regmap_read</span><span class="params">(<span class="keyword">struct</span> regmap *<span class="built_in">map</span>, <span class="type">unsigned</span> <span class="type">int</span> reg, <span class="type">unsigned</span> <span class="type">int</span> *val)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">regmap_write</span><span class="params">(<span class="keyword">struct</span> regmap *<span class="built_in">map</span>, <span class="type">unsigned</span> <span class="type">int</span> reg, <span class="type">unsigned</span> <span class="type">int</span> val)</span>;</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>regmap_read</code> 和 <code>regmap_write</code> 的基础上还衍生出了其他一些 <code>regmap</code> 的 API 函数:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* regmap_update_bits函数，看名字就知道，此函数用来修改寄存器指定的 bit。</span></span><br><span class="line"><span class="comment">* mask：掩码，需要更新的位必须在掩码中设置为 1。</span></span><br><span class="line"><span class="comment">* val：需要更新的位值。</span></span><br><span class="line"><span class="comment">* 比如要将寄存器的 bit1 和 bit2 置 1，那么 mask 应该设置为 0X00000011，此时 val 的 bit1</span></span><br><span class="line"><span class="comment">和 bit2 应该设置为 1，也就是 0Xxxxxxx11。如果要清除寄存器的 bit4 和 bit7，那么 mask 应该</span></span><br><span class="line"><span class="comment">设置为 0X10010000，val 的 bit4 和 bit7 设置为 0，也就是 0X0xx0xxxx。</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">regmap_update_bits</span> <span class="params">(<span class="keyword">struct</span> regmap *<span class="built_in">map</span>, <span class="type">unsigned</span> <span class="type">int</span> reg, <span class="type">unsigned</span> <span class="type">int</span> mask, <span class="type">unsigned</span> <span class="type">int</span> val)</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//读取写入多个寄存器的值</span></span><br><span class="line"><span class="comment">//map：要操作的 regmap。</span></span><br><span class="line"><span class="comment">//reg：要读写的第一个寄存器。</span></span><br><span class="line"><span class="comment">//val：要读写的寄存器数据缓冲区。</span></span><br><span class="line"><span class="comment">//val_count：要读写的寄存器数量</span></span><br><span class="line"><span class="type">int</span> <span class="title function_">regmap_bulk_read</span><span class="params">(<span class="keyword">struct</span> regmap *<span class="built_in">map</span>, <span class="type">unsigned</span> <span class="type">int</span> reg, <span class="type">void</span> *val, <span class="type">size_t</span> val_count)</span>;</span><br><span class="line"><span class="type">int</span> <span class="title function_">regmap_bulk_write</span><span class="params">(<span class="keyword">struct</span> regmap *<span class="built_in">map</span>, <span class="type">unsigned</span> <span class="type">int</span> reg, <span class="type">const</span> <span class="type">void</span> *val, <span class="type">size_t</span> val_count)</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="3-3-regmap-config-yan-ma-she-zhi">3.3 regmap_config 掩码设置</span><a href="#3-3-regmap-config-yan-ma-she-zhi" class="header-anchor">#</a></h2><p>结构体<code>regmap_config</code>里面有三个关于掩码的成员变量：<code>read_flag_mask </code>和 <code>write_flag_mask</code>.</p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/18194640">Linux下SPI子系统驱动</a>   <a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-SPI%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-SPI子系统 | Hexo (fuzidage.github.io)</a></p>
+<p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/3.png" alt="image"></p>
+<p>其中读操作要将寄存器的地址 <code>bit7 </code>置 1，表示这是 一个读操作。当我们使用<code>regmap</code>的时候就不需要手动将寄存器地址的 bit7 置 1，在初始化<code> regmap_config</code> 的时候直接将<code>read_flag_mask</code>设置为<code> 0X80</code> 即可，这样通过<code>regmap</code>读取 SPI 内部寄存器的时候就会将寄存器地址与<code>read_flag_mask</code>进行或运算，结果就是将 <code>bit7 </code>置 1。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="class"><span class="keyword">struct</span> <span class="title">regmap_bus</span> <span class="title">regmap_spi</span> =</span> &#123;</span><br><span class="line">	.write = regmap_spi_write,</span><br><span class="line">	.gather_write = regmap_spi_gather_write,</span><br><span class="line">	.async_write = regmap_spi_async_write,</span><br><span class="line">	.async_alloc = regmap_spi_async_alloc,</span><br><span class="line">	.read = regmap_spi_read,</span><br><span class="line">	.read_flag_mask = <span class="number">0x80</span>,</span><br><span class="line">	.reg_format_endian_default = REGMAP_ENDIAN_BIG,</span><br><span class="line">	.val_format_endian_default = REGMAP_ENDIAN_BIG,</span><br><span class="line">&#125;;</span><br><span class="line">...</span><br><span class="line"><span class="keyword">struct</span> regmap *<span class="title function_">regmap_init_spi</span><span class="params">(<span class="keyword">struct</span> spi_device *spi, <span class="type">const</span> <span class="keyword">struct</span> regmap_config *config)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="keyword">return</span> regmap_init(&amp;spi-&gt;dev, &amp;regmap_spi, &amp;spi-&gt;dev, config);</span><br><span class="line">&#125;<span class="comment">// regmap-spi.c </span></span><br></pre></td></tr></table></figure>
+
+<p>在 <code>regmap_init</code> 函数中找到如下所示内容:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (config-&gt;read_flag_mask || config-&gt;write_flag_mask) &#123;</span><br><span class="line">	<span class="built_in">map</span>-&gt;read_flag_mask = config-&gt;read_flag_mask;</span><br><span class="line">	<span class="built_in">map</span>-&gt;write_flag_mask = config-&gt;write_flag_mask;</span><br><span class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (bus) &#123;</span><br><span class="line">	<span class="built_in">map</span>-&gt;read_flag_mask = bus-&gt;read_flag_mask;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到初始化时用<code>regmap_config </code>中的读写掩码来初始化<code>regmap_bus</code>中的掩码。由于 <code>regmap_spi </code>默认将 <code>read_flag_mask </code>设置为 0X80，假如你所使用的 SPI 设备不需要读掩码，在初始 化<code>regmap_config</code>的时候一定要将 <code>read_flag_mask </code>设置为 0X00。</p>
+<h1><span id="4-regmap-cao-zuo-spi-icm20608-shi-yan">4 Regmap操作SPI-ICM20608实验</span><a href="#4-regmap-cao-zuo-spi-icm20608-shi-yan" class="header-anchor">#</a></h1><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/18194640">Linux下SPI子系统驱动</a>  <a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-SPI%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-SPI子系统 | Hexo (fuzidage.github.io)</a></p>
+<p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/4.png" alt="image"></p>
+<p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/5.png" alt="image"></p>
+<p>之前构造了<code>icm20608_dev</code>利用<code>spi子系统框架</code>通信。框架还是保持不变，添加<code>regmap和regmap_config</code>参数。</p>
+<h2><span id="4-1-chu-shi-hua-regmap">4.1 初始化 regmap</span><a href="#4-1-chu-shi-hua-regmap" class="header-anchor">#</a></h2><p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/6.png" alt="image"></p>
+<p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/7.png" alt="image"></p>
+<h2><span id="4-2-regmap-fang-wen-icm20608">4.2 regmap 访问icm20608</span><a href="#4-2-regmap-fang-wen-icm20608" class="header-anchor">#</a></h2><p>以前的读写寄存器操作要构造<code>spi_message,spi_transfer</code>:</p>
+<p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/8.png" alt="image"></p>
+<p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/9.png" alt="image"></p>
+<p>现在直接套用<code>reg_map</code>函数,无需要调用spi数据传输相关api：</p>
+<p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/10.png" alt="image"></p>
+<p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/11.png" alt="image"></p>
+<p>读多组寄存器也是一样，调用<code>regmap_bulk_read</code>。</p>
+<p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/12.png" alt="image"></p>
+<h1><span id="5-regmap-cao-zuo-i2c-ap3216c-shi-yan">5 Regmap操作I2C-ap3216c实验</span><a href="#5-regmap-cao-zuo-i2c-ap3216c-shi-yan" class="header-anchor">#</a></h1><p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/13.png" alt="image"></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/fuzidage/p/18183047">Linux I2C子系统驱动</a>    <a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/08/25/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-I2C%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-I2C子系统 | Hexo (fuzidage.github.io)</a></p>
+<h2><span id="5-1-chu-shi-hua-regmap">5.1 初始化 regmap</span><a href="#5-1-chu-shi-hua-regmap" class="header-anchor">#</a></h2><p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/14.png" alt="image"></p>
+<h2><span id="5-2-regmap-fang-wen-ap3216c">5.2 regmap 访问ap3216c</span><a href="#5-2-regmap-fang-wen-ap3216c" class="header-anchor">#</a></h2><p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/15.png" alt="image"></p>
+<p><img src="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/16.png" alt="image"></p>
+<p>这里初始化<code>open fd</code>时，要用到<code>regmap_write</code>进行i2c从设备的寄存器写入初始化。然后调用read，调用<code>regmap_read</code>进行读操作，这里每次都只读取一个byte，不需要用到<code>regmap_bulk_read</code>.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/" data-id="cm1daap930000mgufepwi5m5y" data-title="字符设备驱动-regmap子系统" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-IIO%E5%AD%90%E7%B3%BB%E7%BB%9F/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          字符设备驱动-IIO子系统
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">字符设备驱动-UART子系统</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">linux内存管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.36px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15.45px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.27px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19.09px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.82px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14.55px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15.45px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.91px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.73px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.64px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.36px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 15.45px;">通信协议</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/09/">September 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">August 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">July 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-IIO%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-IIO子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-regmap子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-UART子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-RTC%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-RTC子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-Framebuffer%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-Framebuffer子系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://example.com/page/10/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:locale" content="en_US">
+<meta property="article:author" content="John Doe">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-linux搭建nfs服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" class="article-date">
+  <time class="dt-published" datetime="2024-03-26T15:32:15.000Z" itemprop="datePublished">2024-03-26</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/">linux搭建nfs服务</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-xia-zai-an-zhuang-nfs-fu-wu">1 下载安装NFS服务</a></li>
+<li><a href="#2-guan-bi-fang-huo-qiang">2 关闭防火墙</a></li>
+<li><a href="#3-chuang-jian-nfs-gong-xiang-wen-jian-jia">3 创建NFS共享文件夹</a></li>
+<li><a href="#4-pei-zhi-nfs">4 配置NFS</a></li>
+<li><a href="#5-qi-dong-nfs-fu-wu">5 启动NFS服务</a></li>
+<li><a href="#6-ke-hu-duan-jin-xing-nfs-gua-zai">6 客户端进行NFS挂载</a></li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-xia-zai-an-zhuang-nfs-fu-wu">1 下载安装NFS服务</span><a href="#1-xia-zai-an-zhuang-nfs-fu-wu" class="header-anchor">#</a></h1><p><code>sudo apt-get install nfs-kernel-server nfs-common</code></p>
+<h1><span id="2-guan-bi-fang-huo-qiang">2 关闭防火墙</span><a href="#2-guan-bi-fang-huo-qiang" class="header-anchor">#</a></h1><p><code>sudo ufw disable</code></p>
+<h1><span id="3-chuang-jian-nfs-gong-xiang-wen-jian-jia">3 创建NFS共享文件夹</span><a href="#3-chuang-jian-nfs-gong-xiang-wen-jian-jia" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">mkdir</span> /home/book/nfs_share</span><br><span class="line">sudo <span class="built_in">chown</span> book:book /home/book/nfs_share</span><br><span class="line">sudo <span class="built_in">chmod</span> 777 /home/book/nfs_share -R</span><br></pre></td></tr></table></figure>
+<h1><span id="4-pei-zhi-nfs">4 配置NFS</span><a href="#4-pei-zhi-nfs" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo vim /etc/exports</span><br><span class="line">/home/book/nfs_share *(rw,<span class="built_in">sync</span>,no_root_squash,no_subtree_check)</span><br></pre></td></tr></table></figure>
+
+<p><img src="/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/1.png" alt="1"></p>
+<h1><span id="5-qi-dong-nfs-fu-wu">5 启动NFS服务</span><a href="#5-qi-dong-nfs-fu-wu" class="header-anchor">#</a></h1><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart nfs-kernel-serve</span><br><span class="line">或者sudo service nfs-kernel-server restart</span><br><span class="line">或者sudo /etc/init.d/nfs-kernel-server restart</span><br></pre></td></tr></table></figure>
+
+<h1><span id="6-ke-hu-duan-jin-xing-nfs-gua-zai">6 客户端进行NFS挂载</span><a href="#6-ke-hu-duan-jin-xing-nfs-gua-zai" class="header-anchor">#</a></h1><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">运行开发板</span><br><span class="line"><span class="meta prompt_">[root@book]~# </span><span class="language-bash">mount -t nfs -o nolock -o tcp 192.168.2.100:/home/book/nfs_share /mnt/nfs</span></span><br><span class="line">-t nfs                          #挂载类型</span><br><span class="line">-o nolock                       #读写的时候不锁定</span><br><span class="line">-o tcp                          #tcp模式</span><br><span class="line">客户端退出NFS挂载</span><br><span class="line">umount /mnt/nfs</span><br></pre></td></tr></table></figure>
+
+
+
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/26/linux%E6%90%AD%E5%BB%BAnfs%E6%9C%8D%E5%8A%A1/" data-id="cm0xxogdx0014qsuf5wg84smd" data-title="linux搭建nfs服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+    <article id="post-linux搭建tftp和ftp服务" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" class="article-date">
+  <time class="dt-published" datetime="2024-03-24T14:24:38.000Z" itemprop="datePublished">2024-03-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="p-name article-title" href="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/">linux搭建tftp和ftp服务</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-an-zhuang-tftp-fu-wu-he-ke-hu-duan">1 安装tftp服务和客户端</a><ul>
+<li><a href="#1-1-pei-zhi">1.1 配置</a></li>
+<li><a href="#1-2-chuang-jian-tftp-gong-xiang-mu-lu">1.2 创建tftp共享目录</a></li>
+<li><a href="#1-3-ce-shi-yan-zheng-gong-neng">1.3 测试验证功能</a><ul>
+<li><a href="#1-3-1-ben-ji-ce-shi">1.3.1 本机测试</a></li>
+<li><a href="#1-3-2-kai-fa-ban-ce-shi">1.3.2 开发板测试</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#2-ftp-fu-wu">2 ftp服务</a><ul>
+<li><a href="#2-1-windows-ke-hu-duan">2.1 windows客户端</a></li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-an-zhuang-tftp-fu-wu-he-ke-hu-duan">1 安装tftp服务和客户端</span><a href="#1-an-zhuang-tftp-fu-wu-he-ke-hu-duan" class="header-anchor">#</a></h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install xinetd tftp tftpd</span><br></pre></td></tr></table></figure>
+
+
+<h2><span id="1-1-pei-zhi">1.1 配置</span><a href="#1-1-pei-zhi" class="header-anchor">#</a></h2><p><code>vim /etc/xinetd.d/tftp</code><br>内容如下：</p>
+<pre><code>service tftp
+&#123;
+        socket_type     		= dgram
+        protocol                = udp
+        wait                    = yes
+        user                    = root
+        server          		= /usr/sbin/in.tftpd
+        server_args     		= -s /home/lyb/tftpshare/
+        disable         		= no
+        per_source      		=11
+        cps                     = 100 2
+        flags                   = IPv4
+&#125;
+</code></pre>
+<h2><span id="1-2-chuang-jian-tftp-gong-xiang-mu-lu">1.2 创建tftp共享目录</span><a href="#1-2-chuang-jian-tftp-gong-xiang-mu-lu" class="header-anchor">#</a></h2><pre><code>1.创建服务器目录
+mkdir /home/lyb/tftpshare/
+2.然后修改目录权限
+chmod 777 /home/lyb/tftpshare/
+3.重启xinetd服务
+sudo /etc/init.d/xinetd restart（如果启动失败先关闭防火墙 service iptables stop）
+</code></pre>
+<h2><span id="1-3-ce-shi-yan-zheng-gong-neng">1.3 测试验证功能</span><a href="#1-3-ce-shi-yan-zheng-gong-neng" class="header-anchor">#</a></h2><h3><span id="1-3-1-ben-ji-ce-shi">1.3.1 本机测试</span><a href="#1-3-1-ben-ji-ce-shi" class="header-anchor">#</a></h3><pre><code>重新启动一个终端，
+输入命令 tftp 192.168.1.11（我的虚拟机ip）进入tftp,
+输入get test,这样就可以获取到test文件,
+输入q退出tftp
+</code></pre>
+<p>如下图所示：<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/1.png" alt="1"></p>
+<h3><span id="1-3-2-kai-fa-ban-ce-shi">1.3.2 开发板测试</span><a href="#1-3-2-kai-fa-ban-ce-shi" class="header-anchor">#</a></h3><p>2440开发板的uboot可以支持tftp下载功能，在uboot命令行输入：</p>
+<pre><code>tftp 0x30000000  uImage_4.3
+</code></pre>
+<p>如下图所示。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/2.png" alt="2"></p>
+<h1><span id="2-ftp-fu-wu">2 ftp服务</span><a href="#2-ftp-fu-wu" class="header-anchor">#</a></h1><pre><code>sudo apt install vsftpd
+vi /etc/vsftpd.conf
+
+local_enable=YES
+write_enable=YES
+sudo /etc/init.d/vsftpd restart
+</code></pre>
+<p><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/3.png" alt="3"></p>
+<h2><span id="2-1-windows-ke-hu-duan">2.1 windows客户端</span><a href="#2-1-windows-ke-hu-duan" class="header-anchor">#</a></h2><p><a target="_blank" rel="noopener" href="https://filezilla-project.org/">https://filezilla-project.org/</a></p>
+<p>新建站点，配置ftp协议, 主机输入ubuntu IP地址，用户密码信息，即可连接成功。<br><img src="/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/4.png" alt="4"></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/03/24/linux%E6%90%AD%E5%BB%BAtftp%E5%92%8Cftp%E6%9C%8D%E5%8A%A1/" data-id="cm0xxogdz001cqsufgjxl4k34" data-title="linux搭建tftp和ftp服务" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+
+  
+
+
+  <nav id="page-nav">
+    
+    <a class="extend prev" rel="prev" href="/page/9/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span>
+  </nav>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">linux内存管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.36px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15.45px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.27px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19.09px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.82px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14.55px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15.45px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.91px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.73px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.64px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.36px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 15.45px;">通信协议</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/09/">September 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">August 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">July 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-IIO%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-IIO子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-regmap子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-UART子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-RTC%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-RTC子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-Framebuffer%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-Framebuffer子系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
