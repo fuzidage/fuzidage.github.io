@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>ToolChain工具链命令介绍 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="1 ToolChain官方下载地址 2 readelf 2.1 elf格式 2.1.1 readelf命令   2.2 elf文件类型 2.2.1 可重定位目标文件 2.2.1.1 读头部 2.2.1.2 读section   2.2.2 可执行文件 2.2.2.1 读头部   2.2.3 动态库文件 2.2.3.1 位置无关码 2.2.3.2 读头部       3 objcopy 4">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ToolChain工具链命令介绍">
+<meta property="og:url" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="1 ToolChain官方下载地址 2 readelf 2.1 elf格式 2.1.1 readelf命令   2.2 elf文件类型 2.2.1 可重定位目标文件 2.2.1.1 读头部 2.2.1.2 读section   2.2.2 可执行文件 2.2.2.1 读头部   2.2.3 动态库文件 2.2.3.1 位置无关码 2.2.3.2 读头部       3 objcopy 4">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/1.png">
+<meta property="og:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/2.png">
+<meta property="og:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/3.png">
+<meta property="og:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/4.png">
+<meta property="og:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/5.png">
+<meta property="og:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/6.png">
+<meta property="og:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/7.png">
+<meta property="og:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/8.png">
+<meta property="og:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/9.png">
+<meta property="og:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/10.png">
+<meta property="og:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/11.png">
+<meta property="og:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/12.png">
+<meta property="og:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/13.png">
+<meta property="og:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/14.png">
+<meta property="article:published_time" content="2024-07-22T09:47:28.000Z">
+<meta property="article:modified_time" content="2024-10-20T07:50:28.850Z">
+<meta property="article:author" content="John Doe">
+<meta property="article:tag" content="linux系统构建">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Search"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://example.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-ToolChain工具链命令介绍" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/" class="article-date">
+  <time class="dt-published" datetime="2024-07-22T09:47:28.000Z" itemprop="datePublished">2024-07-22</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      ToolChain工具链命令介绍
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <div class="toc">
+
+<!-- toc -->
+
+<ul>
+<li><a href="#1-toolchain-guan-fang-xia-zai-di-zhi">1 ToolChain官方下载地址</a></li>
+<li><a href="#2-readelf">2 readelf</a><ul>
+<li><a href="#2-1-elf-ge-shi">2.1 elf格式</a><ul>
+<li><a href="#2-1-1-readelf-ming-ling">2.1.1 readelf命令</a></li>
+</ul>
+</li>
+<li><a href="#2-2-elf-wen-jian-lei-xing">2.2 elf文件类型</a><ul>
+<li><a href="#2-2-1-ke-chong-ding-wei-mu-biao-wen-jian">2.2.1 可重定位目标文件</a><ul>
+<li><a href="#2-2-1-1-du-tou-bu">2.2.1.1 读头部</a></li>
+<li><a href="#2-2-1-2-du-section">2.2.1.2 读section</a></li>
+</ul>
+</li>
+<li><a href="#2-2-2-ke-zhi-xing-wen-jian">2.2.2 可执行文件</a><ul>
+<li><a href="#2-2-2-1-du-tou-bu">2.2.2.1 读头部</a></li>
+</ul>
+</li>
+<li><a href="#2-2-3-dong-tai-ku-wen-jian">2.2.3 动态库文件</a><ul>
+<li><a href="#2-2-3-1-wei-zhi-wu-guan-ma">2.2.3.1 位置无关码</a></li>
+<li><a href="#2-2-3-2-du-tou-bu">2.2.3.2 读头部</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-objcopy">3 objcopy</a></li>
+<li><a href="#4-objdump">4 objdump</a></li>
+<li><a href="#5-addr2line">5 addr2line</a></li>
+<li><a href="#6-size">6 size</a></li>
+<li><a href="#7-nm">7 nm</a></li>
+<li><a href="#8-strip">8 strip</a></li>
+<li><a href="#9-strings">9 strings</a></li>
+<li><a href="#12-gcc">12 gcc</a><ul>
+<li><a href="#12-1-chang-yong-xuan-xiang">12.1 常用选项</a></li>
+<li><a href="#12-2-bian-yi-guo-cheng">12.2 编译过程</a><ul>
+<li><a href="#12-2-1-yu-chu-li">12.2.1 预处理</a></li>
+<li><a href="#12-2-2-bian-yi">12.2.2 编译</a><ul>
+<li><a href="#12-2-2-1-qiang-ruo-fu-hao-he-qiang-ruo-yin-yong">12.2.2.1 强弱符号和强弱引用</a></li>
+</ul>
+</li>
+<li><a href="#12-2-3-hui-bian">12.2.3 汇编</a></li>
+<li><a href="#12-2-4-lian-jie">12.2.4 链接</a><ul>
+<li><a href="#12-2-4-1-lian-jie-qi">12.2.4.1 链接器</a></li>
+<li><a href="#12-2-4-2-dong-tai-jing-tai-ku">12.2.4.2 动态静态库</a></li>
+<li><a href="#12-2-4-3-lian-jie-xuan-xiang">12.2.4.3 链接选项</a></li>
+<li><a href="#12-2-4-n-lian-jie-jiao-ben-lds">12.2.4.n 链接脚本lds</a><ul>
+<li><a href="#12-2-4-n-1-lian-jie-jiao-ben-yu-fa">12.2.4.n.1 链接脚本语法</a><ul>
+<li><a href="#12-2-4-n-1-1-memory-sections">12.2.4.n.1.1 MEMORY&#x2F;SECTIONS</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<!-- tocstop -->
+
+</div>
+
+<h1><span id="1-toolchain-guan-fang-xia-zai-di-zhi">1 ToolChain官方下载地址</span><a href="#1-toolchain-guan-fang-xia-zai-di-zhi" class="header-anchor">#</a></h1><p>下载地址： <a target="_blank" rel="noopener" href="https://releases.linaro.org/components/toolchain/binaries/4.9-2017.01/arm-linux-gnueabihf/">https://releases.linaro.org/components/toolchain/binaries/4.9-2017.01/arm-linux-gnueabihf/</a></p>
+<h1><span id="2-readelf">2 readelf</span><a href="#2-readelf" class="header-anchor">#</a></h1><h2><span id="2-1-elf-ge-shi">2.1 elf格式</span><a href="#2-1-elf-ge-shi" class="header-anchor">#</a></h2><p>elf是一种用于二进制文件、可执行文件、目标代码、共享库和核心转储格文件的文件格式。是UNIX系统实验室（USL）作为应用程序二进制接口<code>（Application Binary Interface，ABI）</code>而开发和发布的，也是Linux的主要可执行文件格式。<br><img src="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/1.png" alt="image"></p>
+<h3><span id="2-1-1-readelf-ming-ling">2.1.1 readelf命令</span><a href="#2-1-1-readelf-ming-ling" class="header-anchor">#</a></h3><p>readelf是一个读取elf格式的命令，比如下图是一个vmlinux原始elf文件，<code>ARM 32bit LSB</code>格式，使用静态库。使用<code>readelf -h</code>可以查看elf header信息。无论elf是什么格式，elf header只是描述头部信息，因此用什么工具链的命令都一样。<br><img src="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/2.png" alt="image"><br><img src="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/3.png" alt="image"><br>用hexdump看头部果然位7f 45 4c 46<br><img src="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/4.png" alt="image"></p>
+<p>再看<code>Entry point address: 0x8000,8000</code>这个表示加载入口点。</p>
+<h2><span id="2-2-elf-wen-jian-lei-xing">2.2 elf文件类型</span><a href="#2-2-elf-wen-jian-lei-xing" class="header-anchor">#</a></h2><p>elf 文件通常有三种类型: ①可重定位目标文件 ②可执行文件 ③动态库</p>
+<h3><span id="2-2-1-ke-chong-ding-wei-mu-biao-wen-jian">2.2.1 可重定位目标文件</span><a href="#2-2-1-ke-chong-ding-wei-mu-biao-wen-jian" class="header-anchor">#</a></h3><p>实际上就是在编译过程中生成的 .o 文件，或者是静态库文件。<br><img src="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/5.png" alt="image"><br>elf头部：整个文件的描述+目录<br>sections：也就是我们经常提到的代码段、数据段所存放的位置。<br>section headers table：对文件中所有的段进行描述，段的起始地址，大小等信息<br>符号表以及字符串表： 注意这里的字符串表并不是应用程序中定义的字符串内容，而是编译时的一些符号字符串，比如 printf、main、.test、.bss 等</p>
+<h4><span id="2-2-1-1-du-tou-bu">2.2.1.1 读头部</span><a href="#2-2-1-1-du-tou-bu" class="header-anchor">#</a></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">root@hd:~<span class="comment"># readelf -h foo.o</span></span><br><span class="line"></span><br><span class="line">ELF Header:</span><br><span class="line">  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00</span><br><span class="line">  Class:                             ELF32</span><br><span class="line">  Data:                              2<span class="string">&#x27;s complement， little endian</span></span><br><span class="line"><span class="string">  Version:                           1 (current)</span></span><br><span class="line"><span class="string">  OS/ABI:                            UNIX - System V</span></span><br><span class="line"><span class="string">  ABI Version:                       0</span></span><br><span class="line"><span class="string">  Type:                              REL (Relocatable file)</span></span><br><span class="line"><span class="string">  Machine:                           ARM</span></span><br><span class="line"><span class="string">  Version:                           0x1</span></span><br><span class="line"><span class="string">  Entry point address:               0x0</span></span><br><span class="line"><span class="string">  Start of program headers:          0 (bytes into file)</span></span><br><span class="line"><span class="string">  Start of section headers:          264 (bytes into file)</span></span><br><span class="line"><span class="string">  Flags:                             0x5000000， Version5 EABI</span></span><br><span class="line"><span class="string">  Size of this header:               52 (bytes)</span></span><br><span class="line"><span class="string">  Size of program headers:           0 (bytes)</span></span><br><span class="line"><span class="string">  Number of program headers:         0</span></span><br><span class="line"><span class="string">  Size of section headers:           40 (bytes)</span></span><br><span class="line"><span class="string">  Number of section headers:         10</span></span><br><span class="line"><span class="string">  Section header string table index: 7</span></span><br></pre></td></tr></table></figure>
+<p>头部对应的C语言中结构体，这个结构体可以在 readelf 的源代码中找到:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> &#123;</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> e_ident[<span class="number">16</span>];        <span class="comment">/* ELF &quot;magic number&quot; */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> e_type[<span class="number">2</span>];      <span class="comment">/* Identifies object file type */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> e_machine[<span class="number">2</span>];       <span class="comment">/* Specifies required architecture */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> e_version[<span class="number">4</span>];       <span class="comment">/* Identifies object file version */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> e_entry[<span class="number">4</span>];     <span class="comment">/* Entry point virtual address */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> e_phoff[<span class="number">4</span>];     <span class="comment">/* Program header table file offset */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> e_shoff[<span class="number">4</span>];     <span class="comment">/* Section header table file offset */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> e_flags[<span class="number">4</span>];     <span class="comment">/* Processor-specific flags */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> e_ehsize[<span class="number">2</span>];        <span class="comment">/* ELF header size in bytes */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> e_phentsize[<span class="number">2</span>];     <span class="comment">/* Program header table entry size */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> e_phnum[<span class="number">2</span>];     <span class="comment">/* Program header table entry count */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> e_shentsize[<span class="number">2</span>];     <span class="comment">/* Section header table entry size */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> e_shnum[<span class="number">2</span>];     <span class="comment">/* Section header table entry count */</span></span><br><span class="line">  <span class="type">unsigned</span> <span class="type">char</span> e_shstrndx[<span class="number">2</span>];      <span class="comment">/* Section header string table index */</span></span><br><span class="line">&#125; Elf32_External_Ehdr;</span><br></pre></td></tr></table></figure>
+<p>**e_ident(magic部分)**：<br>e_ident 是一个包含 16 字节的数组成员，对应 readelf -h 给出的 magic 部分，关于这一部分就需要参考 readelf 源码来进行分析了，分析结果如下:</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">前四个字节:<span class="number">7f</span> <span class="number">45</span> <span class="number">4</span>c <span class="number">46</span>，识别码， <span class="number">0x45</span>，<span class="number">0x4c</span>，<span class="number">0x46</span> 三个字节的 ascii 码对应 ELF 字母，通过这四个字节就可以判断文件是不是 elf 文件.</span><br><span class="line">第五个字节:其中 <span class="number">01</span> 表示 <span class="number">32</span> 位 elf 文件，<span class="number">02</span> 表示 <span class="number">64</span> 位.</span><br><span class="line">第六个字节:其中 <span class="number">01</span> 表示 小端模式，<span class="number">02</span> 表示 大端模式.</span><br><span class="line">第七个字节:表示 EI_version，<span class="number">1</span> 表示 EV_CURRENT，只有 <span class="number">1</span> 才是合理的(代码中是 EI_versoin，但是博主没有进一步具体研究).</span><br><span class="line">第八个字节: <span class="number">00</span> 表示 OS_ABI</span><br><span class="line">第九个字节: <span class="number">00</span> 表示 ABI version</span><br><span class="line">其它字段，源码中没有找到对应的解析，暂定为reserver.</span><br></pre></td></tr></table></figure>
+
+<p><strong>e_type(elf类型)</strong></p>
+<ul>
+<li>可重定位的目标文件</li>
+<li>可执行文件</li>
+<li>动态链接文件</li>
+<li>coredump 文件，这是系统生成的调试文件.</li>
+</ul>
+<p>这四种类型的文件各有各的特点，比如可重定位的目标文件针对的是链接器.</p>
+<p>而可执行文件针对加载器，需要被静态加载到内存中执行，而动态链接文件则是运行过程中的加载.</p>
+<p><strong>e_machine(机器架构)</strong></p>
+<p>标识指定的机器，比如 40 代表 ARM.</p>
+<p><strong>e_entry(程序入口虚拟地址)</strong></p>
+<p>程序的入口虚拟地址，对于可重定位的目标文件默认是0，而对于可执行文件而言是真实的程序入口.</p>
+<p>程序入口是被加载器使用的，在程序加载过程中会读取该程序入口，作为应用程序的开始执行地址，在实际的加载过程中，内核加载完当前 elf 可执行文件之后其实并不是跳到该入口地址，而是先执行动态链接器代码，在动态链接完成之后才会跳到该入口地址。</p>
+<p><strong>e_phoff</strong></p>
+<p>四个字节的 program headers 的起始偏移地址</p>
+<p><strong>e_shoff</strong></p>
+<p>四个字节的 section headers 的起始偏移地址</p>
+<p><strong>e_ehsize</strong></p>
+<p>指示 elf header 的 size，对于 arm 而言，52 或者 64.</p>
+<h4><span id="2-2-1-2-du-section">2.2.1.2 读section</span><a href="#2-2-1-2-du-section" class="header-anchor">#</a></h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">readelf -S foo.o</span><br><span class="line"></span><br><span class="line">There are 10 section headers， starting at offset 0x108:</span><br><span class="line"></span><br><span class="line">Section Headers:</span><br><span class="line">  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al</span><br><span class="line">  [ 0]                   NULL            00000000 000000 000000 00      0   0  0</span><br><span class="line">  [ 1] .text             PROGBITS        00000000 000034 000010 00  AX  0   0  4</span><br><span class="line">  [ 2] .data             PROGBITS        00000000 000044 000004 00  WA  0   0  4</span><br><span class="line">  [ 3] .bss              NOBITS          00000000 000048 000004 00  WA  0   0  4</span><br><span class="line">  [ 4] .comment          PROGBITS        00000000 000048 000033 01  MS  0   0  1</span><br><span class="line">  [ 5] .note.GNU-stack   PROGBITS        00000000 00007b 000000 00      0   0  1</span><br><span class="line">  [ 6] .ARM.attributes   ARM_ATTRIBUTES  00000000 00007b 000035 00      0   0  1</span><br><span class="line">  [ 7] .shstrtab         STRTAB          00000000 0000b0 000055 00      0   0  1</span><br><span class="line">  [ 8] .symtab           SYMTAB          00000000 000298 0000f0 10      9  11  4</span><br><span class="line">  [ 9] .strtab           STRTAB          00000000 000388 000027 00      0   0  1</span><br><span class="line">Key to Flags:</span><br><span class="line">  W (write)， A (alloc)， X (execute)， M (merge)， S (strings)</span><br><span class="line">  I (info)， L (<span class="built_in">link</span> order)， G (group)， T (TLS)， E (exclude)， x (unknown)</span><br><span class="line">  O (extra OS processing required) o (OS specific)， p (processor specific)</span><br></pre></td></tr></table></figure>
+
+<p>一共10个段。</p>
+<h3><span id="2-2-2-ke-zhi-xing-wen-jian">2.2.2 可执行文件</span><a href="#2-2-2-ke-zhi-xing-wen-jian" class="header-anchor">#</a></h3><p>可执行文件是给加载器使用，而可重定位目标文件是给链接器使用。</p>
+<h4><span id="2-2-2-1-du-tou-bu">2.2.2.1 读头部</span><a href="#2-2-2-1-du-tou-bu" class="header-anchor">#</a></h4><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">readelf -h foo</span><br><span class="line"></span><br><span class="line">ELF Header:</span><br><span class="line">  Magic:   7f 45 4c 46 01 01 01 00 00 00 00 00 00 00 00 00</span><br><span class="line">  Class:                             ELF32</span><br><span class="line">  Data:                              2&#x27;s complement， little endian</span><br><span class="line">  Version:                           1 (current)</span><br><span class="line">  OS/ABI:                            UNIX - System V</span><br><span class="line">  ABI Version:                       0</span><br><span class="line">  Type:                              EXEC (Executable file)</span><br><span class="line">  Machine:                           ARM</span><br><span class="line">  Version:                           0x1</span><br><span class="line">  Entry point address:               0x82e1</span><br><span class="line">  Start of program headers:          52 (bytes into file)</span><br><span class="line">  Start of section headers:          4508 (bytes into file)</span><br><span class="line">  Flags:                             0x5000402， has entry point， Version5 EABI， hard-float ABI</span><br><span class="line">  Size of this header:               52 (bytes)</span><br><span class="line">  Size of program headers:           32 (bytes)</span><br><span class="line">  Number of program headers:         9</span><br><span class="line">  Size of section headers:           40 (bytes)</span><br><span class="line">  Number of section headers:         30</span><br><span class="line">  Section header string table index: 27</span><br></pre></td></tr></table></figure>
+
+<p>和<strong>2.2.1 可重定位目标文件</strong>对比，有以下几点不同:</p>
+<ul>
+<li>Type 由 REL (Relocatable file) 变成了 EXEC (Executable file)，表示这是一个可执行文件.</li>
+<li>Entry point address，即程序入口为 0x82e1 而不再是 0，表示程序在加载时需要将入口代码放到该地址执行.</li>
+<li>多了一个 Program header，起始偏移地址为 52，紧随着 elf header.</li>
+<li>section 的数量增加到了 30 个，这是因为程序在链接过程中不仅仅包含用户编写的源代码，还会链接 glibc 库，增加的那些 section 从 glibc 而来，同时增加了 9 个 Program header，表示该程序有 9 个 segment.</li>
+</ul>
+<h3><span id="2-2-3-dong-tai-ku-wen-jian">2.2.3 动态库文件</span><a href="#2-2-3-dong-tai-ku-wen-jian" class="header-anchor">#</a></h3><h4><span id="2-2-3-1-wei-zhi-wu-guan-ma">2.2.3.1 位置无关码</span><a href="#2-2-3-1-wei-zhi-wu-guan-ma" class="header-anchor">#</a></h4><p>当静态链接时，链接器为每条指令和数据分配独立的地址空间，当指令要访问数据时，访问的是数据的绝对地址。因此每个进程使用的库独立。</p>
+<p>当动态链接时，多个进程共享一块内存的<code>.text</code>, 即共享库。因此使用相对地址，共享库相对于某个进程A,进程B，进程C有一个偏移量。</p>
+<p><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/">https://fuzidage.github.io/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/</a></p>
+<h4><span id="2-2-3-2-du-tou-bu">2.2.3.2 读头部</span><a href="#2-2-3-2-du-tou-bu" class="header-anchor">#</a></h4><p>使用 readelf -h 命令查看动态库的 elf 头,差异如下：</p>
+<ul>
+<li>文件类型不一样,动态库的类型为 DNY(Shared object file)。</li>
+<li>从动态库中段的组成来看，它和可执行文件几乎是差不多的，同时包含了 .init,.fini,.init_array,.fini_array,.text 等段内容，同时也有 segment table，这两者最大的差别在于：动态库的重定位过程放到加载时完成，因此其每个段，每个 segment 对应的虚拟地址都是不确定的，逻辑上从 0 开始。</li>
+<li>动态库中的代码都是位置无关代码，这是由动态库共享的特性决定的</li>
+<li>静态链接中，符号表、重定位表、字符串表这些都是作为链接阶段的辅助，所以在加载过程中属于无用的信息，但是动态库中这些段需要辅助动态库进行运行时的符号解析以及重定位，在加载时同样会被加载到内存中。</li>
+</ul>
+<h1><span id="3-objcopy">3 objcopy</span><a href="#3-objcopy" class="header-anchor">#</a></h1><p>objcopy刚好和readelf相反，readelf是提取头部，而objdump是裁去掉头部，只剩二进制文件中的代码段，数据段，bss等。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">arm-linux-gnueabihf-objcopy -O binary -S -g led.elf led.bin</span><br><span class="line">arm-linux-gnueabihf-objcopy -O binary -S ledc.elf <span class="variable">$@</span></span><br></pre></td></tr></table></figure>
+<p>“binary”表示以二进制格式输出，选项“-S”表示不要复制源文件中的重定位信息和符号信息，“-g”表示不复制源文件中的调试信息</p>
+<h1><span id="4-objdump">4 objdump</span><a href="#4-objdump" class="header-anchor">#</a></h1><p>反汇编.<br><img src="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/6.png" alt="image"><br><img src="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/7.png" alt="image"></p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">arm-linux-gnueabihf-objdump -D led.elf &gt; led.dis</span><br><span class="line">arm-linux-gnueabihf-objdump -D -m arm ledc.elf &gt; ledc.dis</span><br><span class="line">aarch64-linux-gnu-objdump -S -d -l soph_ldc.ko &gt;oops.asm</span><br></pre></td></tr></table></figure>
+<h1><span id="5-addr2line">5 addr2line</span><a href="#5-addr2line" class="header-anchor">#</a></h1><p>当程序出现crash掉后，会打印出异常信息地址，addr2line可以通过地址来用来对可执行程序找出源代码的文件函数行号具体位置。前提条件是gcc编译用-g选项。<br><img src="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/8.png" alt="image"></p>
+<h1><span id="6-size">6 size</span><a href="#6-size" class="header-anchor">#</a></h1><p>size命令用于查看elf文件的进程地址空间各段的大小.<br><img src="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/9.png" alt="image"></p>
+<h1><span id="7-nm">7 nm</span><a href="#7-nm" class="header-anchor">#</a></h1><p>nm命令用来查看可执行程序的符号表。<br><img src="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/10.png" alt="image"><br>第1列表示符号地址，第2列表示符号类型，T表示全局的函数，D表示全局变量，d表示静态变量， t表示静态函数。如上图main函数就是T类型。第3列表示符号。</p>
+<h1><span id="8-strip">8 strip</span><a href="#8-strip" class="header-anchor">#</a></h1><p>strip命令用来剔除符号表。可以看到对于可执行文件，一般都是包含符号表的，那么为了节省可执行程序空间，用strip可以剔除符号表。<br><img src="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/11.png" alt="image"><br>剔除符号表后不影响可执行程序的功能。<br>下图可以看到strip后可执行文件变小了，用file命令查看状态变成了stripped, 用nm命令可以看到符号表已经消失。<br><img src="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/12.png" alt="image"></p>
+<h1><span id="9-strings">9 strings</span><a href="#9-strings" class="header-anchor">#</a></h1><p>查看可执行程序中的用双引号表示的字符串，比如<code>printf(&quot;hello world\n&quot;); </code>这里hello world就属于strings。<br><img src="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/13.png" alt="image"></p>
+<h1><span id="12-gcc">12 gcc</span><a href="#12-gcc" class="header-anchor">#</a></h1><p>源代码编译</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">arm-linux-gnueabihf-gcc -g -c led.s -o led.o</span><br><span class="line"><span class="section">%.o:%.s</span></span><br><span class="line">	arm-linux-gnueabihf-gcc -Wall -nostdlib -c -o <span class="variable">$@</span> <span class="variable">$&lt;</span></span><br></pre></td></tr></table></figure>
+
+<h2><span id="12-1-chang-yong-xuan-xiang">12.1 常用选项</span><a href="#12-1-chang-yong-xuan-xiang" class="header-anchor">#</a></h2><table>
+<thead>
+<tr>
+<th>参数</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>-o</td>
+<td>指定文件输出路径</td>
+</tr>
+<tr>
+<td>-E</td>
+<td>对源文件进行预处理操作，输出.i文件</td>
+</tr>
+<tr>
+<td>-S</td>
+<td>对源文件进行预处理、编译操作，输出.s文件</td>
+</tr>
+<tr>
+<td>-c</td>
+<td>对源文件进行预处理、编译、汇编操作，输出.o文件</td>
+</tr>
+<tr>
+<td>-I</td>
+<td>包含头文件路径 例：gcc -I src&#x2F;include&#x2F;</td>
+</tr>
+<tr>
+<td>-L</td>
+<td>添加链接库路径 例： gcc -L src&#x2F;lib&#x2F;</td>
+</tr>
+<tr>
+<td>-l</td>
+<td>链接库文件 例： gcc -llibA.so</td>
+</tr>
+<tr>
+<td>-fPIC</td>
+<td>生成位置无关代码(position-independent code)</td>
+</tr>
+<tr>
+<td>-Wall</td>
+<td>对代码所有可能有问题的地方发出警告</td>
+</tr>
+<tr>
+<td>-g</td>
+<td>在目标文件中嵌入调试信息，便于gdb调试</td>
+</tr>
+<tr>
+<td>-v</td>
+<td>打印出gcc编译一个文件的时候所有的步骤</td>
+</tr>
+<tr>
+<td>-D</td>
+<td>使用编译时的宏 例子：gcc -Wall -DMY_MACRO main.c -o main</td>
+</tr>
+<tr>
+<td>-std</td>
+<td>指定支持的c&#x2F;c++标准 例：gcc -std&#x3D;c++11 main.cpp</td>
+</tr>
+<tr>
+<td>-static &#x2F;-shared</td>
+<td>静态编译文件(把动态库的函数和其它依赖都编译进最终文件) or 动态编译文件</td>
+</tr>
+<tr>
+<td>-O(n)</td>
+<td>优化等级</td>
+</tr>
+</tbody></table>
+<h2><span id="12-2-bian-yi-guo-cheng">12.2 编译过程</span><a href="#12-2-bian-yi-guo-cheng" class="header-anchor">#</a></h2><p>分4个阶段：<strong>预处理、编译、汇编、链接</strong>。</p>
+<h3><span id="12-2-1-yu-chu-li">12.2.1 预处理</span><a href="#12-2-1-yu-chu-li" class="header-anchor">#</a></h3><p>预编译阶段主要处理源文件中的以“#”开始的预编译指令。比如“#include”、“#define”。预处理会对头文件递归展开，宏定义进行替换。</p>
+<p><code>gcc -E main.c -o main.i</code></p>
+<p><img src="/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/14.png" alt="image"></p>
+<h3><span id="12-2-2-bian-yi">12.2.2 编译</span><a href="#12-2-2-bian-yi" class="header-anchor">#</a></h3><p>生成相应的汇编代码.</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc -S main.c -o main.s</span><br></pre></td></tr></table></figure>
+<h4><span id="12-2-2-1-qiang-ruo-fu-hao-he-qiang-ruo-yin-yong">12.2.2.1 强弱符号和强弱引用</span><a href="#12-2-2-1-qiang-ruo-fu-hao-he-qiang-ruo-yin-yong" class="header-anchor">#</a></h4><ol>
+<li>强符号屏蔽弱符号</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">test_func</span><span class="params">(<span class="type">void</span>)</span>;<span class="comment">//test.h</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="type">void</span> __attribute__((weak)) weak_func(<span class="type">void</span>) &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;defualt weak func is running!\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="type">void</span> <span class="title function_">test_func</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    weak_func();</span><br><span class="line">&#125;<span class="comment">// test.c申明一个弱符号weak_func</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;test.h&quot;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">weak_func</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;custom strong func override!\n&quot;</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> &#123;</span><br><span class="line">    test_func();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;<span class="comment">//main.c</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">gcc -c test.c</span><br><span class="line">ar -rsc libtest.a test.o <span class="comment">#将test.c编译成静态库</span></span><br><span class="line"></span><br><span class="line">gcc main.c test.h -L. -ltest -o test</span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">custom strong func override!</span><br></pre></td></tr></table></figure>
+
+<p>比如我们调用其他人的库，但是不得不自己去实现库里面的函数xxx, 那么就可以在对应头文件申明xxx是一个弱函数。</p>
+<ol start="2">
+<li>强弱引用</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">test_func</span><span class="params">(<span class="type">void</span>)</span>;<span class="comment">//test.h</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">include &lt;stdio.h&gt;</span><br><span class="line"><span class="type">static</span> __attribute__((weakref(<span class="string">&quot;test&quot;</span>))) <span class="type">void</span> <span class="title function_">weak_ref</span><span class="params">(<span class="type">void</span>)</span>;<span class="comment">//申明weak_ref是test的一个弱引用。</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">test_func</span><span class="params">(<span class="type">void</span>)</span> </span><br><span class="line">    <span class="title function_">if</span><span class="params">(weak_ref)</span>&#123;</span><br><span class="line">        weak_ref();</span><br><span class="line">    &#125; <span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">&quot;weak ref function is null\n&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;<span class="comment">//test.c</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;stdio.h&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;test.h&quot;</span></span></span><br><span class="line"><span class="type">void</span> <span class="title function_">test</span><span class="params">(<span class="type">void</span>)</span> </span><br><span class="line">    <span class="title function_">printf</span><span class="params">(<span class="string">&quot;running custom weak ref function!\n&quot;</span>)</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">int</span> <span class="title function_">main</span><span class="params">()</span> </span><br><span class="line">    <span class="title function_">test_func</span><span class="params">()</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;<span class="comment">//main.c</span></span><br></pre></td></tr></table></figure>
+
+<p>输出结果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">running custom weak ref function!</span><br></pre></td></tr></table></figure>
+
+<p>当把弱引用声明去掉，输出结果：</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">running custom weak ref function!</span><br></pre></td></tr></table></figure>
+
+<h3><span id="12-2-3-hui-bian">12.2.3 汇编</span><a href="#12-2-3-hui-bian" class="header-anchor">#</a></h3><p>将汇编代码转换成二进制机器代码，也就是目标文件。汇编使用as指令完成的。</p>
+<figure class="highlight text"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc -c main.s -o main.o</span><br><span class="line">或者as main.s -o main.o</span><br></pre></td></tr></table></figure>
+
+<h3><span id="12-2-4-lian-jie">12.2.4 链接</span><a href="#12-2-4-lian-jie" class="header-anchor">#</a></h3><p>汇编将代码编译成了二进制文件，但还需要和系统其他组件（比如标准库、动态链接库等）结合起来才能正常运行，比如调用print函数打印。链接就是打包各种目标文件。</p>
+<figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gcc hello.o sub.o display.o -o hello</span><br></pre></td></tr></table></figure>
+
+<h4><span id="12-2-4-1-lian-jie-qi">12.2.4.1 链接器</span><a href="#12-2-4-1-lian-jie-qi" class="header-anchor">#</a></h4><p>链接器，-Ttext表示链接地址，也就是运行地址。一般会用lds链接脚本来进行。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">arm-linux-gnueabihf-ld -Ttext 0X87800000 led.o -o led.elf</span><br><span class="line">arm-linux-gnueabihf-ld -Timx6ul.lds -o ledc.elf $^</span><br></pre></td></tr></table></figure>
+<h4><span id="12-2-4-2-dong-tai-jing-tai-ku">12.2.4.2 动态静态库</span><a href="#12-2-4-2-dong-tai-jing-tai-ku" class="header-anchor">#</a></h4><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">gcc -fpic -shared -o libhello.so hello.o</span><br><span class="line">ar -rsc liba.a test1.o test2.o test3.o <span class="comment">#静态库的打包</span></span><br></pre></td></tr></table></figure>
+
+<h4><span id="12-2-4-3-lian-jie-xuan-xiang">12.2.4.3 链接选项</span><a href="#12-2-4-3-lian-jie-xuan-xiang" class="header-anchor">#</a></h4><figure class="highlight makefile"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">-L 指定链接库的目录</span><br><span class="line">-l 指定需要链接的库名称</span><br><span class="line">-T：-T 参数表示指定链接脚本，用户可以通过 ld -T file 来指定使用自己的链接脚本</span><br><span class="line">-EB、-EL：指定大小端，这会覆盖掉系统默认的大小端设置</span><br><span class="line">-s、--strip-all：丢弃可执行文件中的符号，以减小尺寸</span><br><span class="line">-static：不使用动态库，静态地链接</span><br><span class="line">-nostdlib：默认情况下链接标准库，该参数显示地指明不链接标准库。</span><br><span class="line">-shared：创建一个动态库</span><br></pre></td></tr></table></figure>
+
+<h4><span id="12-2-4-n-lian-jie-jiao-ben-lds">12.2.4.n 链接脚本lds</span><a href="#12-2-4-n-lian-jie-jiao-ben-lds" class="header-anchor">#</a></h4><pre><code>1 SECTIONS&#123;
+2 	. = 0X87800000;
+3 	.text :
+4 	&#123;
+5 		start.o 
+6 		main.o 
+7		 *(.text)
+8 	&#125;
+9 	.rodata ALIGN(4) : &#123;*(.rodata*)&#125; 
+10 	.data ALIGN(4) : &#123; *(.data) &#125; 
+11	 __bss_start = .; 
+12 	.bss ALIGN(4) : &#123; *(.bss) *(COMMON) &#125; 
+13 	__bss_end = .;
+14 &#125;
+</code></pre>
+<p>第 2 行设置定位计数器为0X87800000，因为我们的链接地址就是0X87800000。<br>第5行设置链接到开始位置的文件为start.o，因为 start.o 里面包含着第一个要执行的指令，所以一定要链接到最开始的地方。<br>第 6 行是 main.o这个文件，其实可以不用写出来，因为 main.o 的位置就无所谓了，可以由编译器自行决定链接位置。<br>第9行第10行定义了只读数据段和数据段。ALIGN(4)表示地址按照4对齐。<br>在第 11、13 行有<code>“__bss_start”和“__bss_end”</code>这两个东西？这个是什么呢？<code>“__bss_start”和“__bss_end”</code>是符号，第 11、13 这两行其实就是对这两个符号进行赋值，其值为定位符“.”，这两个符号用来保存.bss 段的起始地址和结束地址。前面说了.bss 段是定义了但是没有被初始化的变量，我们需要手动对.bss 段的变量清的，因此我们需要知道.bss 段的起始和结束地址，这样我们直接对这段内存赋 0 即可完成清零。通过第 11、13 行代码，.bss 段的起始地址和结束地址就保存在了<code>“__bss_start”和“__bss_end”</code>中，我们就可以直接在汇编或者 C 文件里面使用这两个符号。</p>
+<p>代码重定位和清bss详细原理介绍可以参考我之前的介绍：<br><a target="_blank" rel="noopener" href="https://fuzidage.github.io/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/">https://fuzidage.github.io/2024/04/15/s3c2440%E8%A3%B8%E6%9C%BA%E7%BC%96%E7%A8%8B-%E4%BB%A3%E7%A0%81%E9%87%8D%E5%AE%9A%E4%BD%8D%E5%92%8C%E6%B8%85bss/</a></p>
+<h5><span id="12-2-4-n-1-lian-jie-jiao-ben-yu-fa">12.2.4.n.1 链接脚本语法</span><a href="#12-2-4-n-1-lian-jie-jiao-ben-yu-fa" class="header-anchor">#</a></h5><h6><span id="12-2-4-n-1-1-memory-x2f-sections">12.2.4.n.1.1 MEMORY&#x2F;SECTIONS</span><a href="#12-2-4-n-1-1-memory-x2f-sections" class="header-anchor">#</a></h6><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">MEMORY</span><br><span class="line">&#123;</span><br><span class="line">    name [(attr)] : ORIGIN = origin, LENGTH = len</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>属性 attr 部分是可选的,它主要有以下几个选项:</p>
+<p>‘R’:只读段<br>‘W’:读写段<br>‘X’:可执行段<br>‘A’:需要分配内存的段<br>‘I’,’L’:初始化段<br>‘!’:和上述的属性合并使用,表示反转给出的属性</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">MEMORY</span><br><span class="line">&#123;</span><br><span class="line">    rom (rx) : ORIGIN = <span class="number">0</span>, LENGTH = <span class="number">256</span>K</span><br><span class="line">    ram (w) : org = <span class="number">0x40000000</span>, l = <span class="number">4</span>M</span><br><span class="line">&#125;</span><br><span class="line">SECTIONS</span><br><span class="line">&#123;</span><br><span class="line">    . = <span class="number">0x80000000</span>;</span><br><span class="line">    .text : &#123; *(.text) &#125; &gt; rom</span><br><span class="line">    .data : &#123; *(.data) &#125; &gt; ram</span><br><span class="line">    .bss  : &#123; *(.bss)  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述示例中,定义了两个内存区域,rom 区域从 0 开始,占据 256K 字节,而 ram 区域从 0x40000000 开始,占用 4M 空间.<br>而输出段 .text 指定放在 rom 中, .data 放在 ram 区域, .bss 没有指定,但是由于 .bss 段的属性是 ‘w’ 类型的,所以匹配的区域是 ram,被放在 .data 随后的地址处.<br>而地址定位符的赋值语句 <code>&quot;. = 0x80000000;&quot; </code>会被忽略,编译完成之后可以通过 readelf -S 命令查看输出文件,可以看到各个段对应的虚拟地址.</p>
+<p>在 linux 系统中,通常不会使用这种指定内存区域的定义方式,而是使用 SECTIONS 中的地址定位符,因为 linux 中对于系统内存的规定是比较严格的,通常不支持自定义的内存区域,而在裸机或者实时操作系统中这种方式使用得比较多.</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://example.com/2024/07/22/ToolChain%E5%B7%A5%E5%85%B7%E9%93%BE%E5%91%BD%E4%BB%A4%E4%BB%8B%E7%BB%8D/" data-id="cm2hahcvq0000r0uf0n267271" data-title="ToolChain工具链命令介绍" class="article-share-link"><span class="fa fa-share">Share</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2024/07/23/Linux%E5%86%85%E6%A0%B8-%E5%BC%82%E5%B8%B8%E8%BE%93%E5%87%BA%E5%87%BD%E6%95%B0%E8%B0%83%E7%94%A8%E6%A0%88calltrace%E5%88%86%E6%9E%90/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Linux内核-异常输出函数调用栈calltrace分析
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2024/07/21/Linux%E5%86%85%E6%A0%B8-kmalloc%E4%B8%8Evmalloc%E5%8F%8ACMA%E5%86%85%E5%AD%98/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">Linux内核-kmalloc与vmalloc及CMA内存</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" rel="tag">Linux设备驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Makefile/" rel="tag">Makefile</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E6%B1%87%E7%BC%96/" rel="tag">arm汇编</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/arm%E8%A3%B8%E6%9C%BA/" rel="tag">arm裸机</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/boot%E5%90%AF%E5%8A%A8/" rel="tag">boot启动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ini%E8%A7%A3%E6%9E%90/" rel="tag">ini解析</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" rel="tag">linux内存管理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%86%85%E6%A0%B8/" rel="tag">linux内核</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" rel="tag">linux嵌入式环境搭建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" rel="tag">linux系统构建</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" rel="tag">mipi图像处理</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/uboot/" rel="tag">uboot</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" rel="tag">中断体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" rel="tag">字符编码</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" rel="tag">存储驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" rel="tag">开源插件</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" rel="tag">数据结构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" rel="tag">时钟体系</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" rel="tag">裸机外设驱动</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" rel="tag">通信协议</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/Linux%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8/" style="font-size: 20px;">Linux设备驱动</a> <a href="/tags/Makefile/" style="font-size: 10px;">Makefile</a> <a href="/tags/arm%E6%B1%87%E7%BC%96/" style="font-size: 10px;">arm汇编</a> <a href="/tags/arm%E8%A3%B8%E6%9C%BA/" style="font-size: 18.18px;">arm裸机</a> <a href="/tags/boot%E5%90%AF%E5%8A%A8/" style="font-size: 16.36px;">boot启动</a> <a href="/tags/ini%E8%A7%A3%E6%9E%90/" style="font-size: 10px;">ini解析</a> <a href="/tags/linux%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/" style="font-size: 10px;">linux内存管理</a> <a href="/tags/linux%E5%86%85%E6%A0%B8/" style="font-size: 15.45px;">linux内核</a> <a href="/tags/linux%E5%B5%8C%E5%85%A5%E5%BC%8F%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/" style="font-size: 17.27px;">linux嵌入式环境搭建</a> <a href="/tags/linux%E7%B3%BB%E7%BB%9F%E6%9E%84%E5%BB%BA/" style="font-size: 19.09px;">linux系统构建</a> <a href="/tags/mipi%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/" style="font-size: 11.82px;">mipi图像处理</a> <a href="/tags/uboot/" style="font-size: 14.55px;">uboot</a> <a href="/tags/%E4%B8%AD%E6%96%AD%E4%BD%93%E7%B3%BB/" style="font-size: 15.45px;">中断体系</a> <a href="/tags/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" style="font-size: 10px;">字符编码</a> <a href="/tags/%E5%AD%98%E5%82%A8%E9%A9%B1%E5%8A%A8/" style="font-size: 10.91px;">存储驱动</a> <a href="/tags/%E5%BC%80%E6%BA%90%E6%8F%92%E4%BB%B6/" style="font-size: 12.73px;">开源插件</a> <a href="/tags/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84/" style="font-size: 13.64px;">数据结构</a> <a href="/tags/%E6%97%B6%E9%92%9F%E4%BD%93%E7%B3%BB/" style="font-size: 10px;">时钟体系</a> <a href="/tags/%E8%A3%B8%E6%9C%BA%E5%A4%96%E8%AE%BE%E9%A9%B1%E5%8A%A8/" style="font-size: 16.36px;">裸机外设驱动</a> <a href="/tags/%E9%80%9A%E4%BF%A1%E5%8D%8F%E8%AE%AE/" style="font-size: 15.45px;">通信协议</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/09/">September 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/08/">August 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/07/">July 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/06/">June 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/05/">May 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/04/">April 2024</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2024/03/">March 2024</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-IIO%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-IIO子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/22/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-regmap%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-regmap子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-UART%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-UART子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/16/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-RTC%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-RTC子系统</a>
+          </li>
+        
+          <li>
+            <a href="/2024/09/01/%E5%AD%97%E7%AC%A6%E8%AE%BE%E5%A4%87%E9%A9%B1%E5%8A%A8-Framebuffer%E5%AD%90%E7%B3%BB%E7%BB%9F/">字符设备驱动-Framebuffer子系统</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 John Doe<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
